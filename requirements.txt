@@ -1,2 +1,4 @@
 django==1.7b4
 PyOpenSSL==0.14
+django-stronghold==0.2.6
+django-grappelli==2.5.3

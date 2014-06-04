@@ -1,4 +1,5 @@
 from common_settings import *
+# This file is generated when deploying
 from production_secrets import *
 
 # SECURITY WARNING: don't run with debug turned on in production!
