@@ -1,0 +1,27 @@
+{% load static %}
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>{% block head_title %}A Project Light web site{% endblock %}</title>
+  <meta name="description" content="{% block head_description %}{% endblock %}" />
+  <meta name="author" content="{% block head_author %}{% endblock %}" />
+
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Place favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
+  <link rel="shortcut icon" href="favicon.ico" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+
+  <!-- CSS : implied media="all" -->
+  <link rel="stylesheet" href="{% static 'stylesheets/apps-full-stylesheet.css' %}" />
+  <link rel="stylesheet" href="{% static 'stylesheets/apps.css' %}" />
+
+<script type="text/javascript" src="//use.typekit.com/hyb5bko.js"></script>
+<script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+<script type="text/javascript">  document.documentElement.className += " js";</script>
+{% block additional_head %}
+{# If you are using extensions to the base Project Light app template, in addition to your own app, #}
+{# they will load their extra js and css here. #}
+{% endblock %}
+{% block app_head %}
+{# If your application itself needs its own js and css, load it here. #}
+{% endblock %}

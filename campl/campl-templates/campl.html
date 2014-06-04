@@ -1,0 +1,43 @@
+{% load static %}
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>		   <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" class="no-js"><!--<![endif]-->
+<head>
+	{% block campl_block_head %}
+	{% include 'campl-block-head.html' %}
+	{% endblock %}
+</head>
+<body>
+	<a href="#nav" class="campl-skipTo" tabindex="1">skip to navigation</a>
+	<a href="#content" class="campl-skipTo" tabindex="2">skip to content</a>
+	{% include 'campl-global-header.html' %}
+{# Use campl-page-header-simple.html if you don't want a search bar. #}
+	{% block campl_page_header %}
+	{% include 'campl-page-header.html' %}
+	{% endblock %}
+	<div class="campl-row campl-content"  id="content">
+		<div class="campl-wrap clearfix">
+{# Make this block empty in your sub-template if you don't want tabs. #}
+			{% block campl_tabs_header %}
+			{% include 'campl-tabs-header.html' %}
+			{% endblock %}
+			<div class="campl-column12 campl-main-content">
+				{% block page_content %}    			
+				{% include 'campl-page-content.html' %}
+				{% endblock %}
+			</div>
+		</div>
+	</div>
+	{% block local_footer %}
+	{% include 'campl-local-footer.html' %}
+	{% endblock %}
+	{% block global_footer %}
+	{% include 'campl-global-footer.html' %}
+	{% endblock %}
+	{% block campl_foot_js %}
+	{% include 'campl-foot-js.html' %}
+  	{% endblock %}
+</body>
+</html>

@@ -1,0 +1,11 @@
+			<div class="campl-content-container campl-no-padding">
+        		<div class="campl-column12">				
+					<ul id="searchTabs" class="campl-nav campl-nav-tabs campl-unstyled-list">
+					{% for index, tab in tabs.items %}
+						<li{% ifequal active_tab_name tab.name %} class="active"{% endifequal %}>
+							<a href="{{ tab.url }}" data-toggle="tab">{{ tab.name }}</a>
+						</li>
+					{% endfor %}
+		            </ul>
+		        </div>
+	        </div>

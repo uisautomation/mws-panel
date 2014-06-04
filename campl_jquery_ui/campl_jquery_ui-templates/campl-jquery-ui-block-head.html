@@ -1,0 +1,9 @@
+{% extends 'campl-block-head.html' %}
+{% load static %}
+{% block head_title %}A Project Light web site with jQuery UI{% endblock %}
+{% block additional_head %}
+{# move in jQuery from the footer, everything breaks if it is there #}
+<script type="text/javascript" src="{% static 'javascripts/libs/jquery-min.js' %}"></script>
+{# add jQuery UI #}
+{% include 'campl-jquery-ui-includes.html' %}
+{% endblock %}
