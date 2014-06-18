@@ -9,11 +9,14 @@ class Site(models.Model):
     description = models.CharField(max_length=250, blank=True)
     # The institution (retrieved using lookup)
     institution_id = models.CharField(max_length=100, validators=[validate_correct_institution])
-    # Suspended site?
-    suspended = models.BooleanField(default=False)
-    # Administratively suspended site?
-    admin_suspended = models.BooleanField(default=False)
-
+    # Start date of the site
+    start_date = models.DateField()
+    # End date of the site (when user decides to delete the site)
+    end_date = models.DateField(null=True)
+    # is the site deleted?
+    deleted = models.BooleanField(default=False)
+    # webmaster email
+    email = models.EmailField(null=True)
 
     # Authorised users per site
     users = models.ManyToManyField(User, related_name='sites')
@@ -21,31 +24,22 @@ class Site(models.Model):
     group = models.ManyToManyField(Group, related_name='sites', null=True)
 
 
+class Suspension(models.Model):
+    reason = models.CharField(max_length=250)
+    # is the suspension active?
+    active = models.BooleanField()
+    # start date of the suspension
+    start_date = models.DateField()
+    # end date of the suspension
+    end_date = models.DateField(null=True)
 
-class DomainName(models.Model):
-    name = models.CharField(max_length=250, unique=True)
-    network_configuration = models.ForeignKey(NetworkConfig)
-
-
-class ContactEmail(models.Model):
-    email = models.EmailField()
-    site = models.ForeignKey(Site)
+    site = models.ForeignKey(Site, related_name="suspensions")
 
 
 class Billing(models.Model):
-    start_date = models.DateField()
-    end_date = models.DateField()
     purchase_order = models.FileField()
     group = models.CharField(max_length=250)
     site = models.OneToOneField(Site, related_name='billing')
-
-
-class NetworkConfig(models.Model):
-    """ The network configuration for a VM (IPv4, IPv6, and domain name associated
-    """
-    IPv4 = models.GenericIPAddressField(protocol='IPv4')
-    IPv6 = models.GenericIPAddressField(protocol='IPv6')
-    main_domain = models.OneToOneField(DomainName, related_name="network_configuration")
 
 
 class VirtualMachine(models.Model):
@@ -54,5 +48,19 @@ class VirtualMachine(models.Model):
     """
     name = models.CharField(max_length=250)
     primary = models.BooleanField(default=True)
-    network_configuration = models.OneToOneField(NetworkConfig, null=True, related_name='virtual_machine')
-    site = models.ForeignKey(Site, null=True, related_name='virtual_machine')
+
+    network_configuration = models.OneToOneField(NetworkConfig, related_name='virtual_machine')
+    site = models.ForeignKey(Site, related_name='virtual_machines')
+
+
+class NetworkConfig(models.Model):
+    """ The network configuration for a VM (IPv4, IPv6, and domain name associated
+    """
+    IPv4 = models.GenericIPAddressField(protocol='IPv4')
+    IPv6 = models.GenericIPAddressField(protocol='IPv6')
+    main_domain = models.OneToOneField(DomainName)
+
+
+class DomainName(models.Model):
+    name = models.CharField(max_length=250, unique=True)
+    site = models.ForeignKey(Site, related_name='domain_names', null=True)
