@@ -1,0 +1,20 @@
+{% extends 'campl-block-head.html' %}
+{% load static %}
+{% block additional_head %}
+{# If you are using extensions to the base Project Light app template, in addition to your own app, #}
+{# they will load their extra js and css here. #}
+{% endblock %}
+{% block app_head %}
+{# If your application itself needs its own js and css, load it here. #}
+	<script type="text/javascript" src="{% static 'javascripts/libs/ios-orientationchange-fix.js' %}"></script>
+  	<script type="text/javascript" src="{% static 'js/jquery-2.1.1.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'javascripts/libs/modernizr.js' %}"></script>
+  	<script type="text/javascript" src="{% static 'javascripts/apps-custom.js' %}"></script>
+    <script src="{% static 'select2-3.4.8/select2.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'stylesheets/mws.css' %}" />
+    <link rel="stylesheet" href="{% static 'select2-3.4.8/select2.css' %}">
+
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap-confirmation3.js' %}"></script>
+{% endblock %}
+{% block head_title %}Managed Web Service administration site{% endblock %}

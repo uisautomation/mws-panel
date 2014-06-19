@@ -3,9 +3,11 @@ import urllib
 from django.http import HttpResponseRedirect
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import redirect
+from stronghold.decorators import public
 
 from pyroven.utils import setting, HttpResponseSeeOther
 
+@public
 def raven_return(request):
     # Get the token which the Raven server sent us - this should really
     # have a try/except around it to catch KeyError
@@ -22,6 +24,7 @@ def raven_return(request):
     # Redirect somewhere sensible
     return HttpResponseRedirect('/')
 
+@public
 def raven_login(request):
     # Get the Raven object and return a redirect to the Raven server
     login_url = setting('PYROVEN_LOGIN_URL')

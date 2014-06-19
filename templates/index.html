@@ -1,0 +1,19 @@
+{% extends 'campl-mws.html' %}
+{% load static %}
+{% block page_content %}
+    <div class="campl-column12 campl-main-content">
+        <div class="campl-content-container">
+
+            <p>This site allows member of the university
+            University to request a managed web server</p>
+
+            <p>When you request a MWS you automatically get the right to
+            manage it in the future. {% if all_metadatas %} A list of
+            the sites that you manage appears below. {% endif %} For
+            any site that you manage you can nominate additional
+            managers, and you are strongly advised to do so.</p>
+
+            <p><a href={% url 'SitesManagement.views.index' %} class="campl-primary-cta">Register new site</a></p>
+        </div>
+    </div>
+{% endblock %}
