@@ -1,0 +1,35 @@
+#id_description {
+    min-width: 300px;
+    height: 110px;
+}
+
+.select2-input {
+    min-width: 75px;
+}
+
+.select2-container {
+    min-width: 300px;
+}
+
+ul.errorlist {
+    display: inline-block;
+    width: 100%;
+}
+
+ul.errorlist li {
+    list-style-type: none;
+    float: left;
+    color: #b94a48;
+    clear: both;
+/*    border-style: ridge;
+    border-color: #b94a48;
+    padding: 5px;*/
+}
+
+ul.errorlist + p input, ul.errorlist + .metadata_email_form_each p input {
+    border-color: #b94a48 !important;
+}
+
+ul.errorlist + p textarea {
+    border-color: #b94a48 !important;
+}

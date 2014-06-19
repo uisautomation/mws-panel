@@ -1,5 +1,7 @@
 from django.contrib.auth.models import User, Group
 from django.db import models
+from django import forms
+from SitesManagement.utils import get_institutions
 
 
 class Site(models.Model):
@@ -16,7 +18,7 @@ class Site(models.Model):
     # is the site deleted?
     deleted = models.BooleanField(default=False)
     # webmaster email
-    email = models.EmailField(null=True)
+    email = models.EmailField(null=True, blank=True)
 
     # Authorised users per site
     users = models.ManyToManyField(User, related_name='sites')
@@ -64,3 +66,27 @@ class VirtualMachine(models.Model):
 
     network_configuration = models.OneToOneField(NetworkConfig, related_name='virtual_machine')
     site = models.ForeignKey(Site, related_name='virtual_machines')
+
+
+# FORMS
+
+class SiteForm(forms.ModelForm):
+    institution_id = forms.ChoiceField(label='The University institution responsible for this site')
+    description = forms.CharField(label='Description for the web server (e.g. Web server for St Botolph\'s College '
+                                        'main website)',
+                                  widget=forms.Textarea(attrs={'maxlength': 250}),
+                                  max_length=250,
+                                  required=False)
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super(SiteForm, self).__init__(*args, **kwargs)
+        self.fields['institution_id'].choices = get_institutions(user)
+
+    class Meta:
+        model = Site
+        fields = ('name', 'description', 'institution_id', 'email')
+        labels = {
+            'name': 'A short name for this web server (e.g. St Botolph\'s main site)',
+            'email': 'The webmaster email (please use a role email when possible)'
+        }

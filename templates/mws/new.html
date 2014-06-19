@@ -1,0 +1,31 @@
+{% extends 'project-light/campl-mws.html' %}
+{% load static %}
+{% block page_content %}
+    <div class="campl-column12 campl-main-content">
+        <div class="campl-content-container">
+            <h1>Request new site</h1>
+
+            <form action={% url 'SitesManagement.views.new' %} method="post">{% csrf_token %}
+                <fieldset>
+                    <div id="site_form">
+                        {{ site_form.as_p }}
+                    </div>
+                    <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
+                </fieldset>
+            </form>
+            <p><a href={% url 'SitesManagement.views.index' %}>Cancel request</a></p>
+        </div>
+    </div>
+{% endblock %}
+
+{% block campl_foot_js %}
+{% include 'project-light/campl-foot-js-mws.html' %}
+    <script>
+        $(document).ready(function() {
+            $("#id_institution_id").select2({
+                placeholder: "Select an Institution",
+                allowClear: false
+            });
+        });
+    </script>
+{% endblock %}
