@@ -11,6 +11,7 @@ urlpatterns = patterns('',
     url(r'', include('pyroven.urls')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$', views.index),
+    url(r'^show/$', views.show),
     url(r'^new/$', views.new),
     url(r'^privacy/$', views.privacy),
 )

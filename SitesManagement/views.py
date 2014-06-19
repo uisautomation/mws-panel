@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from SitesManagement.models import SiteForm
+from SitesManagement.models import SiteForm, DomainNameForm
 
 
 @login_required
@@ -16,8 +16,10 @@ def new(request):
     breadcrumbs = {}
     breadcrumbs[0] = dict(name='New Manage Web Server', url=reverse(new))
 
+    # TODO: FIX: if SiteForm's name field is empty then DomainNameForm errors are also shown
     if request.method == 'POST':  # If the form has been submitted...
-        site_form = SiteForm(request.POST, user=request.user) # A bound form
+        site_form = SiteForm(request.POST, prefix="siteform", user=request.user) # A bound form
+        domain_form = DomainNameForm(request.POST, prefix="domainform")
         if site_form.is_valid():
 
             site = site_form.save(commit=False)
@@ -29,10 +31,12 @@ def new(request):
 
             return HttpResponseRedirect(reverse('SitesManagement.views.show'))  # Redirect after POST
     else:
-        site_form = SiteForm(user=request.user)  # An unbound form
+        site_form = SiteForm(prefix="siteform", user=request.user)  # An unbound form
+        domain_form = DomainNameForm(prefix="domainform")
 
     return render(request, 'mws/new.html', {
         'site_form': site_form,
+        'domain_form': domain_form,
         'breadcrumbs': breadcrumbs
     })
 

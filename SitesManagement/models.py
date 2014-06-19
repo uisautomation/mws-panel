@@ -14,7 +14,7 @@ class Site(models.Model):
     # Start date of the site
     start_date = models.DateField()
     # End date of the site (when user decides to delete the site)
-    end_date = models.DateField(null=True)
+    end_date = models.DateField(null=True, blank=True)
     # is the site deleted?
     deleted = models.BooleanField(default=False)
     # webmaster email
@@ -23,7 +23,10 @@ class Site(models.Model):
     # Authorised users per site
     users = models.ManyToManyField(User, related_name='sites')
     # Authorised user groups per site
-    group = models.ManyToManyField(Group, related_name='sites', null=True)
+    group = models.ManyToManyField(Group, related_name='sites', null=True, blank=True)
+
+    def __unicode__(self):
+        return self.name
 
 
 class Suspension(models.Model):
@@ -45,8 +48,19 @@ class Billing(models.Model):
 
 
 class DomainName(models.Model):
+    STATUS_CHOICES = (
+        ('requested', 'Requested'),
+        ('accepted', 'Accepted'),
+        ('denied', 'Denied'),
+        ('mws', 'mws*.cam.ac.uk domain ready to be assigned'),
+    )
+
     name = models.CharField(max_length=250, unique=True)
-    site = models.ForeignKey(Site, related_name='domain_names', null=True)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES)
+    site = models.ForeignKey(Site, related_name='domain_names', null=True, blank=True)
+
+    def __unicode__(self):
+        return self.name
 
 
 class NetworkConfig(models.Model):
@@ -55,6 +69,9 @@ class NetworkConfig(models.Model):
     IPv4 = models.GenericIPAddressField(protocol='IPv4')
     IPv6 = models.GenericIPAddressField(protocol='IPv6')
     main_domain = models.OneToOneField(DomainName)
+
+    def __unicode__(self):
+        return self.IPv4 + " - " + self.main_domain.name
 
 
 class VirtualMachine(models.Model):
@@ -66,6 +83,9 @@ class VirtualMachine(models.Model):
 
     network_configuration = models.OneToOneField(NetworkConfig, related_name='virtual_machine')
     site = models.ForeignKey(Site, related_name='virtual_machines')
+
+    def __unicode__(self):
+        return self.name
 
 
 # FORMS
@@ -89,4 +109,13 @@ class SiteForm(forms.ModelForm):
         labels = {
             'name': 'A short name for this web server (e.g. St Botolph\'s main site)',
             'email': 'The webmaster email (please use a role email when possible)'
+        }
+
+
+class DomainNameForm(forms.ModelForm):
+    class Meta:
+        model = DomainName
+        fields = ('name', )
+        labels = {
+            'name': 'Domain name requested'
         }

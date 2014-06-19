@@ -20,9 +20,18 @@ class SiteAdmin(ModelAdmin):
     institution.admin_order_field = 'institution_id'
 
 
+class DomainNameAdmin(ModelAdmin):
+
+    model = Site
+    list_display = ('name', 'site' )
+    ordering = ('name', )
+    search_fields = ('name', )
+    list_filter = ('site', )
+
+
 admin.site.register(Site, SiteAdmin)
 admin.site.register(Billing, ModelAdmin)
-admin.site.register(DomainName, ModelAdmin)
+admin.site.register(DomainName, DomainNameAdmin)
 admin.site.register(NetworkConfig, ModelAdmin)
 admin.site.register(Suspension, ModelAdmin)
 admin.site.register(VirtualMachine, ModelAdmin)
