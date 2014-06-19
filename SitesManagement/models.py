@@ -8,7 +8,7 @@ class Site(models.Model):
     # Description of the site
     description = models.CharField(max_length=250, blank=True)
     # The institution (retrieved using lookup)
-    institution_id = models.CharField(max_length=100, validators=[validate_correct_institution])
+    institution_id = models.CharField(max_length=100)
     # Start date of the site
     start_date = models.DateField()
     # End date of the site (when user decides to delete the site)
@@ -27,7 +27,7 @@ class Site(models.Model):
 class Suspension(models.Model):
     reason = models.CharField(max_length=250)
     # is the suspension active?
-    active = models.BooleanField()
+    active = models.BooleanField(default=True)
     # start date of the suspension
     start_date = models.DateField()
     # end date of the suspension
@@ -42,15 +42,9 @@ class Billing(models.Model):
     site = models.OneToOneField(Site, related_name='billing')
 
 
-class VirtualMachine(models.Model):
-    """ A virtual machine is associated to a site and has a network configuration. Its attributes include
-        a name and a boolean to indicate if it's the primary or secondary VM of a Site.
-    """
-    name = models.CharField(max_length=250)
-    primary = models.BooleanField(default=True)
-
-    network_configuration = models.OneToOneField(NetworkConfig, related_name='virtual_machine')
-    site = models.ForeignKey(Site, related_name='virtual_machines')
+class DomainName(models.Model):
+    name = models.CharField(max_length=250, unique=True)
+    site = models.ForeignKey(Site, related_name='domain_names', null=True)
 
 
 class NetworkConfig(models.Model):
@@ -61,6 +55,12 @@ class NetworkConfig(models.Model):
     main_domain = models.OneToOneField(DomainName)
 
 
-class DomainName(models.Model):
-    name = models.CharField(max_length=250, unique=True)
-    site = models.ForeignKey(Site, related_name='domain_names', null=True)
+class VirtualMachine(models.Model):
+    """ A virtual machine is associated to a site and has a network configuration. Its attributes include
+        a name and a boolean to indicate if it's the primary or secondary VM of a Site.
+    """
+    name = models.CharField(max_length=250)
+    primary = models.BooleanField(default=True)
+
+    network_configuration = models.OneToOneField(NetworkConfig, related_name='virtual_machine')
+    site = models.ForeignKey(Site, related_name='virtual_machines')
