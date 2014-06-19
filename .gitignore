@@ -1,0 +1,13 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Pycharm files
+.idea/
+
+# Vagrant files
+deployment/.vagrant/
+deployment/Vagrantfile
+
+# Database files
+*.sqlite3
