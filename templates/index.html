@@ -14,6 +14,47 @@
             managers, and you are strongly advised to do so.</p>
 
             <p><a href={% url 'SitesManagement.views.new' %} class="campl-primary-cta">Register new site</a></p>
+
+            {% if all_sites %}
+                <h1>MWS sites for {{ user.username }}</h1>
+                <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Domain Name</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for site in all_sites %}
+                        {% if site.is_admin_suspended %}
+                            <tr class="site_suspended">
+                                <td>
+                                    {{ site.name }} <br/>
+                                    This site has been administratively suspended
+                        {% else %}
+                            <tr>
+                                <td>
+                                    {{ site.name }}
+                        {% endif %}
+                                </td>
+                                <td>
+                                    {{ site.description }}
+                                </td>
+                                <td>
+                                    {{ site.main_domain }}
+                                </td>
+                                <td style="width: 35px;">
+                                    <a href="{% url 'SitesManagement.views.show' site_id=site.id %}">
+                                        <img alt="Show" class="iconic" src="{% static 'icons/iconic/magnifying-glass.svg' %}">
+                                    </a>
+                                </td>
+                            </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
         </div>
     </div>
 {% endblock %}

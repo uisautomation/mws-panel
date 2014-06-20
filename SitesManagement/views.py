@@ -1,14 +1,17 @@
 import datetime
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
-from SitesManagement.models import SiteForm, DomainNameForm
+from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.shortcuts import render, get_object_or_404, redirect
+from SitesManagement.models import SiteForm, DomainNameForm, Site
 
 
 @login_required
 def index(request):
-    return render(request, 'index.html', {})
+    all_sites = request.user.sites.all().order_by('name')
+    return render(request, 'index.html', {
+        'all_sites': all_sites,
+    })
 
 
 @login_required
@@ -42,8 +45,22 @@ def new(request):
 
 
 @login_required
-def show(request):
-    return render(request, 'index.html', {})
+def show(request, site_id):
+    site = get_object_or_404(Site, pk=site_id)
+
+    if not site in request.user.sites.all():
+        return HttpResponseForbidden()
+
+    if site.is_admin_suspended():
+        return HttpResponseForbidden()
+
+    breadcrumbs = {}
+    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
+
+    return render(request, 'mws/show.html', {
+        'breadcrumbs': breadcrumbs,
+        'site': site
+    })
 
 
 def privacy(request):

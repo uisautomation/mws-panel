@@ -33,3 +33,9 @@ ul.errorlist + p input, ul.errorlist + .metadata_email_form_each p input {
 ul.errorlist + p textarea {
     border-color: #b94a48 !important;
 }
+
+.iconic {
+    height: 1.25em;
+    margin-left: 10px;
+    vertical-align: baseline;
+}

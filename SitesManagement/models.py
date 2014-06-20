@@ -28,6 +28,14 @@ class Site(models.Model):
     def __unicode__(self):
         return self.name
 
+    def is_admin_suspended(self):
+        #TODO: implement
+        return False
+
+    def main_domain(self):
+        #TODO: implement
+        return ""
+
 
 class Suspension(models.Model):
     reason = models.CharField(max_length=250)
