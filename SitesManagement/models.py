@@ -1,7 +1,10 @@
 from django.contrib.auth.models import User, Group
+from django.core.mail import send_mail
 from django.db import models
 from django import forms
-from SitesManagement.utils import get_institutions
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from .utils import get_institutions
 
 
 class Site(models.Model):
@@ -25,7 +28,7 @@ class Site(models.Model):
     # Authorised user groups per site
     group = models.ManyToManyField(Group, related_name='sites', null=True, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def is_admin_suspended(self):
@@ -127,3 +130,15 @@ class DomainNameForm(forms.ModelForm):
         labels = {
             'name': 'Domain name requested'
         }
+
+
+@receiver(post_save, sender=Site)
+def extract_contact_data(instance, created, update_fields, **kwargs):
+    subject = "New request of a VM for the MWS"
+    message = "IPv4: 12.12.12.12\n" \
+              "IPv6: ::12.12.12.12\n" \
+              "Please, when ready click here: http://localhost:8000/api/confirm_vm/"+str(instance.id)
+    from_email = "mws-admin@cam.ac.uk"
+    recipient_list = ('amc203@cam.ac.uk', )
+    send_mail(subject, message, from_email, recipient_list, fail_silently=False, auth_user=None, auth_password=None,
+              connection=None, html_message=None)

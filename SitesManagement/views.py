@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
-from SitesManagement.models import SiteForm, DomainNameForm, Site
+from .models import SiteForm, DomainNameForm, Site
 
 
 @login_required
@@ -32,7 +32,7 @@ def new(request):
             # Save user that requested the site
             site.users.add(request.user)
 
-            return HttpResponseRedirect(reverse('SitesManagement.views.show'))  # Redirect after POST
+            return HttpResponseRedirect(reverse('SitesManagement.views.show', kwargs={'site_id': site.id}))  # Redirect after POST
     else:
         site_form = SiteForm(prefix="siteform", user=request.user)  # An unbound form
         domain_form = DomainNameForm(prefix="domainform")

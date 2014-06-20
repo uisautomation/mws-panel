@@ -20,6 +20,9 @@ DATABASES = {
     }
 }
 
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = 1025
+
 # pyroven configuration
 PYROVEN_CREATE_USER = True
 PYROVEN_TIMEOUT = 15
