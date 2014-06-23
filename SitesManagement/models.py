@@ -39,6 +39,12 @@ class Site(models.Model):
         #TODO: implement
         return ""
 
+    def vm(self, primary):
+        if self.virtual_machines.filter(primary=primary).count() is 0:
+            return None
+        else:
+            return self.virtual_machines.get(primary=primary)
+
 
 class Suspension(models.Model):
     reason = models.CharField(max_length=250)
@@ -79,7 +85,7 @@ class NetworkConfig(models.Model):
     """
     IPv4 = models.GenericIPAddressField(protocol='IPv4')
     IPv6 = models.GenericIPAddressField(protocol='IPv6')
-    main_domain = models.OneToOneField(DomainName)
+    main_domain = models.OneToOneField(DomainName, related_name='network_config')
 
     def __unicode__(self):
         return self.IPv4 + " - " + self.main_domain.name

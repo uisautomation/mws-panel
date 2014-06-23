@@ -1,0 +1,23 @@
+{% extends 'project-light/campl-mws.html' %}
+{% load static %}
+{% block page_content %}
+    <div class="campl-column12 campl-main-content">
+        <div class="campl-content-container">
+            <h1>Submit Virtual Machine information requested</h1>
+
+            <form action={% url 'apimws.views.confirm_vm' site_id=site.id network_conf_id=network_conf.id primary_or_secondary=primary_or_secondary %} method="post">{% csrf_token %}
+                <fieldset>
+                    <div id="site_form">
+                        {{ vm_form.as_p }}
+                    </div>
+                    <div id="network_conf">
+                        <p>IPv4: {{ network_conf.IPv4 }}</p>
+                        <p>IPv6: {{ network_conf.IPv6 }}</p>
+                        <p>Domain Name: {{ network_conf.main_domain.name }}</p>
+                    </div>
+                    <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+{% endblock %}

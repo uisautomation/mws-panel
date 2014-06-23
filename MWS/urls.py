@@ -2,7 +2,6 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
-from SitesManagement import views
 
 urlpatterns = patterns('',
     # Examples:
@@ -12,9 +11,15 @@ urlpatterns = patterns('',
     url(r'^grappelli/', include('grappelli.urls')),
     url(r'', include('pyroven.urls')),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^$', views.index),
-    url(r'^show/(?P<site_id>[0-9]+)/$', views.show),
-    url(r'^billing/(?P<site_id>[0-9]+)/$', views.billing),
-    url(r'^new/$', views.new),
-    url(r'^privacy/$', views.privacy),
+
+    # SitesManagement app
+    url(r'^$', 'SitesManagement.views.index'),
+    url(r'^show/(?P<site_id>[0-9]+)/$', 'SitesManagement.views.show'),
+    url(r'^billing/(?P<site_id>[0-9]+)/$', 'SitesManagement.views.billing'),
+    url(r'^new/$', 'SitesManagement.views.new'),
+    url(r'^privacy/$', 'SitesManagement.views.privacy'),
+
+    # apimws app
+    url(r'^api/confirm_vm/(?P<site_id>[0-9]+)/(?P<primary_or_secondary>(primary|secondary))/(?P<network_conf_id>[0-9]+)/$', 'apimws.views.confirm_vm')
+
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
