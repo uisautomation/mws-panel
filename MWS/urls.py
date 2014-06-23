@@ -20,6 +20,8 @@ urlpatterns = patterns('',
     url(r'^privacy/$', 'SitesManagement.views.privacy'),
 
     # apimws app
-    url(r'^api/confirm_vm/(?P<vm_id>[0-9]+)/$', 'apimws.views.confirm_vm')
+    url(r'^api/confirm_vm/(?P<vm_id>[0-9]+)/$', 'apimws.views.confirm_vm'),
+    url(r'^api/findPeople$', 'apimws.views.find_people'),
+
 
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

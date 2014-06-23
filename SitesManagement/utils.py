@@ -25,16 +25,6 @@ def get_institutions(user=None):
     return map((lambda institution: (institution.instid, institution.name)), all_institutions)
 
 
-def get_users_from_query(search_string):
-    """ Returns the list of people based on the search string using the lookup ucam service
-        :param search_string: the search string
-    """
-    persons = PersonMethods(conn).search(query=search_string)
-
-    return map((lambda person: {'crsid': person.identifier.value, 'visibleName': person.visibleName}),
-               persons)
-
-
 def get_or_create_user_by_crsid(crsid):
     """ Returns the django user corresponding to the crsid parameter.
         :param crsid: the crsid of the retrieved user
@@ -48,11 +38,6 @@ def get_or_create_user_by_crsid(crsid):
         user.save()
 
     return user
-
-
-def return_visibleName_by_crsid(crsid):
-    person = PersonMethods(conn).getPerson(scheme='crsid', identifier=crsid)
-    return person.visibleName if person is not None else ''
 
 
 def get_institution_name_by_id(institution_id, all_institutions=None):
