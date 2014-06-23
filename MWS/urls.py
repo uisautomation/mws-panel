@@ -23,5 +23,8 @@ urlpatterns = patterns('',
     url(r'^api/confirm_vm/(?P<vm_id>[0-9]+)/$', 'apimws.views.confirm_vm'),
     url(r'^api/findPeople$', 'apimws.views.find_people'),
 
+    # mwsauth app
+    url(r'^mws/(?P<site_id>[0-9]+)/auth/$', 'mwsauth.views.auth_change'),
+
 
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

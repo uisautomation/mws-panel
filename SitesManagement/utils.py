@@ -25,21 +25,6 @@ def get_institutions(user=None):
     return map((lambda institution: (institution.instid, institution.name)), all_institutions)
 
 
-def get_or_create_user_by_crsid(crsid):
-    """ Returns the django user corresponding to the crsid parameter.
-        :param crsid: the crsid of the retrieved user
-    """
-
-    user = User.objects.filter(username=crsid)
-    if user.exists():
-        user = user.first()
-    else:
-        user = User(username=crsid)
-        user.save()
-
-    return user
-
-
 def get_institution_name_by_id(institution_id, all_institutions=None):
     if all_institutions is not None:
         instname = next((institution[1] for institution in all_institutions if institution[0] == institution_id), None)

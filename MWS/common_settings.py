@@ -33,6 +33,7 @@ INSTALLED_APPS = (
     'pyroven',
     'SitesManagement',
     'apimws',
+    'mwsauth',
 )
 
 MIDDLEWARE_CLASSES = (

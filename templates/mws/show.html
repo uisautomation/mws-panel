@@ -44,7 +44,7 @@
                             class="node-27051 node node-external-link view-mode-focus_on clearfix campl-horizontal-teaser campl-teaser campl-focus-teaser">
                         <div class="campl-focus-teaser-img">
                             <div class="campl-content-container campl-horizontal-teaser-img">
-                                <a href="http://www.cam.ac.uk/about-the-university?camref=home-focuson">
+                                <a href="{% url 'SitesManagement.views.show' site_id=site.id %}">
                                     <div class="field field-name-field-external-url-image field-type-image field-label-hidden">
                                         <div class="field-items">
                                             <div class="field-item even">
@@ -80,7 +80,7 @@
                             class="node-27052 node node-external-link view-mode-focus_on clearfix campl-horizontal-teaser campl-teaser campl-focus-teaser">
                         <div class="campl-focus-teaser-img">
                             <div class="campl-content-container campl-horizontal-teaser-img">
-                                <a href="http://www.cam.ac.uk/study-at-cambridge?ucampl-ref=home-focuson">
+                                <a href="{% url 'SitesManagement.views.show' site_id=site.id %}">
                                     <div class="field field-name-field-external-url-image field-type-image field-label-hidden">
                                         <div class="field-items">
                                             <div class="field-item even">
@@ -116,7 +116,7 @@
                             class="node-27053 node node-external-link view-mode-focus_on clearfix campl-horizontal-teaser campl-teaser campl-focus-teaser">
                         <div class="campl-focus-teaser-img">
                             <div class="campl-content-container campl-horizontal-teaser-img">
-                                <a href="http://www.cam.ac.uk/research?ucampl-ref=home-focuson">
+                                <a href="{% url 'mwsauth.views.auth_change' site_id=site.id %}">
                                     <div class="field field-name-field-external-url-image field-type-image field-label-hidden">
                                         <div class="field-items">
                                             <div class="field-item even">
@@ -132,11 +132,11 @@
                         <div class="campl-focus-teaser-txt">
                             <div class="campl-content-container campl-horizontal-teaser-txt">
                                 <h3 class="campl-teaser-title">
-                                    <a href="{% url 'SitesManagement.views.show' site_id=site.id %}">
+                                    <a href="{% url 'mwsauth.views.auth_change' site_id=site.id %}">
                                         Change user and groups authorised in this MWS
                                     </a>
                                 </h3>
-                                <a href="{% url 'SitesManagement.views.show' site_id=site.id %}"
+                                <a href="{% url 'mwsauth.views.auth_change' site_id=site.id %}"
                                    class="ir campl-focus-link">Change user and groups authorised in this MWS</a></div>
                         </div>
                     </article>
@@ -155,7 +155,7 @@
                             class="node-27054 node node-external-link view-mode-focus_on clearfix campl-horizontal-teaser campl-teaser campl-focus-teaser">
                         <div class="campl-focus-teaser-img">
                             <div class="campl-content-container campl-horizontal-teaser-img">
-                                <a href="http://www.admin.cam.ac.uk/whatson/?ucampl-ref=home-focuson">
+                                <a href="{% url 'SitesManagement.views.billing' site_id=site.id %}">
                                     <div class="field field-name-field-external-url-image field-type-image field-label-hidden">
                                         <div class="field-items">
                                             <div class="field-item even">

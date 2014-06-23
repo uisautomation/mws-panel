@@ -1,0 +1,75 @@
+{% extends 'project-light/campl-mws.html' %}
+{% block page_content %}
+    <div class="campl-column12 campl-main-content">
+        <div class="campl-content-container">
+            <h1>Change authorised users and groups</h1>
+
+            <form action={% url 'mwsauth.views.auth_change' site_id=site.id %} method="post">{% csrf_token %}
+                <fieldset>
+                    <p>
+                        Authorised users:<br/>
+                        <input id="input-user-ajax" name="crsids">
+                    </p>
+                    <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
+                </fieldset>
+            </form>
+            <p><a href={% url 'SitesManagement.views.show' site_id=site.id %}>Back to the main menu</a></p>
+        </div>
+    </div>
+{% endblock %}
+
+{% block campl_foot_js %}
+{% include 'project-light/campl-foot-js-mws.html' %}
+<script>
+    /**
+     * ID of the last AJAX search request we sent.
+     */
+    searchId = 0;
+
+    $(document).ready(function() {
+        $("#input-user-ajax").select2({
+            placeholder: "Search for a user",
+            minimumInputLength: 3,
+            multiple: true,
+            ajax: {
+                url: "/api/findPeople",
+                dataType: 'json',
+                data: function (term, page) {
+                    return {
+                        query: term,
+                        searchId: ++searchId
+                    };
+                },
+                results: function (data, page) {
+                    if (data.searchId != searchId)
+                        return;
+                    return {results: data.persons};
+                }
+            },
+            formatResult: function(person) {
+                return person.visibleName+" ("+person.crsid+") ";
+            },
+            formatSelection: function(person) {
+                return person.visibleName+" ("+person.crsid+") ";
+            },
+            id: function(person) {
+                return person.crsid;
+            },
+            dropdownCssClass: "bigdrop", // apply css that makes the dropdown taller
+            escapeMarkup: function (m) { return m; } // we do not want to escape markup since we are displaying html in results
+        });
+
+        $("#input-user-ajax").select2("data", [
+            {% for authorised_user in authorised_users %}
+                {
+                    crsid: "{{ authorised_user.username }}",
+                    visibleName: "{{ authorised_user.last_name }}",
+                    {% if request.user.username == authorised_user.username %}
+                        locked: true
+                    {% endif %}
+                },
+            {% endfor %}
+        ]);
+    });
+</script>
+{% endblock %}
