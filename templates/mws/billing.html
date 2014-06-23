@@ -1,0 +1,19 @@
+{% extends 'project-light/campl-mws.html' %}
+{% load static %}
+{% block page_content %}
+    <div class="campl-column12 campl-main-content">
+        <div class="campl-content-container">
+            <h1>Change billing data</h1>
+
+            <form enctype="multipart/form-data" action={% url 'SitesManagement.views.billing' site_id=site.id %} method="post">{% csrf_token %}
+                <fieldset>
+                    <div id="site_form">
+                        {{ billing_form.as_p }}
+                    </div>
+                    <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
+                </fieldset>
+            </form>
+            <p><a href={% url 'SitesManagement.views.show' site_id=site.id %}>Cancel request</a></p>
+        </div>
+    </div>
+{% endblock %}

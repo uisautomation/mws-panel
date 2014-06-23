@@ -132,6 +132,12 @@ class DomainNameForm(forms.ModelForm):
         }
 
 
+class BillingForm(forms.ModelForm):
+    class Meta:
+        model = Billing
+        fields = ('group', 'purchase_order')
+
+
 @receiver(post_save, sender=Site)
 def extract_contact_data(instance, created, update_fields, **kwargs):
     subject = "New request of a VM for the MWS"

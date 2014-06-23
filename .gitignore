@@ -11,3 +11,6 @@ deployment/Vagrantfile
 
 # Database files
 *.sqlite3
+
+# User uploaded files
+media/*

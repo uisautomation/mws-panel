@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import SiteForm, DomainNameForm, Site
+from .models import SiteForm, DomainNameForm, Site, BillingForm
 
 
 @login_required
@@ -57,9 +57,54 @@ def show(request, site_id):
     breadcrumbs = {}
     breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
 
+    warning_messages = []
+
+    if not hasattr(site, 'billing'):
+        warning_messages.append("No Billing, please add one.")
+
     return render(request, 'mws/show.html', {
         'breadcrumbs': breadcrumbs,
+        'warning_messages': warning_messages,
         'site': site
+    })
+
+
+@login_required
+def billing(request, site_id):
+    site = get_object_or_404(Site, pk=site_id)
+
+    if not site in request.user.sites.all():
+        return HttpResponseForbidden()
+
+    if site.is_admin_suspended():
+        return HttpResponseForbidden()
+
+    breadcrumbs = {}
+    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
+    breadcrumbs[1] = dict(name='Billing', url=reverse(show, kwargs={'site_id': site.id}))
+
+    if request.method == 'POST':  # If the form has been submitted...
+        if hasattr(site, 'billing'):
+            billing_form = BillingForm(request.POST, request.FILES, instance=site.billing) # A bound form
+            if billing_form.is_valid():
+                billing_form.save()
+                return HttpResponseRedirect(reverse('SitesManagement.views.show', kwargs={'site_id': site.id}))  # Redirect after POST
+        else:
+            billing_form = BillingForm(request.POST, request.FILES) # A bound form
+            if billing_form.is_valid():
+                billing = billing_form.save(commit=False)
+                billing.site = site
+                billing.save()
+                return HttpResponseRedirect(reverse('SitesManagement.views.show', kwargs={'site_id': site.id}))  # Redirect after POST
+    elif hasattr(site, 'billing'):
+        billing_form = BillingForm(instance=site.billing)
+    else:
+        billing_form = BillingForm()  # An unbound form
+
+    return render(request, 'mws/billing.html', {
+        'breadcrumbs': breadcrumbs,
+        'site': site,
+        'billing_form': billing_form
     })
 
 

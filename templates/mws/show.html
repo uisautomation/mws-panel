@@ -12,6 +12,13 @@
 
 
         <div class="view-content">
+
+            <div class="campl-column12">
+                {% for message in warning_messages %}
+                    <p class="campl-warning">{{ message }}</p>
+                {% endfor %}
+            </div>
+
             <div class="campl-column4">
 
                 <div class="campl-content-container campl-side-padding">
@@ -143,11 +150,11 @@
                         <div class="campl-focus-teaser-txt">
                             <div class="campl-content-container campl-horizontal-teaser-txt">
                                 <h3 class="campl-teaser-title">
-                                    <a href="{% url 'SitesManagement.views.show' site_id=site.id %}">
+                                    <a href="{% url 'SitesManagement.views.billing' site_id=site.id %}">
                                         Change billing information
                                     </a>
                                 </h3>
-                                <a href="{% url 'SitesManagement.views.show' site_id=site.id %}"
+                                <a href="{% url 'SitesManagement.views.billing' site_id=site.id %}"
                                    class="ir campl-focus-link">Change billing information</a></div>
                         </div>
                     </article>
