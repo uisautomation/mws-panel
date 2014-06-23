@@ -45,6 +45,12 @@ class Site(models.Model):
         else:
             return self.virtual_machines.get(primary=primary)
 
+    def primary_vm(self):
+        return self.vm(primary=True)
+
+    def secondary_vm(self):
+        return self.vm(primary=False)
+
 
 class Suspension(models.Model):
     reason = models.CharField(max_length=250)
@@ -85,7 +91,7 @@ class NetworkConfig(models.Model):
     """
     IPv4 = models.GenericIPAddressField(protocol='IPv4')
     IPv6 = models.GenericIPAddressField(protocol='IPv6')
-    main_domain = models.OneToOneField(DomainName, related_name='network_config')
+    main_domain = models.OneToOneField(DomainName, related_name='network_configuration')
 
     def __unicode__(self):
         return self.IPv4 + " - " + self.main_domain.name
@@ -95,8 +101,16 @@ class VirtualMachine(models.Model):
     """ A virtual machine is associated to a site and has a network configuration. Its attributes include
         a name and a boolean to indicate if it's the primary or secondary VM of a Site.
     """
+    STATUS_CHOICES = (
+        ('requested', 'Requested'),
+        ('accepted', 'Accepted'),
+        ('denied', 'Denied'),
+        ('ready', 'Ready'),
+    )
+
     name = models.CharField(max_length=250)
     primary = models.BooleanField(default=True)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES)
 
     network_configuration = models.OneToOneField(NetworkConfig, related_name='virtual_machine')
     site = models.ForeignKey(Site, related_name='virtual_machines')
@@ -144,12 +158,24 @@ class BillingForm(forms.ModelForm):
         fields = ('group', 'purchase_order')
 
 
-@receiver(post_save, sender=Site)
-def extract_contact_data(instance, created, update_fields, **kwargs):
+#@receiver(post_save, sender=Site)
+#def platforms_api_request(instance, created, update_fields, **kwargs):
+def platforms_api_request(site, primary):
+    mwsdn = DomainName.objects.filter(status='mws').first()
+    mwsdn.site = site
+    mwsdn.status = 'accepted'
+    mwsdn.save()
+
+    vm = VirtualMachine(primary=primary, status='requested', network_configuration=mwsdn.network_configuration,
+                        site=site)
+    vm.save()
+
     subject = "New request of a VM for the MWS"
-    message = "IPv4: 12.12.12.12\n" \
-              "IPv6: ::12.12.12.12\n" \
-              "Please, when ready click here: http://localhost:8000/api/confirm_vm/"+str(instance.id)
+    message = "IPv4: " + vm.network_configuration.IPv4 + "\n" \
+              "IPv6: " + vm.network_configuration.IPv6 + "\n" \
+              "Domain Name: " + site.domain_names.first().name + "\n" \
+              "Attached: autoyast.xml (with IPs, keys)\n" \
+              "Please, when ready click here: http://localhost:8000/api/confirm_vm/"+str(vm.id)
     from_email = "mws-admin@cam.ac.uk"
     recipient_list = ('amc203@cam.ac.uk', )
     send_mail(subject, message, from_email, recipient_list, fail_silently=False, auth_user=None, auth_password=None,

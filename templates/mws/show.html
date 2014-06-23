@@ -14,10 +14,28 @@
         <div class="view-content">
 
             <div class="campl-column12">
-                {% for message in warning_messages %}
-                    <p class="campl-warning">{{ message }}</p>
-                {% endfor %}
+                <div class="campl-content-container campl-side-padding">
+                    <article
+                            class="node-27054 node node-external-link view-mode-focus_on clearfix campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                        <div class="campl-focus-teaser-txt">
+                            <div style="padding: 20px; color: white">
+                                <h2 style="color: white">Messages:</h2>
+                                <ul>
+                                    {% for message in warning_messages %}
+                                        <li>{{ message }}</li>
+                                    {% endfor %}
+
+                                    {% if site.primary_vm.status != 'ready' %}
+                                        <li>Your Manage Web Server is being prepared</li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </article>
+                </div>
             </div>
+
+        {% if site.primary_vm.status == 'ready' %}
 
             <div class="campl-column4">
 
@@ -127,6 +145,9 @@
 
 
             </div>
+
+        {% endif %}
+
             <div class="campl-column4">
 
                 <div class="campl-content-container campl-side-padding">

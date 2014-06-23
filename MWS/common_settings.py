@@ -32,6 +32,7 @@ INSTALLED_APPS = (
     'stronghold',
     'pyroven',
     'SitesManagement',
+    'apimws',
 )
 
 MIDDLEWARE_CLASSES = (
