@@ -5,7 +5,7 @@ from django.contrib import admin
 
 urlpatterns = patterns('',
     # Examples:
-    # url(r'^$', 'MWS.views.home', name='home'),
+    # url(r'^$', 'mws.views.home', name='home'),
     # url(r'^blog/', include('blog.urls')),
 
     url(r'^grappelli/', include('grappelli.urls')),

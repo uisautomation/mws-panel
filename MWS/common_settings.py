@@ -53,9 +53,9 @@ AUTHENTICATION_BACKENDS = (
     'pyroven.backends.RavenAuthBackend',
 )
 
-ROOT_URLCONF = 'MWS.urls'
+ROOT_URLCONF = 'mws.urls'
 
-WSGI_APPLICATION = 'MWS.wsgi.application'
+WSGI_APPLICATION = 'mws.wsgi.application'
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/
