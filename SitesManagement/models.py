@@ -75,7 +75,6 @@ class DomainName(models.Model):
         ('requested', 'Requested'),
         ('accepted', 'Accepted'),
         ('denied', 'Denied'),
-        ('mws', 'mws*.cam.ac.uk domain ready to be assigned'),
     )
 
     name = models.CharField(max_length=250, unique=True)
@@ -91,10 +90,10 @@ class NetworkConfig(models.Model):
     """
     IPv4 = models.GenericIPAddressField(protocol='IPv4')
     IPv6 = models.GenericIPAddressField(protocol='IPv6')
-    main_domain = models.OneToOneField(DomainName, related_name='network_configuration')
+    mws_domain = models.CharField(max_length=250, unique=True)
 
     def __unicode__(self):
-        return self.IPv4 + " - " + self.main_domain.name
+        return self.IPv4 + " - " + self.mws_domain
 
 
 class VirtualMachine(models.Model):
@@ -144,6 +143,7 @@ class SiteForm(forms.ModelForm):
 
 
 class DomainNameForm(forms.ModelForm):
+    name = forms.CharField(max_length=250, required=False)
     class Meta:
         model = DomainName
         fields = ('name', )
@@ -161,21 +161,31 @@ class BillingForm(forms.ModelForm):
 #@receiver(post_save, sender=Site)
 #def platforms_api_request(instance, created, update_fields, **kwargs):
 def platforms_api_request(site, primary):
-    mwsdn = DomainName.objects.filter(status='mws').first()
-    mwsdn.site = site
-    mwsdn.status = 'accepted'
-    mwsdn.save()
-
-    vm = VirtualMachine(primary=primary, status='requested', network_configuration=mwsdn.network_configuration,
-                        site=site)
+    network_configuration = NetworkConfig.objects.filter(virtual_machine=None).first()
+    vm = VirtualMachine(primary=primary, status='requested', network_configuration=network_configuration, site=site)
     vm.save()
 
     subject = "New request of a VM for the MWS"
-    message = "IPv4: " + vm.network_configuration.IPv4 + "\n" \
-              "IPv6: " + vm.network_configuration.IPv6 + "\n" \
-              "Domain Name: " + site.domain_names.first().name + "\n" \
+    message = "IPv4: " + network_configuration.IPv4 + "\n" \
+              "IPv6: " + network_configuration.IPv6 + "\n" \
+              "Domain Name: " + network_configuration.mws_domain + "\n" \
               "Attached: autoyast.xml (with IPs, keys)\n" \
               "Please, when ready click here: http://localhost:8000/api/confirm_vm/"+str(vm.id)
+    from_email = "mws-admin@cam.ac.uk"
+    recipient_list = ('amc203@cam.ac.uk', )
+    send_mail(subject, message, from_email, recipient_list, fail_silently=False, auth_user=None, auth_password=None,
+              connection=None, html_message=None)
+
+
+def ip_register_api_request(site, domain_name):
+    domain_requested = DomainName(name=domain_name, status='requested', site=site)
+    domain_requested.save()
+
+    subject = "New request of a Domain Name for the MWS"
+    message = "Domain Name requested: " + domain_name + "\n" \
+              "IPv4: " + site.primary_vm().network_configuration.IPv4 + "\n" \
+              "IPv6: " + site.primary_vm().network_configuration.IPv6 + "\n" \
+              "Please, when ready click here: http://localhost:8000/api/confirm_dns/"+str(domain_requested.id)
     from_email = "mws-admin@cam.ac.uk"
     recipient_list = ('amc203@cam.ac.uk', )
     send_mail(subject, message, from_email, recipient_list, fail_silently=False, auth_user=None, auth_password=None,

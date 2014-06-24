@@ -1,5 +1,4 @@
 import re
-from django.contrib.auth.models import User
 from django.shortcuts import _get_queryset
 from ibisclient import *
 
@@ -41,3 +40,10 @@ def get_object_or_None(klass, *args, **kwargs):
         return queryset.get(*args, **kwargs)
     except queryset.model.DoesNotExist:
         return None
+
+
+def is_camacuk(domain_name):
+    if re.match(r'^((\w|\-)+\.)*cam.ac.uk$', domain_name) is None:
+        return False
+    else:
+        return True

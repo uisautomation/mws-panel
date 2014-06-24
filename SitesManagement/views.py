@@ -3,7 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import SiteForm, DomainNameForm, Site, BillingForm, DomainName, platforms_api_request
+from SitesManagement.utils import is_camacuk
+from .models import SiteForm, DomainNameForm, Site, BillingForm, DomainName, platforms_api_request, \
+    ip_register_api_request
 
 
 @login_required
@@ -23,7 +25,7 @@ def new(request):
     if request.method == 'POST':  # If the form has been submitted...
         site_form = SiteForm(request.POST, prefix="siteform", user=request.user) # A bound form
         domain_form = DomainNameForm(request.POST, prefix="domainform")
-        if site_form.is_valid():
+        if site_form.is_valid() and domain_form.is_valid():
 
             site = site_form.save(commit=False)
             site.start_date = datetime.date.today()
@@ -33,6 +35,14 @@ def new(request):
             site.users.add(request.user)
 
             platforms_api_request(site, primary=True)
+
+            # Check domain name requested
+            domain_requested = domain_form.save(commit=False)
+            if domain_requested.name != '':
+                if is_camacuk(domain_requested.name):
+                    ip_register_api_request(site, domain_requested.name)
+                else:
+                    site.domain_names.add(DomainName(name=domain_requested.name, status='accepted'))
 
             return HttpResponseRedirect(reverse('SitesManagement.views.show', kwargs={'site_id': site.id}))  # Redirect after POST
     else:
@@ -90,6 +100,10 @@ def show(request, site_id):
     breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
 
     warning_messages = []
+
+    for domain_name in site.domain_names.all():
+        if domain_name.status == 'requested':
+            warning_messages.append("Your domain name %s has been requested and is under review." % domain_name.name)
 
     if not hasattr(site, 'billing'):
         warning_messages.append("No Billing, please add one.")
