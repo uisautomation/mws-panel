@@ -17,6 +17,7 @@ urlpatterns = patterns('',
     url(r'^show/(?P<site_id>[0-9]+)/$', 'SitesManagement.views.show'),
     url(r'^billing/(?P<site_id>[0-9]+)/$', 'SitesManagement.views.billing'),
     url(r'^new/$', 'SitesManagement.views.new'),
+    url(r'^edit/(?P<site_id>[0-9]+)/$', 'SitesManagement.views.edit'),
     url(r'^privacy/$', 'SitesManagement.views.privacy'),
 
     # apimws app

@@ -47,6 +47,36 @@ def new(request):
 
 
 @login_required
+def edit(request, site_id):
+    site = get_object_or_404(Site, pk=site_id)
+
+    if not site in request.user.sites.all():
+        return HttpResponseForbidden()
+
+    if site.is_admin_suspended():
+        return HttpResponseForbidden()
+
+    breadcrumbs = {}
+    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
+    breadcrumbs[1] = dict(name='Change information about your MWS',
+                          url=reverse('SitesManagement.views.edit', kwargs={'site_id': site.id}))
+
+    if request.method == 'POST':
+        site_form = SiteForm(request.POST, user=request.user, instance=site)
+        if site_form.is_valid():
+            site_form.save()
+            return HttpResponseRedirect(reverse('SitesManagement.views.show', kwargs={'site_id': site.id}))  # Redirect after POST
+    else:
+        site_form = SiteForm(user=request.user, instance=site)
+
+    return render(request, 'mws/edit.html', {
+        'site_form': site_form,
+        'site': site,
+        'breadcrumbs': breadcrumbs
+    })
+
+
+@login_required
 def show(request, site_id):
     site = get_object_or_404(Site, pk=site_id)
 
