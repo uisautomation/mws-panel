@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from SitesManagement.models import VirtualMachine
 from apimws.models import VMForm
-from apimws.utils import get_users_from_query
+from apimws.utils import get_users_from_query, get_groups_from_query
 
 
 @login_required()
@@ -32,6 +32,12 @@ def confirm_vm(request, vm_id):
 @login_required()
 def find_people(request):
     persons = get_users_from_query(request.GET.get('query'))
-    return HttpResponse(json.dumps({'searchId': request.GET.get('searchId'), 'persons': persons}),
+    return HttpResponse(json.dumps({'searchId_u': request.GET.get('searchId_u'), 'persons': persons}),
                         content_type='application/json')
 
+
+@login_required()
+def find_groups(request):
+    groups = get_groups_from_query(request.GET.get('query'))
+    return HttpResponse(json.dumps({'searchId_g': request.GET.get('searchId_g'), 'groups': groups}),
+                        content_type='application/json')

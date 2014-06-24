@@ -26,7 +26,7 @@ class Site(models.Model):
     # Authorised users per site
     users = models.ManyToManyField(User, related_name='sites')
     # Authorised user groups per site
-    group = models.ManyToManyField(Group, related_name='sites', null=True, blank=True)
+    groups = models.ManyToManyField(Group, related_name='sites', null=True, blank=True)
 
     def __str__(self):
         return self.name
