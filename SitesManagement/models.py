@@ -59,7 +59,7 @@ class Suspension(models.Model):
     # start date of the suspension
     start_date = models.DateField()
     # end date of the suspension
-    end_date = models.DateField(null=True)
+    end_date = models.DateField(null=True, blank=True)
 
     site = models.ForeignKey(Site, related_name="suspensions")
 
@@ -79,7 +79,7 @@ class DomainName(models.Model):
 
     name = models.CharField(max_length=250, unique=True)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES)
-    site = models.ForeignKey(Site, related_name='domain_names', null=True, blank=True)
+    site = models.ForeignKey(Site, related_name='domain_names')
 
     def __unicode__(self):
         return self.name
