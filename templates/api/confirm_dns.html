@@ -1,0 +1,15 @@
+{% extends 'project-light/campl-mws.html' %}
+{% load static %}
+{% block page_content %}
+    <div class="campl-column12 campl-main-content">
+        <div class="campl-content-container">
+            <h1>Confirm acceptance for domain name {{ dn.name }}</h1>
+
+            <form action={% url 'apimws.views.confirm_dns' dn_id=dn.id %} method="post">{% csrf_token %}
+                <fieldset>
+                    <p><input type="submit" value="Accept" class="campl-btn campl-primary-cta"/></p>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+{% endblock %}

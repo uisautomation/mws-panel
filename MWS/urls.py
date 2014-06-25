@@ -22,6 +22,7 @@ urlpatterns = patterns('',
 
     # apimws app
     url(r'^api/confirm_vm/(?P<vm_id>[0-9]+)/$', 'apimws.views.confirm_vm'),
+    url(r'^api/confirm_dns/(?P<dn_id>[0-9]+)/$', 'apimws.views.confirm_dns'),
     url(r'^api/findPeople$', 'apimws.views.find_people'),
     url(r'^api/findGroups$', 'apimws.views.find_groups'),
 

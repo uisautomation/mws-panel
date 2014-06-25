@@ -2,7 +2,7 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
-from SitesManagement.models import VirtualMachine
+from SitesManagement.models import VirtualMachine, DomainName
 from apimws.models import VMForm
 from apimws.utils import get_users_from_query, get_groups_from_query
 
@@ -26,6 +26,22 @@ def confirm_vm(request, vm_id):
     return render(request, 'api/confirm_vm.html', {
         'vm': vm,
         'vm_form': vm_form
+    })
+
+
+@login_required()
+def confirm_dns(request, dn_id):
+    dn = get_object_or_404(DomainName, pk=dn_id)
+
+    # check if the request.user is authorised to do so: member of the UIS ip-register or UIS Information Systems groups
+
+    if request.method == 'POST':
+        dn.status = 'accepted'
+        dn.save()
+        return render(request, 'api/success.html')
+
+    return render(request, 'api/confirm_dns.html', {
+        'dn': dn,
     })
 
 
