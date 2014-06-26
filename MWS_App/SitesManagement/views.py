@@ -4,7 +4,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
 from SitesManagement.utils import is_camacuk
-from .models import SiteForm, DomainNameForm, Site, BillingForm, DomainName, platforms_api_request, \
+from .models import SiteForm, DomainNameFormNewSite, Site, BillingForm, DomainName, platforms_api_request, \
     ip_register_api_request
 
 
@@ -24,7 +24,7 @@ def new(request):
     # TODO: FIX: if SiteForm's name field is empty then DomainNameForm errors are also shown
     if request.method == 'POST':  # If the form has been submitted...
         site_form = SiteForm(request.POST, prefix="siteform", user=request.user) # A bound form
-        domain_form = DomainNameForm(request.POST, prefix="domainform")
+        domain_form = DomainNameFormNewSite(request.POST, prefix="domainform")
         if site_form.is_valid() and domain_form.is_valid():
 
             site = site_form.save(commit=False)
@@ -47,7 +47,7 @@ def new(request):
             return HttpResponseRedirect(reverse('SitesManagement.views.show', kwargs={'site_id': site.id}))  # Redirect after POST
     else:
         site_form = SiteForm(prefix="siteform", user=request.user)  # An unbound form
-        domain_form = DomainNameForm(prefix="domainform")
+        domain_form = DomainNameFormNewSite(prefix="domainform")
 
     return render(request, 'mws/new.html', {
         'site_form': site_form,

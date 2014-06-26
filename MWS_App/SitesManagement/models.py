@@ -144,14 +144,11 @@ class SiteForm(forms.ModelForm):
         }
 
 
-class DomainNameForm(forms.ModelForm):
-    name = forms.CharField(max_length=250, required=False)
+class DomainNameFormNewSite(forms.ModelForm):
+    name = forms.CharField(max_length=250, required=False, label="Main domain name")
     class Meta:
         model = DomainName
         fields = ('name', )
-        labels = {
-            'name': 'Domain name requested'
-        }
 
 
 class BillingForm(forms.ModelForm):
