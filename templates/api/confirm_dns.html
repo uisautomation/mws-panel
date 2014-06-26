@@ -7,7 +7,11 @@
 
             <form action={% url 'apimws.views.confirm_dns' dn_id=dn.id %} method="post">{% csrf_token %}
                 <fieldset>
-                    <p><input type="submit" value="Accept" class="campl-btn campl-primary-cta"/></p>
+                    <select name="accepted">
+                      <option value="1" selected>Accept</option>
+                      <option value="0">Deny</option>
+                    </select>
+                    <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
                 </fieldset>
             </form>
         </div>

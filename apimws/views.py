@@ -36,7 +36,10 @@ def confirm_dns(request, dn_id):
     # check if the request.user is authorised to do so: member of the UIS ip-register or UIS Information Systems groups
 
     if request.method == 'POST':
-        dn.status = 'accepted'
+        if request.POST.get('accepted') == '1':
+            dn.status = 'accepted'
+        else:
+            dn.status = 'denied'
         dn.save()
         return render(request, 'api/success.html')
 

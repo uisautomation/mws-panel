@@ -23,10 +23,10 @@ class SiteAdmin(ModelAdmin):
 class DomainNameAdmin(ModelAdmin):
 
     model = Site
-    list_display = ('name', 'site' )
+    list_display = ('name', 'site', 'status' )
     ordering = ('name', )
     search_fields = ('name', )
-    list_filter = ('site', )
+    list_filter = ('site', 'status')
 
 
 admin.site.register(Site, SiteAdmin)
