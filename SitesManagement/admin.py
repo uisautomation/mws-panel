@@ -29,9 +29,16 @@ class DomainNameAdmin(ModelAdmin):
     list_filter = ('site', 'status')
 
 
+class SuspensionAdmin(ModelAdmin):
+
+    model = Suspension
+    list_display = ('site', 'start_date', 'end_date', 'active')
+    list_filter = ('site__name', 'active')
+
+
 admin.site.register(Site, SiteAdmin)
 admin.site.register(Billing, ModelAdmin)
 admin.site.register(DomainName, DomainNameAdmin)
 admin.site.register(NetworkConfig, ModelAdmin)
-admin.site.register(Suspension, ModelAdmin)
+admin.site.register(Suspension, SuspensionAdmin)
 admin.site.register(VirtualMachine, ModelAdmin)

@@ -32,7 +32,9 @@ class Site(models.Model):
         return self.name
 
     def is_admin_suspended(self):
-        #TODO: implement
+        for susp in self.suspensions.all():
+            if susp.active:
+                return True
         return False
 
     def main_domain(self):
