@@ -1,4 +1,3 @@
-from django.contrib.auth.models import User
 from ibisclient import *
 
 
@@ -32,3 +31,13 @@ def get_groups_from_query(search_string):
 def return_title_by_groupid(groupid):
     group = GroupMethods(conn).getGroup(groupid=groupid)
     return group.title if group is not None else ''
+
+
+def get_groups_of_a_user_in_lookup(user):
+    """ Returns the list of groups of a user in the lookup service
+    :param user: the user
+    :return: the list of group_ids
+    """
+
+    group_list = PersonMethods(conn).getGroups(scheme="crsid", identifier=user.username)
+    return map(lambda group: int(group.groupid), group_list)
