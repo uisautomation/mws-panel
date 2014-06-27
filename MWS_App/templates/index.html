@@ -46,9 +46,11 @@
                                     {{ site.main_domain }}
                                 </td>
                                 <td style="width: 35px;">
-                                    <a href="{% url 'SitesManagement.views.show' site_id=site.id %}">
-                                        <img alt="Show" class="iconic" src="{% static 'icons/iconic/magnifying-glass.svg' %}">
-                                    </a>
+                                    {% if not site.is_admin_suspended %}
+                                        <a href="{% url 'SitesManagement.views.show' site_id=site.id %}">
+                                            <img alt="Show" class="iconic" src="{% static 'icons/iconic/magnifying-glass.svg' %}">
+                                        </a>
+                                    {% endif %}
                                 </td>
                             </tr>
                     {% endfor %}
