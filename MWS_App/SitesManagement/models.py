@@ -109,7 +109,7 @@ class VirtualMachine(models.Model):
         ('ready', 'Ready'),
     )
 
-    name = models.CharField(max_length=250, unique=True)
+    name = models.CharField(max_length=250, blank=True, null=True)
     primary = models.BooleanField(default=True)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES)
 
