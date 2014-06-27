@@ -42,7 +42,8 @@ def new(request):
                 if is_camacuk(domain_requested.name):
                     ip_register_api_request(site, domain_requested.name)
                 else:
-                    site.domain_names.add(DomainName(name=domain_requested.name, status='accepted'))
+                    site.main_domain = DomainName.objects.create(name=domain_requested.name, status='accepted', site=site)
+                    site.save()
 
             return HttpResponseRedirect(reverse('SitesManagement.views.show', kwargs={'site_id': site.id}))  # Redirect after POST
     else:
@@ -157,3 +158,41 @@ def billing(request, site_id):
 
 def privacy(request):
     return render(request, 'index.html', {})
+
+
+@login_required
+def domains_management(request, site_id):
+    site = get_object_or_404(Site, pk=site_id)
+
+    if not site in request.user.sites.all():
+        return HttpResponseForbidden()
+
+    if site.is_admin_suspended():
+        return HttpResponseForbidden()
+
+    breadcrumbs = {}
+    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
+    breadcrumbs[1] = dict(name='Domains Management', url=reverse(domains_management, kwargs={'site_id': site.id}))
+
+
+    return render(request, 'mws/domains.html', {
+        'breadcrumbs': breadcrumbs,
+        'site': site
+    })
+
+
+@login_required
+def set_dn_as_main(request, site_id, domain_id):
+    site = get_object_or_404(Site, pk=site_id)
+    domain = get_object_or_404(DomainName, pk=domain_id)
+
+    if (site not in request.user.sites.all()) or (domain not in site.domain_names.all()):
+        return HttpResponseForbidden()
+
+    if site.is_admin_suspended():
+        return HttpResponseForbidden()
+
+    site.main_domain = domain
+    site.save()
+
+    return HttpResponseRedirect(reverse('SitesManagement.views.domains_management', kwargs={'site_id': site.id}))

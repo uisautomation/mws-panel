@@ -22,6 +22,8 @@ class Site(models.Model):
     deleted = models.BooleanField(default=False)
     # webmaster email
     email = models.EmailField(null=True, blank=True)
+    # main domain name for this mws site
+    main_domain = models.ForeignKey('DomainName', related_name='+', null=True, blank=True)
 
     # Authorised users per site
     users = models.ManyToManyField(User, related_name='sites')
@@ -36,10 +38,6 @@ class Site(models.Model):
             if susp.active:
                 return True
         return False
-
-    def main_domain(self):
-        #TODO: implement
-        return ""
 
     def vm(self, primary):
         if self.virtual_machines.filter(primary=primary).count() is 0:
@@ -117,7 +115,10 @@ class VirtualMachine(models.Model):
     site = models.ForeignKey(Site, related_name='virtual_machines')
 
     def __unicode__(self):
-        return self.name
+        if self.name is None:
+            return "<Under request>"
+        else:
+            return self.name
 
 
 # FORMS

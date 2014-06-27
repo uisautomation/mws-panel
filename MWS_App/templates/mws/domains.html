@@ -1,0 +1,42 @@
+{% extends 'project-light/campl-mws.html' %}
+{% load static %}
+{% block page_content %}
+    <div class="campl-column12 campl-main-content">
+        <div class="campl-content-container">
+
+            <h1>MWS sites for {{ user.username }}</h1>
+            <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
+                <thead>
+                    <tr>
+                        <th>Domain Name</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for domain in site.domain_names.all %}
+                    <tr>
+                        <td>
+                            {{ domain.name }}
+                            {% if domain == site.main_domain %}
+                                <br/>This is the current main domain
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ domain.get_status_display }}
+                        </td>
+                        <td style="width: 35px;">
+                            {% if not site.is_admin_suspended %}
+                                <a href="{% url 'SitesManagement.views.set_dn_as_main' site_id=site.id domain_id=domain.id %}">
+                                    Set as Master
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+{% endblock %}

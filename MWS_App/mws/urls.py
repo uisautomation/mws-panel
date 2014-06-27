@@ -19,6 +19,8 @@ urlpatterns = patterns('',
     url(r'^new/$', 'SitesManagement.views.new'),
     url(r'^edit/(?P<site_id>[0-9]+)/$', 'SitesManagement.views.edit'),
     url(r'^privacy/$', 'SitesManagement.views.privacy'),
+    url(r'^domains/(?P<site_id>[0-9]+)/$', 'SitesManagement.views.domains_management'),
+    url(r'^set_dn_as_main/(?P<site_id>[0-9]+)/(?P<domain_id>[0-9]+)/$', 'SitesManagement.views.set_dn_as_main'),
 
     # apimws app
     url(r'^api/confirm_vm/(?P<vm_id>[0-9]+)/$', 'apimws.views.confirm_vm'),
