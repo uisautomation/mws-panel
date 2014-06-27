@@ -9,13 +9,19 @@ class SiteAdmin(ModelAdmin):
     all_institutions = get_institutions()
 
     model = Site
-    list_display = ('name', 'description', 'institution' )
+    list_display = ('name', 'description', 'institution', 'primary_vm' )
     ordering = ('name', )
     search_fields = ('name', )
     list_filter = ('institution_id', )
 
     def institution(self, obj):
         return get_institution_name_by_id(obj.institution_id, self.all_institutions)
+
+    def primary_vm_name(self, obj):
+        if obj.primary_vm():
+            return obj.primary_vm()
+        else:
+            return None
 
     institution.admin_order_field = 'institution_id'
 
@@ -36,9 +42,34 @@ class SuspensionAdmin(ModelAdmin):
     list_filter = ('site__name', 'active')
 
 
+class NetworkConfigAdmin(ModelAdmin):
+
+    model = NetworkConfig
+    list_display = ('IPv4', 'IPv6', 'mws_domain', 'virtual_machine')
+    #list_filter = ('used', )
+
+    def used(self, obj):
+        if obj.virtual_machine:
+            return True
+        else:
+            return False
+
+
+class BillingAdmin(ModelAdmin):
+
+    model = Billing
+    list_display = ('site', 'group', )
+
+
+class VirtualMachineAdmin(ModelAdmin):
+
+    model = VirtualMachine
+    list_display = ('name', 'site', 'primary', 'status', 'network_configuration')
+
+
 admin.site.register(Site, SiteAdmin)
-admin.site.register(Billing, ModelAdmin)
+admin.site.register(Billing, BillingAdmin)
 admin.site.register(DomainName, DomainNameAdmin)
-admin.site.register(NetworkConfig, ModelAdmin)
+admin.site.register(NetworkConfig, NetworkConfigAdmin)
 admin.site.register(Suspension, SuspensionAdmin)
-admin.site.register(VirtualMachine, ModelAdmin)
+admin.site.register(VirtualMachine, VirtualMachineAdmin)
