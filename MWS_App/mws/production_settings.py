@@ -8,11 +8,8 @@ DEBUG = False
 TEMPLATE_DEBUG = False
 
 # pyroven configuration
-PYROVEN_CREATE_USER = True
-PYROVEN_TIMEOUT = 15
 PYROVEN_LOGIN_URL = 'https://raven.cam.ac.uk/auth/authenticate.html'
 PYROVEN_LOGOUT_URL = 'https://raven.cam.ac.uk/auth/logout.html'
-PYROVEN_LOGOUT_REDIRECT = 'http://www.cam.ac.uk/'
 PYROVEN_RETURN_URL = 'http://localhost:8080/raven_return/'
 PYROVEN_CERTS = {'2': """
 -----BEGIN CERTIFICATE-----

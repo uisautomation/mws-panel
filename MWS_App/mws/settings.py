@@ -24,11 +24,8 @@ EMAIL_HOST = 'localhost'
 EMAIL_PORT = 1025
 
 # pyroven configuration
-PYROVEN_CREATE_USER = True
-PYROVEN_TIMEOUT = 15
 PYROVEN_LOGIN_URL = 'https://demo.raven.cam.ac.uk/auth/authenticate.html'
 PYROVEN_LOGOUT_URL = 'https://demo.raven.cam.ac.uk/auth/logout.html'
-PYROVEN_LOGOUT_REDIRECT = 'http://www.cam.ac.uk/'
 PYROVEN_RETURN_URL = 'http://localhost:8000/raven_return/'
 PYROVEN_CERTS = {'901': """-----BEGIN CERTIFICATE-----
 MIIDzTCCAzagAwIBAgIBADANBgkqhkiG9w0BAQQFADCBpjELMAkGA1UEBhMCR0Ix

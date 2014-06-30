@@ -3,13 +3,11 @@ import urllib
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import redirect
-from stronghold.decorators import public
+from django.utils.module_loading import import_by_path
 from pyroven import UserNotAuthorised
 from pyroven.utils import setting, HttpResponseSeeOther
-from django.utils.module_loading import import_by_path
 
 
-@public
 def raven_return(request):
     # Get the token which the Raven server sent us - this should really
     # have a try/except around it to catch KeyError
@@ -36,7 +34,6 @@ def default_unauthorised_user(request):
     return HttpResponseForbidden("Authentication successful but you are not authorised to access this site")
 
 
-@public
 def raven_login(request):
     # Get the Raven object and return a redirect to the Raven server
     login_url = setting('PYROVEN_LOGIN_URL')

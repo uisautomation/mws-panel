@@ -101,3 +101,12 @@ STATICFILES_DIRS += (os.path.join(BASE_DIR, 'campl/campl-static'),)
 
 # campl tabs requires a new context preprocessor
 # TEMPLATE_CONTEXT_PROCESSORS = ('campl.campl_context_processors.tabs',)
+
+
+# pyroven configuration
+PYROVEN_CREATE_USER = True
+PYROVEN_TIMEOUT = 30
+PYROVEN_NOT_AUTHORISED = 'RavenMetadata.views.unauthorised_pyroven_users'
+PYROVEN_LOGOUT_REDIRECT = 'http://www.cam.ac.uk/'
+
+STRONGHOLD_PUBLIC_NAMED_URLS = ('raven_login', 'raven_return')
