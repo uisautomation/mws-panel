@@ -11,14 +11,10 @@ from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 
 from pyroven import (MalformedResponseError, InvalidResponseError, 
-                     RavenResponse, PublicKeyNotFoundError)
+                     RavenResponse, PublicKeyNotFoundError, UserNotAuthorised)
 
 from pyroven.utils import setting
 
-class HttpResponseSeeOther(HttpResponseRedirect):
-    """An HttpResponse with a 303 status code, since django doesn't provide one
-    by default.  A 303 is required by the the WAA2WLS specification."""
-    status_code = 303
 
 class RavenAuthBackend(object):
     """An authentication backend for django that uses Raven.  To use, add
@@ -43,7 +39,7 @@ class RavenAuthBackend(object):
             # If the response was malformed, we're not allowed to login
             return None
         except InvalidResponseError:
-            print("Got an invalid reponse from the Raven server")
+            print("Got an invalid response from the Raven server")
             return None
         except PublicKeyNotFoundError:
             print("Cannot find a public key for the server's response")
@@ -53,7 +49,7 @@ class RavenAuthBackend(object):
             return None
 
         if (setting('PYROVEN_NOT_CURRENT', default=False) == False) and ('current' not in response.ptags):
-            return None
+            raise UserNotAuthorised
 
         username = response.principal
  
