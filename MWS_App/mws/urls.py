@@ -9,7 +9,7 @@ urlpatterns = patterns('',
     # url(r'^blog/', include('blog.urls')),
 
     url(r'^grappelli/', include('grappelli.urls')),
-    url(r'', include('pyroven.urls')),
+    url(r'', include('ucamwebauth.urls')),
     url(r'^admin/', include(admin.site.urls)),
 
     # SitesManagement app

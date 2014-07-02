@@ -7,11 +7,11 @@ DEBUG = False
 
 TEMPLATE_DEBUG = False
 
-# pyroven configuration
-PYROVEN_LOGIN_URL = 'https://raven.cam.ac.uk/auth/authenticate.html'
-PYROVEN_LOGOUT_URL = 'https://raven.cam.ac.uk/auth/logout.html'
-PYROVEN_RETURN_URL = 'http://localhost:8080/raven_return/'
-PYROVEN_CERTS = {'2': """
+# ucamwebauth configuration
+UCAMWEBAUTH_LOGIN_URL = 'https://raven.cam.ac.uk/auth/authenticate.html'
+UCAMWEBAUTH_LOGOUT_URL = 'https://raven.cam.ac.uk/auth/logout.html'
+UCAMWEBAUTH_RETURN_URL = 'http://localhost:8080/raven_return/'
+UCAMWEBAUTH_CERTS = {'2': """
 -----BEGIN CERTIFICATE-----
 MIIDrTCCAxagAwIBAgIBADANBgkqhkiG9w0BAQQFADCBnDELMAkGA1UEBhMCR0Ix
 EDAOBgNVBAgTB0VuZ2xhbmQxEjAQBgNVBAcTCUNhbWJyaWRnZTEgMB4GA1UEChMX
