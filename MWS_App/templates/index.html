@@ -13,7 +13,7 @@
             any site that you manage you can nominate additional
             managers, and you are strongly advised to do so.</p>
 
-            <p><a href={% url 'SitesManagement.views.new' %} class="campl-primary-cta">Register new site</a></p>
+            <p><a href={% url 'sitesmanagement.views.new' %} class="campl-primary-cta">Register new site</a></p>
 
             {% if all_sites %}
                 <h1>MWS sites for {{ user.username }}</h1>
@@ -47,7 +47,7 @@
                                 </td>
                                 <td style="width: 35px;">
                                     {% if not site.is_admin_suspended %}
-                                        <a href="{% url 'SitesManagement.views.show' site_id=site.id %}">
+                                        <a href="{% url 'sitesmanagement.views.show' site_id=site.id %}">
                                             <img alt="Show" class="iconic" src="{% static 'icons/iconic/magnifying-glass.svg' %}">
                                         </a>
                                     {% endif %}

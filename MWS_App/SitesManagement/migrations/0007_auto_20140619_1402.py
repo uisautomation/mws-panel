@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('SitesManagement', '0006_virtualmachine'),
+        ('sitesmanagement', '0006_virtualmachine'),
     ]
 
     operations = [

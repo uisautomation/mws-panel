@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('SitesManagement', '0004_networkconfig'),
+        ('sitesmanagement', '0004_networkconfig'),
     ]
 
     operations = [

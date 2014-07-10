@@ -31,7 +31,7 @@ INSTALLED_APPS = (
     # The following app force all views to have @login_required https://github.com/mgrouchy/django-stronghold/
     'stronghold',
     'ucamwebauth',
-    'SitesManagement',
+    'sitesmanagement',
     'apimws',
     'mwsauth',
 )
@@ -106,8 +106,6 @@ STATICFILES_DIRS += (os.path.join(BASE_DIR, 'campl/campl-static'),)
 # ucamwebauth configuration
 UCAMWEBAUTH_CREATE_USER = True
 UCAMWEBAUTH_TIMEOUT = 30
-#TODO
-#UCAMWEBAUTH_NOT_AUTHORISED = 'RavenMetadata.views.unauthorised_ucamwebauth_users'
 UCAMWEBAUTH_LOGOUT_REDIRECT = 'http://www.cam.ac.uk/'
 
 STRONGHOLD_PUBLIC_NAMED_URLS = ('raven_login', 'raven_return')

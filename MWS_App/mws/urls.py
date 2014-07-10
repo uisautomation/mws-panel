@@ -12,15 +12,15 @@ urlpatterns = patterns('',
     url(r'', include('ucamwebauth.urls')),
     url(r'^admin/', include(admin.site.urls)),
 
-    # SitesManagement app
-    url(r'^$', 'SitesManagement.views.index'),
-    url(r'^show/(?P<site_id>[0-9]+)/$', 'SitesManagement.views.show'),
-    url(r'^billing/(?P<site_id>[0-9]+)/$', 'SitesManagement.views.billing'),
-    url(r'^new/$', 'SitesManagement.views.new'),
-    url(r'^edit/(?P<site_id>[0-9]+)/$', 'SitesManagement.views.edit'),
-    url(r'^privacy/$', 'SitesManagement.views.privacy'),
-    url(r'^domains/(?P<site_id>[0-9]+)/$', 'SitesManagement.views.domains_management'),
-    url(r'^set_dn_as_main/(?P<site_id>[0-9]+)/(?P<domain_id>[0-9]+)/$', 'SitesManagement.views.set_dn_as_main'),
+    # sitesmanagement app
+    url(r'^$', 'sitesmanagement.views.index'),
+    url(r'^show/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.show'),
+    url(r'^billing/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.billing'),
+    url(r'^new/$', 'sitesmanagement.views.new'),
+    url(r'^edit/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.edit'),
+    url(r'^privacy/$', 'sitesmanagement.views.privacy'),
+    url(r'^domains/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.domains_management'),
+    url(r'^set_dn_as_main/(?P<site_id>[0-9]+)/(?P<domain_id>[0-9]+)/$', 'sitesmanagement.views.set_dn_as_main'),
 
     # apimws app
     url(r'^api/confirm_vm/(?P<vm_id>[0-9]+)/$', 'apimws.views.confirm_vm'),

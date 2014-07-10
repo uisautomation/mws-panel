@@ -1,5 +1,5 @@
 from django import forms
-from SitesManagement.models import VirtualMachine
+from sitesmanagement.models import VirtualMachine
 
 
 class VMForm(forms.ModelForm):

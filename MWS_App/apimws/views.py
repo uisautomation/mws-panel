@@ -2,7 +2,7 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
-from SitesManagement.models import VirtualMachine, DomainName
+from sitesmanagement.models import VirtualMachine, DomainName
 from apimws.models import VMForm
 from apimws.utils import get_users_from_query, get_groups_from_query
 

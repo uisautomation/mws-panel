@@ -27,7 +27,7 @@
                         </td>
                         <td style="width: 35px;">
                             {% if not site.is_admin_suspended %}
-                                <a href="{% url 'SitesManagement.views.set_dn_as_main' site_id=site.id domain_id=domain.id %}">
+                                <a href="{% url 'sitesmanagement.views.set_dn_as_main' site_id=site.id domain_id=domain.id %}">
                                     Set as Master
                                 </a>
                             {% endif %}

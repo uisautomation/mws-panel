@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('SitesManagement', '0012_auto_20140625_1257'),
+        ('sitesmanagement', '0012_auto_20140625_1257'),
     ]
 
     operations = [

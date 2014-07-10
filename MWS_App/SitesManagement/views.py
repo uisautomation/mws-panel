@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
-from SitesManagement.utils import is_camacuk
+from sitesmanagement.utils import is_camacuk
 from .models import SiteForm, DomainNameFormNewSite, Site, BillingForm, DomainName, platforms_api_request, \
     ip_register_api_request
 
@@ -45,7 +45,7 @@ def new(request):
                     site.main_domain = DomainName.objects.create(name=domain_requested.name, status='accepted', site=site)
                     site.save()
 
-            return HttpResponseRedirect(reverse('SitesManagement.views.show', kwargs={'site_id': site.id}))  # Redirect after POST
+            return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))  # Redirect after POST
     else:
         site_form = SiteForm(prefix="siteform", user=request.user)  # An unbound form
         domain_form = DomainNameFormNewSite(prefix="domainform")
@@ -70,13 +70,13 @@ def edit(request, site_id):
     breadcrumbs = {}
     breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
     breadcrumbs[1] = dict(name='Change information about your MWS',
-                          url=reverse('SitesManagement.views.edit', kwargs={'site_id': site.id}))
+                          url=reverse('sitesmanagement.views.edit', kwargs={'site_id': site.id}))
 
     if request.method == 'POST':
         site_form = SiteForm(request.POST, user=request.user, instance=site)
         if site_form.is_valid():
             site_form.save()
-            return HttpResponseRedirect(reverse('SitesManagement.views.show', kwargs={'site_id': site.id}))  # Redirect after POST
+            return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))  # Redirect after POST
     else:
         site_form = SiteForm(user=request.user, instance=site)
 
@@ -136,14 +136,14 @@ def billing(request, site_id):
             billing_form = BillingForm(request.POST, request.FILES, instance=site.billing) # A bound form
             if billing_form.is_valid():
                 billing_form.save()
-                return HttpResponseRedirect(reverse('SitesManagement.views.show', kwargs={'site_id': site.id}))  # Redirect after POST
+                return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))  # Redirect after POST
         else:
             billing_form = BillingForm(request.POST, request.FILES) # A bound form
             if billing_form.is_valid():
                 billing = billing_form.save(commit=False)
                 billing.site = site
                 billing.save()
-                return HttpResponseRedirect(reverse('SitesManagement.views.show', kwargs={'site_id': site.id}))  # Redirect after POST
+                return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))  # Redirect after POST
     elif hasattr(site, 'billing'):
         billing_form = BillingForm(instance=site.billing)
     else:
@@ -195,4 +195,4 @@ def set_dn_as_main(request, site_id, domain_id):
     site.main_domain = domain
     site.save()
 
-    return HttpResponseRedirect(reverse('SitesManagement.views.domains_management', kwargs={'site_id': site.id}))
+    return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management', kwargs={'site_id': site.id}))
