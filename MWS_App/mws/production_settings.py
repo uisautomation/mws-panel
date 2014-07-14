@@ -10,7 +10,7 @@ TEMPLATE_DEBUG = False
 # ucamwebauth configuration
 UCAMWEBAUTH_LOGIN_URL = 'https://raven.cam.ac.uk/auth/authenticate.html'
 UCAMWEBAUTH_LOGOUT_URL = 'https://raven.cam.ac.uk/auth/logout.html'
-UCAMWEBAUTH_CERTS = {'2': """
+UCAMWEBAUTH_CERTS = {2: """
 -----BEGIN CERTIFICATE-----
 MIIDrTCCAxagAwIBAgIBADANBgkqhkiG9w0BAQQFADCBnDELMAkGA1UEBhMCR0Ix
 EDAOBgNVBAgTB0VuZ2xhbmQxEjAQBgNVBAcTCUNhbWJyaWRnZTEgMB4GA1UEChMX
