@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.models import User, Group
 from django.core.mail import send_mail
 from django.db import models
@@ -65,7 +66,7 @@ class Suspension(models.Model):
 
 
 class Billing(models.Model):
-    purchase_order = models.FileField()
+    purchase_order = models.FileField(upload_to=settings.MEDIA_ROOT)
     group = models.CharField(max_length=250)
     site = models.OneToOneField(Site, related_name='billing')
 
