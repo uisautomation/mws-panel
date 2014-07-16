@@ -1,20 +1,40 @@
-{% extends 'campl.html' %}
+{% extends 'ucamprojectlight.html' %}
 {% load static %}
-{% block campl_block_head %}
-{% include 'project-light/campl-block-head-mws.html' %}
+
+{% block app_head %}
+    <script src="{% static 'select2-3.4.8/select2.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'stylesheets/mws.css' %}" />
+    <link rel="stylesheet" href="{% static 'select2-3.4.8/select2.css' %}">
+
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap-confirmation3.js' %}"></script>
 {% endblock %}
-{% block campl_page_header %}
-{% include 'project-light/campl-page-header-mws.html' %}
+
+{% block head_title %}Managed Web Service administration site{% endblock %}
+
+{% block static_breadcrumbs %}
+    {# My parent organisation #}
+    <li>
+        <a href="http://www.cam.ac.uk/">University of Cambridge</a>
+    </li>
+    {# My app name #}
+    <li>
+        <a href="/">Managed Web Service administration site</a>
+    </li>
 {% endblock %}
+
+{% block site_name %}
+    <a href="/">Managed Web Service administration site</a>
+{% endblock %}
+
+{% block search_bar %}
+{% endblock %}
+
 {% block campl_tabs_header %}
-{% include 'project-light/campl-tabs-header-mws.html' %}
 {% endblock %}
-{% block page_content %}
-{% include 'project-light/campl-page-content-mws.html' %}
-{% endblock %}
-{% block local_footer %}
-{% include 'project-light/campl-local-footer-mws.html' %}
-{% endblock %}
-{% block campl_foot_js %}
-{% include 'project-light/campl-foot-js-mws.html' %}
-{% endblock %}
+
+{% block blurb %}The Managed Web Service is provided by the <a href="http://www.uis.cam.ac.uk">University Information Services</a>.{% endblock %}
+
+{% block footer1 %}<h3><a href="/">Managed Web Service administration site</a></h3>{% endblock %}
+
+{% block footer2 %}<h3><a href="{% url 'sitesmanagement.views.privacy' %}">Privacy & cookie policy</a></h3>{% endblock %}
