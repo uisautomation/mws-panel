@@ -13,4 +13,4 @@ deployment/Vagrantfile
 *.sqlite3
 
 # User uploaded files
-MWS_App/media/*
+mws/media/*

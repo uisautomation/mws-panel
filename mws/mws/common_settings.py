@@ -31,6 +31,7 @@ INSTALLED_APPS = (
     # The following app force all views to have @login_required https://github.com/mgrouchy/django-stronghold/
     'stronghold',
     'ucamwebauth',
+    'ucamprojectlight',
     'sitesmanagement',
     'apimws',
     'mwsauth',
