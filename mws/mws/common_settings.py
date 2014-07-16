@@ -96,15 +96,6 @@ STATICFILES_FINDERS = (
 )
 GRAPPELLI_ADMIN_TITLE = "Managed Web Service"
 
-# BEGIN campl common settings
-TEMPLATE_DIRS += (os.path.join(BASE_DIR, 'campl/campl-templates'),)
-STATICFILES_DIRS += (os.path.join(BASE_DIR, 'campl/campl-static'),)
-# END campl common settings
-
-# campl tabs requires a new context preprocessor
-# TEMPLATE_CONTEXT_PROCESSORS = ('campl.campl_context_processors.tabs',)
-
-
 # ucamwebauth configuration
 UCAMWEBAUTH_CREATE_USER = True
 UCAMWEBAUTH_TIMEOUT = 30
