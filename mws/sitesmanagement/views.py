@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
 from sitesmanagement.utils import is_camacuk
 from .models import SiteForm, DomainNameFormNewSite, Site, BillingForm, DomainName, platforms_api_request, \
-    ip_register_api_request
+    ip_register_api_request, NetworkConfig
 
 
 @login_required
@@ -18,6 +18,9 @@ def index(request):
 
 @login_required
 def new(request):
+    if NetworkConfig.num_pre_allocated() < 1:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.index')) #TODO redirect to some error message
+
     breadcrumbs = {}
     breadcrumbs[0] = dict(name='New Manage Web Server', url=reverse(new))
 

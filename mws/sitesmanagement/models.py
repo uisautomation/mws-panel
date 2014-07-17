@@ -93,6 +93,10 @@ class NetworkConfig(models.Model):
     IPv6 = models.GenericIPAddressField(protocol='IPv6')
     mws_domain = models.CharField(max_length=250, unique=True)
 
+    @classmethod
+    def num_pre_allocated(cls):
+        return cls.objects.filter(virtual_machine=None).count()
+
     def __unicode__(self):
         return self.IPv4 + " - " + self.mws_domain
 
@@ -148,6 +152,7 @@ class SiteForm(forms.ModelForm):
 
 class DomainNameFormNewSite(forms.ModelForm):
     name = forms.CharField(max_length=250, required=False, label="Main domain name")
+
     class Meta:
         model = DomainName
         fields = ('name', )
