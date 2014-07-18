@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('IPv4', models.GenericIPAddressField(protocol=b'IPv4')),
                 ('IPv6', models.GenericIPAddressField(protocol=b'IPv6')),
-                ('main_domain', models.OneToOneField(to='SitesManagement.DomainName', to_field='id')),
+                ('main_domain', models.OneToOneField(to='sitesmanagement.DomainName', to_field='id')),
             ],
             options={
             },

@@ -3,8 +3,6 @@ from django.contrib.auth.models import User, Group
 from django.core.mail import send_mail
 from django.db import models
 from django import forms
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from .utils import get_institutions
 
 
@@ -68,7 +66,7 @@ class Site(models.Model):
             return None  # The site was deactivated before this financial year or started after this financial year
         else:
             if hasattr(self, 'billing'):
-                return [self.billing.group, self.billing.purchase_order, start_date, end_date]
+                return [self.billing.group, self.billing.purchase_order_number, start_date, end_date]
             else:
                 return ['Site ID: %d' % self.id, 'Pending', start_date, end_date]
 
@@ -86,7 +84,8 @@ class Suspension(models.Model):
 
 
 class Billing(models.Model):
-    purchase_order = models.FileField(upload_to=settings.MEDIA_ROOT)
+    purchase_order_number = models.CharField(max_length=100)
+    purchase_order = models.FileField(upload_to='billing')
     group = models.CharField(max_length=250)
     site = models.OneToOneField(Site, related_name='billing')
 
@@ -181,7 +180,7 @@ class DomainNameFormNewSite(forms.ModelForm):
 class BillingForm(forms.ModelForm):
     class Meta:
         model = Billing
-        fields = ('group', 'purchase_order')
+        fields = ('purchase_order_number', 'group', 'purchase_order')
 
 
 #@receiver(post_save, sender=Site)

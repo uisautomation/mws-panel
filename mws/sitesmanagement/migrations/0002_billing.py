@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('purchase_order', models.FileField(upload_to=b'')),
                 ('group', models.CharField(max_length=250)),
-                ('site', models.OneToOneField(to='SitesManagement.Site', to_field='id')),
+                ('site', models.OneToOneField(to='sitesmanagement.Site', to_field='id')),
             ],
             options={
             },

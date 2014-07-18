@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='site',
             name='main_domain',
-            field=models.ForeignKey(blank=True, to='SitesManagement.DomainName', null=True),
+            field=models.ForeignKey(blank=True, to='sitesmanagement.DomainName', null=True),
             preserve_default=True,
         ),
     ]

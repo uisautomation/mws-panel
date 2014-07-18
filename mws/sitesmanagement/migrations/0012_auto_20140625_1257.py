@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='domainname',
             name='site',
-            field=models.ForeignKey(to='SitesManagement.Site', to_field='id'),
+            field=models.ForeignKey(to='sitesmanagement.Site', to_field='id'),
         ),
         migrations.AlterField(
             model_name='suspension',

@@ -17,8 +17,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('name', models.CharField(max_length=250)),
                 ('primary', models.BooleanField(default=True)),
-                ('network_configuration', models.OneToOneField(to='SitesManagement.NetworkConfig', to_field='id')),
-                ('site', models.ForeignKey(to='SitesManagement.Site', to_field='id')),
+                ('network_configuration', models.OneToOneField(to='sitesmanagement.NetworkConfig', to_field='id')),
+                ('site', models.ForeignKey(to='sitesmanagement.Site', to_field='id')),
             ],
             options={
             },

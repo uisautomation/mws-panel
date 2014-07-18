@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 ('active', models.BooleanField(default=True)),
                 ('start_date', models.DateField()),
                 ('end_date', models.DateField(null=True)),
-                ('site', models.ForeignKey(to='SitesManagement.Site', to_field='id')),
+                ('site', models.ForeignKey(to='sitesmanagement.Site', to_field='id')),
             ],
             options={
             },
