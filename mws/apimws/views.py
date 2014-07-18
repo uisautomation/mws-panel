@@ -1,13 +1,15 @@
+import csv
+from datetime import date
 import json
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
-from sitesmanagement.models import VirtualMachine, DomainName
+from sitesmanagement.models import VirtualMachine, DomainName, Site
 from apimws.models import VMForm
 from apimws.utils import get_users_from_query, get_groups_from_query
 
 
-@login_required()
+@login_required
 def confirm_vm(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
 
@@ -29,7 +31,7 @@ def confirm_vm(request, vm_id):
     })
 
 
-@login_required()
+@login_required
 def confirm_dns(request, dn_id):
     dn = get_object_or_404(DomainName, pk=dn_id)
 
@@ -48,15 +50,33 @@ def confirm_dns(request, dn_id):
     })
 
 
-@login_required()
+@login_required
 def find_people(request):
     persons = get_users_from_query(request.GET.get('query'))
     return HttpResponse(json.dumps({'searchId_u': request.GET.get('searchId_u'), 'persons': persons}),
                         content_type='application/json')
 
 
-@login_required()
+@login_required
 def find_groups(request):
     groups = get_groups_from_query(request.GET.get('query'))
     return HttpResponse(json.dumps({'searchId_g': request.GET.get('searchId_g'), 'groups': groups}),
                         content_type='application/json')
+
+
+@login_required
+def billing_year(request, year):
+    billing_list = map(lambda x: x.calculate_billing(financial_year_start=date(int(year), 8, 1),
+                                                     financial_year_end=date(int(year)+1, 7, 31)),
+                       Site.objects.all())
+    billing_list = [x for x in billing_list if x is not None]
+
+    # Create the HttpResponse object with the an excel header as a requirement of Finance
+    response = HttpResponse(content_type='application/vnd.ms-excel')
+    response['Content-Disposition'] = 'attachment; filename="mwsbilling%s.csv"' % year
+
+    writer = csv.writer(response)
+    for billing in billing_list:
+        writer.writerow(billing)
+
+    return response

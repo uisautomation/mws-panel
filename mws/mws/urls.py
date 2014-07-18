@@ -28,6 +28,7 @@ urlpatterns = patterns('',
     url(r'^api/confirm_dns/(?P<dn_id>[0-9]+)/$', 'apimws.views.confirm_dns'),
     url(r'^api/findPeople$', 'apimws.views.find_people'),
     url(r'^api/findGroups$', 'apimws.views.find_groups'),
+    url(r'^api/finance/billing/(?P<year>20[0-9]{2})/$', 'apimws.views.billing_year'),
 
     # mwsauth app
     url(r'^mws/(?P<site_id>[0-9]+)/auth/$', 'mwsauth.views.auth_change'),
