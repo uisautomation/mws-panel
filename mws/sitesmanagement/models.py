@@ -1,6 +1,4 @@
-from django.conf import settings
 from django.contrib.auth.models import User, Group
-from django.core.mail import send_mail
 from django.db import models
 from django import forms
 from .utils import get_institutions
@@ -69,6 +67,18 @@ class Site(models.Model):
                 return [self.billing.group, self.billing.purchase_order_number, start_date, end_date]
             else:
                 return ['Site ID: %d' % self.id, 'Pending', start_date, end_date]
+
+
+class EmailConfirmation(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+    )
+
+    email = models.EmailField(null=True, blank=True)
+    token = models.CharField(max_length=50)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES)
+    site = models.ForeignKey(Site, related_name='+') # do not to create a backwards relation
 
 
 class Suspension(models.Model):
@@ -181,37 +191,3 @@ class BillingForm(forms.ModelForm):
     class Meta:
         model = Billing
         fields = ('purchase_order_number', 'group', 'purchase_order')
-
-
-#@receiver(post_save, sender=Site)
-#def platforms_api_request(instance, created, update_fields, **kwargs):
-def platforms_api_request(site, primary):
-    network_configuration = NetworkConfig.objects.filter(virtual_machine=None).first()
-    vm = VirtualMachine(primary=primary, status='requested', network_configuration=network_configuration, site=site)
-    vm.save()
-
-    subject = "New request of a VM for the MWS"
-    message = "IPv4: " + network_configuration.IPv4 + "\n" \
-              "IPv6: " + network_configuration.IPv6 + "\n" \
-              "Domain Name: " + network_configuration.mws_domain + "\n" \
-              "Attached: autoyast.xml (with IPs, keys)\n" \
-              "Please, when ready click here: http://localhost:8000/api/confirm_vm/"+str(vm.id)
-    from_email = "mws-admin@cam.ac.uk"
-    recipient_list = ('amc203@cam.ac.uk', )
-    send_mail(subject, message, from_email, recipient_list, fail_silently=False, auth_user=None, auth_password=None,
-              connection=None, html_message=None)
-
-
-def ip_register_api_request(site, domain_name):
-    domain_requested = DomainName(name=domain_name, status='requested', site=site)
-    domain_requested.save()
-
-    subject = "New request of a Domain Name for the MWS"
-    message = "Domain Name requested: " + domain_name + "\n" \
-              "IPv4: " + site.primary_vm().network_configuration.IPv4 + "\n" \
-              "IPv6: " + site.primary_vm().network_configuration.IPv6 + "\n" \
-              "Please, when ready click here: http://localhost:8000/api/confirm_dns/"+str(domain_requested.id)
-    from_email = "mws-admin@cam.ac.uk"
-    recipient_list = ('amc203@cam.ac.uk', )
-    send_mail(subject, message, from_email, recipient_list, fail_silently=False, auth_user=None, auth_password=None,
-              connection=None, html_message=None)

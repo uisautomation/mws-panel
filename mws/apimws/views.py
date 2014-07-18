@@ -3,10 +3,11 @@ from datetime import date
 import json
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, render
-from sitesmanagement.models import VirtualMachine, DomainName, Site
+from django.shortcuts import get_object_or_404, render, redirect
+from sitesmanagement.models import VirtualMachine, DomainName, Site, EmailConfirmation
 from apimws.models import VMForm
 from apimws.utils import get_users_from_query, get_groups_from_query
+from sitesmanagement.views import show
 
 
 @login_required
@@ -80,3 +81,19 @@ def billing_year(request, year):
         writer.writerow(billing)
 
     return response
+
+
+@login_required
+def confirm_email(request, ec_id, token):
+    #TODO add a message to say that your email approval is pending
+    #TODO add a message when doing the redirect to the site to inform the user that the email has been accepted
+    email_confirmation = get_object_or_404(EmailConfirmation, pk=ec_id)
+
+    # check that the token match
+
+    if email_confirmation.token == token:
+        email_confirmation.status = 'accepted'
+        email_confirmation.save()
+        return redirect(show, site_id=email_confirmation.site.id)
+    else:
+        raise Exception #TODO change this exception for an error message

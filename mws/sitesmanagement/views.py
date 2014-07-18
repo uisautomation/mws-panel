@@ -2,10 +2,10 @@ import datetime
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404
+from apimws.utils import email_confirmation, platforms_api_request, ip_register_api_request
 from sitesmanagement.utils import is_camacuk
-from .models import SiteForm, DomainNameFormNewSite, Site, BillingForm, DomainName, platforms_api_request, \
-    ip_register_api_request, NetworkConfig
+from .models import SiteForm, DomainNameFormNewSite, Site, BillingForm, DomainName, NetworkConfig
 
 
 @login_required
@@ -32,21 +32,35 @@ def new(request):
 
             site = site_form.save(commit=False)
             site.start_date = datetime.date.today()
+            email_addr_to_be_confirmed = site.email
+            site.email = None
             site.save()
 
             # Save user that requested the site
             site.users.add(request.user)
 
-            platforms_api_request(site, primary=True)
+            try:
+                platforms_api_request(site, primary=True)
+            except Exception as e:
+                raise e # TODO try again later. pass to celery?
 
-            # Check domain name requested
-            domain_requested = domain_form.save(commit=False)
-            if domain_requested.name != '':
-                if is_camacuk(domain_requested.name):
-                    ip_register_api_request(site, domain_requested.name)
-                else:
-                    site.main_domain = DomainName.objects.create(name=domain_requested.name, status='accepted', site=site)
-                    site.save()
+            try:
+                # Check domain name requested
+                domain_requested = domain_form.save(commit=False)
+                if domain_requested.name != '':
+                    if is_camacuk(domain_requested.name):
+                        ip_register_api_request(site, domain_requested.name)
+                    else:
+                        site.main_domain = DomainName.objects.create(name=domain_requested.name, status='accepted', site=site)
+                        site.save()
+            except Exception as e:
+                raise e # TODO try again later. pass to celery?
+
+            try:
+                if email_addr_to_be_confirmed:
+                    email_confirmation(site, email_addr_to_be_confirmed)
+            except Exception as e:
+                raise e # TODO try again later. pass to celery?
 
             return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))  # Redirect after POST
     else:

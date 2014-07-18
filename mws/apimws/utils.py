@@ -1,4 +1,7 @@
+import uuid
+from django.core.mail import send_mail
 from ibisclient import *
+from sitesmanagement.models import VirtualMachine, NetworkConfig, DomainName, EmailConfirmation
 
 
 conn = createConnection()
@@ -41,3 +44,43 @@ def get_groups_of_a_user_in_lookup(user):
 
     group_list = PersonMethods(conn).getGroups(scheme="crsid", identifier=user.username)
     return map(lambda group: int(group.groupid), group_list)
+
+
+def platforms_api_request(site, primary):
+    network_configuration = NetworkConfig.objects.filter(virtual_machine=None).first()
+    vm = VirtualMachine(primary=primary, status='requested', network_configuration=network_configuration, site=site)
+    vm.save()
+
+    subject = "New request of a VM for the MWS"
+    message = "IPv4: " + network_configuration.IPv4 + "\n" \
+              "IPv6: " + network_configuration.IPv6 + "\n" \
+              "Domain Name: " + network_configuration.mws_domain + "\n" \
+              "Attached: autoyast.xml (with IPs, keys)\n" \
+              "Please, when ready click here: http://localhost:8000/api/confirm_vm/"+str(vm.id)
+    from_email = "mws-admin@cam.ac.uk"
+    recipient_list = ('amc203@cam.ac.uk', )
+    send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+
+
+def ip_register_api_request(site, domain_name):
+    domain_requested = DomainName(name=domain_name, status='requested', site=site)
+    domain_requested.save()
+
+    subject = "New request of a Domain Name for the MWS"
+    message = "Domain Name requested: " + domain_name + "\n" \
+              "IPv4: " + site.primary_vm().network_configuration.IPv4 + "\n" \
+              "IPv6: " + site.primary_vm().network_configuration.IPv6 + "\n" \
+              "Please, when ready click here: http://localhost:8000/api/confirm_dns/"+str(domain_requested.id)
+    from_email = "mws-admin@cam.ac.uk"
+    recipient_list = ('amc203@cam.ac.uk', )
+    send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+
+
+def email_confirmation(site, email_addr):
+    email_conf = EmailConfirmation.objects.create(email=email_addr, token=uuid.uuid4(), status="pending", site=site)
+    subject = "University of Cambridge Managed Web Service: Please confirm your email address"
+    message = "Please, confirm your email address by clicking in the following link: " \
+              "http://localhost:8000/confirm_email/%d/%s/" % (email_conf.id, email_conf.token)
+    from_email = "mws-admin@cam.ac.uk"
+    recipient_list = (email_addr, )
+    send_mail(subject, message, from_email, recipient_list, fail_silently=False)
