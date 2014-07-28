@@ -13,7 +13,13 @@
             any site that you manage you can nominate additional
             managers, and you are strongly advised to do so.</p>
 
-            <p><a href={% url 'sitesmanagement.views.new' %} class="campl-primary-cta">Register new site</a></p>
+            {% if deactivate_new %}
+                <p class="campl-notifications-icon campl-warning-icon" style="float:none; margin-bottom: 10px;">
+                    At this moment we cannot process any new request for a new Managed Web Server, please try again later.
+                </p>
+            {% else %}
+                <p><a href={% url 'sitesmanagement.views.new' %} class="campl-primary-cta">Register new site</a></p>
+            {% endif %}
 
             {% if all_sites %}
                 <h1>MWS sites for {{ user.username }}</h1>

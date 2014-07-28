@@ -10,9 +10,14 @@ from .models import SiteForm, DomainNameFormNewSite, Site, BillingForm, DomainNa
 
 @login_required
 def index(request):
+    if NetworkConfig.num_pre_allocated() < 1:
+        deactivate_new = True
+    else:
+        deactivate_new = False
     all_sites = request.user.sites.all().order_by('name')
     return render(request, 'index.html', {
         'all_sites': all_sites,
+        'deactivate_new': deactivate_new
     })
 
 
