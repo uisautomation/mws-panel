@@ -24,10 +24,6 @@
                                     {% for message in warning_messages %}
                                         <li>{{ message }}</li>
                                     {% endfor %}
-
-                                    {% if site.primary_vm.status != 'ready' %}
-                                        <li>Your Manage Web Server is being prepared</li>
-                                    {% endif %}
                                 </ul>
                             </div>
                         </div>

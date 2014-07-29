@@ -10,6 +10,8 @@ TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
+MAIN_DOMAIN = 'http://localhost:8000'
+
 # Database
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 

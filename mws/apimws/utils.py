@@ -1,6 +1,7 @@
 import uuid
 from django.core.mail import send_mail
 from ibisclient import *
+from mws import settings
 from sitesmanagement.models import VirtualMachine, NetworkConfig, DomainName, EmailConfirmation
 
 
@@ -56,7 +57,8 @@ def platforms_api_request(site, primary):
               "IPv6: " + network_configuration.IPv6 + "\n" \
               "Domain Name: " + network_configuration.mws_domain + "\n" \
               "Attached: autoyast.xml (with IPs, keys)\n" \
-              "Please, when ready click here: http://localhost:8000/api/confirm_vm/"+str(vm.id)
+              "Please, when ready click here: %s/api/confirm_vm/" % settings.MAIN_DOMAIN \
+              + str(vm.id)
     from_email = "mws-admin@cam.ac.uk"
     recipient_list = ('amc203@cam.ac.uk', )
     send_mail(subject, message, from_email, recipient_list, fail_silently=False)
@@ -70,17 +72,18 @@ def ip_register_api_request(site, domain_name):
     message = "Domain Name requested: " + domain_name + "\n" \
               "IPv4: " + site.primary_vm().network_configuration.IPv4 + "\n" \
               "IPv6: " + site.primary_vm().network_configuration.IPv6 + "\n" \
-              "Please, when ready click here: http://localhost:8000/api/confirm_dns/"+str(domain_requested.id)
+              "Please, when ready click here: %s/api/confirm_dns/" % settings.MAIN_DOMAIN \
+              + str(domain_requested.id)
     from_email = "mws-admin@cam.ac.uk"
     recipient_list = ('amc203@cam.ac.uk', )
     send_mail(subject, message, from_email, recipient_list, fail_silently=False)
 
 
-def email_confirmation(site, email_addr):
-    email_conf = EmailConfirmation.objects.create(email=email_addr, token=uuid.uuid4(), status="pending", site=site)
+def email_confirmation(site):
+    email_conf = EmailConfirmation.objects.create(email=site.email, token=uuid.uuid4(), status="pending", site=site)
     subject = "University of Cambridge Managed Web Service: Please confirm your email address"
     message = "Please, confirm your email address by clicking in the following link: " \
-              "http://localhost:8000/confirm_email/%d/%s/" % (email_conf.id, email_conf.token)
+              "%s/confirm_email/%d/%s/" % (settings.MAIN_DOMAIN, email_conf.id, email_conf.token)
     from_email = "mws-admin@cam.ac.uk"
-    recipient_list = (email_addr, )
+    recipient_list = (site.email, )
     send_mail(subject, message, from_email, recipient_list, fail_silently=False)

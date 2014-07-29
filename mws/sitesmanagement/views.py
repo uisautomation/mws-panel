@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404
 from apimws.utils import email_confirmation, platforms_api_request, ip_register_api_request
 from sitesmanagement.utils import is_camacuk
-from .models import SiteForm, DomainNameFormNewSite, Site, BillingForm, DomainName, NetworkConfig
+from .models import SiteForm, DomainNameFormNewSite, Site, BillingForm, DomainName, NetworkConfig, EmailConfirmation
 
 
 @login_required
@@ -37,22 +37,20 @@ def new(request):
 
             site = site_form.save(commit=False)
             site.start_date = datetime.date.today()
-            email_addr_to_be_confirmed = site.email
-            site.email = None
             site.save()
 
             # Save user that requested the site
             site.users.add(request.user)
 
             try:
-                platforms_api_request(site, primary=True)
+                platforms_api_request(site, primary=True) #TODO do it after saving a site
             except Exception as e:
                 raise e # TODO try again later. pass to celery?
 
             try:
                 # Check domain name requested
                 domain_requested = domain_form.save(commit=False)
-                if domain_requested.name != '':
+                if domain_requested.name != '':  #TODO do it after saving a domain request
                     if is_camacuk(domain_requested.name):
                         ip_register_api_request(site, domain_requested.name)
                     else:
@@ -62,8 +60,8 @@ def new(request):
                 raise e # TODO try again later. pass to celery?
 
             try:
-                if email_addr_to_be_confirmed:
-                    email_confirmation(site, email_addr_to_be_confirmed)
+                if site.email:
+                    email_confirmation(site) #TODO do it after saving a site
             except Exception as e:
                 raise e # TODO try again later. pass to celery?
 
@@ -130,6 +128,14 @@ def show(request, site_id):
 
     if not hasattr(site, 'billing'):
         warning_messages.append("No Billing, please add one.")
+
+    if site.email:
+        site_email = EmailConfirmation.objects.get(email=site.email, site_id=site.id)
+        if site_email.status == 'pending':
+            warning_messages.append("Your email is still unconfirmed, please click on the link of the sent email")
+
+    if site.primary_vm().status != 'ready':
+        warning_messages.append("Your Manage Web Server is being prepared")
 
     return render(request, 'mws/show.html', {
         'breadcrumbs': breadcrumbs,
