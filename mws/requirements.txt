@@ -3,4 +3,4 @@ PyOpenSSL==0.14
 django-stronghold==0.2.6
 django-grappelli==2.5.3
 django-ucamwebauth
-django-ucamprojectligth
+django-ucamprojectlight
