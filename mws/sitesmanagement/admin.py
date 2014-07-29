@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
-from .models import Site, Billing, DomainName, NetworkConfig, Suspension, VirtualMachine
+from .models import Site, Billing, DomainName, NetworkConfig, Suspension, VirtualMachine, EmailConfirmation
 from .utils import get_institutions, get_institution_name_by_id
 
 
@@ -67,9 +67,16 @@ class VirtualMachineAdmin(ModelAdmin):
     list_display = ('name', 'site', 'primary', 'status', 'network_configuration')
 
 
+class EmailConfirmationAdmin(ModelAdmin):
+
+    model = EmailConfirmation
+    list_display = ('email', 'site', 'status')
+
+
 admin.site.register(Site, SiteAdmin)
 admin.site.register(Billing, BillingAdmin)
 admin.site.register(DomainName, DomainNameAdmin)
 admin.site.register(NetworkConfig, NetworkConfigAdmin)
 admin.site.register(Suspension, SuspensionAdmin)
 admin.site.register(VirtualMachine, VirtualMachineAdmin)
+admin.site.register(EmailConfirmation, EmailConfirmationAdmin)

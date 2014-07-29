@@ -78,7 +78,7 @@ class EmailConfirmation(models.Model):
     email = models.EmailField(null=True, blank=True)
     token = models.CharField(max_length=50)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES)
-    site = models.ForeignKey(Site, related_name='+') # do not to create a backwards relation
+    site = models.ForeignKey(Site, related_name='+', unique=True) # do not to create a backwards relation
 
 
 class Suspension(models.Model):

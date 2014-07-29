@@ -96,6 +96,12 @@ def edit(request, site_id):
         site_form = SiteForm(request.POST, user=request.user, instance=site)
         if site_form.is_valid():
             site_form.save()
+            if 'email' in site_form.changed_data:
+                try:
+                    if site.email:
+                        email_confirmation(site) #TODO do it in other place?
+                except Exception as e:
+                    raise e # TODO try again later. pass to celery?
             return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))  # Redirect after POST
     else:
         site_form = SiteForm(user=request.user, instance=site)

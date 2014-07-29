@@ -80,6 +80,9 @@ def ip_register_api_request(site, domain_name):
 
 
 def email_confirmation(site):
+    previous = EmailConfirmation.objects.filter(site=site)
+    if previous:
+       previous.first().delete()
     email_conf = EmailConfirmation.objects.create(email=site.email, token=uuid.uuid4(), status="pending", site=site)
     subject = "University of Cambridge Managed Web Service: Please confirm your email address"
     message = "Please, confirm your email address by clicking in the following link: " \
