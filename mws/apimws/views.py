@@ -2,8 +2,9 @@ import csv
 from datetime import date
 import json
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
+from mwsauth.utils import user_in_groups, get_or_create_group_by_groupid
 from sitesmanagement.models import VirtualMachine, DomainName, Site, EmailConfirmation
 from apimws.models import VMForm
 from apimws.utils import get_users_from_query, get_groups_from_query
@@ -12,9 +13,12 @@ from sitesmanagement.views import show
 
 @login_required
 def confirm_vm(request, vm_id):
+    # Check if the request.user is authorised to do so: member of the UIS Platforms or UIS Information Systems groups
+    if not user_in_groups(request.user,
+                          [get_or_create_group_by_groupid(101128), get_or_create_group_by_groupid(101888)]):
+        return HttpResponseForbidden()
+    
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
-
-    # check if the request.user is authorised to do so: member of the UIS Platforms or UIS Information Systems groups
 
     if request.method == 'POST':
         vm_form = VMForm(request.POST, instance=vm)
@@ -34,9 +38,13 @@ def confirm_vm(request, vm_id):
 
 @login_required
 def confirm_dns(request, dn_id):
-    dn = get_object_or_404(DomainName, pk=dn_id)
+    # Check if the request.user is authorised to do so: member of the UIS ip-register or UIS Information Systems groups
+    # TODO change ip-register group == first groupid
+    if not user_in_groups(request.user,
+                          [get_or_create_group_by_groupid(101128), get_or_create_group_by_groupid(101888)]):
+        return HttpResponseForbidden()
 
-    # check if the request.user is authorised to do so: member of the UIS ip-register or UIS Information Systems groups
+    dn = get_object_or_404(DomainName, pk=dn_id)
 
     if request.method == 'POST':
         if request.POST.get('accepted') == '1':
@@ -67,6 +75,11 @@ def find_groups(request):
 
 @login_required
 def billing_year(request, year):
+    # Check if the request.user is authorised to do so: member of the uis-finance or UIS Information Systems groups
+    if not user_in_groups(request.user,
+                          [get_or_create_group_by_groupid(101923), get_or_create_group_by_groupid(101888)]):
+        return HttpResponseForbidden()
+
     billing_list = map(lambda x: x.calculate_billing(financial_year_start=date(int(year), 8, 1),
                                                      financial_year_end=date(int(year)+1, 7, 31)),
                        Site.objects.all())
