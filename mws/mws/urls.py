@@ -21,6 +21,7 @@ urlpatterns = patterns('',
     url(r'^edit/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.edit'),
     url(r'^privacy/$', 'sitesmanagement.views.privacy'),
     url(r'^domains/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.domains_management'),
+    url(r'^add_domain/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.add_domain'),
     url(r'^set_dn_as_main/(?P<site_id>[0-9]+)/(?P<domain_id>[0-9]+)/$', 'sitesmanagement.views.set_dn_as_main'),
 
     # apimws app

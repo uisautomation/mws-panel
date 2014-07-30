@@ -30,7 +30,7 @@ def new(request):
     breadcrumbs[0] = dict(name='New Manage Web Server', url=reverse(new))
 
     # TODO: FIX: if SiteForm's name field is empty then DomainNameForm errors are also shown
-    if request.method == 'POST':  # If the form has been submitted...
+    if request.method == 'POST':
         site_form = SiteForm(request.POST, prefix="siteform", user=request.user) # A bound form
         domain_form = DomainNameFormNewSite(request.POST, prefix="domainform")
         if site_form.is_valid() and domain_form.is_valid():
@@ -54,8 +54,7 @@ def new(request):
                     if is_camacuk(domain_requested.name):
                         ip_register_api_request(site, domain_requested.name)
                     else:
-                        site.main_domain = DomainName.objects.create(name=domain_requested.name, status='accepted', site=site)
-                        site.save()
+                        DomainName.objects.create(name=domain_requested.name, status='accepted', site=site)
             except Exception as e:
                 raise e # TODO try again later. pass to celery?
 
@@ -230,3 +229,41 @@ def set_dn_as_main(request, site_id, domain_id):
     site.save()
 
     return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management', kwargs={'site_id': site.id}))
+
+
+@login_required
+def add_domain(request, site_id):
+    site = get_object_or_404(Site, pk=site_id)
+
+    if not site in request.user.sites.all():
+        return HttpResponseForbidden()
+
+    if site.is_admin_suspended():
+        return HttpResponseForbidden()
+
+    breadcrumbs = {}
+    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
+    breadcrumbs[1] = dict(name='Domains Management', url=reverse(domains_management, kwargs={'site_id': site.id}))
+    breadcrumbs[2] = dict(name='Add Domain', url=reverse(add_domain, kwargs={'site_id': site.id}))
+
+    if request.method == 'POST':
+        domain_form = DomainNameFormNewSite(request.POST)
+        if domain_form.is_valid():
+            try:
+                domain_requested = domain_form.save(commit=False)
+                if domain_requested.name != '':  #TODO do it after saving a domain request
+                    if is_camacuk(domain_requested.name):
+                        ip_register_api_request(site, domain_requested.name)
+                    else:
+                        DomainName.objects.create(name=domain_requested.name, status='accepted', site=site)
+            except Exception as e:
+                raise e # TODO try again later. pass to celery?
+        return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management', kwargs={'site_id': site.id}))  # Redirect after POST
+    else:
+        domain_form = DomainNameFormNewSite()
+
+    return render(request, 'mws/add_domain.html', {
+        'breadcrumbs': breadcrumbs,
+        'site': site,
+        'domain_form': domain_form,
+    })

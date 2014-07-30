@@ -1,10 +1,9 @@
 {% extends 'project-light/campl-mws.html' %}
-{% load static %}
 {% block page_content %}
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
 
-            <h1>MWS sites for {{ user.username }}</h1>
+            <h1>Domain names for the mws "{{ site.name }}"</h1>
             <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
                 <thead>
                     <tr>
@@ -36,6 +35,8 @@
                 {% endfor %}
                 </tbody>
             </table>
+
+        <p><a href={% url 'sitesmanagement.views.add_domain' site_id=site.id %} class="campl-primary-cta">Add a new domain</a></p>
 
         </div>
     </div>

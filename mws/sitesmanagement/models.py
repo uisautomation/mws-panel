@@ -108,7 +108,7 @@ class DomainName(models.Model):
     )
 
     name = models.CharField(max_length=250, unique=True)
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='requested')
     site = models.ForeignKey(Site, related_name='domain_names')
 
     def __unicode__(self):
