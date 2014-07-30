@@ -9,7 +9,7 @@ class SiteAdmin(ModelAdmin):
     all_institutions = get_institutions()
 
     model = Site
-    list_display = ('name', 'description', 'institution', 'primary_vm' )
+    list_display = ('name', 'description', 'institution', 'primary_vm')
     ordering = ('name', )
     search_fields = ('name', )
     list_filter = ('institution_id', )
@@ -29,7 +29,7 @@ class SiteAdmin(ModelAdmin):
 class DomainNameAdmin(ModelAdmin):
 
     model = Site
-    list_display = ('name', 'site', 'status' )
+    list_display = ('name', 'site', 'status')
     ordering = ('name', )
     search_fields = ('name', )
     list_filter = ('site', 'status')

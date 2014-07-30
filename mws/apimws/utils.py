@@ -7,6 +7,7 @@ from sitesmanagement.models import VirtualMachine, NetworkConfig, DomainName, Em
 
 conn = createConnection()
 
+
 def get_users_from_query(search_string):
     """ Returns the list of people based on the search string using the lookup ucam service
         :param search_string: the search string
@@ -49,7 +50,8 @@ def get_groups_of_a_user_in_lookup(user):
 
 def platforms_api_request(site, primary):
     network_configuration = NetworkConfig.objects.filter(virtual_machine=None).first()
-    vm = VirtualMachine.objects.create(primary=primary, status='requested', network_configuration=network_configuration, site=site)
+    vm = VirtualMachine.objects.create(primary=primary, status='requested',
+                                       network_configuration=network_configuration, site=site)
 
     subject = "New request of a VM for the MWS"
     message = "IPv4: " + network_configuration.IPv4 + "\n" \
@@ -80,7 +82,7 @@ def ip_register_api_request(site, domain_name):
 def email_confirmation(site):
     previous = EmailConfirmation.objects.filter(site=site)
     if previous:
-       previous.first().delete()
+        previous.first().delete()
     email_conf = EmailConfirmation.objects.create(email=site.email, token=uuid.uuid4(), status="pending", site=site)
     subject = "University of Cambridge Managed Web Service: Please confirm your email address"
     message = "Please, confirm your email address by clicking in the following link: " \

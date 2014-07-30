@@ -5,7 +5,7 @@ from mwsauth.utils import get_or_create_user_by_crsid, get_or_create_group_by_gr
 
 def validate_crsids(crsids_text):
     """ Validates the list of authorsied users from input
-        :param crsids: list of crsids from the form
+        :param crsids_text: list of crsids from the form
     """
 
     crsid_re = re.compile(r'^[a-z][a-z0-9]{3,7}$')
@@ -23,7 +23,7 @@ def validate_crsids(crsids_text):
 
 def validate_groupids(groupids_text):
     """ Validates the list of authorsied users from input
-        :param crsids: list of crsids from the form
+        :param groupids_text: list of groupids from the form
     """
 
     groupid_re = re.compile(r'^[0-9]{1,6}$')

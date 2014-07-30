@@ -24,14 +24,14 @@ def index(request):
 @login_required
 def new(request):
     if NetworkConfig.num_pre_allocated() < 1:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.index')) #TODO redirect to some error message
+        return HttpResponseRedirect(reverse('sitesmanagement.views.index'))  # TODO redirect to some error message
 
     breadcrumbs = {}
     breadcrumbs[0] = dict(name='New Manage Web Server', url=reverse(new))
 
     # TODO: FIX: if SiteForm's name field is empty then DomainNameForm errors are also shown
     if request.method == 'POST':
-        site_form = SiteForm(request.POST, prefix="siteform", user=request.user) # A bound form
+        site_form = SiteForm(request.POST, prefix="siteform", user=request.user)
         domain_form = DomainNameFormNewSite(request.POST, prefix="domainform")
         if site_form.is_valid() and domain_form.is_valid():
 
@@ -43,9 +43,9 @@ def new(request):
             site.users.add(request.user)
 
             try:
-                platforms_api_request(site, primary=True) #TODO do it after saving a site
+                platforms_api_request(site, primary=True)  # TODO do it after saving a site
             except Exception as e:
-                raise e # TODO try again later. pass to celery?
+                raise e  # TODO try again later. pass to celery?
 
             try:
                 # Check domain name requested
@@ -56,17 +56,17 @@ def new(request):
                     else:
                         DomainName.objects.create(name=domain_requested.name, status='accepted', site=site)
             except Exception as e:
-                raise e # TODO try again later. pass to celery?
+                raise e  # TODO try again later. pass to celery?
 
             try:
                 if site.email:
-                    email_confirmation(site) #TODO do it after saving a site
+                    email_confirmation(site)  # TODO do it after saving a site
             except Exception as e:
-                raise e # TODO try again later. pass to celery?
+                raise e  # TODO try again later. pass to celery?
 
-            return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))  # Redirect after POST
+            return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
     else:
-        site_form = SiteForm(prefix="siteform", user=request.user)  # An unbound form
+        site_form = SiteForm(prefix="siteform", user=request.user)
         domain_form = DomainNameFormNewSite(prefix="domainform")
 
     return render(request, 'mws/new.html', {
@@ -98,10 +98,10 @@ def edit(request, site_id):
             if 'email' in site_form.changed_data:
                 try:
                     if site.email:
-                        email_confirmation(site) #TODO do it in other place?
+                        email_confirmation(site)  # TODO do it in other place?
                 except Exception as e:
-                    raise e # TODO try again later. pass to celery?
-            return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))  # Redirect after POST
+                    raise e  # TODO try again later. pass to celery?
+            return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
     else:
         site_form = SiteForm(user=request.user, instance=site)
 
@@ -161,26 +161,26 @@ def billing(request, site_id):
 
     breadcrumbs = {}
     breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
-    #TODO Change this
+    # TODO Change this
     breadcrumbs[1] = dict(name='Billing', url=reverse(show, kwargs={'site_id': site.id}))
 
-    if request.method == 'POST':  # If the form has been submitted...
+    if request.method == 'POST':
         if hasattr(site, 'billing'):
-            billing_form = BillingForm(request.POST, request.FILES, instance=site.billing) # A bound form
+            billing_form = BillingForm(request.POST, request.FILES, instance=site.billing)
             if billing_form.is_valid():
                 billing_form.save()
-                return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))  # Redirect after POST
+                return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
         else:
-            billing_form = BillingForm(request.POST, request.FILES) # A bound form
+            billing_form = BillingForm(request.POST, request.FILES)
             if billing_form.is_valid():
                 billing = billing_form.save(commit=False)
                 billing.site = site
                 billing.save()
-                return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))  # Redirect after POST
+                return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
     elif hasattr(site, 'billing'):
         billing_form = BillingForm(instance=site.billing)
     else:
-        billing_form = BillingForm()  # An unbound form
+        billing_form = BillingForm()
 
     return render(request, 'mws/billing.html', {
         'breadcrumbs': breadcrumbs,
@@ -206,7 +206,6 @@ def domains_management(request, site_id):
     breadcrumbs = {}
     breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
     breadcrumbs[1] = dict(name='Domains Management', url=reverse(domains_management, kwargs={'site_id': site.id}))
-
 
     return render(request, 'mws/domains.html', {
         'breadcrumbs': breadcrumbs,
@@ -251,14 +250,14 @@ def add_domain(request, site_id):
         if domain_form.is_valid():
             try:
                 domain_requested = domain_form.save(commit=False)
-                if domain_requested.name != '':  #TODO do it after saving a domain request
+                if domain_requested.name != '':  # TODO do it after saving a domain request
                     if is_camacuk(domain_requested.name):
                         ip_register_api_request(site, domain_requested.name)
                     else:
                         DomainName.objects.create(name=domain_requested.name, status='accepted', site=site)
             except Exception as e:
-                raise e # TODO try again later. pass to celery?
-        return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management', kwargs={'site_id': site.id}))  # Redirect after POST
+                raise e  # TODO try again later. pass to celery?
+        return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management', kwargs={'site_id': site.id}))
     else:
         domain_form = DomainNameFormNewSite()
 
