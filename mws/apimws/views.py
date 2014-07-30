@@ -17,7 +17,7 @@ def confirm_vm(request, vm_id):
     if not user_in_groups(request.user,
                           [get_or_create_group_by_groupid(101128), get_or_create_group_by_groupid(101888)]):
         return HttpResponseForbidden()
-    
+
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
 
     if request.method == 'POST':
