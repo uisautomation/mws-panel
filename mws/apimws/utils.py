@@ -49,8 +49,7 @@ def get_groups_of_a_user_in_lookup(user):
 
 def platforms_api_request(site, primary):
     network_configuration = NetworkConfig.objects.filter(virtual_machine=None).first()
-    vm = VirtualMachine(primary=primary, status='requested', network_configuration=network_configuration, site=site)
-    vm.save()
+    vm = VirtualMachine.objects.create(primary=primary, status='requested', network_configuration=network_configuration, site=site)
 
     subject = "New request of a VM for the MWS"
     message = "IPv4: " + network_configuration.IPv4 + "\n" \
@@ -65,8 +64,7 @@ def platforms_api_request(site, primary):
 
 
 def ip_register_api_request(site, domain_name):
-    domain_requested = DomainName(name=domain_name, status='requested', site=site)
-    domain_requested.save()
+    domain_requested = DomainName.objects.create(name=domain_name, status='requested', site=site)
 
     subject = "New request of a Domain Name for the MWS"
     message = "Domain Name requested: " + domain_name + "\n" \
