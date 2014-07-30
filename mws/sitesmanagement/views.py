@@ -2,7 +2,7 @@ import datetime
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from apimws.utils import email_confirmation, platforms_api_request, ip_register_api_request
 from sitesmanagement.utils import is_camacuk
 from .models import SiteForm, DomainNameFormNewSite, Site, BillingForm, DomainName, NetworkConfig, EmailConfirmation
@@ -265,4 +265,50 @@ def add_domain(request, site_id):
         'breadcrumbs': breadcrumbs,
         'site': site,
         'domain_form': domain_form,
+    })
+
+
+@login_required
+def settings(request, site_id):
+    site = get_object_or_404(Site, pk=site_id)
+
+    if not site in request.user.sites.all():
+        return HttpResponseForbidden()
+
+    if site.is_admin_suspended():
+        return HttpResponseForbidden()
+
+    vm = site.primary_vm()
+
+    if vm == None or vm.status != 'ready':
+        return redirect(reverse(show, kwargs={'site_id': site.id}))
+
+    breadcrumbs = {}
+    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
+    breadcrumbs[1] = dict(name='Settings', url=reverse(settings, kwargs={'site_id': site.id}))
+
+    return render(request, 'mws/settings.html', {
+        'breadcrumbs': breadcrumbs,
+        'site': site
+    })
+
+
+@login_required
+def system_packages(request, site_id):
+    site = get_object_or_404(Site, pk=site_id)
+
+    if not site in request.user.sites.all():
+        return HttpResponseForbidden()
+
+    if site.is_admin_suspended():
+        return HttpResponseForbidden()
+
+    breadcrumbs = {}
+    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
+    breadcrumbs[1] = dict(name='Settings', url=reverse(settings, kwargs={'site_id': site.id}))
+    breadcrumbs[2] = dict(name='System packages', url=reverse(system_packages, kwargs={'site_id': site.id}))
+
+    return render(request, 'mws/system_packages.html', {
+        'breadcrumbs': breadcrumbs,
+        'site': site
     })

@@ -16,6 +16,7 @@ urlpatterns = patterns('',
     # sitesmanagement app
     url(r'^$', 'sitesmanagement.views.index'),
     url(r'^show/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.show'),
+    url(r'^settings/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.settings'),
     url(r'^billing/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.billing'),
     url(r'^new/$', 'sitesmanagement.views.new'),
     url(r'^edit/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.edit'),
@@ -23,6 +24,7 @@ urlpatterns = patterns('',
     url(r'^domains/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.domains_management'),
     url(r'^add_domain/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.add_domain'),
     url(r'^set_dn_as_main/(?P<site_id>[0-9]+)/(?P<domain_id>[0-9]+)/$', 'sitesmanagement.views.set_dn_as_main'),
+    url(r'^system_packages/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.system_packages'),
 
     # apimws app
     url(r'^api/confirm_vm/(?P<vm_id>[0-9]+)/$', 'apimws.views.confirm_vm'),
