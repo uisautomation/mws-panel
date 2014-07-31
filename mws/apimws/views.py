@@ -136,7 +136,8 @@ def dns_entries(request, token):
                 'name': secondary_vm.network_configuration.mws_domain,
                 'values': {
                     'A': secondary_vm.network_configuration.IPv4,
-                    'AAAA': secondary_vm.network_configuration.IPv6
+                    'AAAA': secondary_vm.network_configuration.IPv6,
+                    'SSHFP': secondary_vm.network_configuration.SSHFP
                 },
             })
         for dn in site.domain_names.all():

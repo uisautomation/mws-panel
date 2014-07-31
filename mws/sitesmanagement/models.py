@@ -120,6 +120,7 @@ class NetworkConfig(models.Model):
     """
     IPv4 = models.GenericIPAddressField(protocol='IPv4')
     IPv6 = models.GenericIPAddressField(protocol='IPv6')
+    SSHFP = models.CharField(max_length=250, null=True, blank=True)
     mws_domain = models.CharField(max_length=250, unique=True)
 
     @classmethod
