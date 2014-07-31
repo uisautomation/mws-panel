@@ -33,6 +33,7 @@ urlpatterns = patterns('',
     url(r'^api/findGroups$', 'apimws.views.find_groups'),
     url(r'^api/finance/billing/(?P<year>20[0-9]{2})/$', 'apimws.views.billing_year'),
     url(r'^confirm_email/(?P<ec_id>[0-9]+)/(?P<token>(\w|\-)+)/$', 'apimws.views.confirm_email'),
+    url(r'^api/dns/(?P<token>(\w|\-)+)/entries.json$', 'apimws.views.dns_entries'),
 
     # mwsauth app
     url(r'^mws/(?P<site_id>[0-9]+)/auth/$', 'mwsauth.views.auth_change'),

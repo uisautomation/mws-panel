@@ -4,6 +4,7 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
+from stronghold.decorators import public
 from mwsauth.utils import user_in_groups, get_or_create_group_by_groupid
 from sitesmanagement.models import VirtualMachine, DomainName, Site, EmailConfirmation
 from apimws.models import VMForm
@@ -98,8 +99,8 @@ def billing_year(request, year):
 
 @login_required
 def confirm_email(request, ec_id, token):
-    #TODO add a message to say that your email approval is pending
-    #TODO add a message when doing the redirect to the site to inform the user that the email has been accepted
+    # TODO add a message to say that your email approval is pending
+    # TODO add a message when doing the redirect to the site to inform the user that the email has been accepted
     email_confirmation = get_object_or_404(EmailConfirmation, pk=ec_id)
 
     # check that the token match
@@ -110,3 +111,45 @@ def confirm_email(request, ec_id, token):
         return redirect(show, site_id=email_confirmation.site.id)
     else:
         raise Exception #TODO change this exception for an error message
+
+
+@public
+def dns_entries(request, token):
+    # TODO test that the token matches the one we have stored
+    json_object = {}
+    json_object['protocol_version'] = 1
+    json_object['mwsv3_sites'] = []
+    for site in Site.objects.all():
+        dns_entries = []
+        primary_vm = site.primary_vm()
+        secondary_vm = site.secondary_vm()
+        if primary_vm:
+            dns_entries.append({
+                'name': primary_vm.network_configuration.mws_domain,
+                'values': {
+                    'A': primary_vm.network_configuration.IPv4,
+                    'AAAA': primary_vm.network_configuration.IPv6
+                },
+            })
+        if secondary_vm:
+            dns_entries.append({
+                'name': secondary_vm.network_configuration.mws_domain,
+                'values': {
+                    'A': secondary_vm.network_configuration.IPv4,
+                    'AAAA': secondary_vm.network_configuration.IPv6
+                },
+            })
+        for dn in site.domain_names.all():
+            dns_entries.append({
+                'name': dn.name,
+                'values': {
+                    'CNAME': primary_vm.network_configuration.mws_domain
+                },
+            })
+        if dns_entries:
+            json_object['mwsv3_sites'].append({
+                'mwsv3_name': site.name,
+                'changed': True,
+                'dns_entries': dns_entries,
+            })
+    return HttpResponse(json.dumps(json_object), content_type='application/json')
