@@ -149,7 +149,7 @@ def dns_entries(request, token):
         if dns_entries:
             json_object['mwsv3_sites'].append({
                 'mwsv3_name': site.name,
-                'changed': True,
+                'changed': len(site.domain_names.filter(status='requested')) > 0,
                 'dns_entries': dns_entries,
             })
-    return HttpResponse(json.dumps(json_object), content_type='application/json')
+    return HttpResponse(json.dumps(json_object, indent=4), content_type='application/json')
