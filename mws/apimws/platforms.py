@@ -57,7 +57,7 @@ def change_vm_power_state(vm, on):
         'username': 'mwsadmin',
         'secret': crypt.crypt("7d503557b69ecd94c921784541f18bc2f9ecdd62",
                               "$6$"+''.join(random.sample(string.hexdigits, 16))),
-        'command': 'get power '+on,
+        'command': 'power '+on,
         'vmid': '502b427f-9f9d-9017-076e-ae83a0498faf' # TODO change that for vm.name
     }
 
