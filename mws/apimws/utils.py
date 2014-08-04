@@ -48,7 +48,7 @@ def get_groups_of_a_user_in_lookup(user):
     return map(lambda group: int(group.groupid), group_list)
 
 
-def platforms_api_request(site, primary):
+def platforms_email_api_request(site, primary):
     network_configuration = NetworkConfig.objects.filter(virtual_machine=None).first()
     vm = VirtualMachine.objects.create(primary=primary, status='requested',
                                        network_configuration=network_configuration, site=site)

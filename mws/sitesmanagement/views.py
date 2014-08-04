@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
-from apimws.utils import email_confirmation, platforms_api_request, ip_register_api_request
+from apimws.utils import email_confirmation, platforms_email_api_request, ip_register_api_request
 from sitesmanagement.utils import is_camacuk
 from .models import SiteForm, DomainNameFormNewSite, Site, BillingForm, DomainName, NetworkConfig, EmailConfirmation
 
@@ -43,7 +43,7 @@ def new(request):
             site.users.add(request.user)
 
             try:
-                platforms_api_request(site, primary=True)  # TODO do it after saving a site
+                platforms_email_api_request(site, primary=True)  # TODO do it after saving a site
             except Exception as e:
                 raise e  # TODO try again later. pass to celery?
 
