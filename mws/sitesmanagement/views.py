@@ -3,9 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
+from apimws.platforms import change_vm_power_state
 from apimws.utils import email_confirmation, platforms_email_api_request, ip_register_api_request
 from sitesmanagement.utils import is_camacuk
-from .models import SiteForm, DomainNameFormNewSite, Site, BillingForm, DomainName, NetworkConfig, EmailConfirmation
+from .models import SiteForm, DomainNameFormNewSite, Site, BillingForm, DomainName, NetworkConfig, EmailConfirmation, \
+    VirtualMachine
 
 
 @login_required
@@ -289,7 +291,8 @@ def settings(request, site_id):
 
     return render(request, 'mws/settings.html', {
         'breadcrumbs': breadcrumbs,
-        'site': site
+        'site': site,
+        'primaryvm': vm
     })
 
 
@@ -312,3 +315,25 @@ def system_packages(request, site_id):
         'breadcrumbs': breadcrumbs,
         'site': site
     })
+
+
+@login_required
+def power_vm(request, vm_id, on):
+    vm = get_object_or_404(VirtualMachine, pk=vm_id)
+    site = vm.site
+
+    if not site in request.user.sites.all():
+        return HttpResponseForbidden()
+
+    if site.is_admin_suspended():
+        return HttpResponseForbidden()
+
+    if vm == None or vm.status != 'ready':
+        return redirect(reverse(show, kwargs={'site_id': site.id}))
+
+    if on == 'on':
+        vm.power_on()
+    else:
+        vm.power_off()
+
+    return redirect(settings, site_id=site.id)

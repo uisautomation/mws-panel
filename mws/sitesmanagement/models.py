@@ -149,6 +149,21 @@ class VirtualMachine(models.Model):
     network_configuration = models.OneToOneField(NetworkConfig, related_name='virtual_machine')
     site = models.ForeignKey(Site, related_name='virtual_machines')
 
+    def is_on(self):
+        from apimws.platforms import get_vm_power_state
+        if get_vm_power_state(self) == "On":
+            return True
+        else:
+            return False
+
+    def power_on(self):
+        from apimws.platforms import change_vm_power_state
+        return change_vm_power_state(self, 'on')
+
+    def power_off(self):
+        from apimws.platforms import change_vm_power_state
+        return change_vm_power_state(self, 'off')
+
     def __unicode__(self):
         if self.name is None:
             return "<Under request>"
