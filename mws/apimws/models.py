@@ -1,5 +1,12 @@
 from django import forms
-from sitesmanagement.models import VirtualMachine
+from django.db import models
+from sitesmanagement.models import VirtualMachine, Site
+
+
+class AnsibleConfiguration(models.Model):
+    site = models.ForeignKey(Site)
+    key = models.CharField(max_length=250, db_index=True)
+    value = models.TextField()
 
 
 class VMForm(forms.ModelForm):
