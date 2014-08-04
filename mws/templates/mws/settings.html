@@ -47,9 +47,9 @@
 
         <p>Your primary VM is currently
             {% if primaryvm.is_on %}
-                On. Power it <a href="{% url 'sitesmanagement.views.power_vm' vm_id=primaryvm.id on='on' %}">Off</a>
+                On. Power it <a href="{% url 'sitesmanagement.views.power_vm' vm_id=primaryvm.id on='off' %}">Off</a>
             {% else %}
-                Off. Power it <a href="{% url 'sitesmanagement.views.power_vm' vm_id=primaryvm.id on='off' %}">On</a>
+                Off. Power it <a href="{% url 'sitesmanagement.views.power_vm' vm_id=primaryvm.id on='on' %}">On</a>
             {% endif %}
         </p>
 
