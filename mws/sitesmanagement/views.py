@@ -318,7 +318,7 @@ def system_packages(request, site_id):
 
 
 @login_required
-def power_vm(request, vm_id, on):
+def power_vm(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
     site = vm.site
 
@@ -331,10 +331,7 @@ def power_vm(request, vm_id, on):
     if vm == None or vm.status != 'ready':
         return redirect(reverse(show, kwargs={'site_id': site.id}))
 
-    if on == 'on':
-        vm.power_on()
-    else:
-        vm.power_off()
+    vm.power_on()
 
     return redirect(settings, site_id=site.id)
 
