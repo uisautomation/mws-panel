@@ -42,7 +42,7 @@ def confirm_dns(request, dn_id):
     # Check if the request.user is authorised to do so: member of the UIS ip-register or UIS Information Systems groups
     # TODO change ip-register group == first groupid
     if not user_in_groups(request.user,
-                          [get_or_create_group_by_groupid(101128), get_or_create_group_by_groupid(101888)]):
+                          [get_or_create_group_by_groupid(101927), get_or_create_group_by_groupid(101888)]):
         return HttpResponseForbidden()
 
     dn = get_object_or_404(DomainName, pk=dn_id)
