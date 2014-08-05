@@ -164,6 +164,10 @@ class VirtualMachine(models.Model):
         from apimws.platforms import change_vm_power_state
         return change_vm_power_state(self, 'off')
 
+    def do_reset(self):
+        from apimws.platforms import reset_vm
+        return reset_vm(self)
+
     def __unicode__(self):
         if self.name is None:
             return "<Under request>"

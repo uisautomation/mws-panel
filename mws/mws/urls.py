@@ -26,6 +26,7 @@ urlpatterns = patterns('',
     url(r'^set_dn_as_main/(?P<site_id>[0-9]+)/(?P<domain_id>[0-9]+)/$', 'sitesmanagement.views.set_dn_as_main'),
     url(r'^system_packages/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.system_packages'),
     url(r'^settings/vm/(?P<vm_id>[0-9]+)/(?P<on>(on|off))$', 'sitesmanagement.views.power_vm'),
+    url(r'^settings/vm/(?P<vm_id>[0-9]+)/reset/$', 'sitesmanagement.views.reset_vm'),
 
     # apimws app
     url(r'^api/confirm_vm/(?P<vm_id>[0-9]+)/$', 'apimws.views.confirm_vm'),

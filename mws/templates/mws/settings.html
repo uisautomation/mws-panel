@@ -50,7 +50,8 @@
                 On. Power it <a href="{% url 'sitesmanagement.views.power_vm' vm_id=primaryvm.id on='off' %}">Off</a>
             {% else %}
                 Off. Power it <a href="{% url 'sitesmanagement.views.power_vm' vm_id=primaryvm.id on='on' %}">On</a>
-            {% endif %}
+            {% endif %},
+                or <a href="{% url 'sitesmanagement.views.reset_vm' vm_id=primaryvm.id %}">reset it</a>
         </p>
 
     </div>

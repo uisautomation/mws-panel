@@ -337,3 +337,22 @@ def power_vm(request, vm_id, on):
         vm.power_off()
 
     return redirect(settings, site_id=site.id)
+
+
+@login_required
+def reset_vm(request, vm_id):
+    vm = get_object_or_404(VirtualMachine, pk=vm_id)
+    site = vm.site
+
+    if not site in request.user.sites.all():
+        return HttpResponseForbidden()
+
+    if site.is_admin_suspended():
+        return HttpResponseForbidden()
+
+    if vm == None or vm.status != 'ready':
+        return redirect(reverse(show, kwargs={'site_id': site.id}))
+
+    vm.do_reset()
+
+    return redirect(settings, site_id=site.id)
