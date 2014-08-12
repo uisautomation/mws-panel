@@ -70,21 +70,33 @@
                         <div class="campl-content-container campl-horizontal-teaser-txt">
                             <h3 class="campl-teaser-title">
                             {% if primaryvm.is_on %}
-                                <a href="{% url 'sitesmanagement.views.reset_vm' vm_id=primaryvm.id %}">
+                                <a href="{% url 'sitesmanagement.views.reset_vm' vm_id=primaryvm.id %}"
+                                   onclick='$("#translucidframe")[0].style.visibility = "visible"'>
                                     If it does not respond you can do a hard reset, clicking here
                             {% else %}
-                                <a href="{% url 'sitesmanagement.views.power_vm' vm_id=primaryvm.id on='on' %}">
+                                <a href="{% url 'sitesmanagement.views.power_vm' vm_id=primaryvm.id on='on' %}"
+                                   onclick='$("#translucidframe")[0].style.visibility = "visible"'>
                                     Power it on
                             {% endif %}
                                 </a>
                             </h3>
-                            <a href="{% url 'sitesmanagement.views.system_packages' site_id=site.id %}"
-                               class="ir campl-focus-link">Install system packages</a>
+                        {% if primaryvm.is_on %}
+                            <a href="{% url 'sitesmanagement.views.reset_vm' vm_id=primaryvm.id %}"
+                               class="ir campl-focus-link"
+                               onclick='$("#translucidframe")[0].style.visibility = "visible"'>
+                        {% else %}
+                            <a href="{% url 'sitesmanagement.views.power_vm' vm_id=primaryvm.id on='on' %}"
+                               class="ir campl-focus-link"
+                               onclick='$("#translucidframe")[0].style.visibility = "visible"'>
+                        {% endif %}
+                            </a>
                         </div>
                     </div>
                 </article>
             </div>
         </div>
-
+    </div>
+    <div id="translucidframe">
+        <img src="{% static 'img/ajax_loader_orange_256.gif' %}">
     </div>
 {% endblock %}
