@@ -38,7 +38,7 @@ urlpatterns = patterns('',
     url(r'^api/dns/(?P<token>(\w|\-)+)/entries.json$', 'apimws.views.dns_entries'),
 
     # mwsauth app
-    url(r'^mws/(?P<site_id>[0-9]+)/auth/$', 'mwsauth.views.auth_change'),
+    url(r'^auth/(?P<site_id>[0-9]+)/$', 'mwsauth.views.auth_change'),
 
 
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
