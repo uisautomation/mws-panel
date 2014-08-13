@@ -35,6 +35,7 @@ def get_groups_from_query(search_string):
 
 def return_title_by_groupid(groupid):
     group = GroupMethods(conn).getGroup(groupid=groupid)
+    # TODO If a group does not exists in lookup should we allow it?
     return group.title if group is not None else ''
 
 
