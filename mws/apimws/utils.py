@@ -1,7 +1,7 @@
 import uuid
 from django.core.mail import send_mail
 from ibisclient import *
-from mws import settings
+from django.conf import settings
 from sitesmanagement.models import VirtualMachine, NetworkConfig, DomainName, EmailConfirmation
 
 

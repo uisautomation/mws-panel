@@ -356,6 +356,7 @@ def reset_vm(request, vm_id):
     if vm is None or vm.status != 'ready':
         return redirect(reverse(show, kwargs={'site_id': site.id}))
 
-    vm.do_reset()
+    if vm.do_reset() is False:
+        pass  # TODO add error messages in session if it is False
 
     return redirect(settings, site_id=site.id)
