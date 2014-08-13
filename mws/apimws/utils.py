@@ -1,4 +1,5 @@
 import uuid
+from django.forms import ValidationError
 from django.core.mail import send_mail
 from ibisclient import *
 from django.conf import settings
@@ -36,6 +37,9 @@ def get_groups_from_query(search_string):
 def return_title_by_groupid(groupid):
     group = GroupMethods(conn).getGroup(groupid=groupid)
     # TODO If a group does not exists in lookup should we allow it?
+    if group is None:
+        raise ValidationError("The group with id %(groupid)s does not exist in Lookup", code='invalid',
+                              params={'groupid': groupid},)
     return group.title if group is not None else ''
 
 
