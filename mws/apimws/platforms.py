@@ -52,7 +52,7 @@ def get_vm_power_state(vm):
         'username': get_api_username(),
         'secret': get_api_secret(),
         'command': 'get power state',
-        'vmid': '502b427f-9f9d-9017-076e-ae83a0498faf'  # TODO change that for vm.name
+        'vmid': vm.name
     }
     headers = {'Content-type': 'application/json'}
     try:
@@ -80,7 +80,7 @@ def change_vm_power_state(vm, on):
         'username': get_api_username(),
         'secret': get_api_secret(),
         'command': 'power '+on,
-        'vmid': '502b427f-9f9d-9017-076e-ae83a0498faf'  # TODO change that for vm.name
+        'vmid': vm.name
     }
 
     headers = {'Content-type': 'application/json'}
@@ -101,7 +101,7 @@ def reset_vm(vm):
         'username': get_api_username(),
         'secret': get_api_secret(),
         'command': 'reset',
-        'vmid': '502b427f-9f9d-9017-076e-ae83a0498faf'  # TODO change that for vm.name
+        'vmid': vm.name
     }
 
     headers = {'Content-type': 'application/json'}
