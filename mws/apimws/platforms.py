@@ -6,6 +6,10 @@ import requests
 import platform
 from sitesmanagement.models import VirtualMachine, NetworkConfig
 
+class PlatformsAPINotWorkingException(Exception):
+    pass
+
+
 def get_api_secret():
     if platform.system() == 'Darwin':
         from passlib.hash import sha512_crypt
@@ -42,11 +46,11 @@ def get_vm_power_state(vm):
         'vmid': '502b427f-9f9d-9017-076e-ae83a0498faf' # TODO change that for vm.name
     }
     headers = {'Content-type': 'application/json'}
-    r = requests.post("https://bes.csi.cam.ac.uk/mws-api/v1/vm.json", data=json.dumps(json_object), headers=headers)
     try:
-        response = json.loads(r.text)
+        response = json.loads(requests.post("https://bes.csi.cam.ac.uk/mws-api/v1/vm.json",
+                                            data=json.dumps(json_object), headers=headers).text)
     except Exception as e:
-        pass # TODO raise error
+        raise PlatformsAPINotWorkingException(e.message)
 
     if response['result'] == 'Success':
         if response['powerState'] == 'poweredOff':

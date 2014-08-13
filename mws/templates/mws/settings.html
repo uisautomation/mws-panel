@@ -45,6 +45,7 @@
             </div>
         </div>
 
+        {% if not platforms_api_error %}
         <div class="campl-column4">
             <div class="campl-content-container campl-side-padding">
                 <article class="node node-external-link view-mode-focus_on clearfix
@@ -56,7 +57,7 @@
                                 <div class="field-items">
                                     <div class="field-item even" style="color: #ffffff">
                                         Your primary VM is currently
-                                        {% if primaryvm.is_on %}
+                                        {% if primary_vm_is_on %}
                                             On.
                                         {% else %}
                                             Off.
@@ -69,23 +70,23 @@
                     <div class="campl-focus-teaser-txt">
                         <div class="campl-content-container campl-horizontal-teaser-txt">
                             <h3 class="campl-teaser-title">
-                            {% if primaryvm.is_on %}
-                                <a href="{% url 'sitesmanagement.views.reset_vm' vm_id=primaryvm.id %}"
+                            {% if primary_vm_is_on %}
+                                <a href="{% url 'sitesmanagement.views.reset_vm' vm_id=primary_vm.id %}"
                                    onclick='$("#translucidframe")[0].style.visibility = "visible"'>
                                     If it does not respond you can do a hard reset, clicking here
                             {% else %}
-                                <a href="{% url 'sitesmanagement.views.power_vm' vm_id=primaryvm.id on='on' %}"
+                                <a href="{% url 'sitesmanagement.views.power_vm' vm_id=primary_vm.id on='on' %}"
                                    onclick='$("#translucidframe")[0].style.visibility = "visible"'>
                                     Power it on
                             {% endif %}
                                 </a>
                             </h3>
-                        {% if primaryvm.is_on %}
-                            <a href="{% url 'sitesmanagement.views.reset_vm' vm_id=primaryvm.id %}"
+                        {% if primary_vm_is_on %}
+                            <a href="{% url 'sitesmanagement.views.reset_vm' vm_id=primary_vm.id %}"
                                class="ir campl-focus-link"
                                onclick='$("#translucidframe")[0].style.visibility = "visible"'>
                         {% else %}
-                            <a href="{% url 'sitesmanagement.views.power_vm' vm_id=primaryvm.id on='on' %}"
+                            <a href="{% url 'sitesmanagement.views.power_vm' vm_id=primary_vm.id on='on' %}"
                                class="ir campl-focus-link"
                                onclick='$("#translucidframe")[0].style.visibility = "visible"'>
                         {% endif %}
@@ -95,6 +96,8 @@
                 </article>
             </div>
         </div>
+        {% endif %}
+
     </div>
     <div id="translucidframe">
         <img src="{% static 'img/ajax_loader_orange_256.gif' %}">

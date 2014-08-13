@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
-from apimws.platforms import change_vm_power_state
+from apimws.platforms import change_vm_power_state, PlatformsAPINotWorkingException
 from apimws.utils import email_confirmation, platforms_email_api_request, ip_register_api_request
 from sitesmanagement.utils import is_camacuk
 from .models import SiteForm, DomainNameFormNewSite, Site, BillingForm, DomainName, NetworkConfig, EmailConfirmation, \
@@ -281,6 +281,10 @@ def settings(request, site_id):
         return HttpResponseForbidden()
 
     vm = site.primary_vm()
+    try:
+        primary_vm_is_on = vm.is_on()
+    except PlatformsAPINotWorkingException as e:
+        platforms_api_error = True
 
     if vm == None or vm.status != 'ready':
         return redirect(reverse(show, kwargs={'site_id': site.id}))
@@ -292,7 +296,9 @@ def settings(request, site_id):
     return render(request, 'mws/settings.html', {
         'breadcrumbs': breadcrumbs,
         'site': site,
-        'primaryvm': vm
+        'primary_vm': vm,
+        'primary_vm_is_on': None if platforms_api_error else primary_vm_is_on,
+        'platforms_api_error': True if platforms_api_error else False
     })
 
 
