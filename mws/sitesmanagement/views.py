@@ -52,7 +52,7 @@ def new(request):
             try:
                 # Check domain name requested
                 domain_requested = domain_form.save(commit=False)
-                if domain_requested.name != '':  #TODO do it after saving a domain request
+                if domain_requested.name != '':  # TODO do it after saving a domain request
                     if is_camacuk(domain_requested.name):
                         ip_register_api_request(site, domain_requested.name)
                     else:
@@ -283,10 +283,10 @@ def settings(request, site_id):
     vm = site.primary_vm()
     try:
         primary_vm_is_on = vm.is_on()
-    except PlatformsAPINotWorkingException as e:
+    except PlatformsAPINotWorkingException:
         platforms_api_error = True
 
-    if vm == None or vm.status != 'ready':
+    if vm is None or vm.status != 'ready':
         return redirect(reverse(show, kwargs={'site_id': site.id}))
 
     breadcrumbs = {}
@@ -334,7 +334,7 @@ def power_vm(request, vm_id):
     if site.is_admin_suspended():
         return HttpResponseForbidden()
 
-    if vm == None or vm.status != 'ready':
+    if vm is None or vm.status != 'ready':
         return redirect(reverse(show, kwargs={'site_id': site.id}))
 
     vm.power_on()
@@ -353,7 +353,7 @@ def reset_vm(request, vm_id):
     if site.is_admin_suspended():
         return HttpResponseForbidden()
 
-    if vm == None or vm.status != 'ready':
+    if vm is None or vm.status != 'ready':
         return redirect(reverse(show, kwargs={'site_id': site.id}))
 
     vm.do_reset()
