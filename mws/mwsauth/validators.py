@@ -12,6 +12,9 @@ def validate_crsids(crsids_text):
     crsids = crsids_text.split(',')
     users = ()
 
+    if len(crsids) == 1 and crsids[0] == '':
+        return users
+
     for crsid in crsids:
         if crsid_re.match(crsid):
             users += (get_or_create_user_by_crsid(crsid),)

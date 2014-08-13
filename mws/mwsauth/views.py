@@ -26,6 +26,7 @@ def auth_change(request, site_id):
     if request.method == 'POST':
         authuserlist = validate_crsids(request.POST.get('crsids'))
         authgrouplist = validate_groupids(request.POST.get('groupids'))
+        # TODO If there are no users in the list return an Exception? No users authorised but maybe a group
         site.users.clear()
         site.users.add(*authuserlist)
         site.groups.clear()
