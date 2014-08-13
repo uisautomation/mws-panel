@@ -35,8 +35,16 @@ def new_site_primary_vm(site, primary):
         'hostname': vm.network_configuration.mws_domain,
     }
     headers = {'Content-type': 'application/json'}
-    r = requests.post("https://bes.csi.cam.ac.uk/mws-api/v1/vm.json", data=json.dumps(json_object), headers=headers)
-    #TODO explore request
+    try:
+        response = json.loads(requests.post("https://bes.csi.cam.ac.uk/mws-api/v1/vm.json",
+                                            data=json.dumps(json_object), headers=headers).text)
+    except Exception as e:
+        raise PlatformsAPINotWorkingException(e.message)  # TODO capture exception where it is called
+
+    if response['result'] == 'Success':
+        return True
+    else:
+        return False  # TODO raise error
 
 
 def get_vm_power_state(vm):
@@ -76,11 +84,11 @@ def change_vm_power_state(vm, on):
     }
 
     headers = {'Content-type': 'application/json'}
-    r = requests.post("https://bes.csi.cam.ac.uk/mws-api/v1/vm.json", data=json.dumps(json_object), headers=headers)
     try:
-        response = json.loads(r.text)
+        response = json.loads(requests.post("https://bes.csi.cam.ac.uk/mws-api/v1/vm.json",
+                                            data=json.dumps(json_object), headers=headers).text)
     except Exception as e:
-        pass # TODO raise error
+        raise PlatformsAPINotWorkingException(e.message)  # TODO capture exception where it is called
 
     if response['result'] == 'Success':
         return True
@@ -93,7 +101,7 @@ def reset_vm(vm):
         'username': get_api_username(),
         'secret': get_api_secret(),
         'command': 'reset',
-        'vmid': '502b427f-9f9d-9017-076e-ae83a0498faf' # TODO change that for vm.name
+        'vmid': '502b427f-9f9d-9017-076e-ae83a0498faf'  # TODO change that for vm.name
     }
 
     headers = {'Content-type': 'application/json'}
@@ -101,7 +109,7 @@ def reset_vm(vm):
     try:
         response = json.loads(r.text)
     except Exception as e:
-        pass # TODO raise error
+        raise PlatformsAPINotWorkingException(e.message)  # TODO capture exception where it is called
 
     if response['result'] == 'Success':
         return True
