@@ -87,7 +87,7 @@ class Suspension(models.Model):
     # is the suspension active?
     active = models.BooleanField(default=True)
     # start date of the suspension
-    start_date = models.DateField()
+    start_date = models.DateField(default=datetime.date.today())
     # end date of the suspension
     end_date = models.DateField(null=True, blank=True)
 
