@@ -1,3 +1,4 @@
+import datetime
 from django.contrib.auth.models import User, Group
 from django.db import models
 from django import forms
@@ -12,7 +13,7 @@ class Site(models.Model):
     # The institution (retrieved using lookup)
     institution_id = models.CharField(max_length=100)
     # Start date of the site
-    start_date = models.DateField()
+    start_date = models.DateField(default=datetime.date.today())
     # End date of the site (when user decides to delete the site)
     end_date = models.DateField(null=True, blank=True)
     # is the site deleted?
