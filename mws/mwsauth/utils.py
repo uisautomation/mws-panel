@@ -21,7 +21,7 @@ def get_or_create_group_by_groupid(groupid):
     """ Returns the django group corresponding to the groupid parameter.
         :param crsid: the groupid of the retrieved group
     """
-
+    groupid = int(groupid)
     group = Group.objects.filter(pk=groupid)
     if group.exists():
         group = group.first()
