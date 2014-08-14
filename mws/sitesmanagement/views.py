@@ -283,8 +283,10 @@ def settings(request, site_id):
     vm = site.primary_vm()
     try:
         primary_vm_is_on = vm.is_on()
+        platforms_api_error = False
     except PlatformsAPINotWorkingException:
         platforms_api_error = True
+        primary_vm_is_on = None
 
     if vm is None or vm.status != 'ready':
         return redirect(reverse(show, kwargs={'site_id': site.id}))
@@ -297,8 +299,8 @@ def settings(request, site_id):
         'breadcrumbs': breadcrumbs,
         'site': site,
         'primary_vm': vm,
-        'primary_vm_is_on': None if platforms_api_error else primary_vm_is_on,
-        'platforms_api_error': True if platforms_api_error else False
+        'primary_vm_is_on': primary_vm_is_on,
+        'platforms_api_error': platforms_api_error
     })
 
 
