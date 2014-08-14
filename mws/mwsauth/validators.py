@@ -8,13 +8,17 @@ def validate_crsids(crsids_text):
         :param crsids_text: list of crsids from the form
     """
 
-    crsid_re = re.compile(r'^[a-z][a-z0-9]{3,7}$')
-    crsids = crsids_text.split(',')
     users = ()
+
+    if crsids_text is None:
+        return users
+
+    crsids = crsids_text.split(',')
 
     if len(crsids) == 1 and crsids[0] == '':
         return users
 
+    crsid_re = re.compile(r'^[a-z][a-z0-9]{3,7}$')
     for crsid in crsids:
         if crsid_re.match(crsid):
             users += (get_or_create_user_by_crsid(crsid),)
@@ -29,12 +33,17 @@ def validate_groupids(groupids_text):
         :param groupids_text: list of groupids from the form
     """
 
-    groupid_re = re.compile(r'^[0-9]{1,6}$')
-    groupids = groupids_text.split(',')
     groups = ()
+
+    if groupids_text is None:
+        return groups
+
+    groupids = groupids_text.split(',')
 
     if len(groupids) == 1 and groupids[0] == '':
         return groups
+
+    groupid_re = re.compile(r'^[0-9]{1,6}$')
 
     for groupid in groupids:
         if groupid_re.match(groupid):
