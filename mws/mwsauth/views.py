@@ -14,7 +14,7 @@ def auth_change(request, site_id):
 
     # If the user is not in the user auth list of the site and neither belongs to a group in the group auth list of
     # the site then return a forbidden response
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups):
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
         return HttpResponseForbidden()
 
     if site.is_admin_suspended():
