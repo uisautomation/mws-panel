@@ -5,11 +5,11 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
 from stronghold.decorators import public
-from mwsauth.utils import user_in_groups, get_or_create_group_by_groupid
+from mwsauth.utils import get_or_create_group_by_groupid
 from sitesmanagement.models import VirtualMachine, DomainName, Site, EmailConfirmation
 from apimws.models import VMForm
-from apimws.utils import get_users_from_query, get_groups_from_query
 from sitesmanagement.views import show
+from ucamlookup import user_in_groups
 
 
 @login_required
@@ -58,20 +58,6 @@ def confirm_dns(request, dn_id):
     return render(request, 'api/confirm_dns.html', {
         'dn': dn,
     })
-
-
-@login_required
-def find_people(request):
-    persons = get_users_from_query(request.GET.get('query'))
-    return HttpResponse(json.dumps({'searchId_u': request.GET.get('searchId_u'), 'persons': persons}),
-                        content_type='application/json')
-
-
-@login_required
-def find_groups(request):
-    groups = get_groups_from_query(request.GET.get('query'))
-    return HttpResponse(json.dumps({'searchId_g': request.GET.get('searchId_g'), 'groups': groups}),
-                        content_type='application/json')
 
 
 @login_required

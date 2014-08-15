@@ -2,7 +2,7 @@ import datetime
 from django.contrib.auth.models import User, Group
 from django.db import models
 from django import forms
-from .utils import get_institutions
+from ucamlookup import get_institutions
 
 
 class Site(models.Model):

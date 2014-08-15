@@ -5,7 +5,8 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 from ucamwebauth.tests import create_wls_response
 from mwsauth import views
-from mwsauth.utils import get_or_create_user_by_crsid, get_or_create_group_by_groupid, user_in_groups
+from mwsauth.utils import get_or_create_user_by_crsid, get_or_create_group_by_groupid
+from ucamlookup import user_in_groups
 from mwsauth.validators import validate_crsids, validate_groupids
 from sitesmanagement.models import Site, Suspension
 

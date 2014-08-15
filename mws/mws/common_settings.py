@@ -35,6 +35,7 @@ INSTALLED_APPS = (
     'sitesmanagement',
     'apimws',
     'mwsauth',
+    'ucamlookup'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -85,6 +86,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 TEMPLATE_DIRS = (os.path.join(BASE_DIR, 'templates'),)
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
+
+STATICFILES_DIRS = ('/Users/amc203/Development/PycharmProjects/django-ucamlookup/ucamlookup/static',
+                    '/Users/amc203/Development/PycharmProjects/mws/mws/static')  # TODO REMOVE
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 

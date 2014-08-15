@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
 from .models import Site, Billing, DomainName, NetworkConfig, Suspension, VirtualMachine, EmailConfirmation
-from .utils import get_institutions, get_institution_name_by_id
+from ucamlookup import get_institutions, get_institution_name_by_id
 
 
 class SiteAdmin(ModelAdmin):
