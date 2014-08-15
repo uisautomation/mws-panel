@@ -13,6 +13,9 @@ urlpatterns = patterns('',
     # admin app urls
     url(r'^admin/', include(admin.site.urls)),
 
+    # lookup/ibis urls
+    url(r'^ucamlookup/', include('ucamlookup.urls')),
+
     # sitesmanagement app
     url(r'^$', 'sitesmanagement.views.index'),
     url(r'^show/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.show'),
@@ -31,8 +34,6 @@ urlpatterns = patterns('',
     # apimws app
     url(r'^api/confirm_vm/(?P<vm_id>[0-9]+)/$', 'apimws.views.confirm_vm'),
     url(r'^api/confirm_dns/(?P<dn_id>[0-9]+)/$', 'apimws.views.confirm_dns'),
-    url(r'^api/findPeople$', 'apimws.views.find_people'),
-    url(r'^api/findGroups$', 'apimws.views.find_groups'),
     url(r'^api/finance/billing/(?P<year>20[0-9]{2})/$', 'apimws.views.billing_year'),
     url(r'^confirm_email/(?P<ec_id>[0-9]+)/(?P<token>(\w|\-)+)/$', 'apimws.views.confirm_email'),
     url(r'^api/dns/(?P<token>(\w|\-)+)/entries.json$', 'apimws.views.dns_entries'),
