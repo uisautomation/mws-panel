@@ -2,10 +2,10 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
-from mwsauth.utils import user_in_groups
 from sitesmanagement.models import Site
 from sitesmanagement.views import show
 from mwsauth.validators import validate_crsids, validate_groupids
+from ucamlookup import user_in_groups
 
 
 @login_required
@@ -39,8 +39,8 @@ def auth_change(request, site_id):
     breadcrumbs[1] = dict(name='Authorisation', url=reverse(auth_change, kwargs={'site_id': site.id}))
 
     return render(request, 'mws/auth.html', {
-        'authorised_users': authorised_users,
-        'authorised_groups': authorised_groups,
+        'lookup_users_list': authorised_users,
+        'lookup_group_list': authorised_groups,
         'breadcrumbs': breadcrumbs,
         'site': site
     })

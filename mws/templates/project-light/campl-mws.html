@@ -2,13 +2,11 @@
 {% load static %}
 
 {% block app_head %}
-    <script src="{% static 'select2-3.4.8/select2.min.js' %}"></script>
     <link rel="stylesheet" href="{% static 'stylesheets/mws.css' %}" />
     <link href="{% static 'stylesheets/multi-select.css' %}" media="screen" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" href="{% static 'select2-3.4.8/select2.css' %}">
-
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
     <script src="{% static 'js/bootstrap-confirmation3.js' %}"></script>
+    {% include 'ucamlookup/ucamlookup_headers.html' %}
 {% endblock %}
 
 {% block head_title %}Managed Web Service administration site{% endblock %}

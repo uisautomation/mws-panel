@@ -8,11 +8,11 @@
                 <fieldset>
                     <p>
                         Authorised users:<br/>
-                        <input id="input-user-ajax" name="crsids">
+                        <input id="input-lookup-users-ajax" name="crsids">
                     </p>
                     <p>
                         Authorised groups:<br/>
-                        <input id="input-group-ajax" name="groupids">
+                        <input id="input-lookup-groups-ajax" name="groupids">
                     </p>
                     <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
                 </fieldset>
@@ -23,100 +23,6 @@
 {% endblock %}
 
 {% block campl_foot_js %}
-<script>
-    /**
-     * ID of the last AJAX search request we sent.
-     */
-    searchId_u = 0;
-
-    $(document).ready(function() {
-        $("#input-user-ajax").select2({
-            placeholder: "Search for a user",
-            minimumInputLength: 3,
-            multiple: true,
-            ajax: {
-                url: "/api/findPeople",
-                dataType: 'json',
-                data: function (term, page) {
-                    return {
-                        query: term,
-                        searchId_u: ++searchId_u
-                    };
-                },
-                results: function (data, page) {
-                    if (data.searchId_u != searchId_u)
-                        return;
-                    return {results: data.persons};
-                }
-            },
-            formatResult: function(person) {
-                return person.visibleName+" ("+person.crsid+") ";
-            },
-            formatSelection: function(person) {
-                return person.visibleName+" ("+person.crsid+") ";
-            },
-            id: function(person) {
-                return person.crsid;
-            },
-            dropdownCssClass: "bigdrop", // apply css that makes the dropdown taller
-            escapeMarkup: function (m) { return m; } // we do not want to escape markup since we are displaying html in results
-        });
-
-        $("#input-user-ajax").select2("data", [
-            {% for authorised_user in authorised_users %}
-                {
-                    crsid: "{{ authorised_user.username }}",
-                    visibleName: "{{ authorised_user.last_name }}",
-                    {% if request.user.username == authorised_user.username %}
-                        locked: true
-                    {% endif %}
-                },
-            {% endfor %}
-        ]);
-
-
-        searchId_g = 0;
-
-        $("#input-group-ajax").select2({
-            placeholder: "Search for a group",
-            minimumInputLength: 3,
-            multiple: true,
-            ajax: {
-                url: "/api/findGroups",
-                dataType: 'json',
-                data: function (term, page) {
-                    return {
-                        query: term,
-                        searchId_g: ++searchId_g
-                    };
-                },
-                results: function (data, page) {
-                    if (data.searchId_g != searchId_g)
-                        return;
-                    return {results: data.groups};
-                }
-            },
-            formatResult: function(group) {
-                return group.title;
-            },
-            formatSelection: function(group) {
-                return group.title;
-            },
-            id: function(group) {
-                return group.groupid;
-            },
-            dropdownCssClass: "bigdrop", // apply css that makes the dropdown taller
-            escapeMarkup: function (m) { return m; } // we do not want to escape markup since we are displaying html in results
-        });
-
-        $("#input-group-ajax").select2("data", [
-            {% for authorised_group in authorised_groups %}
-                {
-                    groupid: "{{ authorised_group.id }}",
-                    title: "{{ authorised_group.name }}"
-                },
-            {% endfor %}
-        ]);
-    });
-</script>
+    {% include 'ucamlookup/ucamlookup_users.html' %}
+    {% include 'ucamlookup/ucamlookup_groups.html' %}
 {% endblock %}
