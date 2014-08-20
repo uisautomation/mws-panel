@@ -1,4 +1,5 @@
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
+from ucamlookup.models import LookupGroup
 
 
 def get_or_create_user_by_crsid(crsid):
@@ -10,8 +11,7 @@ def get_or_create_user_by_crsid(crsid):
     if user.exists():
         user = user.first()
     else:
-        user = User(username=crsid)
-        user.save()
+        user = User.objects.create_user(username=crsid)
 
     return user
 
@@ -21,11 +21,10 @@ def get_or_create_group_by_groupid(groupid):
         :param crsid: the groupid of the retrieved group
     """
     groupid = int(groupid)
-    group = Group.objects.filter(pk=groupid)
+    group = LookupGroup.objects.filter(lookup_id=groupid)
     if group.exists():
         group = group.first()
     else:
-        group = Group(pk=groupid)
-        group.save()
+        group = LookupGroup.objects.create(lookup_id=groupid)
 
     return group

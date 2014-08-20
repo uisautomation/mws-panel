@@ -1,8 +1,8 @@
-import datetime
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
 from django.db import models
 from django import forms
 from ucamlookup import get_institutions
+from ucamlookup.models import LookupGroup
 
 
 class Site(models.Model):
@@ -13,7 +13,7 @@ class Site(models.Model):
     # The institution (retrieved using lookup)
     institution_id = models.CharField(max_length=100)
     # Start date of the site
-    start_date = models.DateField(default=datetime.date.today())
+    start_date = models.DateField()
     # End date of the site (when user decides to delete the site)
     end_date = models.DateField(null=True, blank=True)
     # is the site deleted?
@@ -26,7 +26,7 @@ class Site(models.Model):
     # Authorised users per site
     users = models.ManyToManyField(User, related_name='sites')
     # Authorised user groups per site
-    groups = models.ManyToManyField(Group, related_name='sites', null=True, blank=True)
+    groups = models.ManyToManyField(LookupGroup, related_name='sites', null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -43,9 +43,11 @@ class Site(models.Model):
         else:
             return self.virtual_machines.get(primary=primary)
 
+    @property
     def primary_vm(self):
         return self.vm(primary=True)
 
+    @property
     def secondary_vm(self):
         return self.vm(primary=False)
 
@@ -87,7 +89,7 @@ class Suspension(models.Model):
     # is the suspension active?
     active = models.BooleanField(default=True)
     # start date of the suspension
-    start_date = models.DateField(default=datetime.date.today())
+    start_date = models.DateField()
     # end date of the suspension
     end_date = models.DateField(null=True, blank=True)
 

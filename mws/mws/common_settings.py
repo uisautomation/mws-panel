@@ -32,10 +32,10 @@ INSTALLED_APPS = (
     'stronghold',
     'ucamwebauth',
     'ucamprojectlight',
+    'ucamlookup',
     'sitesmanagement',
     'apimws',
     'mwsauth',
-    'ucamlookup'
 )
 
 MIDDLEWARE_CLASSES = (

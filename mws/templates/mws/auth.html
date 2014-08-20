@@ -23,6 +23,6 @@
 {% endblock %}
 
 {% block campl_foot_js %}
-    {% include 'ucamlookup/ucamlookup_users.html' %}
-    {% include 'ucamlookup/ucamlookup_groups.html' %}
+    {% include 'ucamlookup_users.html' with input_tag_id="input-lookup-users-ajax" multiple="true" %}
+    {% include 'ucamlookup_groups.html' with input_tag_id="input-lookup-groups-ajax" multiple="true" %}
 {% endblock %}
