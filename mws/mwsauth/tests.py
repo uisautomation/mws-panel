@@ -1,5 +1,6 @@
+from datetime import datetime
 from django.conf import settings
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.test import TestCase
@@ -9,6 +10,7 @@ from mwsauth.utils import get_or_create_user_by_crsid, get_or_create_group_by_gr
 from ucamlookup import user_in_groups
 from mwsauth.validators import validate_crsids, validate_groupids
 from sitesmanagement.models import Site, Suspension
+from ucamlookup.models import LookupGroup
 
 
 def do_test_login(self, user="user1"):
@@ -84,16 +86,16 @@ class AuthTestCases(TestCase):
 
         groups = validate_groupids("101888")
         self.assertEqual(len(groups), 1)
-        self.assertEqual(groups[0].id, 101888)
+        self.assertEqual(groups[0].lookup_id, 101888)
         self.assertIsNot(groups[0].name, "")
         self.assertIsNot(groups[0].name, None)
 
         groups = validate_groupids("101888,101923")
         self.assertEqual(len(groups), 2)
-        self.assertEqual(groups[0].id, 101888)
+        self.assertEqual(groups[0].lookup_id, 101888)
         self.assertIsNot(groups[0].name, "")
         self.assertIsNot(groups[0].name, None)
-        self.assertEqual(groups[1].id, 101923)
+        self.assertEqual(groups[1].lookup_id, 101923)
         self.assertIsNot(groups[1].name, "")
         self.assertIsNot(groups[1].name, None)
 
@@ -107,11 +109,11 @@ class AuthTestCases(TestCase):
         user2 = User.objects.get(username="amc203")
         self.assertEqual(user1.id, user2.id)
 
-        with self.assertRaises(Group.DoesNotExist):
-            Group.objects.get(pk=101888)
+        with self.assertRaises(LookupGroup.DoesNotExist):
+            LookupGroup.objects.get(lookup_id=101888)
         group1 = get_or_create_group_by_groupid(101888)
-        group2 = Group.objects.get(pk=101888)
-        self.assertEqual(group1.id, group2.id)
+        group2 = LookupGroup.objects.get(lookup_id=101888)
+        self.assertEqual(group1.lookup_id, group2.lookup_id)
 
     def test_user_in_groups(self):
         amc203 = get_or_create_user_by_crsid("amc203")
@@ -132,7 +134,7 @@ class AuthTestCases(TestCase):
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': 1}))
         self.assertEqual(response.status_code, 404)  # Site does not exists
 
-        site_without_auth_users = Site.objects.create(name="test_site1")
+        site_without_auth_users = Site.objects.create(name="test_site1", start_date=datetime.today())
 
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_without_auth_users.id}))
         self.assertEqual(response.status_code, 403)  # User is not authorised
@@ -143,7 +145,7 @@ class AuthTestCases(TestCase):
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_with_auth_users.id}))
         self.assertContains(response, "amc203", status_code=200)  # User is authorised
 
-        site_with_auth_groups = Site.objects.create(name="test_site2")
+        site_with_auth_groups = Site.objects.create(name="test_site2", start_date=datetime.today())
         information_systems_group = get_or_create_group_by_groupid(101888)
         site_with_auth_groups.groups.add(information_systems_group)
 
