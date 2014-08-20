@@ -18,8 +18,8 @@ class SiteAdmin(ModelAdmin):
         return get_institution_name_by_id(obj.institution_id, self.all_institutions)
 
     def primary_vm_name(self, obj):
-        if obj.primary_vm():
-            return obj.primary_vm()
+        if obj.primary_vm:
+            return obj.primary_vm
         else:
             return None
 

@@ -141,7 +141,7 @@ def show(request, site_id):
         if site_email.status == 'pending':
             warning_messages.append("Your email is still unconfirmed, please click on the link of the sent email")
 
-    if site.primary_vm() is None or site.primary_vm().status != 'ready':
+    if site.primary_vm is None or site.primary_vm.status != 'ready':
         warning_messages.append("Your Manage Web Server is being prepared")
 
     return render(request, 'mws/show.html', {
@@ -280,7 +280,7 @@ def settings(request, site_id):
     if site.is_admin_suspended():
         return HttpResponseForbidden()
 
-    vm = site.primary_vm()
+    vm = site.primary_vm
     try:
         primary_vm_is_on = vm.is_on()
         platforms_api_error = False

@@ -107,8 +107,8 @@ def dns_entries(request, token):
     json_object['mwsv3_sites'] = []
     for site in Site.objects.all():
         dns_entries = []
-        primary_vm = site.primary_vm()
-        secondary_vm = site.secondary_vm()
+        primary_vm = site.primary_vm
+        secondary_vm = site.secondary_vm
         if primary_vm:
             dns_entries.append({
                 'name': primary_vm.network_configuration.mws_domain,
