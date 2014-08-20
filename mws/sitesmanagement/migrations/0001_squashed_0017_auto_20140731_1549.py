@@ -10,6 +10,7 @@ class Migration(migrations.Migration):
     replaces = [(b'sitesmanagement', '0001_initial'), (b'sitesmanagement', '0002_billing'), (b'sitesmanagement', '0003_domainname'), (b'sitesmanagement', '0004_networkconfig'), (b'sitesmanagement', '0005_suspension'), (b'sitesmanagement', '0006_virtualmachine'), (b'sitesmanagement', '0007_auto_20140619_1402'), (b'sitesmanagement', '0008_auto_20140619_1507'), (b'sitesmanagement', '0009_auto_20140623_1539'), (b'sitesmanagement', '0010_auto_20140624_0919'), (b'sitesmanagement', '0011_auto_20140624_1544'), (b'sitesmanagement', '0012_auto_20140625_1257'), (b'sitesmanagement', '0013_auto_20140627_1325'), (b'sitesmanagement', '0014_site_main_domain'), (b'sitesmanagement', '0015_auto_20140718_1409'), (b'sitesmanagement', '0016_auto_20140718_1629'), (b'sitesmanagement', '0017_auto_20140731_1549')]
 
     dependencies = [
+        ('auth', '0001_initial'),
     ]
 
     operations = [
