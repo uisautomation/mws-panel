@@ -153,7 +153,8 @@ class AuthTestCases(TestCase):
         self.assertContains(response, "101888", status_code=200)  # User is in an authorised group
         self.assertNotContains(response, "amc203", status_code=200)
 
-        suspension = Suspension.objects.create(reason="test_suspension", site=site_with_auth_users)
+        suspension = Suspension.objects.create(reason="test_suspension", site=site_with_auth_users,
+                                               start_date=datetime.today())
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_with_auth_users.id}))
         self.assertEqual(response.status_code, 302)  # Site is suspended
         self.assertTrue(response.url.endswith(
