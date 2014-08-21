@@ -11,7 +11,4 @@ def get_object_or_None(klass, *args, **kwargs):
 
 
 def is_camacuk(domain_name):
-    if re.match(r'^((\w|\-)+\.)*cam.ac.uk$', domain_name) is None:
-        return False
-    else:
-        return True
+    return domain_name.endswith("cam.ac.uk")

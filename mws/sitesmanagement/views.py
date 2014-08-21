@@ -1,9 +1,10 @@
 import datetime
+import socket
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
-from apimws.platforms import change_vm_power_state, PlatformsAPINotWorkingException
+from apimws.platforms import PlatformsAPINotWorkingException
 from apimws.utils import email_confirmation, platforms_email_api_request, ip_register_api_request
 from sitesmanagement.utils import is_camacuk
 from .models import SiteForm, DomainNameFormNewSite, Site, BillingForm, DomainName, NetworkConfig, EmailConfirmation, \
@@ -233,7 +234,7 @@ def set_dn_as_main(request, site_id, domain_id):
 
 
 @login_required
-def add_domain(request, site_id):
+def add_domain(request, site_id, socket_error=None):
     site = get_object_or_404(Site, pk=site_id)
 
     if not site in request.user.sites.all():
@@ -257,9 +258,11 @@ def add_domain(request, site_id):
                         ip_register_api_request(site, domain_requested.name)
                     else:
                         DomainName.objects.create(name=domain_requested.name, status='accepted', site=site)
+            except socket.error as serr:
+                pass # TODO sent an error to infosys email?
             except Exception as e:
                 raise e  # TODO try again later. pass to celery?
-        return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management', kwargs={'site_id': site.id}))
+            return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management', kwargs={'site_id': site.id}))
     else:
         domain_form = DomainNameFormNewSite()
 
