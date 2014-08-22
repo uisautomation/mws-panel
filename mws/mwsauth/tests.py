@@ -86,16 +86,16 @@ class AuthTestCases(TestCase):
 
         groups = validate_groupids("101888")
         self.assertEqual(len(groups), 1)
-        self.assertEqual(groups[0].lookup_id, 101888)
+        self.assertEqual(groups[0].lookup_id, "101888")
         self.assertIsNot(groups[0].name, "")
         self.assertIsNot(groups[0].name, None)
 
         groups = validate_groupids("101888,101923")
         self.assertEqual(len(groups), 2)
-        self.assertEqual(groups[0].lookup_id, 101888)
+        self.assertEqual(groups[0].lookup_id, "101888")
         self.assertIsNot(groups[0].name, "")
         self.assertIsNot(groups[0].name, None)
-        self.assertEqual(groups[1].lookup_id, 101923)
+        self.assertEqual(groups[1].lookup_id, "101923")
         self.assertIsNot(groups[1].name, "")
         self.assertIsNot(groups[1].name, None)
 
@@ -110,9 +110,9 @@ class AuthTestCases(TestCase):
         self.assertEqual(user1.id, user2.id)
 
         with self.assertRaises(LookupGroup.DoesNotExist):
-            LookupGroup.objects.get(lookup_id=101888)
+            LookupGroup.objects.get(lookup_id="101888")
         group1 = get_or_create_group_by_groupid(101888)
-        group2 = LookupGroup.objects.get(lookup_id=101888)
+        group2 = LookupGroup.objects.get(lookup_id="101888")
         self.assertEqual(group1.lookup_id, group2.lookup_id)
 
     def test_user_in_groups(self):

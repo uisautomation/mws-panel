@@ -16,7 +16,7 @@ from ucamlookup import user_in_groups
 def confirm_vm(request, vm_id):
     # Check if the request.user is authorised to do so: member of the UIS Platforms or UIS Information Systems groups
     if not user_in_groups(request.user,
-                          [get_or_create_group_by_groupid(101128), get_or_create_group_by_groupid(101888)]):
+                          [get_or_create_group_by_groupid("101128"), get_or_create_group_by_groupid("101888")]):
         return HttpResponseForbidden()
 
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
@@ -42,7 +42,7 @@ def confirm_dns(request, dn_id):
     # Check if the request.user is authorised to do so: member of the UIS ip-register or UIS Information Systems groups
     # TODO change ip-register group == first groupid
     if not user_in_groups(request.user,
-                          [get_or_create_group_by_groupid(101927), get_or_create_group_by_groupid(101888)]):
+                          [get_or_create_group_by_groupid("101927"), get_or_create_group_by_groupid("101888")]):
         return HttpResponseForbidden()
 
     dn = get_object_or_404(DomainName, pk=dn_id)
@@ -64,7 +64,7 @@ def confirm_dns(request, dn_id):
 def billing_year(request, year):
     # Check if the request.user is authorised to do so: member of the uis-finance or UIS Information Systems groups
     if not user_in_groups(request.user,
-                          [get_or_create_group_by_groupid(101923), get_or_create_group_by_groupid(101888)]):
+                          [get_or_create_group_by_groupid("101923"), get_or_create_group_by_groupid("101888")]):
         return HttpResponseForbidden()
 
     billing_list = map(lambda x: x.calculate_billing(financial_year_start=date(int(year), 8, 1),

@@ -20,11 +20,11 @@ def get_or_create_group_by_groupid(groupid):
     """ Returns the django group corresponding to the groupid parameter.
         :param crsid: the groupid of the retrieved group
     """
-    groupid = int(groupid)
-    group = LookupGroup.objects.filter(lookup_id=groupid)
+    groupidstr = str(groupid)
+    group = LookupGroup.objects.filter(lookup_id=groupidstr)
     if group.exists():
         group = group.first()
     else:
-        group = LookupGroup.objects.create(lookup_id=groupid)
+        group = LookupGroup.objects.create(lookup_id=groupidstr)
 
     return group
