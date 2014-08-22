@@ -18,7 +18,7 @@
                     At this moment we cannot process any new request for a new Managed Web Server, please try again later.
                 </p>
             {% else %}
-                <p><a href={% url 'sitesmanagement.views.new' %} class="campl-primary-cta">Register new site</a></p>
+                <p><a href="{% url 'sitesmanagement.views.new' %}" class="campl-primary-cta">Register new site</a></p>
             {% endif %}
 
             {% if all_sites %}
