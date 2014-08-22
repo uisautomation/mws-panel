@@ -67,3 +67,51 @@ class SiteManagementTests(TestCase):
         site.users.add(User.objects.get(username="test0001"))
         response = self.client.get(reverse(views.show, kwargs={'site_id': site.id}))
         self.assertContains(response, "No Billing, please add one.")
+
+    def test_view_new(self):
+        response = self.client.get(reverse(views.new))
+        self.assertEqual(response.status_code, 302)  # Not logged in, redirected to login
+        self.assertTrue(response.url.endswith(
+            '%s?next=%s' % (reverse('raven_login'), reverse(views.new))))
+
+        do_test_login(self, user="test0001")
+
+        response = self.client.get(reverse(views.new))
+        self.assertEqual(response.status_code, 302)  # There aren't prealocated network configurations
+        self.assertTrue(response.url.endswith(reverse(views.index)))
+
+        NetworkConfig.objects.create(IPv4='1.1.1.1', IPv6='::1.1.1.1', mws_domain="1.mws.cam.ac.uk")
+
+        response = self.client.get(reverse(views.new))
+        self.assertContains(response, "Request new site")
+
+        response = self.client.post(reverse(views.new), {'siteform-description': 'Desc',
+                                                         'siteform-institution_id': 'UIS',
+                                                         'siteform-email': 'amc203@cam.ac.uk',
+                                                         'domainform-name': 'test.mws.cam.ac.uk'})
+        self.assertContains(response, "This field is required.") # Empty name, error
+
+        response = self.client.post(reverse(views.new), {'siteform-name': 'Test Site', 'siteform-description': 'Desc',
+                                                         'siteform-institution_id': 'UIS',
+                                                         'siteform-email': 'amc203@cam.ac.uk',
+                                                         'domainform-name': 'test.mws.cam.ac.uk'})
+        test_site = Site.objects.get(name='Test Site')
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.endswith(reverse(views.show, kwargs={'site_id': test_site.id})))
+
+        # TODO test platforms API
+        # TODO test email check
+        # TODO test dns api
+        # TODO test errors
+
+        self.assertEqual(test_site.domain_names.first().name, 'test.mws.cam.ac.uk')
+        self.assertEqual(test_site.email, 'amc203@cam.ac.uk')
+        self.assertEqual(test_site.institution_id, 'UIS')
+        self.assertEqual(test_site.description, 'Desc')
+
+        response = self.client.get(response.url)
+
+        self.assertContains(response, "Your domain name %s has been requested and is under review." %
+                            test_site.domain_names.first().name)
+        self.assertContains(response, "Your email &#39;%s&#39; is still unconfirmed, please click on the link of "
+                                      "the sent email" % test_site.email )

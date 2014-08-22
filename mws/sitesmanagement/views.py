@@ -22,7 +22,7 @@ def index(request):
 @login_required
 def new(request):
     if NetworkConfig.num_pre_allocated() < 1:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.index'))  # TODO redirect to some error message
+        return HttpResponseRedirect(reverse('sitesmanagement.views.index'))
 
     breadcrumbs = {}
     breadcrumbs[0] = dict(name='New Manage Web Server', url=reverse(new))
@@ -135,7 +135,8 @@ def show(request, site_id):
     if site.email:
         site_email = EmailConfirmation.objects.get(email=site.email, site_id=site.id)
         if site_email.status == 'pending':
-            warning_messages.append("Your email is still unconfirmed, please click on the link of the sent email")
+            warning_messages.append("Your email '%s' is still unconfirmed, please click on the link of the sent email"
+                                    % site.email)
 
     if site.primary_vm is None or site.primary_vm.status != 'ready':
         warning_messages.append("Your Manage Web Server is being prepared")
