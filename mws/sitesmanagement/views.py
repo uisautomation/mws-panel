@@ -1,11 +1,14 @@
 import datetime
 import socket
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
+from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException
 from apimws.platforms import PlatformsAPINotWorkingException
 from apimws.utils import email_confirmation, platforms_email_api_request, ip_register_api_request
+from mwsauth.utils import get_or_create_group_by_groupid
 from sitesmanagement.utils import is_camacuk
 from .models import SiteForm, DomainNameFormNewSite, Site, BillingForm, DomainName, NetworkConfig, EmailConfirmation, \
     VirtualMachine
@@ -13,8 +16,20 @@ from .models import SiteForm, DomainNameFormNewSite, Site, BillingForm, DomainNa
 
 @login_required
 def index(request):
+    try:
+        groups_id = get_group_ids_of_a_user_in_lookup(request.user)
+    except IbisException as e:
+        groups_id = []
+
+    sites = []
+    for group_id in groups_id:
+        group = get_or_create_group_by_groupid(group_id)
+        sites += group.sites.all()
+
+    sites += request.user.sites.all()
+
     return render(request, 'index.html', {
-        'all_sites': request.user.sites.all().order_by('name'),
+        'all_sites': sorted(set(sites)),
         'deactivate_new': NetworkConfig.num_pre_allocated() < 1
     })
 
