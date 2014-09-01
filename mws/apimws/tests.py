@@ -1,3 +1,5 @@
 from django.test import TestCase
 
-# Create your tests here.
+class APITestCases(TestCase):
+    def test_get_users_from_query(self):
+        pass
