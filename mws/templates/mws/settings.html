@@ -90,19 +90,22 @@
                 $.ajax({url: "{% url 'sitesmanagement.views.check_vm_status' vm_id=primary_vm.id %}",
                     success:function(result){
                         if (result['vm_is_on'] === undefined) {
-                            $("#vm_status_message").html("We are currently experimenting a problem. Try again later.")
+                            $("#vm_status_message").html("We are currently experimenting a problem. ");
+                            $("#vm_status_message_link").html("Please try again later.");
                         } else {
-                            if (result['vm_is_on']) {
-                                $("#vm_status_message").html("Your primary VM is currently ON")
-                                $("#vm_status_message_link").attr("href", "{% url 'sitesmanagement.views.reset_vm' vm_id=primary_vm.id %}")
-                                $("#vm_status_message_link").html("If it does not respond you can do a hard reset, clicking here")
-                                $("#vm_status_link").attr("href", "{% url 'sitesmanagement.views.reset_vm' vm_id=primary_vm.id %}")
-
+                            if (result['vm_is_on'] == true) {
+                                $("#vm_status_message").html("Your primary VM is currently ON");
+                                $("#vm_status_message_link").attr("href", "{% url 'sitesmanagement.views.reset_vm' vm_id=primary_vm.id %}");
+                                $("#vm_status_message_link").html("If it does not respond you can do a hard reset, clicking here");
+                                $("#vm_status_link").attr("href", "{% url 'sitesmanagement.views.reset_vm' vm_id=primary_vm.id %}");
+                            } else if (result['vm_is_on'] == false) {
+                                $("#vm_status_message").html("Your primary VM is currently OFF");
+                                $("#vm_status_message_link").attr("href", "{% url 'sitesmanagement.views.power_vm' vm_id=primary_vm.id %}");
+                                $("#vm_status_message_link").html("Power it on");
+                                $("#vm_status_link").attr("href", "{% url 'sitesmanagement.views.power_vm' vm_id=primary_vm.id %}");
                             } else {
-                                $("#vm_status_message").html("Your primary VM is currently OFF")
-                                $("#vm_status_message_link").attr("href", "{% url 'sitesmanagement.views.power_vm' vm_id=primary_vm.id %}")
-                                $("#vm_status_message_link").html("Power it on")
-                                $("#vm_status_link").attr("href", "{% url 'sitesmanagement.views.power_vm' vm_id=primary_vm.id %}")
+                                $("#vm_status_message").html("We are currently experimenting a problem.");
+                                $("#vm_status_message_link").html("Please try again later.");
                             }
                         }
                     }
