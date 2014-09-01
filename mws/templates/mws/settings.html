@@ -55,13 +55,8 @@
                             <div class="field field-name-field-external-url-image field-type-image
                                         field-label-hidden">
                                 <div class="field-items">
-                                    <div class="field-item even" style="color: #ffffff">
-                                        Your primary VM is currently
-                                        {% if primary_vm_is_on %}
-                                            On.
-                                        {% else %}
-                                            Off.
-                                        {% endif %}
+                                    <div id="vm_status_message" class="field-item even" style="color: #ffffff">
+                                        Checking the status of your VM
                                     </div>
                                 </div>
                             </div>
@@ -70,27 +65,11 @@
                     <div class="campl-focus-teaser-txt">
                         <div class="campl-content-container campl-horizontal-teaser-txt">
                             <h3 class="campl-teaser-title">
-                            {% if primary_vm_is_on %}
-                                <a href="{% url 'sitesmanagement.views.reset_vm' vm_id=primary_vm.id %}"
-                                   onclick='$("#translucidframe")[0].style.visibility = "visible"'>
-                                    If it does not respond you can do a hard reset, clicking here
-                            {% else %}
-                                <a href="{% url 'sitesmanagement.views.power_vm' vm_id=primary_vm.id %}"
-                                   onclick='$("#translucidframe")[0].style.visibility = "visible"'>
-                                    Power it on
-                            {% endif %}
-                                </a>
+                                <a id="vm_status_message_link" href="#"
+                                   onclick='$("#translucidframe")[0].style.visibility = "visible"'></a>
                             </h3>
-                        {% if primary_vm_is_on %}
-                            <a href="{% url 'sitesmanagement.views.reset_vm' vm_id=primary_vm.id %}"
-                               class="ir campl-focus-link"
-                               onclick='$("#translucidframe")[0].style.visibility = "visible"'>
-                        {% else %}
-                            <a href="{% url 'sitesmanagement.views.power_vm' vm_id=primary_vm.id %}"
-                               class="ir campl-focus-link"
-                               onclick='$("#translucidframe")[0].style.visibility = "visible"'>
-                        {% endif %}
-                            </a>
+                            <a id="vm_status_link" href="#" class="ir campl-focus-link"
+                               onclick='$("#translucidframe")[0].style.visibility = "visible"'></a>
                         </div>
                     </div>
                 </article>
@@ -102,4 +81,32 @@
     <div id="translucidframe">
         <img src="{% static 'img/ajax_loader_orange_256.gif' %}">
     </div>
+{% endblock %}
+
+
+{% block campl_foot_js %}
+    <script>
+        $(document).ready(
+                $.ajax({url: "{% url 'sitesmanagement.views.check_vm_status' vm_id=primary_vm.id %}",
+                    success:function(result){
+                        if (result['vm_is_on'] === undefined) {
+                            $("#vm_status_message").html("We are currently experimenting a problem. Try again later.")
+                        } else {
+                            if (result['vm_is_on']) {
+                                $("#vm_status_message").html("Your primary VM is currently ON")
+                                $("#vm_status_message_link").attr("href", "{% url 'sitesmanagement.views.reset_vm' vm_id=primary_vm.id %}")
+                                $("#vm_status_message_link").html("If it does not respond you can do a hard reset, clicking here")
+                                $("#vm_status_link").attr("href", "{% url 'sitesmanagement.views.reset_vm' vm_id=primary_vm.id %}")
+
+                            } else {
+                                $("#vm_status_message").html("Your primary VM is currently OFF")
+                                $("#vm_status_message_link").attr("href", "{% url 'sitesmanagement.views.power_vm' vm_id=primary_vm.id %}")
+                                $("#vm_status_message_link").html("Power it on")
+                                $("#vm_status_link").attr("href", "{% url 'sitesmanagement.views.power_vm' vm_id=primary_vm.id %}")
+                            }
+                        }
+                    }
+                })
+        )
+    </script>
 {% endblock %}

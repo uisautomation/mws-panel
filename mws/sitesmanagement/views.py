@@ -3,7 +3,7 @@ import socket
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException
 from apimws.platforms import PlatformsAPINotWorkingException
@@ -295,12 +295,6 @@ def settings(request, site_id):
         return HttpResponseForbidden()
 
     vm = site.primary_vm
-    try:
-        primary_vm_is_on = vm.is_on()
-        platforms_api_error = False
-    except PlatformsAPINotWorkingException:
-        platforms_api_error = True
-        primary_vm_is_on = None
 
     if vm is None or vm.status != 'ready':
         return redirect(reverse(show, kwargs={'site_id': site.id}))
@@ -313,9 +307,28 @@ def settings(request, site_id):
         'breadcrumbs': breadcrumbs,
         'site': site,
         'primary_vm': vm,
-        'primary_vm_is_on': primary_vm_is_on,
-        'platforms_api_error': platforms_api_error
     })
+
+
+@login_required
+def check_vm_status(request, vm_id):
+    vm = get_object_or_404(VirtualMachine, pk=vm_id)
+    site = vm.site
+
+    if not site in request.user.sites.all():
+        return HttpResponseForbidden()
+
+    if site.is_admin_suspended():
+        return HttpResponseForbidden()
+
+    if vm is None or vm.status != 'ready':
+        return JsonResponse({'error': 'VMNotReady'})
+
+    try:
+        return JsonResponse({'vm_is_on': vm.is_on()})
+    except PlatformsAPINotWorkingException:
+        return JsonResponse({'error': 'PlatformsAPINotWorking'})
+
 
 
 @login_required

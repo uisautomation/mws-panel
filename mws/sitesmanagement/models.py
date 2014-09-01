@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -38,6 +39,9 @@ class Site(models.Model):
             if susp.active:
                 return True
         return False
+
+    def suspend_now(self, input_reason):
+        return Suspension.objects.create(reason=input_reason, start_date=datetime.today(), site=self)
 
     def vm(self, primary):
         if self.virtual_machines.filter(primary=primary).count() is 0:

@@ -38,6 +38,9 @@ urlpatterns = patterns('',
     url(r'^confirm_email/(?P<ec_id>[0-9]+)/(?P<token>(\w|\-)+)/$', 'apimws.views.confirm_email'),
     url(r'^api/dns/(?P<token>(\w|\-)+)/entries.json$', 'apimws.views.dns_entries'),
 
+    # settings site
+    url(r'^settings/vm/(?P<vm_id>[0-9]+)/status/$', 'sitesmanagement.views.check_vm_status'),
+
     # mwsauth app
     url(r'^auth/(?P<site_id>[0-9]+)/$', 'mwsauth.views.auth_change'),
 
