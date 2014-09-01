@@ -115,3 +115,50 @@ class SiteManagementTests(TestCase):
                             test_site.domain_names.first().name)
         self.assertContains(response, "Your email &#39;%s&#39; is still unconfirmed, please click on the link of "
                                       "the sent email" % test_site.email )
+
+    def test_view_edit(self):
+        response = self.client.get(reverse(views.edit, kwargs={'site_id': 1}))
+        self.assertEqual(response.status_code, 302)  # Not logged in, redirected to login
+        self.assertTrue(response.url.endswith(
+            '%s?next=%s' % (reverse('raven_login'), reverse(views.edit, kwargs={'site_id': 1}))))
+
+        do_test_login(self, user="test0001")
+
+        response = self.client.get(reverse(views.edit, kwargs={'site_id': 1}))
+        self.assertEqual(response.status_code, 404)  # The Site does not exist
+
+        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
+        response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
+        self.assertEqual(response.status_code, 403)  # The User is not in the list of auth users
+
+        site.users.add(User.objects.get(username="test0001"))
+        response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
+        self.assertContains(response, "Change information about your MWS")
+
+        suspension = site.suspend_now(input_reason="test suspension")
+        response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
+        self.assertEqual(response.status_code, 403)  # The site is suspended
+
+        suspension.active = False
+        suspension.save()
+        response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
+        self.assertContains(response, "Change information about your MWS")
+
+        self.assertNotEqual(site.name, 'testSiteChange')
+        self.assertNotEqual(site.description, 'testDescChange')
+        self.assertNotEqual(site.institution_id, 'UIS')
+        self.assertNotEqual(site.email, 'email@change.test')
+        response = self.client.post(reverse(views.edit, kwargs={'site_id': site.id}),
+                                    {'name': 'testSiteChange', 'description': 'testDescChange',
+                                     'institution_id': 'UIS', 'email': 'email@change.test',})
+        self.assertEqual(response.status_code, 302)  # Changes done, redirecting
+        self.assertTrue(response.url.endswith(reverse(views.show, kwargs={'site_id': site.id})))
+        site_changed = Site.objects.get(pk=site.id)
+        self.assertEqual(site_changed.name, 'testSiteChange')
+        self.assertEqual(site_changed.description, 'testDescChange')
+        self.assertEqual(site_changed.institution_id, 'UIS')
+        self.assertEqual(site_changed.email, 'email@change.test')
+
+        response = self.client.get(response.url)
+        self.assertContains(response, "Your email &#39;%s&#39; is still unconfirmed, please click on the link of "
+                                      "the sent email" % site_changed.email )
