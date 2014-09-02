@@ -9,10 +9,9 @@ from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException
 from apimws.platforms import PlatformsAPINotWorkingException
 from apimws.utils import email_confirmation, platforms_email_api_request, ip_register_api_request
 from mwsauth.utils import get_or_create_group_by_groupid
-from sitesmanagement.demo import SiteRequestDemo
 from sitesmanagement.utils import is_camacuk
 from .models import SiteForm, DomainNameFormNewSite, Site, BillingForm, DomainName, NetworkConfig, EmailConfirmation, \
-    VirtualMachine
+    VirtualMachine, SiteRequestDemo
 
 
 @login_required
