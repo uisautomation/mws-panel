@@ -3,11 +3,12 @@ from __future__ import unicode_literals
 
 from django.db import models, migrations
 from django.conf import settings
+import sitesmanagement.models
 
 
 class Migration(migrations.Migration):
 
-    replaces = [(b'sitesmanagement', '0001_initial'), (b'sitesmanagement', '0002_billing'), (b'sitesmanagement', '0003_domainname'), (b'sitesmanagement', '0004_networkconfig'), (b'sitesmanagement', '0005_suspension'), (b'sitesmanagement', '0006_virtualmachine'), (b'sitesmanagement', '0007_auto_20140619_1402'), (b'sitesmanagement', '0008_auto_20140619_1507'), (b'sitesmanagement', '0009_auto_20140623_1539'), (b'sitesmanagement', '0010_auto_20140624_0919'), (b'sitesmanagement', '0011_auto_20140624_1544'), (b'sitesmanagement', '0012_auto_20140625_1257'), (b'sitesmanagement', '0013_auto_20140627_1325'), (b'sitesmanagement', '0014_site_main_domain'), (b'sitesmanagement', '0015_auto_20140718_1409'), (b'sitesmanagement', '0016_auto_20140718_1629'), (b'sitesmanagement', '0017_auto_20140731_1549')]
+    replaces = [(b'sitesmanagement', '0001_initial'), (b'sitesmanagement', '0002_billing'), (b'sitesmanagement', '0003_domainname'), (b'sitesmanagement', '0004_networkconfig'), (b'sitesmanagement', '0005_suspension'), (b'sitesmanagement', '0006_virtualmachine'), (b'sitesmanagement', '0007_auto_20140619_1402'), (b'sitesmanagement', '0008_auto_20140619_1507'), (b'sitesmanagement', '0009_auto_20140623_1539'), (b'sitesmanagement', '0010_auto_20140624_0919'), (b'sitesmanagement', '0011_auto_20140624_1544'), (b'sitesmanagement', '0012_auto_20140625_1257'), (b'sitesmanagement', '0013_auto_20140627_1325'), (b'sitesmanagement', '0014_site_main_domain'), (b'sitesmanagement', '0015_auto_20140718_1409'), (b'sitesmanagement', '0016_auto_20140718_1629'), (b'sitesmanagement', '0017_auto_20140731_1549'), (b'sitesmanagement', '0002_auto_20140819_1804'), (b'sitesmanagement', '0003_auto_20140902_1214')]
 
     dependencies = [
         ('auth', '0001_initial'),
@@ -39,7 +40,7 @@ class Migration(migrations.Migration):
                 ('purchase_order', models.FileField(upload_to=b'billing')),
                 ('group', models.CharField(max_length=250)),
                 ('site', models.OneToOneField(to='sitesmanagement.Site', to_field='id')),
-                ('purchase_order_number', models.CharField(default=None, max_length=100)),
+                ('purchase_order_number', models.CharField(max_length=100)),
             ],
             options={
             },
@@ -90,7 +91,7 @@ class Migration(migrations.Migration):
                 ('primary', models.BooleanField(default=True)),
                 ('network_configuration', models.OneToOneField(to='sitesmanagement.NetworkConfig', to_field='id')),
                 ('site', models.ForeignKey(to='sitesmanagement.Site', to_field='id')),
-                ('status', models.CharField(default='ready', max_length=50, choices=[(b'requested', b'Requested'), (b'accepted', b'Accepted'), (b'denied', b'Denied'), (b'ready', b'Ready')])),
+                ('status', models.CharField(max_length=50, choices=[(b'requested', b'Requested'), (b'accepted', b'Accepted'), (b'denied', b'Denied'), (b'ready', b'Ready')])),
             ],
             options={
             },
@@ -166,5 +167,15 @@ class Migration(migrations.Migration):
             name='SSHFP',
             field=models.CharField(max_length=250, null=True, blank=True),
             preserve_default=True,
+        ),
+        migrations.AlterField(
+            model_name='site',
+            name='groups',
+            field=models.ManyToManyField(to=b'ucamlookup.LookupGroup', null=True, blank=True),
+        ),
+        migrations.AlterField(
+            model_name='domainname',
+            name='name',
+            field=models.CharField(unique=True, max_length=250, validators=[sitesmanagement.models.full_domain_validator]),
         ),
     ]
