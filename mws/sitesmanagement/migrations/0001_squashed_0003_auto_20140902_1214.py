@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 ('deleted', models.BooleanField(default=False)),
                 ('email', models.EmailField(max_length=75, null=True)),
                 ('users', models.ManyToManyField(to=settings.AUTH_USER_MODEL)),
-                ('group', models.ManyToManyField(to=b'auth.Group', null=True)),
+                ('groups', models.ManyToManyField(to=b'auth.Group', null=True)),
             ],
             options={
             },
@@ -113,16 +113,6 @@ class Migration(migrations.Migration):
             name='status',
             field=models.CharField(default=b'requested', max_length=50, choices=[(b'requested', b'Requested'), (b'accepted', b'Accepted'), (b'denied', b'Denied')]),
             preserve_default=True,
-        ),
-        migrations.RenameField(
-            model_name='site',
-            old_name='group',
-            new_name='groups',
-        ),
-        migrations.AlterField(
-            model_name='site',
-            name='groups',
-            field=models.ManyToManyField(to=b'auth.Group', null=True, blank=True),
         ),
         migrations.AlterField(
             model_name='site',
