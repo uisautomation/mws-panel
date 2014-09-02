@@ -92,7 +92,7 @@ def new(request):
 def edit(request, site_id):
     site = get_object_or_404(Site, pk=site_id)
 
-    if not site in request.user.sites.all():
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
         return HttpResponseForbidden()
 
     if site.is_admin_suspended():
@@ -166,7 +166,7 @@ def show(request, site_id):
 def billing(request, site_id):
     site = get_object_or_404(Site, pk=site_id)
 
-    if not site in request.user.sites.all():
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
         return HttpResponseForbidden()
 
     if site.is_admin_suspended():
@@ -210,7 +210,7 @@ def privacy(request):
 def domains_management(request, site_id):
     site = get_object_or_404(Site, pk=site_id)
 
-    if not site in request.user.sites.all():
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
         return HttpResponseForbidden()
 
     if site.is_admin_suspended():
@@ -231,7 +231,10 @@ def set_dn_as_main(request, site_id, domain_id):
     site = get_object_or_404(Site, pk=site_id)
     domain = get_object_or_404(DomainName, pk=domain_id)
 
-    if (site not in request.user.sites.all()) or (domain not in site.domain_names.all()):
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
+        return HttpResponseForbidden()
+
+    if domain not in site.domain_names.all():
         return HttpResponseForbidden()
 
     if site.is_admin_suspended():
@@ -247,7 +250,7 @@ def set_dn_as_main(request, site_id, domain_id):
 def add_domain(request, site_id, socket_error=None):
     site = get_object_or_404(Site, pk=site_id)
 
-    if not site in request.user.sites.all():
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
         return HttpResponseForbidden()
 
     if site.is_admin_suspended():
@@ -288,7 +291,7 @@ def add_domain(request, site_id, socket_error=None):
 def settings(request, site_id):
     site = get_object_or_404(Site, pk=site_id)
 
-    if not site in request.user.sites.all():
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
         return HttpResponseForbidden()
 
     if site.is_admin_suspended():
@@ -315,7 +318,7 @@ def check_vm_status(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
     site = vm.site
 
-    if not site in request.user.sites.all():
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
         return HttpResponseForbidden()
 
     if site.is_admin_suspended():
@@ -334,7 +337,7 @@ def check_vm_status(request, vm_id):
 def system_packages(request, site_id):
     site = get_object_or_404(Site, pk=site_id)
 
-    if not site in request.user.sites.all():
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
         return HttpResponseForbidden()
 
     if site.is_admin_suspended():
@@ -356,7 +359,7 @@ def power_vm(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
     site = vm.site
 
-    if not site in request.user.sites.all():
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
         return HttpResponseForbidden()
 
     if site.is_admin_suspended():
@@ -375,7 +378,7 @@ def reset_vm(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
     site = vm.site
 
-    if not site in request.user.sites.all():
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
         return HttpResponseForbidden()
 
     if site.is_admin_suspended():
