@@ -96,7 +96,7 @@ def confirm_email(request, ec_id, token):
         email_confirmation.save()
         return redirect(show, site_id=email_confirmation.site.id)
     else:
-        raise Exception #TODO change this exception for an error message
+        raise Exception  # TODO change this exception for an error message
 
 
 @public

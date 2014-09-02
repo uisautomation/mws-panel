@@ -1,7 +1,6 @@
 import datetime
 import socket
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
@@ -132,7 +131,7 @@ def edit(request, site_id):
 def show(request, site_id):
     site = get_object_or_404(Site, pk=site_id)
 
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups):
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
         return HttpResponseForbidden()
 
     if site.is_admin_suspended():
@@ -276,10 +275,11 @@ def add_domain(request, site_id, socket_error=None):
                     else:
                         DomainName.objects.create(name=domain_requested.name, status='accepted', site=site)
             except socket.error as serr:
-                pass # TODO sent an error to infosys email?
+                pass  # TODO sent an error to infosys email?
             except Exception as e:
                 raise e  # TODO try again later. pass to celery?
-            return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management', kwargs={'site_id': site.id}))
+            return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management',
+                                                kwargs={'site_id': site.id}))
     else:
         domain_form = DomainNameFormNewSite()
 
@@ -334,7 +334,6 @@ def check_vm_status(request, vm_id):
         return JsonResponse({'vm_is_on': vm.is_on()})
     except PlatformsAPINotWorkingException:
         return JsonResponse({'error': 'PlatformsAPINotWorking'})
-
 
 
 @login_required
