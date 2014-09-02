@@ -9,7 +9,7 @@ from apimws.platforms import PlatformsAPINotWorkingException
 from apimws.utils import email_confirmation, platforms_email_api_request, ip_register_api_request
 from mwsauth.utils import get_or_create_group_by_groupid
 from sitesmanagement.utils import is_camacuk
-from .models import SiteForm, DomainNameFormNewSite, Site, BillingForm, DomainName, NetworkConfig, EmailConfirmation, \
+from .models import SiteForm, DomainNameFormNew, Site, BillingForm, DomainName, NetworkConfig, EmailConfirmation, \
     VirtualMachine
 
 
@@ -44,8 +44,7 @@ def new(request):
     # TODO: FIX: if SiteForm's name field is empty then DomainNameForm errors are also shown
     if request.method == 'POST':
         site_form = SiteForm(request.POST, prefix="siteform", user=request.user)
-        domain_form = DomainNameFormNewSite(request.POST, prefix="domainform")
-        if site_form.is_valid() and domain_form.is_valid():
+        if site_form.is_valid():
 
             site = site_form.save(commit=False)
             site.start_date = datetime.date.today()
@@ -60,17 +59,6 @@ def new(request):
                 raise e  # TODO try again later. pass to celery?
 
             try:
-                # Check domain name requested
-                domain_requested = domain_form.save(commit=False)
-                if domain_requested.name != '':  # TODO do it after saving a domain request
-                    if is_camacuk(domain_requested.name):
-                        ip_register_api_request(site, domain_requested.name)
-                    else:
-                        DomainName.objects.create(name=domain_requested.name, status='accepted', site=site)
-            except Exception as e:
-                raise e  # TODO try again later. pass to celery?
-
-            try:
                 if site.email:
                     email_confirmation(site)  # TODO do it after saving a site
             except Exception as e:
@@ -79,11 +67,9 @@ def new(request):
             return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
     else:
         site_form = SiteForm(prefix="siteform", user=request.user)
-        domain_form = DomainNameFormNewSite(prefix="domainform")
 
     return render(request, 'mws/new.html', {
         'site_form': site_form,
-        'domain_form': domain_form,
         'breadcrumbs': breadcrumbs
     })
 
@@ -262,7 +248,7 @@ def add_domain(request, site_id, socket_error=None):
     breadcrumbs[2] = dict(name='Add Domain', url=reverse(add_domain, kwargs={'site_id': site.id}))
 
     if request.method == 'POST':
-        domain_form = DomainNameFormNewSite(request.POST)
+        domain_form = DomainNameFormNew(request.POST)
         if domain_form.is_valid():
             try:
                 domain_requested = domain_form.save(commit=False)
@@ -270,7 +256,10 @@ def add_domain(request, site_id, socket_error=None):
                     if is_camacuk(domain_requested.name):
                         ip_register_api_request(site, domain_requested.name)
                     else:
-                        DomainName.objects.create(name=domain_requested.name, status='accepted', site=site)
+                        new_domain = DomainName.objects.create(name=domain_requested.name, status='accepted', site=site)
+                        if site.main_domain is None:
+                            site.main_domain = new_domain
+                            site.save()
             except socket.error as serr:
                 pass  # TODO sent an error to infosys email?
             except Exception as e:
@@ -278,7 +267,7 @@ def add_domain(request, site_id, socket_error=None):
             return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management',
                                                 kwargs={'site_id': site.id}))
     else:
-        domain_form = DomainNameFormNewSite()
+        domain_form = DomainNameFormNew()
 
     return render(request, 'mws/add_domain.html', {
         'breadcrumbs': breadcrumbs,

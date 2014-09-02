@@ -231,7 +231,7 @@ class SiteForm(forms.ModelForm):
         }
 
 
-class DomainNameFormNewSite(forms.ModelForm):
+class DomainNameFormNew(forms.ModelForm):
     #name = forms.CharField(max_length=250, required=True, label="Domain name",
     #                       validators=[DomainName.full_domain_validator])
 
