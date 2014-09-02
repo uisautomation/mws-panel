@@ -1,4 +1,5 @@
 from datetime import datetime
+import uuid
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -76,6 +77,18 @@ class Site(models.Model):
                 return [self.billing.group, self.billing.purchase_order_number, start_date, end_date]
             else:
                 return ['Site ID: %d' % self.id, 'Pending', start_date, end_date]
+
+
+class SiteRequestDemo(models.Model):
+    site = models.OneToOneField(Site, related_name='site_request_demo')
+    date_submitted = models.TimeField()
+
+    def demo_time_passed(self):
+        self.site.primary_vm.name = uuid.uuid4()
+        self.site.primary_vm.status = 'ready'
+        for dns in self.site.domain_names:
+            if dns.status == 'requested':
+                dns.status = 'accepted'
 
 
 class EmailConfirmation(models.Model):

@@ -110,6 +110,17 @@ class Migration(migrations.Migration):
             preserve_default=True,
         ),
         migrations.CreateModel(
+            name='SiteRequestDemo',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('date_submitted', models.TimeField()),
+                ('site', models.OneToOneField(to='sitesmanagement.Site')),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
             name='Suspension',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
