@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException
+from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups
 from apimws.platforms import PlatformsAPINotWorkingException
 from apimws.utils import email_confirmation, platforms_email_api_request, ip_register_api_request
 from mwsauth.utils import get_or_create_group_by_groupid
@@ -129,7 +129,7 @@ def edit(request, site_id):
 def show(request, site_id):
     site = get_object_or_404(Site, pk=site_id)
 
-    if not site in request.user.sites.all():
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups):
         return HttpResponseForbidden()
 
     if site.is_admin_suspended():
