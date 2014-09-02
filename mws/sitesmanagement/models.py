@@ -86,9 +86,11 @@ class SiteRequestDemo(models.Model):
     def demo_time_passed(self):
         self.site.primary_vm.name = uuid.uuid4()
         self.site.primary_vm.status = 'ready'
+        self.site.primary_vm.save()
         for dns in self.site.domain_names.all():
             if dns.status == 'requested':
                 dns.status = 'accepted'
+                dns.save()
 
 
 class EmailConfirmation(models.Model):
