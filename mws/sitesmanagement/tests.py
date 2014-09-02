@@ -207,7 +207,26 @@ class SiteManagementTests(TestCase):
         self.assertEqual(site_changed.billing.group, 'testGroup')
         self.assertEqual(site_changed.billing.purchase_order.name, 'billing/requirements.txt')
         self.assertEqual(site_changed.billing.purchase_order.url, '/media/billing/requirements.txt')
-
         response = self.client.get(response.url)
         self.assertNotContains(response, "No Billing, please add one.")
-        site_changed.billing.delete()
+        site_changed.billing.purchase_order.delete()
+
+        site = Site.objects.get(pk=site.id)
+        response = self.client.get(reverse(views.billing, kwargs={'site_id': site.id}))
+        self.assertContains(response, "testOrderNumber")
+        self.assertContains(response, "testGroup")
+        self.assertTrue(hasattr(site, 'billing'))
+        with open(os.path.join(settings.BASE_DIR, 'requirements.txt')) as fp:
+            response = self.client.post(reverse(views.billing, kwargs={'site_id': site.id}),
+                                        {'purchase_order_number': 'testOrderNumber1', 'group': 'testGroup1',
+                                         'purchase_order': fp,})
+        self.assertEqual(response.status_code, 302)  # Changes done, redirecting
+        self.assertTrue(response.url.endswith(reverse(views.show, kwargs={'site_id': site_changed.id})))
+        site_changed = Site.objects.get(pk=site.id)
+        self.assertEqual(site_changed.billing.purchase_order_number, 'testOrderNumber1')
+        self.assertEqual(site_changed.billing.group, 'testGroup1')
+        self.assertEqual(site_changed.billing.purchase_order.name, 'billing/requirements.txt')
+        self.assertEqual(site_changed.billing.purchase_order.url, '/media/billing/requirements.txt')
+        response = self.client.get(response.url)
+        self.assertNotContains(response, "No Billing, please add one.")
+        site_changed.billing.purchase_order.delete()
