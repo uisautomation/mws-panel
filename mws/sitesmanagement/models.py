@@ -238,6 +238,9 @@ class DomainNameFormNewSite(forms.ModelForm):
     class Meta:
         model = DomainName
         fields = ('name', )
+        labels = {
+            'name': 'DomainName',
+        }
 
 
 class BillingForm(forms.ModelForm):
