@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 ('deleted', models.BooleanField(default=False)),
                 ('email', models.EmailField(max_length=75, null=True)),
                 ('users', models.ManyToManyField(to=settings.AUTH_USER_MODEL)),
-                ('groups', models.ManyToManyField(to=b'auth.Group', null=True)),
+                ('groups', models.ManyToManyField(to=b'ucamlookup.LookupGroup', null=True, blank=True)),
             ],
             options={
             },
@@ -158,11 +158,6 @@ class Migration(migrations.Migration):
             name='SSHFP',
             field=models.CharField(max_length=250, null=True, blank=True),
             preserve_default=True,
-        ),
-        migrations.AlterField(
-            model_name='site',
-            name='groups',
-            field=models.ManyToManyField(to=b'ucamlookup.LookupGroup', null=True, blank=True),
         ),
         migrations.AlterField(
             model_name='domainname',
