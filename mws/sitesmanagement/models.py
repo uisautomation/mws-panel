@@ -79,21 +79,6 @@ class Site(models.Model):
                 return ['Site ID: %d' % self.id, 'Pending', start_date, end_date]
 
 
-class SiteRequestDemo(models.Model):
-    site = models.OneToOneField(Site, related_name='site_request_demo')
-    date_submitted = models.DateTimeField()
-
-    def demo_time_passed(self):
-        pvm = self.site.primary_vm
-        pvm.name = str(uuid.uuid4())
-        pvm.status = 'ready'
-        pvm.save()
-        for dns in self.site.domain_names.all():
-            if dns.status == 'requested':
-                dns.status = 'accepted'
-                dns.save()
-
-
 class EmailConfirmation(models.Model):
     STATUS_CHOICES = (
         ('pending', 'Pending'),
@@ -264,3 +249,29 @@ class BillingForm(forms.ModelForm):
     class Meta:
         model = Billing
         fields = ('purchase_order_number', 'group', 'purchase_order')
+
+
+# DEMO
+class VMStatusDemo(models.Model):
+    STATUS_CHOICES = (
+        ('off', 'Off'),
+        ('on', 'On'),
+    )
+    vm = models.OneToOneField(VirtualMachine, realted_name='vm_status_demo')
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='on')
+
+
+class SiteRequestDemo(models.Model):
+    site = models.OneToOneField(Site, related_name='site_request_demo')
+    date_submitted = models.DateTimeField()
+
+    def demo_time_passed(self):
+        pvm = self.site.primary_vm
+        pvm.name = str(uuid.uuid4())
+        pvm.status = 'ready'
+        VMStatusDemo.objects.create(vm=pvm)
+        pvm.save()
+        for dns in self.site.domain_names.all():
+            if dns.status == 'requested':
+                dns.status = 'accepted'
+                dns.save()

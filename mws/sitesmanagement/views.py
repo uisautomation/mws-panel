@@ -143,8 +143,11 @@ def show(request, site_id):
 
     warning_messages = []
 
-    if (timezone.now() - site.site_request_demo.date_submitted).seconds > 120:
-        site.site_request_demo.demo_time_passed()
+    if site.primary_vm is None or site.primary_vm.status != 'ready':
+        if (timezone.now() - site.site_request_demo.date_submitted).seconds > 120:
+            site.site_request_demo.demo_time_passed()
+        else:
+            warning_messages.append("Your Manage Web Server is being prepared")
 
     for domain_name in site.domain_names.all():
         if domain_name.status == 'requested':
@@ -158,9 +161,6 @@ def show(request, site_id):
         if site_email.status == 'pending':
             warning_messages.append("Your email '%s' is still unconfirmed, please click on the link of the sent email"
                                     % site.email)
-
-    if site.primary_vm is None or site.primary_vm.status != 'ready':
-        warning_messages.append("Your Manage Web Server is being prepared")
 
     return render(request, 'mws/show.html', {
         'breadcrumbs': breadcrumbs,
