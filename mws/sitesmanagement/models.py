@@ -129,7 +129,7 @@ class DomainName(models.Model):
         if not hostname:
             return
         if len(hostname) > 255:
-            raise ValidationError(_("The domain name cannot be composed of more than 255 characters."))
+            raise ValidationError("The domain name cannot be composed of more than 255 characters.")
         if hostname[-1:] == ".":
             hostname = hostname[:-1]  # strip exactly one dot from the right, if present
         for label in hostname.split("."):
