@@ -184,6 +184,10 @@ class VirtualMachine(models.Model):
     site = models.ForeignKey(Site, related_name='virtual_machines')
 
     def is_on(self):
+        if self.vm_status_demo.status == 'on':
+            return True
+        else:
+            return False
         from apimws.platforms import get_vm_power_state
         if get_vm_power_state(self) == "On":
             return True
@@ -191,14 +195,23 @@ class VirtualMachine(models.Model):
             return False
 
     def power_on(self):
+        self.vm_status_demo.status = 'on'
+        self.vm_status_demo.save()
+        return True
         from apimws.platforms import change_vm_power_state
         return change_vm_power_state(self, 'on')
 
     def power_off(self):
+        self.vm_status_demo.status = 'off'
+        self.vm_status_demo.save()
+        return True
         from apimws.platforms import change_vm_power_state
         return change_vm_power_state(self, 'off')
 
     def do_reset(self):
+        self.vm_status_demo.status = 'off'
+        self.vm_status_demo.save()
+        return True
         from apimws.platforms import reset_vm
         return reset_vm(self)
 
@@ -257,7 +270,7 @@ class VMStatusDemo(models.Model):
         ('off', 'Off'),
         ('on', 'On'),
     )
-    vm = models.OneToOneField(VirtualMachine, realted_name='vm_status_demo')
+    vm = models.OneToOneField(VirtualMachine, related_name='vm_status_demo')
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='on')
 
 
@@ -267,10 +280,11 @@ class SiteRequestDemo(models.Model):
 
     def demo_time_passed(self):
         pvm = self.site.primary_vm
-        pvm.name = str(uuid.uuid4())
-        pvm.status = 'ready'
-        VMStatusDemo.objects.create(vm=pvm)
-        pvm.save()
+        if pvm.status != 'ready':
+            pvm.name = str(uuid.uuid4())
+            pvm.status = 'ready'
+            VMStatusDemo.objects.create(vm=pvm)
+            pvm.save()
         for dns in self.site.domain_names.all():
             if dns.status == 'requested':
                 dns.status = 'accepted'
