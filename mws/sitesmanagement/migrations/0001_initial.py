@@ -113,7 +113,7 @@ class Migration(migrations.Migration):
             name='SiteRequestDemo',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('date_submitted', models.TimeField()),
+                ('date_submitted', models.DateTimeField()),
                 ('site', models.OneToOneField(to='sitesmanagement.Site')),
             ],
             options={
