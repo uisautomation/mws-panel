@@ -142,7 +142,7 @@ def show(request, site_id):
 
     warning_messages = []
 
-    if (datetime.datetime.now().replace(tzinfo=None) - site.site_request_demo.date_submitted).seconds > 120:
+    if (datetime.datetime.now() - site.site_request_demo.date_submitted.replace(tzinfo=None)).seconds > 120:
         site.demo_time_passed()
 
     for domain_name in site.domain_names.all():
