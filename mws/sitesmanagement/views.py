@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
+from django.utils import timezone
 from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException
 from apimws.platforms import PlatformsAPINotWorkingException
 from apimws.utils import email_confirmation, platforms_email_api_request, ip_register_api_request
@@ -142,7 +143,7 @@ def show(request, site_id):
 
     warning_messages = []
 
-    if (datetime.datetime.now() - site.site_request_demo.date_submitted.replace(tzinfo=None)).seconds > 120:
+    if (timezone.now() - site.site_request_demo.date_submitted).seconds > 120:
         site.site_request_demo.demo_time_passed()
 
     for domain_name in site.domain_names.all():

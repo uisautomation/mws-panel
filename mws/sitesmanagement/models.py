@@ -84,9 +84,10 @@ class SiteRequestDemo(models.Model):
     date_submitted = models.DateTimeField()
 
     def demo_time_passed(self):
-        self.site.primary_vm.name = uuid.uuid4()
-        self.site.primary_vm.status = 'ready'
-        self.site.primary_vm.save()
+        pvm = self.site.primary_vm
+        pvm.name = str(uuid.uuid4())
+        pvm.status = 'ready'
+        pvm.save()
         for dns in self.site.domain_names.all():
             if dns.status == 'requested':
                 dns.status = 'accepted'
