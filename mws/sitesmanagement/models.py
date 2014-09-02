@@ -81,7 +81,7 @@ class Site(models.Model):
 
 class SiteRequestDemo(models.Model):
     site = models.OneToOneField(Site, related_name='site_request_demo')
-    date_submitted = models.TimeField()
+    date_submitted = models.DateTimeField()
 
     def demo_time_passed(self):
         self.site.primary_vm.name = uuid.uuid4()
