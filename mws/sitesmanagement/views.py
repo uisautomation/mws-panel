@@ -128,7 +128,7 @@ def edit(request, site_id):
 def show(request, site_id):
     site = get_object_or_404(Site, pk=site_id)
 
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups):
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
         return HttpResponseForbidden()
 
     if site.is_admin_suspended():
