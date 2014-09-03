@@ -198,6 +198,13 @@ class VirtualMachine(models.Model):
         else:
             return False
 
+    @property
+    def is_ready(self):
+        if self.status == 'ready':
+            return True
+        else:
+            return False
+
     def power_on(self):
         from apimws.platforms import change_vm_power_state
         return change_vm_power_state(self, 'on')

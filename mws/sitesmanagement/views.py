@@ -83,6 +83,9 @@ def edit(request, site_id):
     if site is None:
         return HttpResponseForbidden()
 
+    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
         1: dict(name='Change information about your MWS',
@@ -159,6 +162,9 @@ def billing_management(request, site_id):
     if site is None:
         return HttpResponseForbidden()
 
+    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
         1: dict(name='Billing', url=reverse(billing_management, kwargs={'site_id': site.id}))
@@ -200,6 +206,9 @@ def vhosts_management(request, site_id):
     if site is None:
         return HttpResponseForbidden()
 
+    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
         1: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id}))
@@ -217,6 +226,9 @@ def add_vhost(request, site_id, socket_error=None):
 
     if site is None:
         return HttpResponseForbidden()
+
+    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
@@ -251,6 +263,9 @@ def domains_management(request, vhost_id):
     if site is None:
         return HttpResponseForbidden()
 
+    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
         1: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id})),
@@ -272,6 +287,9 @@ def set_dn_as_main(request, domain_id):  # TODO remove vhost_id
     if site is None:
         return HttpResponseForbidden()
 
+    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
     if domain not in vhost.domain_names.all():
         return HttpResponseForbidden()
 
@@ -290,6 +308,9 @@ def add_domain(request, vhost_id, socket_error=None):
 
     if site is None:
         return HttpResponseForbidden()
+
+    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
@@ -336,6 +357,9 @@ def settings(request, site_id):
     if site is None:
         return HttpResponseForbidden()
 
+    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
     vm = site.primary_vm
 
     if vm is None or vm.status != 'ready':
@@ -361,6 +385,9 @@ def check_vm_status(request, vm_id):
     if site is None:
         return HttpResponseForbidden()
 
+    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
     if vm is None or vm.status != 'ready':
         return JsonResponse({'error': 'VMNotReady'})
 
@@ -376,6 +403,9 @@ def system_packages(request, site_id):
 
     if site is None:
         return HttpResponseForbidden()
+
+    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     ansible_configuraton = get_object_or_None(AnsibleConfiguration, site=site, key="System Packages")
 
@@ -420,6 +450,9 @@ def power_vm(request, vm_id):
     if site is None:
         return HttpResponseForbidden()
 
+    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
     if vm is None or vm.status != 'ready':
         return redirect(reverse(show, kwargs={'site_id': site.id}))
 
@@ -435,6 +468,9 @@ def reset_vm(request, vm_id):
 
     if site is None:
         return HttpResponseForbidden()
+
+    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     if vm is None or vm.status != 'ready':
         return redirect(reverse(show, kwargs={'site_id': site.id}))
