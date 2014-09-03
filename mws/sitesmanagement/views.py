@@ -284,8 +284,9 @@ def set_dn_as_main(request, vhost_id, domain_id):
     if site.is_admin_suspended():
         return HttpResponseForbidden()
 
-    vhost.main_domain = domain
-    vhost.save()
+    if request.method == 'POST':
+        vhost.main_domain = domain
+        vhost.save()
 
     return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management', kwargs={'vhost_id': vhost.id}))
 
