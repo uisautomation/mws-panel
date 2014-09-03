@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
+from apimws.utils import launch_ansible
 from sitesmanagement.models import Site
 from sitesmanagement.views import show
 from mwsauth.validators import validate_crsids, validate_groupids
@@ -32,6 +33,7 @@ def auth_change(request, site_id):
         site.users.add(*authuserlist)
         site.groups.clear()
         site.groups.add(*authgrouplist)
+        launch_ansible(site)  # to add or delete users from the ssh/login auth list of the server
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {}

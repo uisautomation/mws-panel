@@ -7,7 +7,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups
 from apimws.models import AnsibleConfiguration
 from apimws.platforms import PlatformsAPINotWorkingException
-from apimws.utils import email_confirmation, platforms_email_api_request, ip_register_api_request
+from apimws.utils import email_confirmation, platforms_email_api_request, ip_register_api_request, launch_ansible
 from mwsauth.utils import get_or_create_group_by_groupid
 from sitesmanagement.utils import is_camacuk, get_object_or_None
 from .models import SiteForm, DomainNameFormNew, Site, BillingForm, DomainName, NetworkConfig, EmailConfirmation, \
@@ -129,7 +129,8 @@ def show(request, site_id):
     for vhost in site.vhosts.all():
         for domain_name in vhost.domain_names.all():
             if domain_name.status == 'requested':
-                warning_messages.append("Your domain name %s has been requested and is under review." % domain_name.name)
+                warning_messages.append("Your domain name %s has been requested and is under review." %
+                                        domain_name.name)
 
     if not hasattr(site, 'billing'):
         warning_messages.append("No Billing, please add one.")
@@ -235,6 +236,7 @@ def add_vhost(request, site_id, socket_error=None):
             vhost = vhost_form.save(commit=False)
             vhost.site = site
             vhost.save()
+            launch_ansible(site)  # to create a new vhost configuration file
             return HttpResponseRedirect(reverse('sitesmanagement.views.vhosts_management',
                                                 kwargs={'site_id': site.id}))
     else:
@@ -287,6 +289,7 @@ def set_dn_as_main(request, vhost_id, domain_id):
     if request.method == 'POST':
         vhost.main_domain = domain
         vhost.save()
+        launch_ansible(site)  # to update the vhost main domain name in the apache configuration
 
     return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management', kwargs={'vhost_id': vhost.id}))
 
@@ -322,6 +325,7 @@ def add_domain(request, vhost_id, socket_error=None):
                         if vhost.main_domain is None:
                             vhost.main_domain = new_domain
                             vhost.save()
+                    launch_ansible(site)  # to add the new domain name to the vhost apache configuration
             except socket.error as serr:
                 pass  # TODO sent an error to infosys email?
             except Exception as e:
@@ -408,12 +412,15 @@ def system_packages(request, site_id):
                 ansible_configuraton.save()
             else:
                 AnsibleConfiguration.objects.create(site=site, key="System Packages",
-                                                    value=",".join(system_packages_form.cleaned_data.get('system_packages')))
+                                                    value=",".join(
+                                                        system_packages_form.cleaned_data.get('system_packages')))
+            launch_ansible(site)  # to install or delete new/old packages selected by the user
             return HttpResponseRedirect(reverse('sitesmanagement.views.show',
                                                 kwargs={'site_id': site.id}))
     else:
         if ansible_configuraton is not None:
-            system_packages_form = SystemPackagesForm(initial={'system_packages': ansible_configuraton.value.split(",")})
+            system_packages_form = SystemPackagesForm(initial={'system_packages':
+                                                                   ansible_configuraton.value.split(",")})
         else:
             system_packages_form = SystemPackagesForm()
 

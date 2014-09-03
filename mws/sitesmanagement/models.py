@@ -180,6 +180,7 @@ class VirtualMachine(models.Model):
         ('requested', 'Requested'),
         ('accepted', 'Accepted'),
         ('denied', 'Denied'),
+        ('ansible', 'Running Ansible'),
         ('ready', 'Ready'),
     )
 
