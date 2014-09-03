@@ -410,7 +410,8 @@ class SiteRequestDemo(models.Model):
             pvm.status = 'ready'
             VMStatusDemo.objects.create(vm=pvm)
             pvm.save()
-        for dns in self.site.domain_names.all():
-            if dns.status == 'requested':
-                dns.status = 'accepted'
-                dns.save()
+        for vhost in self.site.vhosts.all():
+            for dns in vhost.domain_names.all():
+                if dns.status == 'requested':
+                    dns.status = 'accepted'
+                    dns.save()
