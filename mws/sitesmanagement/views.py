@@ -242,9 +242,9 @@ def domains_management(request, vhost_id):
 
 
 @login_required
-def set_dn_as_main(request, vhost_id, domain_id):  # TODO remove vhost_id
-    vhost = get_object_or_404(Vhost, pk=vhost_id)
+def set_dn_as_main(request, domain_id):  # TODO remove vhost_id
     domain = get_object_or_404(DomainName, pk=domain_id)
+    vhost = domain.vhost
     site = privileges_check(vhost.site.id, request.user)
 
     if domain not in vhost.domain_names.all():

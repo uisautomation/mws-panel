@@ -25,7 +25,7 @@
                             {{ domain.get_status_display }}
                         </td>
                         <td style="width: 35px;">
-                            <a href="#" onclick="javascript:set_as_master('{% url 'sitesmanagement.views.set_dn_as_main' vhost_id=vhost.id domain_id=domain.id %}')">
+                            <a href="#" onclick="javascript:set_as_master('{% url 'sitesmanagement.views.set_dn_as_main' domain_id=domain.id %}')">
                                 Set as Master
                             </a>
                         </td>
