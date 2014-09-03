@@ -130,7 +130,7 @@ def show(request, site_id):
 
     warning_messages = []
 
-    if (timezone.now() - site.site_request_demo.date_submitted).seconds > 120:
+    if (timezone.now() - site.site_request_demo.date_submitted).seconds > 60:
         site.site_request_demo.demo_time_passed()
 
     if site.primary_vm is not None and site.primary_vm.status == 'ansible':
