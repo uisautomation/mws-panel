@@ -3,7 +3,7 @@
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
 
-            <h1>Domain names for the mws "{{ site.name }}"</h1>
+            <h1>Domain names for the vhost "{{ vhost.name }}" of the mws "{{ vhost.site.name }}"</h1>
             <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
                 <thead>
                     <tr>
@@ -13,11 +13,11 @@
                     </tr>
                 </thead>
                 <tbody>
-                {% for domain in site.domain_names.all %}
+                {% for domain in vhost.domain_names.all %}
                     <tr>
                         <td>
                             {{ domain.name }}
-                            {% if domain == site.main_domain %}
+                            {% if domain == vhost.main_domain %}
                                 <br/>This is the current main domain
                             {% endif %}
                         </td>
@@ -25,18 +25,16 @@
                             {{ domain.get_status_display }}
                         </td>
                         <td style="width: 35px;">
-                            {% if not site.is_admin_suspended %}
-                                <a href="{% url 'sitesmanagement.views.set_dn_as_main' site_id=site.id domain_id=domain.id %}">
-                                    Set as Master
-                                </a>
-                            {% endif %}
+                            <a href="{% url 'sitesmanagement.views.set_dn_as_main' vhost_id=vhost.id domain_id=domain.id %}">
+                                Set as Master
+                            </a>
                         </td>
                     </tr>
                 {% endfor %}
                 </tbody>
             </table>
 
-        <p><a href={% url 'sitesmanagement.views.add_domain' site_id=site.id %} class="campl-primary-cta">Add a new domain</a></p>
+        <p><a href={% url 'sitesmanagement.views.add_domain' vhost_id=vhost.id %} class="campl-primary-cta">Add a new domain</a></p>
 
         </div>
     </div>

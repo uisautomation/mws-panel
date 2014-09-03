@@ -3,11 +3,11 @@
 {% block page_content %}
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
-            <h1>Add a domain name to your vhost "{{ vhost.name }}"</h1>
-            <form action={% url 'sitesmanagement.views.add_domain' vhost_id=vhost.id %} method="post">{% csrf_token %}
+            <h1>Add a vhost to your mws site {{ site.name }}</h1>
+            <form action={% url 'sitesmanagement.views.add_vhost' site_id=site.id %} method="post">{% csrf_token %}
                 <fieldset>
-                    <div id="domain_form">
-                        {{ domain_form.as_p }}
+                    <div id="vhost_form">
+                        {{ vhost_form.as_p }}
                     </div>
                     <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
                 </fieldset>

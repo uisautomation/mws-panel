@@ -11,7 +11,7 @@ from apimws.utils import email_confirmation, platforms_email_api_request, ip_reg
 from mwsauth.utils import get_or_create_group_by_groupid
 from sitesmanagement.utils import is_camacuk, get_object_or_None
 from .models import SiteForm, DomainNameFormNew, Site, BillingForm, DomainName, NetworkConfig, EmailConfirmation, \
-    VirtualMachine, SystemPackagesForm
+    VirtualMachine, SystemPackagesForm, Vhost, VhostForm
 
 
 @login_required
@@ -126,9 +126,10 @@ def show(request, site_id):
 
     warning_messages = []
 
-    for domain_name in site.domain_names.all():
-        if domain_name.status == 'requested':
-            warning_messages.append("Your domain name %s has been requested and is under review." % domain_name.name)
+    for vhost in site.vhosts.all():
+        for domain_name in vhost.domain_names.all():
+            if domain_name.status == 'requested':
+                warning_messages.append("Your domain name %s has been requested and is under review." % domain_name.name)
 
     if not hasattr(site, 'billing'):
         warning_messages.append("No Billing, please add one.")
@@ -194,7 +195,7 @@ def privacy(request):
 
 
 @login_required
-def domains_management(request, site_id):
+def vhosts_management(request, site_id):
     site = get_object_or_404(Site, pk=site_id)
 
     if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
@@ -205,36 +206,16 @@ def domains_management(request, site_id):
 
     breadcrumbs = {}
     breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
-    breadcrumbs[1] = dict(name='Domains Management', url=reverse(domains_management, kwargs={'site_id': site.id}))
+    breadcrumbs[1] = dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id}))
 
-    return render(request, 'mws/domains.html', {
+    return render(request, 'mws/vhosts.html', {
         'breadcrumbs': breadcrumbs,
         'site': site
     })
 
 
 @login_required
-def set_dn_as_main(request, site_id, domain_id):
-    site = get_object_or_404(Site, pk=site_id)
-    domain = get_object_or_404(DomainName, pk=domain_id)
-
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
-        return HttpResponseForbidden()
-
-    if domain not in site.domain_names.all():
-        return HttpResponseForbidden()
-
-    if site.is_admin_suspended():
-        return HttpResponseForbidden()
-
-    site.main_domain = domain
-    site.save()
-
-    return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management', kwargs={'site_id': site.id}))
-
-
-@login_required
-def add_domain(request, site_id, socket_error=None):
+def add_vhost(request, site_id, socket_error=None):
     site = get_object_or_404(Site, pk=site_id)
 
     if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
@@ -245,8 +226,86 @@ def add_domain(request, site_id, socket_error=None):
 
     breadcrumbs = {}
     breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
-    breadcrumbs[1] = dict(name='Domains Management', url=reverse(domains_management, kwargs={'site_id': site.id}))
-    breadcrumbs[2] = dict(name='Add Domain', url=reverse(add_domain, kwargs={'site_id': site.id}))
+    breadcrumbs[1] = dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id}))
+    breadcrumbs[2] = dict(name='Add Vhost', url=reverse(add_vhost, kwargs={'site_id': site.id}))
+
+    if request.method == 'POST':
+        vhost_form = VhostForm(request.POST)
+        if vhost_form.is_valid():
+            vhost = vhost_form.save(commit=False)
+            vhost.site = site
+            vhost.save()
+            return HttpResponseRedirect(reverse('sitesmanagement.views.vhosts_management',
+                                                kwargs={'site_id': site.id}))
+    else:
+        vhost_form = VhostForm()
+
+    return render(request, 'mws/add_vhost.html', {
+        'breadcrumbs': breadcrumbs,
+        'site': site,
+        'vhost_form': vhost_form,
+    })
+
+
+@login_required
+def domains_management(request, vhost_id):
+    vhost = get_object_or_404(Vhost, pk=vhost_id)
+    site = vhost.site
+
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
+        return HttpResponseForbidden()
+
+    if site.is_admin_suspended():
+        return HttpResponseForbidden()
+
+    breadcrumbs = {}
+    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
+    breadcrumbs[1] = dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id}))
+    breadcrumbs[2] = dict(name='Domains Management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id}))
+
+    return render(request, 'mws/domains.html', {
+        'breadcrumbs': breadcrumbs,
+        'vhost': vhost
+    })
+
+
+@login_required
+def set_dn_as_main(request, vhost_id, domain_id):
+    vhost = get_object_or_404(Vhost, pk=vhost_id)
+    site = vhost.site
+    domain = get_object_or_404(DomainName, pk=domain_id)
+
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
+        return HttpResponseForbidden()
+
+    if domain not in vhost.domain_names.all():
+        return HttpResponseForbidden()
+
+    if site.is_admin_suspended():
+        return HttpResponseForbidden()
+
+    vhost.main_domain = domain
+    vhost.save()
+
+    return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management', kwargs={'vhost_id': vhost.id}))
+
+
+@login_required
+def add_domain(request, vhost_id, socket_error=None):
+    vhost = get_object_or_404(Vhost, pk=vhost_id)
+    site = vhost.site
+
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
+        return HttpResponseForbidden()
+
+    if site.is_admin_suspended():
+        return HttpResponseForbidden()
+
+    breadcrumbs = {}
+    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
+    breadcrumbs[1] = dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id}))
+    breadcrumbs[2] = dict(name='Domains Management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id}))
+    breadcrumbs[3] = dict(name='Add Domain', url=reverse(add_domain, kwargs={'vhost_id': vhost.id}))
 
     if request.method == 'POST':
         domain_form = DomainNameFormNew(request.POST)
@@ -255,24 +314,25 @@ def add_domain(request, site_id, socket_error=None):
                 domain_requested = domain_form.save(commit=False)
                 if domain_requested.name != '':  # TODO do it after saving a domain request
                     if is_camacuk(domain_requested.name):
-                        ip_register_api_request(site, domain_requested.name)
+                        ip_register_api_request(vhost, domain_requested.name)
                     else:
-                        new_domain = DomainName.objects.create(name=domain_requested.name, status='accepted', site=site)
-                        if site.main_domain is None:
-                            site.main_domain = new_domain
-                            site.save()
+                        new_domain = DomainName.objects.create(name=domain_requested.name, status='accepted',
+                                                               vhost=vhost)
+                        if vhost.main_domain is None:
+                            vhost.main_domain = new_domain
+                            vhost.save()
             except socket.error as serr:
                 pass  # TODO sent an error to infosys email?
             except Exception as e:
                 raise e  # TODO try again later. pass to celery?
             return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management',
-                                                kwargs={'site_id': site.id}))
+                                                kwargs={'vhost_id': vhost.id}))
     else:
         domain_form = DomainNameFormNew()
 
     return render(request, 'mws/add_domain.html', {
         'breadcrumbs': breadcrumbs,
-        'site': site,
+        'vhost': vhost,
         'domain_form': domain_form,
     })
 
