@@ -413,10 +413,13 @@ class SiteRequestDemo(models.Model):
 
     def demo_time_passed(self):
         pvm = self.site.primary_vm
-        if pvm.status != 'ready':
+        if pvm.status == 'requested':
             pvm.name = str(uuid.uuid4())
             pvm.status = 'ready'
             VMStatusDemo.objects.create(vm=pvm)
+            pvm.save()
+        if pvm.status == 'ansible':
+            pvm.status = 'ready'
             pvm.save()
         for vhost in self.site.vhosts.all():
             for dns in vhost.domain_names.all():
