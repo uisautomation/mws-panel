@@ -4,13 +4,13 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups
+from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException
 from apimws.models import AnsibleConfiguration
 from apimws.platforms import PlatformsAPINotWorkingException
 from apimws.utils import email_confirmation, platforms_email_api_request, ip_register_api_request, launch_ansible
-from mwsauth.utils import get_or_create_group_by_groupid
+from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.utils import is_camacuk, get_object_or_None
-from .models import SiteForm, DomainNameFormNew, Site, BillingForm, DomainName, NetworkConfig, EmailConfirmation, \
+from .models import SiteForm, DomainNameFormNew, BillingForm, DomainName, NetworkConfig, EmailConfirmation, \
     VirtualMachine, SystemPackagesForm, Vhost, VhostForm
 
 
@@ -78,13 +78,7 @@ def new(request):
 
 @login_required
 def edit(request, site_id):
-    site = get_object_or_404(Site, pk=site_id)
-
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
-        return HttpResponseForbidden()
-
-    if site.is_admin_suspended():
-        return HttpResponseForbidden()
+    site = privileges_check(site_id, request.user)
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
@@ -115,13 +109,7 @@ def edit(request, site_id):
 
 @login_required
 def show(request, site_id):
-    site = get_object_or_404(Site, pk=site_id)
-
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
-        return HttpResponseForbidden()
-
-    if site.is_admin_suspended():
-        return HttpResponseForbidden()
+    site = privileges_check(site_id, request.user)
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
@@ -156,13 +144,7 @@ def show(request, site_id):
 
 @login_required
 def billing_management(request, site_id):
-    site = get_object_or_404(Site, pk=site_id)
-
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
-        return HttpResponseForbidden()
-
-    if site.is_admin_suspended():
-        return HttpResponseForbidden()
+    site = privileges_check(site_id, request.user)
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
@@ -200,13 +182,7 @@ def privacy(request):
 
 @login_required
 def vhosts_management(request, site_id):
-    site = get_object_or_404(Site, pk=site_id)
-
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
-        return HttpResponseForbidden()
-
-    if site.is_admin_suspended():
-        return HttpResponseForbidden()
+    site = privileges_check(site_id, request.user)
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
@@ -221,13 +197,7 @@ def vhosts_management(request, site_id):
 
 @login_required
 def add_vhost(request, site_id, socket_error=None):
-    site = get_object_or_404(Site, pk=site_id)
-
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
-        return HttpResponseForbidden()
-
-    if site.is_admin_suspended():
-        return HttpResponseForbidden()
+    site = privileges_check(site_id, request.user)
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
@@ -257,13 +227,7 @@ def add_vhost(request, site_id, socket_error=None):
 @login_required
 def domains_management(request, vhost_id):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
-    site = vhost.site
-
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
-        return HttpResponseForbidden()
-
-    if site.is_admin_suspended():
-        return HttpResponseForbidden()
+    site = privileges_check(vhost.site.id, request.user)
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
@@ -278,18 +242,12 @@ def domains_management(request, vhost_id):
 
 
 @login_required
-def set_dn_as_main(request, vhost_id, domain_id):
+def set_dn_as_main(request, vhost_id, domain_id):  # TODO remove vhost_id
     vhost = get_object_or_404(Vhost, pk=vhost_id)
-    site = vhost.site
     domain = get_object_or_404(DomainName, pk=domain_id)
-
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
-        return HttpResponseForbidden()
+    site = privileges_check(vhost.site.id, request.user)
 
     if domain not in vhost.domain_names.all():
-        return HttpResponseForbidden()
-
-    if site.is_admin_suspended():
         return HttpResponseForbidden()
 
     if request.method == 'POST':
@@ -303,13 +261,7 @@ def set_dn_as_main(request, vhost_id, domain_id):
 @login_required
 def add_domain(request, vhost_id, socket_error=None):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
-    site = vhost.site
-
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
-        return HttpResponseForbidden()
-
-    if site.is_admin_suspended():
-        return HttpResponseForbidden()
+    site = privileges_check(vhost.site.id, request.user)
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
@@ -351,13 +303,7 @@ def add_domain(request, vhost_id, socket_error=None):
 
 @login_required
 def settings(request, site_id):
-    site = get_object_or_404(Site, pk=site_id)
-
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
-        return HttpResponseForbidden()
-
-    if site.is_admin_suspended():
-        return HttpResponseForbidden()
+    site = privileges_check(site_id, request.user)
 
     vm = site.primary_vm
 
@@ -379,13 +325,7 @@ def settings(request, site_id):
 @login_required
 def check_vm_status(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = vm.site
-
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
-        return HttpResponseForbidden()
-
-    if site.is_admin_suspended():
-        return HttpResponseForbidden()
+    site = privileges_check(vm.site.id, request.user)
 
     if vm is None or vm.status != 'ready':
         return JsonResponse({'error': 'VMNotReady'})
@@ -398,14 +338,8 @@ def check_vm_status(request, vm_id):
 
 @login_required
 def system_packages(request, site_id):
-    site = get_object_or_404(Site, pk=site_id)
+    site = privileges_check(site_id, request.user)
     ansible_configuraton = get_object_or_None(AnsibleConfiguration, site=site, key="System Packages")
-
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
-        return HttpResponseForbidden()
-
-    if site.is_admin_suspended():
-        return HttpResponseForbidden()
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
@@ -443,13 +377,7 @@ def system_packages(request, site_id):
 @login_required
 def power_vm(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = vm.site
-
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
-        return HttpResponseForbidden()
-
-    if site.is_admin_suspended():
-        return HttpResponseForbidden()
+    site = privileges_check(vm.site.id, request.user)
 
     if vm is None or vm.status != 'ready':
         return redirect(reverse(show, kwargs={'site_id': site.id}))
@@ -462,13 +390,7 @@ def power_vm(request, vm_id):
 @login_required
 def reset_vm(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = vm.site
-
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
-        return HttpResponseForbidden()
-
-    if site.is_admin_suspended():
-        return HttpResponseForbidden()
+    site = privileges_check(vm.site.id, request.user)
 
     if vm is None or vm.status != 'ready':
         return redirect(reverse(show, kwargs={'site_id': site.id}))
