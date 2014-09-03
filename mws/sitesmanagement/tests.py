@@ -89,14 +89,12 @@ class SiteManagementTests(TestCase):
 
         response = self.client.post(reverse(views.new), {'siteform-description': 'Desc',
                                                          'siteform-institution_id': 'UIS',
-                                                         'siteform-email': 'amc203@cam.ac.uk',
-                                                         'domainform-name': 'test.mws.cam.ac.uk'})
+                                                         'siteform-email': 'amc203@cam.ac.uk'})
         self.assertContains(response, "This field is required.") # Empty name, error
 
         response = self.client.post(reverse(views.new), {'siteform-name': 'Test Site', 'siteform-description': 'Desc',
                                                          'siteform-institution_id': 'UIS',
-                                                         'siteform-email': 'amc203@cam.ac.uk',
-                                                         'domainform-name': 'test.mws.cam.ac.uk'})
+                                                         'siteform-email': 'amc203@cam.ac.uk'})
         test_site = Site.objects.get(name='Test Site')
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith(reverse(views.show, kwargs={'site_id': test_site.id})))
@@ -106,7 +104,6 @@ class SiteManagementTests(TestCase):
         # TODO test dns api
         # TODO test errors
 
-        self.assertEqual(test_site.domain_names.first().name, 'test.mws.cam.ac.uk')
         self.assertEqual(test_site.email, 'amc203@cam.ac.uk')
         self.assertEqual(test_site.institution_id, 'UIS')
         self.assertEqual(test_site.description, 'Desc')
