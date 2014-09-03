@@ -343,16 +343,16 @@ def system_packages(request, site_id):
         system_packages_form = SystemPackagesForm(request.POST)
         if system_packages_form.is_valid():
             if ansible_configuraton is not None:
-                ansible_configuraton.value = system_packages_form.cleaned_data.get('system_packages')
+                ansible_configuraton.value = ",".join(system_packages_form.cleaned_data.get('system_packages'))
                 ansible_configuraton.save()
             else:
                 AnsibleConfiguration.objects.create(site=site, key="System Packages",
-                                                    value=system_packages_form.cleaned_data.get('system_packages'))
+                                                    value=",".join(system_packages_form.cleaned_data.get('system_packages')))
             return HttpResponseRedirect(reverse('sitesmanagement.views.show',
                                                 kwargs={'site_id': site.id}))
     else:
         if ansible_configuraton is not None:
-            system_packages_form = SystemPackagesForm(initial={'system_packages': ansible_configuraton.value})
+            system_packages_form = SystemPackagesForm(initial={'system_packages': ansible_configuraton.value.split(",")})
         else:
             system_packages_form = SystemPackagesForm()
 
