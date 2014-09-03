@@ -3,13 +3,12 @@ from __future__ import unicode_literals
 
 from django.db import models, migrations
 from django.conf import settings
-import sitesmanagement.models
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('sitesmanagement', '0002_auto_20140819_1804'),
+        ('sitesmanagement', '0002_vmstatusdemo'),
     ]
 
     operations = [
@@ -36,18 +35,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='domainname',
             name='vhost',
-            field=models.ForeignKey(related_name=b'domain_names', default='', to='sitesmanagement.Vhost'),
+            field=models.ForeignKey(related_name=b'domain_names', default=1, to='sitesmanagement.Vhost'),
             preserve_default=False,
         ),
         migrations.AlterField(
             model_name='billing',
             name='site',
             field=models.OneToOneField(related_name=b'billing', to='sitesmanagement.Site'),
-        ),
-        migrations.AlterField(
-            model_name='domainname',
-            name='name',
-            field=models.CharField(unique=True, max_length=250, validators=[sitesmanagement.models.full_domain_validator]),
         ),
         migrations.AlterField(
             model_name='emailconfirmation',
@@ -65,6 +59,11 @@ class Migration(migrations.Migration):
             field=models.ManyToManyField(related_name=b'sites', to=settings.AUTH_USER_MODEL),
         ),
         migrations.AlterField(
+            model_name='siterequestdemo',
+            name='site',
+            field=models.OneToOneField(related_name=b'site_request_demo', to='sitesmanagement.Site'),
+        ),
+        migrations.AlterField(
             model_name='suspension',
             name='site',
             field=models.ForeignKey(related_name=b'suspensions', to='sitesmanagement.Site'),
@@ -78,5 +77,10 @@ class Migration(migrations.Migration):
             model_name='virtualmachine',
             name='site',
             field=models.ForeignKey(related_name=b'virtual_machines', to='sitesmanagement.Site'),
+        ),
+        migrations.AlterField(
+            model_name='vmstatusdemo',
+            name='vm',
+            field=models.OneToOneField(related_name=b'vm_status_demo', to='sitesmanagement.VirtualMachine'),
         ),
     ]
