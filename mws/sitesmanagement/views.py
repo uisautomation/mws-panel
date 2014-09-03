@@ -145,7 +145,7 @@ def show(request, site_id):
             warning_messages.append("Your email '%s' is still unconfirmed, please click on the link of the sent email"
                                     % site.email)
 
-    if site.primary_vm is None or site.primary_vm.status != 'ready':
+    if site.primary_vm is None or site.primary_vm.status == 'requested':
         warning_messages.append("Your Manage Web Server is being prepared")
 
     return render(request, 'mws/show.html', {
