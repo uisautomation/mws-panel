@@ -2,6 +2,7 @@ import uuid
 from django.forms import ValidationError
 from django.core.mail import send_mail
 from django.conf import settings
+from django.utils import timezone
 from sitesmanagement.models import VirtualMachine, NetworkConfig, DomainName, EmailConfirmation
 
 def platforms_email_api_request(site, primary):
@@ -54,6 +55,4 @@ def launch_ansible(site):
     primary_vm.status = 'ansible'
     primary_vm.save()
 
-    # TODO Remove the following code when the Ansible API is ready and substitute by an API call
-    primary_vm.status = 'ready'
-    primary_vm.save()
+    site.site_request_demo.date_submitted = timezone.now()
