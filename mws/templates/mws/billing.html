@@ -5,7 +5,7 @@
         <div class="campl-content-container">
             <h1>Change billing data</h1>
 
-            <form enctype="multipart/form-data" action={% url 'sitesmanagement.views.billing' site_id=site.id %} method="post">{% csrf_token %}
+            <form enctype="multipart/form-data" action={% url 'sitesmanagement.views.billing_management' site_id=site.id %} method="post">{% csrf_token %}
                 <fieldset>
                     <div id="site_form">
                         {{ billing_form.as_p }}

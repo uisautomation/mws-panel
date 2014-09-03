@@ -39,8 +39,9 @@ def new(request):
     if NetworkConfig.num_pre_allocated() < 1:
         return HttpResponseRedirect(reverse('sitesmanagement.views.index'))
 
-    breadcrumbs = {}
-    breadcrumbs[0] = dict(name='New Manage Web Server', url=reverse(new))
+    breadcrumbs = {
+        0: dict(name='New Manage Web Server', url=reverse(new))
+    }
 
     # TODO: FIX: if SiteForm's name field is empty then DomainNameForm errors are also shown
     if request.method == 'POST':
@@ -85,10 +86,11 @@ def edit(request, site_id):
     if site.is_admin_suspended():
         return HttpResponseForbidden()
 
-    breadcrumbs = {}
-    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
-    breadcrumbs[1] = dict(name='Change information about your MWS',
-                          url=reverse('sitesmanagement.views.edit', kwargs={'site_id': site.id}))
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Change information about your MWS',
+                           url=reverse('sitesmanagement.views.edit', kwargs={'site_id': site.id}))
+    }
 
     if request.method == 'POST':
         site_form = SiteForm(request.POST, user=request.user, instance=site)
@@ -121,8 +123,9 @@ def show(request, site_id):
     if site.is_admin_suspended():
         return HttpResponseForbidden()
 
-    breadcrumbs = {}
-    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
+    }
 
     warning_messages = []
 
@@ -152,7 +155,7 @@ def show(request, site_id):
 
 
 @login_required
-def billing(request, site_id):
+def billing_management(request, site_id):
     site = get_object_or_404(Site, pk=site_id)
 
     if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
@@ -161,10 +164,10 @@ def billing(request, site_id):
     if site.is_admin_suspended():
         return HttpResponseForbidden()
 
-    breadcrumbs = {}
-    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
-    # TODO Change this
-    breadcrumbs[1] = dict(name='Billing', url=reverse(show, kwargs={'site_id': site.id}))
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Billing', url=reverse(billing_management, kwargs={'site_id': site.id}))
+    }
 
     if request.method == 'POST':
         if hasattr(site, 'billing'):
@@ -205,9 +208,10 @@ def vhosts_management(request, site_id):
     if site.is_admin_suspended():
         return HttpResponseForbidden()
 
-    breadcrumbs = {}
-    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
-    breadcrumbs[1] = dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id}))
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id}))
+    }
 
     return render(request, 'mws/vhosts.html', {
         'breadcrumbs': breadcrumbs,
@@ -225,10 +229,11 @@ def add_vhost(request, site_id, socket_error=None):
     if site.is_admin_suspended():
         return HttpResponseForbidden()
 
-    breadcrumbs = {}
-    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
-    breadcrumbs[1] = dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id}))
-    breadcrumbs[2] = dict(name='Add Vhost', url=reverse(add_vhost, kwargs={'site_id': site.id}))
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id})),
+        2: dict(name='Add Vhost', url=reverse(add_vhost, kwargs={'site_id': site.id}))
+    }
 
     if request.method == 'POST':
         vhost_form = VhostForm(request.POST)
@@ -260,10 +265,11 @@ def domains_management(request, vhost_id):
     if site.is_admin_suspended():
         return HttpResponseForbidden()
 
-    breadcrumbs = {}
-    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
-    breadcrumbs[1] = dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id}))
-    breadcrumbs[2] = dict(name='Domains Management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id}))
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id})),
+        2: dict(name='Domains Management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id}))
+    }
 
     return render(request, 'mws/domains.html', {
         'breadcrumbs': breadcrumbs,
@@ -305,11 +311,12 @@ def add_domain(request, vhost_id, socket_error=None):
     if site.is_admin_suspended():
         return HttpResponseForbidden()
 
-    breadcrumbs = {}
-    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
-    breadcrumbs[1] = dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id}))
-    breadcrumbs[2] = dict(name='Domains Management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id}))
-    breadcrumbs[3] = dict(name='Add Domain', url=reverse(add_domain, kwargs={'vhost_id': vhost.id}))
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id})),
+        2: dict(name='Domains Management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id})),
+        3: dict(name='Add Domain', url=reverse(add_domain, kwargs={'vhost_id': vhost.id}))
+    }
 
     if request.method == 'POST':
         domain_form = DomainNameFormNew(request.POST)
@@ -357,9 +364,10 @@ def settings(request, site_id):
     if vm is None or vm.status != 'ready':
         return redirect(reverse(show, kwargs={'site_id': site.id}))
 
-    breadcrumbs = {}
-    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
-    breadcrumbs[1] = dict(name='Settings', url=reverse(settings, kwargs={'site_id': site.id}))
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Settings', url=reverse(settings, kwargs={'site_id': site.id}))
+    }
 
     return render(request, 'mws/settings.html', {
         'breadcrumbs': breadcrumbs,
@@ -399,10 +407,11 @@ def system_packages(request, site_id):
     if site.is_admin_suspended():
         return HttpResponseForbidden()
 
-    breadcrumbs = {}
-    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
-    breadcrumbs[1] = dict(name='Settings', url=reverse(settings, kwargs={'site_id': site.id}))
-    breadcrumbs[2] = dict(name='System packages', url=reverse(system_packages, kwargs={'site_id': site.id}))
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Settings', url=reverse(settings, kwargs={'site_id': site.id})),
+        2: dict(name='System packages', url=reverse(system_packages, kwargs={'site_id': site.id}))
+    }
 
     if request.method == 'POST':
         system_packages_form = SystemPackagesForm(request.POST)
