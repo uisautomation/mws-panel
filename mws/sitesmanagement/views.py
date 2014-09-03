@@ -8,8 +8,8 @@ from django.utils import timezone
 from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups
 from apimws.models import AnsibleConfiguration
 from apimws.platforms import PlatformsAPINotWorkingException
-from apimws.utils import email_confirmation, platforms_email_api_request, ip_register_api_request
-from mwsauth.utils import get_or_create_group_by_groupid
+from apimws.utils import email_confirmation, platforms_email_api_request, ip_register_api_request, launch_ansible
+from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.utils import is_camacuk, get_object_or_None
 from .models import SiteForm, DomainNameFormNew, Site, BillingForm, DomainName, NetworkConfig, EmailConfirmation, \
     VirtualMachine, SystemPackagesForm, Vhost, VhostForm, SiteRequestDemo
@@ -40,8 +40,9 @@ def new(request):
     if NetworkConfig.num_pre_allocated() < 1:
         return HttpResponseRedirect(reverse('sitesmanagement.views.index'))
 
-    breadcrumbs = {}
-    breadcrumbs[0] = dict(name='New Manage Web Server', url=reverse(new))
+    breadcrumbs = {
+        0: dict(name='New Manage Web Server', url=reverse(new))
+    }
 
     # TODO: FIX: if SiteForm's name field is empty then DomainNameForm errors are also shown
     if request.method == 'POST':
@@ -80,18 +81,19 @@ def new(request):
 
 @login_required
 def edit(request, site_id):
-    site = get_object_or_404(Site, pk=site_id)
+    site = privileges_check(site_id, request.user)
 
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
+    if site is None:
         return HttpResponseForbidden()
 
-    if site.is_admin_suspended():
-        return HttpResponseForbidden()
+    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
-    breadcrumbs = {}
-    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
-    breadcrumbs[1] = dict(name='Change information about your MWS',
-                          url=reverse('sitesmanagement.views.edit', kwargs={'site_id': site.id}))
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Change information about your MWS',
+                           url=reverse('sitesmanagement.views.edit', kwargs={'site_id': site.id}))
+    }
 
     if request.method == 'POST':
         site_form = SiteForm(request.POST, user=request.user, instance=site)
@@ -118,24 +120,27 @@ def edit(request, site_id):
 def show(request, site_id):
     site = get_object_or_404(Site, pk=site_id)
 
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
+    if (not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all())) \
+            or site.is_admin_suspended():
         return HttpResponseForbidden()
 
-    if site.is_admin_suspended():
-        return HttpResponseForbidden()
-
-    breadcrumbs = {}
-    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
+    }
 
     warning_messages = []
 
     if (timezone.now() - site.site_request_demo.date_submitted).seconds > 120:
         site.site_request_demo.demo_time_passed()
 
+    if site.primary_vm is not None and site.primary_vm.status == 'ansible':
+        warning_messages.append("Your virtual machine is being configured.")
+
     for vhost in site.vhosts.all():
         for domain_name in vhost.domain_names.all():
             if domain_name.status == 'requested':
-                warning_messages.append("Your domain name %s has been requested and is under review." % domain_name.name)
+                warning_messages.append("Your domain name %s has been requested and is under review." %
+                                        domain_name.name)
 
     if not hasattr(site, 'billing'):
         warning_messages.append("No Billing, please add one.")
@@ -157,19 +162,19 @@ def show(request, site_id):
 
 
 @login_required
-def billing(request, site_id):
-    site = get_object_or_404(Site, pk=site_id)
+def billing_management(request, site_id):
+    site = privileges_check(site_id, request.user)
 
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
+    if site is None:
         return HttpResponseForbidden()
 
-    if site.is_admin_suspended():
-        return HttpResponseForbidden()
+    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
-    breadcrumbs = {}
-    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
-    # TODO Change this
-    breadcrumbs[1] = dict(name='Billing', url=reverse(show, kwargs={'site_id': site.id}))
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Billing', url=reverse(billing_management, kwargs={'site_id': site.id}))
+    }
 
     if request.method == 'POST':
         if hasattr(site, 'billing'):
@@ -202,17 +207,18 @@ def privacy(request):
 
 @login_required
 def vhosts_management(request, site_id):
-    site = get_object_or_404(Site, pk=site_id)
+    site = privileges_check(site_id, request.user)
 
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
+    if site is None:
         return HttpResponseForbidden()
 
-    if site.is_admin_suspended():
-        return HttpResponseForbidden()
+    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
-    breadcrumbs = {}
-    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
-    breadcrumbs[1] = dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id}))
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id}))
+    }
 
     return render(request, 'mws/vhosts.html', {
         'breadcrumbs': breadcrumbs,
@@ -222,18 +228,19 @@ def vhosts_management(request, site_id):
 
 @login_required
 def add_vhost(request, site_id, socket_error=None):
-    site = get_object_or_404(Site, pk=site_id)
+    site = privileges_check(site_id, request.user)
 
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
+    if site is None:
         return HttpResponseForbidden()
 
-    if site.is_admin_suspended():
-        return HttpResponseForbidden()
+    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
-    breadcrumbs = {}
-    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
-    breadcrumbs[1] = dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id}))
-    breadcrumbs[2] = dict(name='Add Vhost', url=reverse(add_vhost, kwargs={'site_id': site.id}))
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id})),
+        2: dict(name='Add Vhost', url=reverse(add_vhost, kwargs={'site_id': site.id}))
+    }
 
     if request.method == 'POST':
         vhost_form = VhostForm(request.POST)
@@ -241,6 +248,7 @@ def add_vhost(request, site_id, socket_error=None):
             vhost = vhost_form.save(commit=False)
             vhost.site = site
             vhost.save()
+            launch_ansible(site)  # to create a new vhost configuration file
             return HttpResponseRedirect(reverse('sitesmanagement.views.vhosts_management',
                                                 kwargs={'site_id': site.id}))
     else:
@@ -256,18 +264,19 @@ def add_vhost(request, site_id, socket_error=None):
 @login_required
 def domains_management(request, vhost_id):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
-    site = vhost.site
+    site = privileges_check(vhost.site.id, request.user)
 
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
+    if site is None:
         return HttpResponseForbidden()
 
-    if site.is_admin_suspended():
-        return HttpResponseForbidden()
+    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
-    breadcrumbs = {}
-    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
-    breadcrumbs[1] = dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id}))
-    breadcrumbs[2] = dict(name='Domains Management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id}))
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id})),
+        2: dict(name='Domains Management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id}))
+    }
 
     return render(request, 'mws/domains.html', {
         'breadcrumbs': breadcrumbs,
@@ -276,22 +285,24 @@ def domains_management(request, vhost_id):
 
 
 @login_required
-def set_dn_as_main(request, vhost_id, domain_id):
-    vhost = get_object_or_404(Vhost, pk=vhost_id)
-    site = vhost.site
+def set_dn_as_main(request, domain_id):  # TODO remove vhost_id
     domain = get_object_or_404(DomainName, pk=domain_id)
+    vhost = domain.vhost
+    site = privileges_check(vhost.site.id, request.user)
 
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
+    if site is None:
         return HttpResponseForbidden()
+
+    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     if domain not in vhost.domain_names.all():
         return HttpResponseForbidden()
 
-    if site.is_admin_suspended():
-        return HttpResponseForbidden()
-
-    vhost.main_domain = domain
-    vhost.save()
+    if request.method == 'POST':
+        vhost.main_domain = domain
+        vhost.save()
+        launch_ansible(site)  # to update the vhost main domain name in the apache configuration
 
     return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management', kwargs={'vhost_id': vhost.id}))
 
@@ -299,19 +310,20 @@ def set_dn_as_main(request, vhost_id, domain_id):
 @login_required
 def add_domain(request, vhost_id, socket_error=None):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
-    site = vhost.site
+    site = privileges_check(vhost.site.id, request.user)
 
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
+    if site is None:
         return HttpResponseForbidden()
 
-    if site.is_admin_suspended():
-        return HttpResponseForbidden()
+    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
-    breadcrumbs = {}
-    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
-    breadcrumbs[1] = dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id}))
-    breadcrumbs[2] = dict(name='Domains Management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id}))
-    breadcrumbs[3] = dict(name='Add Domain', url=reverse(add_domain, kwargs={'vhost_id': vhost.id}))
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id})),
+        2: dict(name='Domains Management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id})),
+        3: dict(name='Add Domain', url=reverse(add_domain, kwargs={'vhost_id': vhost.id}))
+    }
 
     if request.method == 'POST':
         domain_form = DomainNameFormNew(request.POST)
@@ -327,6 +339,7 @@ def add_domain(request, vhost_id, socket_error=None):
                         if vhost.main_domain is None:
                             vhost.main_domain = new_domain
                             vhost.save()
+                    launch_ansible(site)  # to add the new domain name to the vhost apache configuration
             except socket.error as serr:
                 pass  # TODO sent an error to infosys email?
             except Exception as e:
@@ -345,22 +358,23 @@ def add_domain(request, vhost_id, socket_error=None):
 
 @login_required
 def settings(request, site_id):
-    site = get_object_or_404(Site, pk=site_id)
+    site = privileges_check(site_id, request.user)
 
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
+    if site is None:
         return HttpResponseForbidden()
 
-    if site.is_admin_suspended():
-        return HttpResponseForbidden()
+    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     vm = site.primary_vm
 
     if vm is None or vm.status != 'ready':
         return redirect(reverse(show, kwargs={'site_id': site.id}))
 
-    breadcrumbs = {}
-    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
-    breadcrumbs[1] = dict(name='Settings', url=reverse(settings, kwargs={'site_id': site.id}))
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Settings', url=reverse(settings, kwargs={'site_id': site.id}))
+    }
 
     return render(request, 'mws/settings.html', {
         'breadcrumbs': breadcrumbs,
@@ -372,13 +386,13 @@ def settings(request, site_id):
 @login_required
 def check_vm_status(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = vm.site
+    site = privileges_check(vm.site.id, request.user)
 
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
+    if site is None:
         return HttpResponseForbidden()
 
-    if site.is_admin_suspended():
-        return HttpResponseForbidden()
+    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     if vm is None or vm.status != 'ready':
         return JsonResponse({'error': 'VMNotReady'})
@@ -391,19 +405,21 @@ def check_vm_status(request, vm_id):
 
 @login_required
 def system_packages(request, site_id):
-    site = get_object_or_404(Site, pk=site_id)
+    site = privileges_check(site_id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
     ansible_configuraton = get_object_or_None(AnsibleConfiguration, site=site, key="System Packages")
 
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
-        return HttpResponseForbidden()
-
-    if site.is_admin_suspended():
-        return HttpResponseForbidden()
-
-    breadcrumbs = {}
-    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
-    breadcrumbs[1] = dict(name='Settings', url=reverse(settings, kwargs={'site_id': site.id}))
-    breadcrumbs[2] = dict(name='System packages', url=reverse(system_packages, kwargs={'site_id': site.id}))
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Settings', url=reverse(settings, kwargs={'site_id': site.id})),
+        2: dict(name='System packages', url=reverse(system_packages, kwargs={'site_id': site.id}))
+    }
 
     if request.method == 'POST':
         system_packages_form = SystemPackagesForm(request.POST)
@@ -413,12 +429,15 @@ def system_packages(request, site_id):
                 ansible_configuraton.save()
             else:
                 AnsibleConfiguration.objects.create(site=site, key="System Packages",
-                                                    value=",".join(system_packages_form.cleaned_data.get('system_packages')))
+                                                    value=",".join(
+                                                        system_packages_form.cleaned_data.get('system_packages')))
+            launch_ansible(site)  # to install or delete new/old packages selected by the user
             return HttpResponseRedirect(reverse('sitesmanagement.views.show',
                                                 kwargs={'site_id': site.id}))
     else:
         if ansible_configuraton is not None:
-            system_packages_form = SystemPackagesForm(initial={'system_packages': ansible_configuraton.value.split(",")})
+            system_packages_form = SystemPackagesForm(initial={'system_packages':
+                                                                   ansible_configuraton.value.split(",")})
         else:
             system_packages_form = SystemPackagesForm()
 
@@ -432,13 +451,13 @@ def system_packages(request, site_id):
 @login_required
 def power_vm(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = vm.site
+    site = privileges_check(vm.site.id, request.user)
 
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
+    if site is None:
         return HttpResponseForbidden()
 
-    if site.is_admin_suspended():
-        return HttpResponseForbidden()
+    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     if vm is None or vm.status != 'ready':
         return redirect(reverse(show, kwargs={'site_id': site.id}))
@@ -451,13 +470,13 @@ def power_vm(request, vm_id):
 @login_required
 def reset_vm(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = vm.site
+    site = privileges_check(vm.site.id, request.user)
 
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
+    if site is None:
         return HttpResponseForbidden()
 
-    if site.is_admin_suspended():
-        return HttpResponseForbidden()
+    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     if vm is None or vm.status != 'ready':
         return redirect(reverse(show, kwargs={'site_id': site.id}))

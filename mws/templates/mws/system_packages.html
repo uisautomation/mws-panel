@@ -21,6 +21,9 @@
 {% block campl_foot_js %}
     <script src="{% static 'js/jquery.multi-select.js' %}" type="text/javascript"></script>
     <script>
-        $('#id_system_packages').multiSelect()
+        $('#id_system_packages').multiSelect({
+            selectableHeader: "<p>List of available packages:</p>",
+            selectionHeader: "<p>List of installed packages:</p>"
+        })
     </script>
 {% endblock %}

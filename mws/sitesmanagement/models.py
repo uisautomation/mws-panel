@@ -182,6 +182,7 @@ class VirtualMachine(models.Model):
         ('requested', 'Requested'),
         ('accepted', 'Accepted'),
         ('denied', 'Denied'),
+        ('ansible', 'Running Ansible'),
         ('ready', 'Ready'),
     )
 
@@ -199,6 +200,13 @@ class VirtualMachine(models.Model):
             return False
         from apimws.platforms import get_vm_power_state
         if get_vm_power_state(self) == "On":
+            return True
+        else:
+            return False
+
+    @property
+    def is_ready(self):
+        if self.status == 'ready':
             return True
         else:
             return False
@@ -386,7 +394,7 @@ class SystemPackagesForm(forms.Form):
             ("98", "php-numbers-words - PEAR module providing methods for spelling numerals in words"),
             ("99", "php-openid - PHP OpenID library"),
         )
-        system_packages = forms.MultipleChoiceField(widget=forms.SelectMultiple, choices=OPTIONS)
+        system_packages = forms.MultipleChoiceField(widget=forms.SelectMultiple, choices=OPTIONS, label="")
 
 
 # DEMO

@@ -47,3 +47,13 @@ def email_confirmation(site):
     from_email = "mws-admin@cam.ac.uk"
     recipient_list = (site.email, )
     send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+
+
+def launch_ansible(site):
+    primary_vm = site.primary_vm
+    primary_vm.status = 'ansible'
+    primary_vm.save()
+
+    # TODO Remove the following code when the Ansible API is ready and substitute by an API call
+    primary_vm.status = 'ready'
+    primary_vm.save()
