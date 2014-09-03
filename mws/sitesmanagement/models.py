@@ -371,4 +371,4 @@ class SystemPackagesForm(forms.Form):
             ("98", "php-numbers-words - PEAR module providing methods for spelling numerals in words"),
             ("99", "php-openid - PHP OpenID library"),
         )
-        system_packages = forms.MultipleChoiceField(widget=forms.SelectMultiple, choices=OPTIONS)
+        system_packages = forms.MultipleChoiceField(widget=forms.SelectMultiple, choices=OPTIONS, label="")
