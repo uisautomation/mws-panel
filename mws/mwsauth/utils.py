@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
-from django.http import HttpResponseForbidden
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from ucamlookup import user_in_groups
 from ucamlookup.models import LookupGroup
@@ -42,5 +43,8 @@ def privileges_check(site_id, user):
 
     if site.is_admin_suspended():
         return HttpResponseForbidden()
+
+    if site.primary_vm is not None and site.primary_vm.status is not 'ready':
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     return site

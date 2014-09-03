@@ -4,14 +4,14 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException
+from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups
 from apimws.models import AnsibleConfiguration
 from apimws.platforms import PlatformsAPINotWorkingException
 from apimws.utils import email_confirmation, platforms_email_api_request, ip_register_api_request, launch_ansible
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.utils import is_camacuk, get_object_or_None
 from .models import SiteForm, DomainNameFormNew, BillingForm, DomainName, NetworkConfig, EmailConfirmation, \
-    VirtualMachine, SystemPackagesForm, Vhost, VhostForm
+    VirtualMachine, SystemPackagesForm, Vhost, VhostForm, Site
 
 
 @login_required
@@ -109,13 +109,20 @@ def edit(request, site_id):
 
 @login_required
 def show(request, site_id):
-    site = privileges_check(site_id, request.user)
+    site = get_object_or_404(Site, pk=site_id)
+
+    if (not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all())) \
+            or site.is_admin_suspended():
+        return HttpResponseForbidden()
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
     }
 
     warning_messages = []
+
+    if site.primary_vm is not None and site.primary_vm.status == 'ansible':
+        warning_messages.append("Your virtual machine is being configured.")
 
     for vhost in site.vhosts.all():
         for domain_name in vhost.domain_names.all():
