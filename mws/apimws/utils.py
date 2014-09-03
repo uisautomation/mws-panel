@@ -55,4 +55,6 @@ def launch_ansible(site):
     primary_vm.status = 'ansible'
     primary_vm.save()
 
-    site.site_request_demo.date_submitted = timezone.now()
+    demo = site.site_request_demo
+    demo.date_submitted = timezone.now()
+    demo.save()
