@@ -39,12 +39,9 @@ def privileges_check(site_id, user):
     site = get_object_or_404(Site, pk=site_id)
 
     if not site in user.sites.all() and not user_in_groups(user, site.groups.all()):
-        return HttpResponseForbidden()
+        return None
 
     if site.is_admin_suspended():
-        return HttpResponseForbidden()
-
-    if site.primary_vm is not None and site.primary_vm.status is not 'ready':
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+        return None
 
     return site

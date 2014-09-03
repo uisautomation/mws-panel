@@ -80,6 +80,9 @@ def new(request):
 def edit(request, site_id):
     site = privileges_check(site_id, request.user)
 
+    if site is None:
+        return HttpResponseForbidden()
+
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
         1: dict(name='Change information about your MWS',
@@ -153,6 +156,9 @@ def show(request, site_id):
 def billing_management(request, site_id):
     site = privileges_check(site_id, request.user)
 
+    if site is None:
+        return HttpResponseForbidden()
+
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
         1: dict(name='Billing', url=reverse(billing_management, kwargs={'site_id': site.id}))
@@ -191,6 +197,9 @@ def privacy(request):
 def vhosts_management(request, site_id):
     site = privileges_check(site_id, request.user)
 
+    if site is None:
+        return HttpResponseForbidden()
+
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
         1: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id}))
@@ -205,6 +214,9 @@ def vhosts_management(request, site_id):
 @login_required
 def add_vhost(request, site_id, socket_error=None):
     site = privileges_check(site_id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
@@ -236,6 +248,9 @@ def domains_management(request, vhost_id):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
     site = privileges_check(vhost.site.id, request.user)
 
+    if site is None:
+        return HttpResponseForbidden()
+
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
         1: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id})),
@@ -254,6 +269,9 @@ def set_dn_as_main(request, domain_id):  # TODO remove vhost_id
     vhost = domain.vhost
     site = privileges_check(vhost.site.id, request.user)
 
+    if site is None:
+        return HttpResponseForbidden()
+
     if domain not in vhost.domain_names.all():
         return HttpResponseForbidden()
 
@@ -269,6 +287,9 @@ def set_dn_as_main(request, domain_id):  # TODO remove vhost_id
 def add_domain(request, vhost_id, socket_error=None):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
     site = privileges_check(vhost.site.id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
@@ -312,6 +333,9 @@ def add_domain(request, vhost_id, socket_error=None):
 def settings(request, site_id):
     site = privileges_check(site_id, request.user)
 
+    if site is None:
+        return HttpResponseForbidden()
+
     vm = site.primary_vm
 
     if vm is None or vm.status != 'ready':
@@ -334,6 +358,9 @@ def check_vm_status(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
     site = privileges_check(vm.site.id, request.user)
 
+    if site is None:
+        return HttpResponseForbidden()
+
     if vm is None or vm.status != 'ready':
         return JsonResponse({'error': 'VMNotReady'})
 
@@ -346,6 +373,10 @@ def check_vm_status(request, vm_id):
 @login_required
 def system_packages(request, site_id):
     site = privileges_check(site_id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
     ansible_configuraton = get_object_or_None(AnsibleConfiguration, site=site, key="System Packages")
 
     breadcrumbs = {
@@ -386,6 +417,9 @@ def power_vm(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
     site = privileges_check(vm.site.id, request.user)
 
+    if site is None:
+        return HttpResponseForbidden()
+
     if vm is None or vm.status != 'ready':
         return redirect(reverse(show, kwargs={'site_id': site.id}))
 
@@ -398,6 +432,9 @@ def power_vm(request, vm_id):
 def reset_vm(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
     site = privileges_check(vm.site.id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
 
     if vm is None or vm.status != 'ready':
         return redirect(reverse(show, kwargs={'site_id': site.id}))
