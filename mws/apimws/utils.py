@@ -21,8 +21,9 @@ def platforms_email_api_request(site, primary):
     send_mail(subject, message, from_email, recipient_list, fail_silently=False)
 
 
-def ip_register_api_request(site, domain_name):
-    domain_requested = DomainName.objects.create(name=domain_name, status='requested', site=site)
+def ip_register_api_request(vhost, domain_name):
+    site = vhost.site
+    domain_requested = DomainName.objects.create(name=domain_name, status='requested', vhost=vhost)
 
     subject = "New request of a Domain Name for the MWS"
     message = "Domain Name requested: " + domain_name + "\n" \

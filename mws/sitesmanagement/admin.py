@@ -1,14 +1,12 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
-from .models import Site, Billing, DomainName, NetworkConfig, Suspension, VirtualMachine, EmailConfirmation
+from .models import Site, Billing, DomainName, NetworkConfig, Suspension, VirtualMachine, EmailConfirmation, Vhost
 from ucamlookup import get_institutions, get_institution_name_by_id
 
 
 class SiteAdmin(ModelAdmin):
-
     all_institutions = get_institutions()
 
-    model = Site
     list_display = ('name', 'description', 'institution', 'primary_vm')
     ordering = ('name', )
     search_fields = ('name', )
@@ -27,24 +25,18 @@ class SiteAdmin(ModelAdmin):
 
 
 class DomainNameAdmin(ModelAdmin):
-
-    model = Site
-    list_display = ('name', 'site', 'status')
+    list_display = ('name', 'vhost', 'status')
     ordering = ('name', )
     search_fields = ('name', )
-    list_filter = ('site', 'status')
+    list_filter = ('vhost', 'status')
 
 
 class SuspensionAdmin(ModelAdmin):
-
-    model = Suspension
     list_display = ('site', 'start_date', 'end_date', 'active')
     list_filter = ('site__name', 'active')
 
 
 class NetworkConfigAdmin(ModelAdmin):
-
-    model = NetworkConfig
     list_display = ('IPv4', 'IPv6', 'mws_domain', 'virtual_machine')
     #list_filter = ('used', )
 
@@ -56,25 +48,24 @@ class NetworkConfigAdmin(ModelAdmin):
 
 
 class BillingAdmin(ModelAdmin):
-
-    model = Billing
     list_display = ('site', 'group', )
 
 
-class VirtualMachineAdmin(ModelAdmin):
+class VhostAdmin(ModelAdmin):
+    list_display = ('name', 'site', )
 
-    model = VirtualMachine
+
+class VirtualMachineAdmin(ModelAdmin):
     list_display = ('name', 'site', 'primary', 'status', 'network_configuration')
 
 
 class EmailConfirmationAdmin(ModelAdmin):
-
-    model = EmailConfirmation
     list_display = ('email', 'site', 'status')
 
 
 admin.site.register(Site, SiteAdmin)
 admin.site.register(Billing, BillingAdmin)
+admin.site.register(Vhost, VhostAdmin)
 admin.site.register(DomainName, DomainNameAdmin)
 admin.site.register(NetworkConfig, NetworkConfigAdmin)
 admin.site.register(Suspension, SuspensionAdmin)

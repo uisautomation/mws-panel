@@ -6,12 +6,13 @@ from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonRespons
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups
+from apimws.models import AnsibleConfiguration
 from apimws.platforms import PlatformsAPINotWorkingException
 from apimws.utils import email_confirmation, platforms_email_api_request, ip_register_api_request
 from mwsauth.utils import get_or_create_group_by_groupid
-from sitesmanagement.utils import is_camacuk
-from .models import SiteForm, DomainNameFormNewSite, Site, BillingForm, DomainName, NetworkConfig, EmailConfirmation, \
-    VirtualMachine, SiteRequestDemo
+from sitesmanagement.utils import is_camacuk, get_object_or_None
+from .models import SiteForm, DomainNameFormNew, Site, BillingForm, DomainName, NetworkConfig, EmailConfirmation, \
+    VirtualMachine, SystemPackagesForm, Vhost, VhostForm, SiteRequestDemo
 
 
 @login_required
@@ -45,8 +46,7 @@ def new(request):
     # TODO: FIX: if SiteForm's name field is empty then DomainNameForm errors are also shown
     if request.method == 'POST':
         site_form = SiteForm(request.POST, prefix="siteform", user=request.user)
-        domain_form = DomainNameFormNewSite(request.POST, prefix="domainform")
-        if site_form.is_valid() and domain_form.is_valid():
+        if site_form.is_valid():
 
             site = site_form.save(commit=False)
             site.start_date = datetime.date.today()
@@ -63,17 +63,6 @@ def new(request):
                 raise e  # TODO try again later. pass to celery?
 
             try:
-                # Check domain name requested
-                domain_requested = domain_form.save(commit=False)
-                if domain_requested.name != '':  # TODO do it after saving a domain request
-                    if is_camacuk(domain_requested.name):
-                        ip_register_api_request(site, domain_requested.name)
-                    else:
-                        DomainName.objects.create(name=domain_requested.name, status='accepted', site=site)
-            except Exception as e:
-                raise e  # TODO try again later. pass to celery?
-
-            try:
                 if site.email:
                     email_confirmation(site)  # TODO do it after saving a site
             except Exception as e:
@@ -82,11 +71,9 @@ def new(request):
             return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
     else:
         site_form = SiteForm(prefix="siteform", user=request.user)
-        domain_form = DomainNameFormNewSite(prefix="domainform")
 
     return render(request, 'mws/new.html', {
         'site_form': site_form,
-        'domain_form': domain_form,
         'breadcrumbs': breadcrumbs
     })
 
@@ -95,7 +82,7 @@ def new(request):
 def edit(request, site_id):
     site = get_object_or_404(Site, pk=site_id)
 
-    if not site in request.user.sites.all():
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
         return HttpResponseForbidden()
 
     if site.is_admin_suspended():
@@ -145,9 +132,10 @@ def show(request, site_id):
     if (timezone.now() - site.site_request_demo.date_submitted).seconds > 120:
         site.site_request_demo.demo_time_passed()
 
-    for domain_name in site.domain_names.all():
-        if domain_name.status == 'requested':
-            warning_messages.append("Your domain name %s has been requested and is under review." % domain_name.name)
+    for vhost in site.vhosts.all():
+        for domain_name in vhost.domain_names.all():
+            if domain_name.status == 'requested':
+                warning_messages.append("Your domain name %s has been requested and is under review." % domain_name.name)
 
     if not hasattr(site, 'billing'):
         warning_messages.append("No Billing, please add one.")
@@ -172,7 +160,7 @@ def show(request, site_id):
 def billing(request, site_id):
     site = get_object_or_404(Site, pk=site_id)
 
-    if not site in request.user.sites.all():
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
         return HttpResponseForbidden()
 
     if site.is_admin_suspended():
@@ -213,10 +201,10 @@ def privacy(request):
 
 
 @login_required
-def domains_management(request, site_id):
+def vhosts_management(request, site_id):
     site = get_object_or_404(Site, pk=site_id)
 
-    if not site in request.user.sites.all():
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
         return HttpResponseForbidden()
 
     if site.is_admin_suspended():
@@ -224,36 +212,19 @@ def domains_management(request, site_id):
 
     breadcrumbs = {}
     breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
-    breadcrumbs[1] = dict(name='Domains Management', url=reverse(domains_management, kwargs={'site_id': site.id}))
+    breadcrumbs[1] = dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id}))
 
-    return render(request, 'mws/domains.html', {
+    return render(request, 'mws/vhosts.html', {
         'breadcrumbs': breadcrumbs,
         'site': site
     })
 
 
 @login_required
-def set_dn_as_main(request, site_id, domain_id):
-    site = get_object_or_404(Site, pk=site_id)
-    domain = get_object_or_404(DomainName, pk=domain_id)
-
-    if (site not in request.user.sites.all()) or (domain not in site.domain_names.all()):
-        return HttpResponseForbidden()
-
-    if site.is_admin_suspended():
-        return HttpResponseForbidden()
-
-    site.main_domain = domain
-    site.save()
-
-    return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management', kwargs={'site_id': site.id}))
-
-
-@login_required
-def add_domain(request, site_id, socket_error=None):
+def add_vhost(request, site_id, socket_error=None):
     site = get_object_or_404(Site, pk=site_id)
 
-    if not site in request.user.sites.all():
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
         return HttpResponseForbidden()
 
     if site.is_admin_suspended():
@@ -261,31 +232,113 @@ def add_domain(request, site_id, socket_error=None):
 
     breadcrumbs = {}
     breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
-    breadcrumbs[1] = dict(name='Domains Management', url=reverse(domains_management, kwargs={'site_id': site.id}))
-    breadcrumbs[2] = dict(name='Add Domain', url=reverse(add_domain, kwargs={'site_id': site.id}))
+    breadcrumbs[1] = dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id}))
+    breadcrumbs[2] = dict(name='Add Vhost', url=reverse(add_vhost, kwargs={'site_id': site.id}))
 
     if request.method == 'POST':
-        domain_form = DomainNameFormNewSite(request.POST)
+        vhost_form = VhostForm(request.POST)
+        if vhost_form.is_valid():
+            vhost = vhost_form.save(commit=False)
+            vhost.site = site
+            vhost.save()
+            return HttpResponseRedirect(reverse('sitesmanagement.views.vhosts_management',
+                                                kwargs={'site_id': site.id}))
+    else:
+        vhost_form = VhostForm()
+
+    return render(request, 'mws/add_vhost.html', {
+        'breadcrumbs': breadcrumbs,
+        'site': site,
+        'vhost_form': vhost_form,
+    })
+
+
+@login_required
+def domains_management(request, vhost_id):
+    vhost = get_object_or_404(Vhost, pk=vhost_id)
+    site = vhost.site
+
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
+        return HttpResponseForbidden()
+
+    if site.is_admin_suspended():
+        return HttpResponseForbidden()
+
+    breadcrumbs = {}
+    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
+    breadcrumbs[1] = dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id}))
+    breadcrumbs[2] = dict(name='Domains Management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id}))
+
+    return render(request, 'mws/domains.html', {
+        'breadcrumbs': breadcrumbs,
+        'vhost': vhost
+    })
+
+
+@login_required
+def set_dn_as_main(request, vhost_id, domain_id):
+    vhost = get_object_or_404(Vhost, pk=vhost_id)
+    site = vhost.site
+    domain = get_object_or_404(DomainName, pk=domain_id)
+
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
+        return HttpResponseForbidden()
+
+    if domain not in vhost.domain_names.all():
+        return HttpResponseForbidden()
+
+    if site.is_admin_suspended():
+        return HttpResponseForbidden()
+
+    vhost.main_domain = domain
+    vhost.save()
+
+    return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management', kwargs={'vhost_id': vhost.id}))
+
+
+@login_required
+def add_domain(request, vhost_id, socket_error=None):
+    vhost = get_object_or_404(Vhost, pk=vhost_id)
+    site = vhost.site
+
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
+        return HttpResponseForbidden()
+
+    if site.is_admin_suspended():
+        return HttpResponseForbidden()
+
+    breadcrumbs = {}
+    breadcrumbs[0] = dict(name='Manage Web Server: '+str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
+    breadcrumbs[1] = dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id}))
+    breadcrumbs[2] = dict(name='Domains Management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id}))
+    breadcrumbs[3] = dict(name='Add Domain', url=reverse(add_domain, kwargs={'vhost_id': vhost.id}))
+
+    if request.method == 'POST':
+        domain_form = DomainNameFormNew(request.POST)
         if domain_form.is_valid():
             try:
                 domain_requested = domain_form.save(commit=False)
                 if domain_requested.name != '':  # TODO do it after saving a domain request
                     if is_camacuk(domain_requested.name):
-                        ip_register_api_request(site, domain_requested.name)
+                        ip_register_api_request(vhost, domain_requested.name)
                     else:
-                        DomainName.objects.create(name=domain_requested.name, status='accepted', site=site)
+                        new_domain = DomainName.objects.create(name=domain_requested.name, status='accepted',
+                                                               vhost=vhost)
+                        if vhost.main_domain is None:
+                            vhost.main_domain = new_domain
+                            vhost.save()
             except socket.error as serr:
                 pass  # TODO sent an error to infosys email?
             except Exception as e:
                 raise e  # TODO try again later. pass to celery?
             return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management',
-                                                kwargs={'site_id': site.id}))
+                                                kwargs={'vhost_id': vhost.id}))
     else:
-        domain_form = DomainNameFormNewSite()
+        domain_form = DomainNameFormNew()
 
     return render(request, 'mws/add_domain.html', {
         'breadcrumbs': breadcrumbs,
-        'site': site,
+        'vhost': vhost,
         'domain_form': domain_form,
     })
 
@@ -294,7 +347,7 @@ def add_domain(request, site_id, socket_error=None):
 def settings(request, site_id):
     site = get_object_or_404(Site, pk=site_id)
 
-    if not site in request.user.sites.all():
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
         return HttpResponseForbidden()
 
     if site.is_admin_suspended():
@@ -321,7 +374,7 @@ def check_vm_status(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
     site = vm.site
 
-    if not site in request.user.sites.all():
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
         return HttpResponseForbidden()
 
     if site.is_admin_suspended():
@@ -339,8 +392,9 @@ def check_vm_status(request, vm_id):
 @login_required
 def system_packages(request, site_id):
     site = get_object_or_404(Site, pk=site_id)
+    ansible_configuraton = get_object_or_None(AnsibleConfiguration, site=site, key="System Packages")
 
-    if not site in request.user.sites.all():
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
         return HttpResponseForbidden()
 
     if site.is_admin_suspended():
@@ -351,9 +405,27 @@ def system_packages(request, site_id):
     breadcrumbs[1] = dict(name='Settings', url=reverse(settings, kwargs={'site_id': site.id}))
     breadcrumbs[2] = dict(name='System packages', url=reverse(system_packages, kwargs={'site_id': site.id}))
 
+    if request.method == 'POST':
+        system_packages_form = SystemPackagesForm(request.POST)
+        if system_packages_form.is_valid():
+            if ansible_configuraton is not None:
+                ansible_configuraton.value = ",".join(system_packages_form.cleaned_data.get('system_packages'))
+                ansible_configuraton.save()
+            else:
+                AnsibleConfiguration.objects.create(site=site, key="System Packages",
+                                                    value=",".join(system_packages_form.cleaned_data.get('system_packages')))
+            return HttpResponseRedirect(reverse('sitesmanagement.views.show',
+                                                kwargs={'site_id': site.id}))
+    else:
+        if ansible_configuraton is not None:
+            system_packages_form = SystemPackagesForm(initial={'system_packages': ansible_configuraton.value.split(",")})
+        else:
+            system_packages_form = SystemPackagesForm()
+
     return render(request, 'mws/system_packages.html', {
         'breadcrumbs': breadcrumbs,
-        'site': site
+        'site': site,
+        'system_packages_form': system_packages_form,
     })
 
 
@@ -362,7 +434,7 @@ def power_vm(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
     site = vm.site
 
-    if not site in request.user.sites.all():
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
         return HttpResponseForbidden()
 
     if site.is_admin_suspended():
@@ -381,7 +453,7 @@ def reset_vm(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
     site = vm.site
 
-    if not site in request.user.sites.all():
+    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
         return HttpResponseForbidden()
 
     if site.is_admin_suspended():
