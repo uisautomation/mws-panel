@@ -5,12 +5,13 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups
+from apimws.models import AnsibleConfiguration
 from apimws.platforms import PlatformsAPINotWorkingException
 from apimws.utils import email_confirmation, platforms_email_api_request, ip_register_api_request
 from mwsauth.utils import get_or_create_group_by_groupid
-from sitesmanagement.utils import is_camacuk
+from sitesmanagement.utils import is_camacuk, get_object_or_None
 from .models import SiteForm, DomainNameFormNew, Site, BillingForm, DomainName, NetworkConfig, EmailConfirmation, \
-    VirtualMachine
+    VirtualMachine, SystemPackagesForm
 
 
 @login_required
@@ -325,6 +326,7 @@ def check_vm_status(request, vm_id):
 @login_required
 def system_packages(request, site_id):
     site = get_object_or_404(Site, pk=site_id)
+    ansible_configuraton = get_object_or_None(AnsibleConfiguration, site=site, key="System Packages")
 
     if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
         return HttpResponseForbidden()
@@ -337,9 +339,27 @@ def system_packages(request, site_id):
     breadcrumbs[1] = dict(name='Settings', url=reverse(settings, kwargs={'site_id': site.id}))
     breadcrumbs[2] = dict(name='System packages', url=reverse(system_packages, kwargs={'site_id': site.id}))
 
+    if request.method == 'POST':
+        system_packages_form = SystemPackagesForm(request.POST)
+        if system_packages_form.is_valid():
+            if ansible_configuraton is not None:
+                ansible_configuraton.value = system_packages_form.cleaned_data.get('system_packages')
+                ansible_configuraton.save()
+            else:
+                AnsibleConfiguration.objects.create(site=site, key="System Packages",
+                                                    value=system_packages_form.cleaned_data.get('system_packages'))
+            return HttpResponseRedirect(reverse('sitesmanagement.views.show',
+                                                kwargs={'site_id': site.id}))
+    else:
+        if ansible_configuraton is not None:
+            system_packages_form = SystemPackagesForm(initial={'system_packages': ansible_configuraton.value})
+        else:
+            system_packages_form = SystemPackagesForm()
+
     return render(request, 'mws/system_packages.html', {
         'breadcrumbs': breadcrumbs,
-        'site': site
+        'site': site,
+        'system_packages_form': system_packages_form,
     })
 
 
