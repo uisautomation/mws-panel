@@ -9,7 +9,7 @@ from mwsauth import views
 from mwsauth.utils import get_or_create_user_by_crsid, get_or_create_group_by_groupid
 from ucamlookup import user_in_groups
 from mwsauth.validators import validate_crsids, validate_groupids
-from sitesmanagement.models import Site, Suspension
+from sitesmanagement.models import Site, Suspension, VirtualMachine, NetworkConfig
 from ucamlookup.models import LookupGroup
 
 
@@ -135,6 +135,10 @@ class AuthTestCases(TestCase):
         self.assertEqual(response.status_code, 404)  # Site does not exists
 
         site_without_auth_users = Site.objects.create(name="test_site1", start_date=datetime.today())
+        VirtualMachine.objects.create(primary=True, status='requested', site=site_without_auth_users,
+                                      network_configuration=NetworkConfig.objects.create(IPv4="1.1.1.1",
+                                                                                         IPv6="::ffff:1.1.1.1",
+                                                                                         mws_domain="1.mws.cam.ac.uk"))
 
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_without_auth_users.id}))
         self.assertEqual(response.status_code, 403)  # User is not authorised
@@ -148,6 +152,10 @@ class AuthTestCases(TestCase):
         site_with_auth_groups = Site.objects.create(name="test_site2", start_date=datetime.today())
         information_systems_group = get_or_create_group_by_groupid(101888)
         site_with_auth_groups.groups.add(information_systems_group)
+        VirtualMachine.objects.create(primary=True, status='requested', site=site_with_auth_groups,
+                                      network_configuration=NetworkConfig.objects.create(IPv4="1.1.1.2",
+                                                                                         IPv6="::ffff:1.1.1.2",
+                                                                                         mws_domain="2.mws.cam.ac.uk"))
 
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_with_auth_groups.id}))
         self.assertContains(response, "101888", status_code=200)  # User is in an authorised group
