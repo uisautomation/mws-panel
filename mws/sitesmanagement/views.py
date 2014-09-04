@@ -268,6 +268,7 @@ def delete_vhost(request, vhost_id):
 
     if request.method == 'DELETE':
         vhost.delete()
+        launch_ansible(site)
         return redirect(show, site_id=site.id)
 
     return HttpResponseForbidden()
