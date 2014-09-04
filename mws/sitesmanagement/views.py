@@ -117,8 +117,11 @@ def edit(request, site_id):
 def show(request, site_id):
     site = get_object_or_404(Site, pk=site_id)
 
-    if (not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all())) \
-            or site.is_admin_suspended():
+    try:
+        if (not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all())) \
+                or site.is_admin_suspended():
+            return HttpResponseForbidden()
+    except Exception as e:
         return HttpResponseForbidden()
 
     breadcrumbs = {
