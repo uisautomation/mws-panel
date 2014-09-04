@@ -110,8 +110,6 @@ class SiteManagementTests(TestCase):
 
         response = self.client.get(response.url)
 
-        self.assertContains(response, "Your domain name %s has been requested and is under review." %
-                            test_site.domain_names.first().name)
         self.assertContains(response, "Your email &#39;%s&#39; is still unconfirmed, please click on the link of "
                                       "the sent email" % test_site.email )
 
@@ -163,38 +161,38 @@ class SiteManagementTests(TestCase):
                                       "the sent email" % site_changed.email )
 
     def test_view_billing(self):
-        response = self.client.get(reverse(views.billing, kwargs={'site_id': 1}))
+        response = self.client.get(reverse(views.billing_management, kwargs={'site_id': 1}))
         self.assertEqual(response.status_code, 302)  # Not logged in, redirected to login
         self.assertTrue(response.url.endswith(
-            '%s?next=%s' % (reverse('raven_login'), reverse(views.billing, kwargs={'site_id': 1}))))
+            '%s?next=%s' % (reverse('raven_login'), reverse(views.billing_management, kwargs={'site_id': 1}))))
 
         do_test_login(self, user="test0001")
 
-        response = self.client.get(reverse(views.billing, kwargs={'site_id': 1}))
+        response = self.client.get(reverse(views.billing_management, kwargs={'site_id': 1}))
         self.assertEqual(response.status_code, 404)  # The Site does not exist
 
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
-        response = self.client.get(reverse(views.billing, kwargs={'site_id': site.id}))
+        response = self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)  # The User is not in the list of auth users
 
         site.users.add(User.objects.get(username="test0001"))
-        response = self.client.get(reverse(views.billing, kwargs={'site_id': site.id}))
+        response = self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id}))
         self.assertContains(response, "Change billing data")
         response = self.client.get(reverse(views.show, kwargs={'site_id': site.id}))
         self.assertContains(response, "No Billing, please add one.")
 
         suspension = site.suspend_now(input_reason="test suspension")
-        response = self.client.get(reverse(views.billing, kwargs={'site_id': site.id}))
+        response = self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)  # The site is suspended
 
         suspension.active = False
         suspension.save()
-        response = self.client.get(reverse(views.billing, kwargs={'site_id': site.id}))
+        response = self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id}))
         self.assertContains(response, "Change billing data")
 
         self.assertFalse(hasattr(site, 'billing'))
         with open(os.path.join(settings.BASE_DIR, 'requirements.txt')) as fp:
-            response = self.client.post(reverse(views.billing, kwargs={'site_id': site.id}),
+            response = self.client.post(reverse(views.billing_management, kwargs={'site_id': site.id}),
                                         {'purchase_order_number': 'testOrderNumber', 'group': 'testGroup',
                                          'purchase_order': fp,})
         self.assertEqual(response.status_code, 302)  # Changes done, redirecting
@@ -209,12 +207,12 @@ class SiteManagementTests(TestCase):
         site_changed.billing.purchase_order.delete()
 
         site = Site.objects.get(pk=site.id)
-        response = self.client.get(reverse(views.billing, kwargs={'site_id': site.id}))
+        response = self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id}))
         self.assertContains(response, "testOrderNumber")
         self.assertContains(response, "testGroup")
         self.assertTrue(hasattr(site, 'billing'))
         with open(os.path.join(settings.BASE_DIR, 'requirements.txt')) as fp:
-            response = self.client.post(reverse(views.billing, kwargs={'site_id': site.id}),
+            response = self.client.post(reverse(views.billing_management, kwargs={'site_id': site.id}),
                                         {'purchase_order_number': 'testOrderNumber1', 'group': 'testGroup1',
                                          'purchase_order': fp,})
         self.assertEqual(response.status_code, 302)  # Changes done, redirecting
