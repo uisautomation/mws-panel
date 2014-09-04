@@ -224,7 +224,7 @@ def vhosts_management(request, site_id):
 
 
 @login_required
-def add_vhost(request, site_id, socket_error=None):
+def add_vhost(request, site_id):
     site = privileges_check(site_id, request.user)
 
     if site is None:
@@ -256,6 +256,21 @@ def add_vhost(request, site_id, socket_error=None):
         'site': site,
         'vhost_form': vhost_form,
     })
+
+
+@login_required
+def delete_vhost(request, vhost_id):
+    vhost = get_object_or_404(Vhost, pk=vhost_id)
+    site = privileges_check(vhost.site.id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if request.method == 'DELETE':
+        vhost.delete()
+        return redirect(show, site_id=site.id)
+
+    return HttpResponseForbidden()
 
 
 @login_required
