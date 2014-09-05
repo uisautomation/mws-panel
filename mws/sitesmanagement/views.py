@@ -385,6 +385,7 @@ def certificates(request, vhost_id):
 
     return render(request, 'mws/certificates.html', {
         'breadcrumbs': breadcrumbs,
+        'vhost': vhost,
         'site': site,
     })
 
