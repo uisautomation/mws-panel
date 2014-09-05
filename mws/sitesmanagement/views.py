@@ -376,6 +376,27 @@ def add_domain(request, vhost_id, socket_error=None):
 
 
 @login_required
+def certificates(request, vhost_id):
+    vhost = get_object_or_404(Vhost, pk=vhost_id)
+    site = privileges_check(vhost.site.id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id})),
+        2: dict(name='TLS/SSL Certificates', url=reverse(certificates, kwargs={'vhost_id': vhost.id})),
+    }
+
+    return render(request, 'mws/certificates.html', {
+        'breadcrumbs': breadcrumbs,
+        'vhost': vhost,
+        'site': site,
+    })
+
+
+@login_required
 def settings(request, site_id):
     site = privileges_check(site_id, request.user)
 

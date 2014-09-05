@@ -1,0 +1,22 @@
+{% extends 'project-light/campl-mws.html' %}
+{% load static %}
+{% block page_content %}
+    <div class="campl-column12 campl-main-content">
+        <div class="campl-content-container">
+            <h1>TLS/SSL certificates</h1>
+
+            <form action={% url 'sitesmanagement.views.certificates' vhost_id=vhost.id %} method="post">{% csrf_token %}
+                <fieldset>
+                    <p><a href="#">Generate CSR</a></p>
+                    <p>Upload the crt file: <input type="file" name="crt"></p>
+                    <p>Upload the ca-bundle file: <input type="file" name="cabundle"></p>
+                    <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block campl_foot_js %}
+
+{% endblock %}

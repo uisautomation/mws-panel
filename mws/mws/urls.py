@@ -3,8 +3,6 @@ from django.conf.urls.static import static
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 
-admin.autodiscover() # TODO not needed in django 1.7
-
 urlpatterns = patterns('',
     # external apps urls
     url(r'^grappelli/', include('grappelli.urls')),
@@ -27,6 +25,7 @@ urlpatterns = patterns('',
     url(r'^domains/(?P<vhost_id>[0-9]+)/$', 'sitesmanagement.views.domains_management'),
     url(r'^vhosts/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.vhosts_management'),
     url(r'^vhosts/(?P<vhost_id>[0-9]+)/delete/$', 'sitesmanagement.views.delete_vhost'),
+    url(r'^vhosts/(?P<vhost_id>[0-9]+)/certificates/$', 'sitesmanagement.views.certificates'),
     url(r'^add_domain/(?P<vhost_id>[0-9]+)/$', 'sitesmanagement.views.add_domain'),
     url(r'^add_vhost/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.add_vhost'),
     url(r'^set_dn_as_main/(?P<domain_id>[0-9]+)/$', 'sitesmanagement.views.set_dn_as_main'),
