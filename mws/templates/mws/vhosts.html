@@ -52,13 +52,19 @@
                             {{ vhost.name }}
                         </td>
                         <td>
-                            <a href="{% url 'sitesmanagement.views.domains_management' vhost_id=vhost.id %}">
-                                Domains associated to this vhost
-                            </a>
+                            {% for domain_name in vhost.sorted_domain_names %}
+                                {{ domain_name.name }},
+                            {% endfor %}
                         </td>
-                        <td style="width: 20px;">
-                            <a class="delete_metadata" data-toggle="confirmation" data-href="javascript:delete_vhost('{% url 'sitesmanagement.views.delete_vhost' vhost_id=vhost.id %}')" href="#">
-                                <img alt="Delete" title="Delete" class="iconic" src="{% static 'icons/iconic/trash.svg' %}">
+                        <td style="width: 160px;">
+                            <a href="{% url 'sitesmanagement.views.domains_management' vhost_id=vhost.id %}">
+                                <i title="Domains associated to this vhost" class="fa fa-link fa-2x"></i>
+                            </a>
+                            <a href="{% url 'sitesmanagement.views.certificates' vhost_id=vhost.id %}">
+                                <i title="TLS/SSL" class="fa fa-lock fa-2x"></i>
+                            </a>
+                            <a class="delete_vhost" data-toggle="confirmation" data-href="javascript:delete_vhost('{% url 'sitesmanagement.views.delete_vhost' vhost_id=vhost.id %}')" href="#">
+                                <i title="Delete" class="fa fa-trash-o fa-2x"></i>
                             </a>
                         </td>
                     </tr>

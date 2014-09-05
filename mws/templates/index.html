@@ -49,12 +49,14 @@
                                     {{ site.description }}
                                 </td>
                                 <td>
-                                    {{ site.main_domain }}
+                                    {% for domain in site.domain_names %}
+                                        {{ domain.name }}<br/>
+                                    {% endfor %}
                                 </td>
                                 <td style="width: 35px;">
                                     {% if not site.is_admin_suspended %}
                                         <a href="{% url 'sitesmanagement.views.show' site_id=site.id %}">
-                                            <img alt="Show" class="iconic" src="{% static 'icons/iconic/magnifying-glass.svg' %}">
+                                            <i title="Details of your site" class="fa fa-angle-double-right fa-2x"></i>
                                         </a>
                                     {% endif %}
                                 </td>

@@ -55,6 +55,12 @@ class Site(models.Model):
     def secondary_vm(self):
         return self.vm(primary=False)
 
+    def domain_names(self):
+        domains = []
+        for vhost in self.vhosts.all():
+            domains += vhost.domain_names.all()
+        return sorted(set(domains))
+
     def calculate_billing(self, financial_year_start, financial_year_end):
         start_date = end_date = None
         if self.end_date is None:
@@ -112,6 +118,9 @@ class Vhost(models.Model):
     # main domain name for this vhost
     main_domain = models.ForeignKey('DomainName', related_name='+', null=True, blank=True)
     site = models.ForeignKey(Site, related_name='vhosts')
+
+    def sorted_domain_names(self):
+        return sorted(set(self.domain_names.all()))
 
     def __unicode__(self):
         return self.name

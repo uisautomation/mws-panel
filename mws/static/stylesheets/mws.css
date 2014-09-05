@@ -34,12 +34,6 @@ ul.errorlist + p textarea {
     border-color: #b94a48 !important;
 }
 
-.iconic {
-    height: 1.25em;
-    margin-left: 10px;
-    vertical-align: baseline;
-}
-
 #translucidframe {
     visibility: hidden;
     width: 100%;
