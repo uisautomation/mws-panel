@@ -171,9 +171,6 @@ def billing_management(request, site_id):
     if site is None:
         return HttpResponseForbidden()
 
-    if site.primary_vm is not None and site.primary_vm.is_ready is False:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
-
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
         1: dict(name='Billing', url=reverse(billing_management, kwargs={'site_id': site.id}))
