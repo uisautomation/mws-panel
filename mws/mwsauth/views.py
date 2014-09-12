@@ -13,6 +13,9 @@ from ucamlookup import user_in_groups
 def auth_change(request, site_id):
     site = get_object_or_404(Site, pk=site_id)
 
+    if site.is_canceled():
+        return HttpResponseForbidden()
+
     # If the user is not in the user auth list of the site and neither belongs to a group in the group auth list of
     # the site then return a forbidden response
     if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):

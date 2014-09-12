@@ -28,6 +28,8 @@ def index(request):
 
     sites += request.user.sites.all()
 
+    sites = filter(lambda site: not site.is_canceled(), sites)
+
     return render(request, 'index.html', {
         'all_sites': sorted(set(sites)),
         'deactivate_new': NetworkConfig.num_pre_allocated() < 1
@@ -114,8 +116,42 @@ def edit(request, site_id):
 
 
 @login_required
+def delete(request, site_id):
+    site = privileges_check(site_id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Change information about your MWS',
+                           url=reverse('sitesmanagement.views.edit', kwargs={'site_id': site.id})),
+        2: dict(name='Delete your MWS',
+                           url=reverse('sitesmanagement.views.delete', kwargs={'site_id': site.id}))
+    }
+
+    if request.method == 'POST':
+        if request.POST.get('confirmation') == "yes":
+            site.cancel()
+            return redirect(index)
+        else:
+            return redirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
+    return render(request, 'mws/delete.html', {
+        'site': site,
+        'breadcrumbs': breadcrumbs
+    })
+
+
+@login_required
 def show(request, site_id):
     site = get_object_or_404(Site, pk=site_id)
+
+    if site.is_canceled():
+        return HttpResponseForbidden()
 
     try:
         if (not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all())) \

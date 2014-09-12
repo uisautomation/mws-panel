@@ -38,6 +38,9 @@ def get_or_create_group_by_groupid(groupid):
 def privileges_check(site_id, user):
     site = get_object_or_404(Site, pk=site_id)
 
+    if site.is_canceled():
+        return None
+
     try:
         if not site in user.sites.all() and not user_in_groups(user, site.groups.all()):
             return None
