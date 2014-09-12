@@ -164,10 +164,7 @@ class AuthTestCases(TestCase):
         suspension = Suspension.objects.create(reason="test_suspension", site=site_with_auth_users,
                                                start_date=datetime.today())
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_with_auth_users.id}))
-        self.assertEqual(response.status_code, 302)  # Site is suspended
-        self.assertTrue(response.url.endswith(
-            '%s' % reverse('sitesmanagement.views.show', kwargs={'site_id': site_with_auth_users.id})))
-        self.assertEqual(self.client.get(response.url).status_code, 403)  # Site is suspended
+        self.assertEqual(response.status_code, 403)  # Site is suspended
         suspension.delete()
 
         self.assertEqual(len(site_with_auth_users.users.all()), 1)

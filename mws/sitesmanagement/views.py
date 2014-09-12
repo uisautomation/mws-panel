@@ -148,16 +148,9 @@ def delete(request, site_id):
 
 @login_required
 def show(request, site_id):
-    site = get_object_or_404(Site, pk=site_id)
+    site = privileges_check(site_id, request.user)
 
-    if site.is_canceled():
-        return HttpResponseForbidden()
-
-    try:
-        if (not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all())) \
-                or site.is_admin_suspended():
-            return HttpResponseForbidden()
-    except Exception as e:
+    if site is None:
         return HttpResponseForbidden()
 
     breadcrumbs = {
