@@ -13,6 +13,9 @@ class PlatformsAPINotWorkingException(Exception):
 class PlatformsAPIInputException(Exception):
     pass
 
+class NoPrealocatedPrivateIPsAvailable(Exception):
+    pass
+
 
 def get_api_secret():
     if platform.system() == 'Darwin':
@@ -123,14 +126,44 @@ def reset_vm(vm):
         return False # TODO raise error
 
 
+def destroy_vm(vm):
+    json_object = {
+        'username': get_api_username(),
+        'secret': get_api_secret(),
+        'command': 'destroy',
+        'vmid': vm.name
+    }
+
+    headers = {'Content-type': 'application/json'}
+    r = requests.post("https://bes.csi.cam.ac.uk/mws-api/v1/vm.json", data=json.dumps(json_object), headers=headers)
+    try:
+        response = json.loads(r.text)
+    except Exception as e:
+        raise PlatformsAPINotWorkingException(e.message)  # TODO capture exception where it is called
+
+    if response['result'] == 'Success':
+        return True
+    else:
+        raise PlatformsAPINotWorkingException()  # TODO capture exception where it is called
+
+
 def clone_vm(site, primary_vm):
+
+    #TODO if the target_vm exists, delete it first
 
     if primary_vm:
         orignal_vm = site.primary_vm
+        if site.secondary_vm:
+            site.secondary_vm.delete()
     else:
         orignal_vm = site.secondary_vm
+        if site.primary_vm:
+            site.primary_vm.delete()
 
     network_configuration = NetworkConfig.objects.filter(virtual_machine=None).first()
+
+    if network_configuration is None:
+        raise NoPrealocatedPrivateIPsAvailable()
 
     destiantion_vm = VirtualMachine.objects.create(primary=(not primary_vm), status='requested',
                                                    network_configuration=network_configuration, site=site)
