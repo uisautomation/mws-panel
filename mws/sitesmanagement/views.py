@@ -6,12 +6,12 @@ from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonRespons
 from django.shortcuts import render, get_object_or_404, redirect
 from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException
 from apimws.models import AnsibleConfiguration
-from apimws.platforms import PlatformsAPINotWorkingException, new_site_primary_vm
+from apimws.platforms import PlatformsAPINotWorkingException, new_site_primary_vm, clone_vm
 from apimws.utils import email_confirmation, ip_register_api_request, launch_ansible
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.utils import is_camacuk, get_object_or_None
 from .models import SiteForm, DomainNameFormNew, BillingForm, DomainName, NetworkConfig, EmailConfirmation, \
-    VirtualMachine, SystemPackagesForm, Vhost, VhostForm
+    VirtualMachine, SystemPackagesForm, Vhost, VhostForm, Site
 
 
 @login_required
@@ -546,3 +546,32 @@ def reset_vm(request, vm_id):
         pass  # TODO add error messages in session if it is False
 
     return redirect(settings, site_id=site.id)
+
+
+@login_required
+def clone_vm_view(request, site_id):
+    site = privileges_check(site_id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Settings', url=reverse(settings, kwargs={'site_id': site.id})),
+        2: dict(name='Clone your VM', url=reverse(clone_vm_view, kwargs={'site_id': site.id}))
+    }
+
+    if request.method == 'POST':
+        if request.POST.get('primary_vm') == "true":
+            if not clone_vm(site, True):
+                raise PlatformsAPINotWorkingException()
+        if request.POST.get('primary_vm') == "false":
+            if not clone_vm(site, False):
+                raise PlatformsAPINotWorkingException()
+
+        redirect(show, site_id = site.id)
+
+    return render(request, 'mws/clone_vm.html', {
+        'breadcrumbs': breadcrumbs,
+        'site': site,
+    })

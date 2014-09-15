@@ -31,6 +31,7 @@ urlpatterns = patterns('',
     url(r'^add_vhost/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.add_vhost'),
     url(r'^set_dn_as_main/(?P<domain_id>[0-9]+)/$', 'sitesmanagement.views.set_dn_as_main'),
     url(r'^system_packages/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.system_packages'),
+    url(r'^clone_vm/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.clone_vm_view'),
     url(r'^settings/vm/(?P<vm_id>[0-9]+)/on/$', 'sitesmanagement.views.power_vm'),
     url(r'^settings/vm/(?P<vm_id>[0-9]+)/reset/$', 'sitesmanagement.views.reset_vm'),
 
