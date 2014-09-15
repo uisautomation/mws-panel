@@ -10,6 +10,9 @@ from sitesmanagement.models import VirtualMachine, NetworkConfig
 class PlatformsAPINotWorkingException(Exception):
     pass
 
+class PlatformsAPIInputException(Exception):
+    pass
+
 
 def get_api_secret():
     if platform.system() == 'Darwin':
@@ -42,6 +45,9 @@ def new_site_primary_vm(site, primary):
         raise PlatformsAPINotWorkingException(e.message)  # TODO capture exception where it is called
 
     if response['result'] == 'Success':
+        vm.name = response['vmid']
+        vm.status = 'ready'
+        vm.save()
         return True
     else:
         return False  # TODO raise error
@@ -74,7 +80,7 @@ def get_vm_power_state(vm):
 
 def change_vm_power_state(vm, on):
     if on != 'on' and on != 'off':
-        pass  # TODO raise error
+        raise PlatformsAPIInputException("passed wrong parameter power %s" % on)
 
     json_object = {
         'username': get_api_username(),
@@ -115,3 +121,39 @@ def reset_vm(vm):
         return True
     else:
         return False # TODO raise error
+
+
+def clone_vm(site, primary_vm):
+
+    if primary_vm:
+        orignal_vm = site.primary_vm
+    else:
+        orignal_vm = site.secondary_vm
+
+    network_configuration = NetworkConfig.objects.filter(virtual_machine=None).first()
+
+    destiantion_vm = VirtualMachine.objects.create(primary=(not primary_vm), status='requested',
+                                                   network_configuration=network_configuration, site=site)
+
+    json_object = {
+        'username': get_api_username(),
+        'secret': get_api_secret(),
+        'command': 'clone',
+        'vmid': orignal_vm.name,
+        'ip': network_configuration.IPv4,
+        'hostname': network_configuration.mws_domain,
+    }
+    headers = {'Content-type': 'application/json'}
+    try:
+        response = json.loads(requests.post("https://bes.csi.cam.ac.uk/mws-api/v1/vm.json",
+                                            data=json.dumps(json_object), headers=headers).text)
+    except Exception as e:
+        raise PlatformsAPINotWorkingException(e.message)  # TODO capture exception where it is called
+
+    if response['result'] == 'Success':
+        destiantion_vm.name = response['vmid']
+        destiantion_vm.status = 'ready'
+        destiantion_vm.save()
+        return True
+    else:
+        return False  # TODO raise error

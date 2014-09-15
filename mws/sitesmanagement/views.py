@@ -4,14 +4,14 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups
+from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException
 from apimws.models import AnsibleConfiguration
-from apimws.platforms import PlatformsAPINotWorkingException
-from apimws.utils import email_confirmation, platforms_email_api_request, ip_register_api_request, launch_ansible
+from apimws.platforms import PlatformsAPINotWorkingException, new_site_primary_vm
+from apimws.utils import email_confirmation, ip_register_api_request, launch_ansible
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.utils import is_camacuk, get_object_or_None
 from .models import SiteForm, DomainNameFormNew, BillingForm, DomainName, NetworkConfig, EmailConfirmation, \
-    VirtualMachine, SystemPackagesForm, Vhost, VhostForm, Site
+    VirtualMachine, SystemPackagesForm, Vhost, VhostForm
 
 
 @login_required
@@ -58,7 +58,7 @@ def new(request):
             site.users.add(request.user)
 
             try:
-                platforms_email_api_request(site, primary=True)  # TODO do it after saving a site
+                new_site_primary_vm(site, primary=True)  # TODO do it after saving a site
             except Exception as e:
                 raise e  # TODO try again later. pass to celery?
 
