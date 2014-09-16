@@ -53,7 +53,9 @@ ul.errorlist + p textarea {
     margin-left: -32px;
 }
 
-
+.campl-primary-red{display:inline-block;background:#D50000;color:#fff;padding:5px 25px 5px 10px;border:0;text-shadow: none}
+.campl-primary-red:link, .campl-primary-red:visited{color:#f8f8f8;background:#D50000;border:0}
+.campl-primary-red:focus, .campl-primary-red:hover, .campl-primary-red:active{color: #f8f8f8;background: #770000;border:0;text-decoration:none}
 
 
 

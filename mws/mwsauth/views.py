@@ -3,6 +3,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
 from apimws.utils import launch_ansible
+from mwsauth.utils import privileges_check
 from sitesmanagement.models import Site
 from sitesmanagement.views import show
 from mwsauth.validators import validate_crsids, validate_groupids
@@ -11,15 +12,10 @@ from ucamlookup import user_in_groups
 
 @login_required
 def auth_change(request, site_id):
-    site = get_object_or_404(Site, pk=site_id)
+    site = privileges_check(site_id, request.user)
 
-    # If the user is not in the user auth list of the site and neither belongs to a group in the group auth list of
-    # the site then return a forbidden response
-    if not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all()):
+    if site is None:
         return HttpResponseForbidden()
-
-    if site.is_admin_suspended():
-        return redirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     authorised_users = site.users.all()
     authorised_groups = site.groups.all()

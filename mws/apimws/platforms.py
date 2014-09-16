@@ -1,13 +1,21 @@
 import json
+import os
 import random
 import string
 import crypt
+from django.conf import settings
 import requests
 import platform
 from sitesmanagement.models import VirtualMachine, NetworkConfig
 
 
 class PlatformsAPINotWorkingException(Exception):
+    pass
+
+class PlatformsAPIInputException(Exception):
+    pass
+
+class NoPrealocatedPrivateIPsAvailable(Exception):
     pass
 
 
@@ -33,6 +41,34 @@ def new_site_primary_vm(site, primary):
         'command': 'create',
         'ip': vm.network_configuration.IPv4,
         'hostname': vm.network_configuration.mws_domain,
+    }
+    headers = {'Content-type': 'application/json'}
+    try:
+        response = json.loads(requests.post("https://bes.csi.cam.ac.uk/mws-api/v1/vm.json",
+                                            data=json.dumps(json_object), headers=headers).text)
+    except Exception as e:
+        raise PlatformsAPINotWorkingException(e.message)  # TODO capture exception where it is called
+
+    if response['result'] == 'Success':
+        vm.name = response['vmid']
+        vm.status = 'ready'
+        vm.save()
+        return install_vm(vm)
+    else:
+        return False  # TODO raise error
+
+
+def install_vm(vm):
+    f = open(os.path.join(settings.BASE_DIR, 'apimws/debian_preseed.txt'), 'r')
+    profile = f.read()
+    f.close()
+
+    json_object = {
+        'username': get_api_username(),
+        'secret': get_api_secret(),
+        'command': 'install',
+        'vmid': vm.name,
+        'profile': profile,
     }
     headers = {'Content-type': 'application/json'}
     try:
@@ -74,7 +110,7 @@ def get_vm_power_state(vm):
 
 def change_vm_power_state(vm, on):
     if on != 'on' and on != 'off':
-        pass  # TODO raise error
+        raise PlatformsAPIInputException("passed wrong parameter power %s" % on)
 
     json_object = {
         'username': get_api_username(),
@@ -115,3 +151,69 @@ def reset_vm(vm):
         return True
     else:
         return False # TODO raise error
+
+
+def destroy_vm(vm):
+    json_object = {
+        'username': get_api_username(),
+        'secret': get_api_secret(),
+        'command': 'destroy',
+        'vmid': vm.name
+    }
+
+    headers = {'Content-type': 'application/json'}
+    r = requests.post("https://bes.csi.cam.ac.uk/mws-api/v1/vm.json", data=json.dumps(json_object), headers=headers)
+    try:
+        response = json.loads(r.text)
+    except Exception as e:
+        raise PlatformsAPINotWorkingException(e.message)  # TODO capture exception where it is called
+
+    if response['result'] == 'Success':
+        return True
+    else:
+        raise PlatformsAPINotWorkingException()  # TODO capture exception where it is called
+
+
+def clone_vm(site, primary_vm):
+
+    #TODO if the target_vm exists, delete it first
+
+    if primary_vm:
+        orignal_vm = site.primary_vm
+        if site.secondary_vm:
+            site.secondary_vm.delete()
+    else:
+        orignal_vm = site.secondary_vm
+        if site.primary_vm:
+            site.primary_vm.delete()
+
+    network_configuration = NetworkConfig.objects.filter(virtual_machine=None).first()
+
+    if network_configuration is None:
+        raise NoPrealocatedPrivateIPsAvailable()
+
+    destiantion_vm = VirtualMachine.objects.create(primary=(not primary_vm), status='requested',
+                                                   network_configuration=network_configuration, site=site)
+
+    json_object = {
+        'username': get_api_username(),
+        'secret': get_api_secret(),
+        'command': 'clone',
+        'vmid': orignal_vm.name,
+        'ip': network_configuration.IPv4,
+        'hostname': network_configuration.mws_domain,
+    }
+    headers = {'Content-type': 'application/json'}
+    try:
+        response = json.loads(requests.post("https://bes.csi.cam.ac.uk/mws-api/v1/vm.json",
+                                            data=json.dumps(json_object), headers=headers).text)
+    except Exception as e:
+        raise PlatformsAPINotWorkingException(e.message)  # TODO capture exception where it is called
+
+    if response['result'] == 'Success':
+        destiantion_vm.name = response['vmid']
+        destiantion_vm.status = 'ready'
+        destiantion_vm.save()
+        return True
+    else:
+        return False  # TODO raise error

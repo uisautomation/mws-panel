@@ -5,10 +5,10 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
-from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups
+from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException
 from apimws.models import AnsibleConfiguration
-from apimws.platforms import PlatformsAPINotWorkingException
-from apimws.utils import email_confirmation, platforms_email_api_request, ip_register_api_request, launch_ansible
+from apimws.platforms import PlatformsAPINotWorkingException, new_site_primary_vm, clone_vm
+from apimws.utils import email_confirmation, ip_register_api_request, launch_ansible
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.utils import is_camacuk, get_object_or_None
 from .models import SiteForm, DomainNameFormNew, Site, BillingForm, DomainName, NetworkConfig, EmailConfirmation, \
@@ -28,6 +28,8 @@ def index(request):
         sites += group.sites.all()
 
     sites += request.user.sites.all()
+
+    sites = filter(lambda site: not site.is_canceled(), sites)
 
     return render(request, 'index.html', {
         'all_sites': sorted(set(sites)),
@@ -59,7 +61,7 @@ def new(request):
             SiteRequestDemo.objects.create(date_submitted=timezone.now(), site=site)
 
             try:
-                platforms_email_api_request(site, primary=True)  # TODO do it after saving a site
+                new_site_primary_vm(site, primary=True)  # TODO do it after saving a site
             except Exception as e:
                 raise e  # TODO try again later. pass to celery?
 
@@ -117,14 +119,41 @@ def edit(request, site_id):
 
 
 @login_required
-def show(request, site_id):
-    site = get_object_or_404(Site, pk=site_id)
+def delete(request, site_id):
+    site = privileges_check(site_id, request.user)
 
-    try:
-        if (not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all())) \
-                or site.is_admin_suspended():
-            return HttpResponseForbidden()
-    except Exception as e:
+    if site is None:
+        return HttpResponseForbidden()
+
+    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Change information about your MWS',
+                           url=reverse('sitesmanagement.views.edit', kwargs={'site_id': site.id})),
+        2: dict(name='Delete your MWS',
+                           url=reverse('sitesmanagement.views.delete', kwargs={'site_id': site.id}))
+    }
+
+    if request.method == 'POST':
+        if request.POST.get('confirmation') == "yes":
+            site.cancel()
+            return redirect(index)
+        else:
+            return redirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
+    return render(request, 'mws/delete.html', {
+        'site': site,
+        'breadcrumbs': breadcrumbs
+    })
+
+
+@login_required
+def show(request, site_id):
+    site = privileges_check(site_id, request.user)
+
+    if site is None:
         return HttpResponseForbidden()
 
     breadcrumbs = {
@@ -151,11 +180,12 @@ def show(request, site_id):
     if site.email:
         site_email = EmailConfirmation.objects.get(email=site.email, site_id=site.id)
         if site_email.status == 'pending':
-            warning_messages.append("Your email '%s' is still unconfirmed, please click on the link of the sent email"
+            warning_messages.append("Your email '%s' is still unconfirmed, please check your email inbox and click on "
+                                    "the link of the email we sent you."
                                     % site.email)
 
     if site.primary_vm is None or site.primary_vm.status == 'requested':
-        warning_messages.append("Your Manage Web Server is being prepared")
+        warning_messages.append("Your Managed Web Server is being prepared")
 
     return render(request, 'mws/show.html', {
         'breadcrumbs': breadcrumbs,
@@ -522,3 +552,32 @@ def reset_vm(request, vm_id):
         pass  # TODO add error messages in session if it is False
 
     return redirect(settings, site_id=site.id)
+
+
+@login_required
+def clone_vm_view(request, site_id):
+    site = privileges_check(site_id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Settings', url=reverse(settings, kwargs={'site_id': site.id})),
+        2: dict(name='Clone your VM', url=reverse(clone_vm_view, kwargs={'site_id': site.id}))
+    }
+
+    if request.method == 'POST':
+        if request.POST.get('primary_vm') == "true":
+            if not clone_vm(site, True):
+                raise PlatformsAPINotWorkingException()
+        if request.POST.get('primary_vm') == "false":
+            if not clone_vm(site, False):
+                raise PlatformsAPINotWorkingException()
+
+        redirect(show, site_id = site.id)
+
+    return render(request, 'mws/clone_vm.html', {
+        'breadcrumbs': breadcrumbs,
+        'site': site,
+    })

@@ -13,6 +13,8 @@
                     <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
                 </fieldset>
             </form>
+
+            <p><a href="{% url 'sitesmanagement.views.delete' site_id=site.id %}" class="campl-btn campl-primary-cta campl-primary-red">Cancel this Managed Web Service</a></p>
         </div>
     </div>
 {% endblock %}

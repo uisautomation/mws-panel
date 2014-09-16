@@ -39,6 +39,9 @@ class Site(models.Model):
                 return True
         return False
 
+    def is_canceled(self):
+        return self.end_date is not None
+
     def suspend_now(self, input_reason):
         return Suspension.objects.create(reason=input_reason, start_date=datetime.today(), site=self)
 
@@ -81,6 +84,20 @@ class Site(models.Model):
                 return [self.billing.group, self.billing.purchase_order_number, start_date, end_date]
             else:
                 return ['Site ID: %d' % self.id, 'Pending', start_date, end_date]
+
+    def cancel(self):
+        self.end_date = datetime.today()
+        self.save()
+        if self.primary_vm:
+            self.primary_vm.power_off()
+        if self.secondary_vm:
+            self.secondary_vm.power_off()
+
+    def delete_vms(self):
+        if self.primary_vm:
+            self.primary_vm.delete()
+        if self.secondary_vm:
+            self.secondary_vm.delete()
 
 
 class EmailConfirmation(models.Model):

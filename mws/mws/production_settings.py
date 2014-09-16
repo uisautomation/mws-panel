@@ -7,8 +7,6 @@ DEBUG = False
 
 TEMPLATE_DEBUG = False
 
-MAIN_DOMAIN = 'https://boarstall.csx.cam.ac.uk'
-
 # ucamwebauth configuration
 UCAMWEBAUTH_LOGIN_URL = 'https://raven.cam.ac.uk/auth/authenticate.html'
 UCAMWEBAUTH_LOGOUT_URL = 'https://raven.cam.ac.uk/auth/logout.html'

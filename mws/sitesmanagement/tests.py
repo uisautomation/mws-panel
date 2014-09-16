@@ -110,8 +110,8 @@ class SiteManagementTests(TestCase):
 
         response = self.client.get(response.url)
 
-        self.assertContains(response, "Your email &#39;%s&#39; is still unconfirmed, please click on the link of "
-                                      "the sent email" % test_site.email )
+        self.assertContains(response, "Your email &#39;%s&#39; is still unconfirmed, please check your email inbox and "
+                                      "click on the link of the email we sent you." % test_site.email )
 
     def test_view_edit(self):
         response = self.client.get(reverse(views.edit, kwargs={'site_id': 1}))
@@ -157,8 +157,8 @@ class SiteManagementTests(TestCase):
         self.assertEqual(site_changed.email, 'email@change.test')
 
         response = self.client.get(response.url)
-        self.assertContains(response, "Your email &#39;%s&#39; is still unconfirmed, please click on the link of "
-                                      "the sent email" % site_changed.email )
+        self.assertContains(response, "Your email &#39;%s&#39; is still unconfirmed, please check your email inbox and "
+                                      "click on the link of the email we sent you." % site_changed.email )
 
     def test_view_billing(self):
         response = self.client.get(reverse(views.billing_management, kwargs={'site_id': 1}))
