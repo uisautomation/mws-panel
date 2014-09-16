@@ -241,7 +241,8 @@ def vhosts_management(request, site_id):
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id}))
+        1: dict(name='Settings', url=reverse(settings, kwargs={'site_id': site.id})),
+        2: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id}))
     }
 
     return render(request, 'mws/vhosts.html', {
@@ -262,8 +263,9 @@ def add_vhost(request, site_id):
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id})),
-        2: dict(name='Add Vhost', url=reverse(add_vhost, kwargs={'site_id': site.id}))
+        1: dict(name='Settings', url=reverse(settings, kwargs={'site_id': site.id})),
+        2: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id})),
+        3: dict(name='Add Vhost', url=reverse(add_vhost, kwargs={'site_id': site.id}))
     }
 
     if request.method == 'POST':
@@ -314,8 +316,9 @@ def domains_management(request, vhost_id):
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id})),
-        2: dict(name='Domains Management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id}))
+        1: dict(name='Settings', url=reverse(settings, kwargs={'site_id': site.id})),
+        2: dict(name='Vhosts Management: %s' % vhost.name, url=reverse(vhosts_management, kwargs={'site_id': site.id})),
+        3: dict(name='Domains Management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id}))
     }
 
     return render(request, 'mws/domains.html', {
@@ -360,9 +363,10 @@ def add_domain(request, vhost_id, socket_error=None):
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id})),
-        2: dict(name='Domains Management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id})),
-        3: dict(name='Add Domain', url=reverse(add_domain, kwargs={'vhost_id': vhost.id}))
+        1: dict(name='Settings', url=reverse(settings, kwargs={'site_id': site.id})),
+        2: dict(name='Vhosts Management: %s' % vhost.name, url=reverse(vhosts_management, kwargs={'site_id': site.id})),
+        3: dict(name='Domains Management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id})),
+        4: dict(name='Add Domain', url=reverse(add_domain, kwargs={'vhost_id': vhost.id}))
     }
 
     if request.method == 'POST':
@@ -406,8 +410,9 @@ def certificates(request, vhost_id):
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id})),
-        2: dict(name='TLS/SSL Certificates', url=reverse(certificates, kwargs={'vhost_id': vhost.id})),
+        1: dict(name='Settings', url=reverse(settings, kwargs={'site_id': site.id})),
+        2: dict(name='Vhosts Management: %s' % vhost.name, url=reverse(vhosts_management, kwargs={'site_id': site.id})),
+        3: dict(name='TLS/SSL Certificates', url=reverse(certificates, kwargs={'vhost_id': vhost.id})),
     }
 
     return render(request, 'mws/certificates.html', {
