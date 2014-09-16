@@ -92,6 +92,12 @@ class Site(models.Model):
         if self.secondary_vm:
             self.secondary_vm.power_off()
 
+    def delete_vms(self):
+        if self.primary_vm:
+            self.primary_vm.delete()
+        if self.secondary_vm:
+            self.secondary_vm.delete()
+
 
 class EmailConfirmation(models.Model):
     STATUS_CHOICES = (
