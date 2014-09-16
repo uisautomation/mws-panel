@@ -1,7 +1,9 @@
 import json
+import os
 import random
 import string
 import crypt
+from django.conf import settings
 import requests
 import platform
 from sitesmanagement.models import VirtualMachine, NetworkConfig
@@ -51,6 +53,31 @@ def new_site_primary_vm(site, primary):
         vm.name = response['vmid']
         vm.status = 'ready'
         vm.save()
+        return install_vm(vm)
+    else:
+        return False  # TODO raise error
+
+
+def install_vm(vm):
+    f = open(os.path.join(settings.BASE_DIR, 'apimws/debian_preseed.txt'), 'r')
+    profile = f.read()
+    f.close()
+
+    json_object = {
+        'username': get_api_username(),
+        'secret': get_api_secret(),
+        'command': 'install',
+        'vmid': vm.name,
+        'profile': profile,
+    }
+    headers = {'Content-type': 'application/json'}
+    try:
+        response = json.loads(requests.post("https://bes.csi.cam.ac.uk/mws-api/v1/vm.json",
+                                            data=json.dumps(json_object), headers=headers).text)
+    except Exception as e:
+        raise PlatformsAPINotWorkingException(e.message)  # TODO capture exception where it is called
+
+    if response['result'] == 'Success':
         return True
     else:
         return False  # TODO raise error
