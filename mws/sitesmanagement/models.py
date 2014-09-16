@@ -438,15 +438,19 @@ class SiteRequestDemo(models.Model):
     date_submitted = models.DateTimeField()
 
     def demo_time_passed(self):
-        pvm = self.site.primary_vm
-        if pvm.status == 'requested':
-            pvm.name = str(uuid.uuid4())
-            pvm.status = 'ready'
-            VMStatusDemo.objects.create(vm=pvm)
-            pvm.save()
-        if pvm.status == 'ansible':
-            pvm.status = 'ready'
-            pvm.save()
+        vms = []
+        vms.append(self.site.primary_vm)
+        if self.site.secondary_vm:
+            vms.append(self.site.secondary_vm)
+        for vm in vms:
+            if vm.status == 'requested':
+                vm.name = str(uuid.uuid4())
+                vm.status = 'ready'
+                VMStatusDemo.objects.create(vm=vm)
+                vm.save()
+            if vm.status == 'ansible':
+                vm.status = 'ready'
+                vm.save()
         for vhost in self.site.vhosts.all():
             for dns in vhost.domain_names.all():
                 if dns.status == 'requested':
