@@ -52,7 +52,7 @@ class BillingAdmin(ModelAdmin):
 
 
 class VhostAdmin(ModelAdmin):
-    list_display = ('name', 'site', )
+    list_display = ('name', 'vm', )
 
 
 class VirtualMachineAdmin(ModelAdmin):

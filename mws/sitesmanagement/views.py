@@ -168,11 +168,12 @@ def show(request, site_id):
     if site.primary_vm is not None and site.primary_vm.status == 'ansible':
         warning_messages.append("Your virtual machine is being configured.")
 
-    for vhost in site.vhosts.all():
-        for domain_name in vhost.domain_names.all():
-            if domain_name.status == 'requested':
-                warning_messages.append("Your domain name %s has been requested and is under review." %
-                                        domain_name.name)
+    if site.primary_vm is not None:
+        for vhost in site.primary_vm.vhosts.all():
+            for domain_name in vhost.domain_names.all():
+                if domain_name.status == 'requested':
+                    warning_messages.append("Your domain name %s has been requested and is under review." %
+                                            domain_name.name)
 
     if not hasattr(site, 'billing'):
         warning_messages.append("No Billing, please add one.")
@@ -236,8 +237,9 @@ def privacy(request):
 
 
 @login_required
-def vhosts_management(request, site_id):
-    site = privileges_check(site_id, request.user)
+def vhosts_management(request, vm_id):
+    vm = get_object_or_404(VirtualMachine, pk=vm_id)
+    site = privileges_check(vm.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
@@ -247,18 +249,20 @@ def vhosts_management(request, site_id):
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id}))
+        1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': vm.id})),
+        2: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'vm_id': vm.id}))
     }
 
     return render(request, 'mws/vhosts.html', {
         'breadcrumbs': breadcrumbs,
-        'site': site
+        'vm': vm
     })
 
 
 @login_required
-def add_vhost(request, site_id):
-    site = privileges_check(site_id, request.user)
+def add_vhost(request, vm_id):
+    vm = get_object_or_404(VirtualMachine, pk=vm_id)
+    site = privileges_check(vm.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
@@ -268,25 +272,26 @@ def add_vhost(request, site_id):
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id})),
-        2: dict(name='Add Vhost', url=reverse(add_vhost, kwargs={'site_id': site.id}))
+        1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': vm.id})),
+        2: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'vm_id': vm.id})),
+        3: dict(name='Add Vhost', url=reverse(add_vhost, kwargs={'vm_id': vm.id}))
     }
 
     if request.method == 'POST':
         vhost_form = VhostForm(request.POST)
         if vhost_form.is_valid():
             vhost = vhost_form.save(commit=False)
-            vhost.site = site
+            vhost.vm = vm
             vhost.save()
             launch_ansible(site)  # to create a new vhost configuration file
             return HttpResponseRedirect(reverse('sitesmanagement.views.vhosts_management',
-                                                kwargs={'site_id': site.id}))
+                                                kwargs={'vm_id': vm.id}))
     else:
         vhost_form = VhostForm()
 
     return render(request, 'mws/add_vhost.html', {
         'breadcrumbs': breadcrumbs,
-        'site': site,
+        'vm': vm,
         'vhost_form': vhost_form,
     })
 
@@ -294,7 +299,7 @@ def add_vhost(request, site_id):
 @login_required
 def delete_vhost(request, vhost_id):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
-    site = privileges_check(vhost.site.id, request.user)
+    site = privileges_check(vhost.vm.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
@@ -310,7 +315,7 @@ def delete_vhost(request, vhost_id):
 @login_required
 def domains_management(request, vhost_id):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
-    site = privileges_check(vhost.site.id, request.user)
+    site = privileges_check(vhost.vm.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
@@ -320,8 +325,10 @@ def domains_management(request, vhost_id):
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id})),
-        2: dict(name='Domains Management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id}))
+        1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': vhost.vm.id})),
+        2: dict(name='Vhosts Management: %s' % vhost.name, url=reverse(vhosts_management,
+                                                                       kwargs={'vm_id': vhost.vm.id})),
+        3: dict(name='Domains Management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id}))
     }
 
     return render(request, 'mws/domains.html', {
@@ -334,7 +341,7 @@ def domains_management(request, vhost_id):
 def set_dn_as_main(request, domain_id):  # TODO remove vhost_id
     domain = get_object_or_404(DomainName, pk=domain_id)
     vhost = domain.vhost
-    site = privileges_check(vhost.site.id, request.user)
+    site = privileges_check(vhost.vm.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
@@ -356,7 +363,7 @@ def set_dn_as_main(request, domain_id):  # TODO remove vhost_id
 @login_required
 def add_domain(request, vhost_id, socket_error=None):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
-    site = privileges_check(vhost.site.id, request.user)
+    site = privileges_check(vhost.vm.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
@@ -366,9 +373,11 @@ def add_domain(request, vhost_id, socket_error=None):
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id})),
-        2: dict(name='Domains Management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id})),
-        3: dict(name='Add Domain', url=reverse(add_domain, kwargs={'vhost_id': vhost.id}))
+        1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': vhost.vm.id})),
+        2: dict(name='Vhosts Management: %s' % vhost.name, url=reverse(vhosts_management,
+                                                                       kwargs={'vm_id': vhost.vm.id})),
+        3: dict(name='Domains Management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id})),
+        4: dict(name='Add Domain', url=reverse(add_domain, kwargs={'vhost_id': vhost.id}))
     }
 
     if request.method == 'POST':
@@ -405,15 +414,17 @@ def add_domain(request, vhost_id, socket_error=None):
 @login_required
 def certificates(request, vhost_id):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
-    site = privileges_check(vhost.site.id, request.user)
+    site = privileges_check(vhost.vm.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'site_id': site.id})),
-        2: dict(name='TLS/SSL Certificates', url=reverse(certificates, kwargs={'vhost_id': vhost.id})),
+        1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': vhost.vm.id})),
+        2: dict(name='Vhosts Management: %s' % vhost.name, url=reverse(vhosts_management,
+                                                                       kwargs={'vm_id': vhost.vm.id})),
+        3: dict(name='TLS/SSL Certificates', url=reverse(certificates, kwargs={'vhost_id': vhost.id})),
     }
 
     return render(request, 'mws/certificates.html', {
@@ -424,8 +435,9 @@ def certificates(request, vhost_id):
 
 
 @login_required
-def settings(request, site_id):
-    site = privileges_check(site_id, request.user)
+def settings(request, vm_id):
+    vm = get_object_or_404(VirtualMachine, pk=vm_id)
+    site = privileges_check(vm.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
@@ -440,13 +452,13 @@ def settings(request, site_id):
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Settings', url=reverse(settings, kwargs={'site_id': site.id}))
+        1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': vm.id}))
     }
 
     return render(request, 'mws/settings.html', {
         'breadcrumbs': breadcrumbs,
         'site': site,
-        'primary_vm': vm,
+        'vm': vm,
     })
 
 
@@ -471,8 +483,9 @@ def check_vm_status(request, vm_id):
 
 
 @login_required
-def system_packages(request, site_id):
-    site = privileges_check(site_id, request.user)
+def system_packages(request, vm_id):
+    vm = get_object_or_404(VirtualMachine, pk=vm_id)
+    site = privileges_check(vm.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
@@ -484,8 +497,8 @@ def system_packages(request, site_id):
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Settings', url=reverse(settings, kwargs={'site_id': site.id})),
-        2: dict(name='System packages', url=reverse(system_packages, kwargs={'site_id': site.id}))
+        1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': vm.id})),
+        2: dict(name='System packages', url=reverse(system_packages, kwargs={'vm_id': vm.id}))
     }
 
     if request.method == 'POST':
@@ -512,6 +525,7 @@ def system_packages(request, site_id):
         'breadcrumbs': breadcrumbs,
         'site': site,
         'system_packages_form': system_packages_form,
+        'vm': vm
     })
 
 
@@ -531,7 +545,7 @@ def power_vm(request, vm_id):
 
     vm.power_on()
 
-    return redirect(settings, site_id=site.id)
+    return redirect(settings, vm_id=vm.id)
 
 
 @login_required
@@ -551,7 +565,7 @@ def reset_vm(request, vm_id):
     if vm.do_reset() is False:
         pass  # TODO add error messages in session if it is False
 
-    return redirect(settings, site_id=site.id)
+    return redirect(settings, vm_id=vm.id)
 
 
 @login_required
@@ -563,8 +577,7 @@ def clone_vm_view(request, site_id):
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Settings', url=reverse(settings, kwargs={'site_id': site.id})),
-        2: dict(name='Clone your VM', url=reverse(clone_vm_view, kwargs={'site_id': site.id}))
+        1: dict(name='Clone your VM', url=reverse(clone_vm_view, kwargs={'site_id': site.id}))
     }
 
     if request.method == 'POST':

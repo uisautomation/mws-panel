@@ -46,7 +46,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                {% for vhost in site.vhosts.all %}
+                {% for vhost in vm.vhosts.all %}
                     <tr>
                         <td>
                             {{ vhost.name }}
@@ -72,7 +72,7 @@
                 </tbody>
             </table>
 
-        <p><a href={% url 'sitesmanagement.views.add_vhost' site_id=site.id %} class="campl-primary-cta">Add a new vhost</a></p>
+        <p><a href={% url 'sitesmanagement.views.add_vhost' vm_id=vm.id %} class="campl-primary-cta">Add a new vhost</a></p>
 
         </div>
     </div>
