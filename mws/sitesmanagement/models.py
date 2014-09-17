@@ -58,9 +58,10 @@ class Site(models.Model):
     def secondary_vm(self):
         return self.vm(primary=False)
 
+    @property
     def domain_names(self):
         domains = []
-        for vhost in self.vhosts.all():
+        for vhost in self.primary_vm.vhosts.all():
             domains += vhost.domain_names.all()
         return sorted(set(domains))
 
@@ -130,19 +131,6 @@ class Billing(models.Model):
     site = models.OneToOneField(Site, related_name='billing')
 
 
-class Vhost(models.Model):
-    name = models.CharField(max_length=250)
-    # main domain name for this vhost
-    main_domain = models.ForeignKey('DomainName', related_name='+', null=True, blank=True)
-    site = models.ForeignKey(Site, related_name='vhosts')
-
-    def sorted_domain_names(self):
-        return sorted(set(self.domain_names.all()))
-
-    def __unicode__(self):
-        return self.name
-
-
 def full_domain_validator(hostname):
     """
     Fully validates a domain name as compilant with the standard rules:
@@ -165,21 +153,6 @@ def full_domain_validator(hostname):
                 "The label '%(label)s' is too long (maximum is 63 characters)." % {'label': label})
         if not HOSTNAME_LABEL_PATTERN.match(label):
             raise ValidationError("Unallowed characters in label '%(label)s'." % {'label': label})
-
-
-class DomainName(models.Model):
-    STATUS_CHOICES = (
-        ('requested', 'Requested'),
-        ('accepted', 'Accepted'),
-        ('denied', 'Denied'),
-    )
-
-    name = models.CharField(max_length=250, unique=True, validators=[full_domain_validator])
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='requested')
-    vhost = models.ForeignKey(Vhost, related_name='domain_names')
-
-    def __unicode__(self):
-        return self.name
 
 
 class NetworkConfig(models.Model):
@@ -248,6 +221,34 @@ class VirtualMachine(models.Model):
             return "<Under request>"
         else:
             return self.name
+
+
+class Vhost(models.Model):
+    name = models.CharField(max_length=250)
+    # main domain name for this vhost
+    main_domain = models.ForeignKey('DomainName', related_name='+', null=True, blank=True)
+    vm = models.ForeignKey(VirtualMachine, related_name='vhosts')
+
+    def sorted_domain_names(self):
+        return sorted(set(self.domain_names.all()))
+
+    def __unicode__(self):
+        return self.name
+
+
+class DomainName(models.Model):
+    STATUS_CHOICES = (
+        ('requested', 'Requested'),
+        ('accepted', 'Accepted'),
+        ('denied', 'Denied'),
+    )
+
+    name = models.CharField(max_length=250, unique=True, validators=[full_domain_validator])
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='requested')
+    vhost = models.ForeignKey(Vhost, related_name='domain_names')
+
+    def __unicode__(self):
+        return self.name
 
 
 # FORMS

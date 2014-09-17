@@ -37,7 +37,7 @@
                                     campl-horizontal-teaser campl-teaser campl-focus-teaser">
                         <div class="campl-focus-teaser-img">
                             <div class="campl-content-container campl-horizontal-teaser-img">
-                                <a href="{% url 'sitesmanagement.views.settings' site_id=site.id %}">
+                                <a href="{% url 'sitesmanagement.views.settings' vm_id=site.primary_vm.id %}">
                                     <div class="field field-name-field-external-url-image field-type-image
                                                 field-label-hidden">
                                         <div class="field-items">
@@ -54,12 +54,12 @@
                         <div class="campl-focus-teaser-txt">
                             <div class="campl-content-container campl-horizontal-teaser-txt">
                                 <h3 class="campl-teaser-title">
-                                    <a href="{% url 'sitesmanagement.views.settings' site_id=site.id %}">
-                                        Change settings of your server
+                                    <a href="{% url 'sitesmanagement.views.settings' vm_id=site.primary_vm.id %}">
+                                        Change settings of your primary VM
                                     </a>
                                 </h3>
-                                <a href="{% url 'sitesmanagement.views.settings' site_id=site.id %}"
-                                   class="ir campl-focus-link">Change settings of your server</a>
+                                <a href="{% url 'sitesmanagement.views.settings' vm_id=site.primary_vm.id %}"
+                                   class="ir campl-focus-link">Change settings of your primary VM</a>
                             </div>
                         </div>
                     </article>
@@ -130,6 +130,41 @@
                                 </h3>
                                 <a href="{% url 'mwsauth.views.auth_change' site_id=site.id %}"
                                    class="ir campl-focus-link">Change user and groups authorised in this MWS</a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <div class="campl-column4">
+                <div class="campl-content-container campl-side-padding">
+                    <article class="node node-external-link view-mode-focus_on clearfix
+                                    campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                        <div class="campl-focus-teaser-img">
+                            <div class="campl-content-container campl-horizontal-teaser-img">
+                                <a href="{% url 'sitesmanagement.views.clone_vm_view' site_id=site.id %}">
+                                    <div class="field field-name-field-external-url-image field-type-image
+                                                field-label-hidden">
+                                        <div class="field-items">
+                                            <div class="field-item even">
+                                                <img class="campl-scale-with-grid"
+                                                     src="{% static "icons/cloud.png" %}"
+                                                     height="128" style="margin: 10px;" alt="">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="campl-focus-teaser-txt">
+                            <div class="campl-content-container campl-horizontal-teaser-txt">
+                                <h3 class="campl-teaser-title">
+                                    <a href="{% url 'sitesmanagement.views.clone_vm_view' site_id=site.id %}">
+                                        Clone your VM
+                                    </a>
+                                </h3>
+                                <a href="{% url 'sitesmanagement.views.clone_vm_view' site_id=site.id %}"
+                                   class="ir campl-focus-link">Clone your VM</a>
                             </div>
                         </div>
                     </article>
