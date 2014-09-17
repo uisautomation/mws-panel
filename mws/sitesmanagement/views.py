@@ -28,7 +28,7 @@ def index(request):
 
     sites += request.user.sites.all()
 
-    sites = filter(lambda site: not site.is_canceled(), sites)
+    sites = filter(lambda site: not site.is_canceled() and not site.is_disabled(), sites)
 
     return render(request, 'index.html', {
         'all_sites': sorted(set(sites)),
@@ -129,8 +129,7 @@ def delete(request, site_id):
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
         1: dict(name='Change information about your MWS',
                            url=reverse('sitesmanagement.views.edit', kwargs={'site_id': site.id})),
-        2: dict(name='Delete your MWS',
-                           url=reverse('sitesmanagement.views.delete', kwargs={'site_id': site.id}))
+        2: dict(name='Delete your MWS', url=reverse('sitesmanagement.views.delete', kwargs={'site_id': site.id}))
     }
 
     if request.method == 'POST':
@@ -143,6 +142,30 @@ def delete(request, site_id):
     return render(request, 'mws/delete.html', {
         'site': site,
         'breadcrumbs': breadcrumbs
+    })
+
+
+@login_required
+def disable(request, site_id):
+    site = privileges_check(site_id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Change information about your MWS',
+                           url=reverse('sitesmanagement.views.edit', kwargs={'site_id': site.id})),
+        2: dict(name='Disable your MWS site', url=reverse(clone_vm_view, kwargs={'site_id': site.id}))
+    }
+
+    if request.method == 'POST':
+        if site.disable():
+            return redirect(index)
+
+    return render(request, 'mws/disable.html', {
+        'breadcrumbs': breadcrumbs,
+        'site': site,
     })
 
 

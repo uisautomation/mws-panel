@@ -7,10 +7,10 @@ from ucamlookup import get_institutions, get_institution_name_by_id
 class SiteAdmin(ModelAdmin):
     all_institutions = get_institutions()
 
-    list_display = ('name', 'description', 'institution', 'primary_vm')
+    list_display = ('name', 'description', 'institution', 'primary_vm', 'secondary_vm', 'disabled', 'canceled')
     ordering = ('name', )
     search_fields = ('name', )
-    list_filter = ('institution_id', )
+    list_filter = ('institution_id', 'disabled', )
 
     def institution(self, obj):
         return get_institution_name_by_id(obj.institution_id, self.all_institutions)
@@ -20,6 +20,15 @@ class SiteAdmin(ModelAdmin):
             return obj.primary_vm
         else:
             return None
+
+    def secondary_vm_name(self, obj):
+        if obj.secondary_vm:
+            return obj.secondary_vm
+        else:
+            return None
+
+    def canceled(self, obj):
+        return obj.is_canceled()
 
     institution.admin_order_field = 'institution_id'
 
