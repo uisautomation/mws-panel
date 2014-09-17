@@ -487,7 +487,7 @@ def system_packages(request, vm_id):
     if site.primary_vm is not None and site.primary_vm.is_ready is False:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
-    ansible_configuraton = get_object_or_None(AnsibleConfiguration, site=site, key="System Packages")
+    ansible_configuraton = get_object_or_None(AnsibleConfiguration, vm=vm, key="System Packages")
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
@@ -502,7 +502,7 @@ def system_packages(request, vm_id):
                 ansible_configuraton.value = ",".join(system_packages_form.cleaned_data.get('system_packages'))
                 ansible_configuraton.save()
             else:
-                AnsibleConfiguration.objects.create(site=site, key="System Packages",
+                AnsibleConfiguration.objects.create(vm=vm, key="System Packages",
                                                     value=",".join(
                                                         system_packages_form.cleaned_data.get('system_packages')))
             launch_ansible(site)  # to install or delete new/old packages selected by the user
@@ -517,7 +517,6 @@ def system_packages(request, vm_id):
 
     return render(request, 'mws/system_packages.html', {
         'breadcrumbs': breadcrumbs,
-        'site': site,
         'system_packages_form': system_packages_form,
         'vm': vm
     })
