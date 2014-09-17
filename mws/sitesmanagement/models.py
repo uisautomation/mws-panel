@@ -451,8 +451,8 @@ class SiteRequestDemo(models.Model):
             if vm.status == 'ansible':
                 vm.status = 'ready'
                 vm.save()
-        for vhost in self.site.vhosts.all():
-            for dns in vhost.domain_names.all():
-                if dns.status == 'requested':
-                    dns.status = 'accepted'
-                    dns.save()
+            for vhost in vm.vhosts.all():
+                for dns in vhost.domain_names.all():
+                    if dns.status == 'requested':
+                        dns.status = 'accepted'
+                        dns.save()
