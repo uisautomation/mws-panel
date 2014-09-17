@@ -57,8 +57,13 @@ ul.errorlist + p textarea {
 .campl-primary-red:link, .campl-primary-red:visited{color:#f8f8f8;background:#D50000;border:0}
 .campl-primary-red:focus, .campl-primary-red:hover, .campl-primary-red:active{color: #f8f8f8;background: #770000;border:0;text-decoration:none}
 
+.campl-focus-teaser-red {
+    background: #701010;
+}
 
-
+.campl-focus-link-red{
+    background-color: #630C0C;
+}
 
 
 

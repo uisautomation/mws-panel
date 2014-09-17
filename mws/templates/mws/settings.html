@@ -5,7 +5,7 @@
         <div class="view-header">
             <div class="campl-content-container">
                 <div class="campl-heading-container">
-                    <h1 id="page-title">Settings of the MWS <span style="">{{ site.name }}</span></h1>
+                    <h1 id="page-title">Settings of the {% if vm.primary %}primary{% else %}secondary{% endif %} VM of the MWS site <span style="">{{ site.name }}</span></h1>
                 </div>
             </div>
         </div>
@@ -90,7 +90,7 @@
                                         field-label-hidden">
                                 <div class="field-items">
                                     <div id="vm_status_message" class="field-item even" style="color: #ffffff">
-                                        Checking the status of your VM
+                                        Checking the status of your {% if vm.primary %}primary{% else %}secondary{% endif %} VM
                                     </div>
                                 </div>
                             </div>
@@ -126,12 +126,12 @@
                         $("#vm_status_message_link").html("Please try again later.");
                     } else {
                         if (result['vm_is_on'] == true) {
-                            $("#vm_status_message").html("Your primary VM is currently ON");
+                            $("#vm_status_message").html("Your {% if vm.primary %}primary{% else %}secondary{% endif %} VM is currently ON");
                             $("#vm_status_message_link").attr("href", "{% url 'sitesmanagement.views.reset_vm' vm_id=vm.id %}");
                             $("#vm_status_message_link").html("If it does not respond you can do a hard reset, clicking here");
                             $("#vm_status_link").attr("href", "{% url 'sitesmanagement.views.reset_vm' vm_id=vm.id %}");
                         } else if (result['vm_is_on'] == false) {
-                            $("#vm_status_message").html("Your primary VM is currently OFF");
+                            $("#vm_status_message").html("Your {% if vm.primary %}primary{% else %}secondary{% endif %} VM is currently OFF");
                             $("#vm_status_message_link").attr("href", "{% url 'sitesmanagement.views.power_vm' vm_id=vm.id %}");
                             $("#vm_status_message_link").html("Power it on");
                             $("#vm_status_link").attr("href", "{% url 'sitesmanagement.views.power_vm' vm_id=vm.id %}");
