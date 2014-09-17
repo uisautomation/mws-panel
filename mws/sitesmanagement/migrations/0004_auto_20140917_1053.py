@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('sitesmanagement', '0003_auto_20140903_1329'),
+        ('sitesmanagement', '0003_auto_20140903_1416'),
     ]
 
     operations = [
@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='vhost',
             name='vm',
-            field=models.ForeignKey(related_name=b'vhosts', default=1, to='sitesmanagement.VirtualMachine'),
+            field=models.ForeignKey(related_name=b'vhosts', default=2, to='sitesmanagement.VirtualMachine'),
             preserve_default=False,
         ),
         migrations.AlterField(
