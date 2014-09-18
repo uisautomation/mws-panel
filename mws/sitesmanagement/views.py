@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException
+from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups
 from apimws.models import AnsibleConfiguration
 from apimws.platforms import PlatformsAPINotWorkingException, new_site_primary_vm, clone_vm
 from apimws.utils import email_confirmation, ip_register_api_request, launch_ansible
@@ -28,10 +28,13 @@ def index(request):
 
     sites += request.user.sites.all()
 
-    sites = filter(lambda site: not site.is_canceled() and not site.is_disabled(), sites)
+    sites_enabled = filter(lambda site: not site.is_canceled() and not site.is_disabled(), sites)
+
+    sites_disabled = filter(lambda site: not site.is_canceled() and site.is_disabled(), sites)
 
     return render(request, 'index.html', {
-        'all_sites': sorted(set(sites)),
+        'sites_enabled': sorted(set(sites_enabled)),
+        'sites_disabled': sorted(set(sites_disabled)),
         'deactivate_new': NetworkConfig.num_pre_allocated() < 1
     })
 
@@ -167,6 +170,24 @@ def disable(request, site_id):
         'breadcrumbs': breadcrumbs,
         'site': site,
     })
+
+
+@login_required
+def enable(request, site_id):
+    site = get_object_or_404(Site, pk=site_id)
+
+    try:
+        if (not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all())) \
+                or site.is_admin_suspended() or site.is_canceled():
+            return HttpResponseForbidden()
+    except Exception:
+        return HttpResponseForbidden()
+
+    if request.method == 'POST':
+        if site.enable():
+            return redirect(show, site_id=site.id)
+
+    return redirect(index)
 
 
 @login_required
@@ -604,7 +625,7 @@ def clone_vm_view(request, site_id):
             if not clone_vm(site, False):
                 raise PlatformsAPINotWorkingException()
 
-        redirect(show, site_id = site.id)
+        return redirect(show, site_id = site.id)
 
     return render(request, 'mws/clone_vm.html', {
         'breadcrumbs': breadcrumbs,

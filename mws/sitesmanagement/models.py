@@ -114,6 +114,15 @@ class Site(models.Model):
             self.secondary_vm.power_off()
         return True
 
+    def enable(self):
+        self.disabled = False
+        self.save()
+        if self.primary_vm:
+            self.primary_vm.power_on()
+        if self.secondary_vm:
+            self.secondary_vm.power_on()
+        return True
+
 
 class EmailConfirmation(models.Model):
     STATUS_CHOICES = (
