@@ -8,7 +8,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('sitesmanagement', '0001_squashed_0017_auto_20140731_1549'),
-        ('ucamlookup', '0001_initial'),
     ]
 
     operations = [

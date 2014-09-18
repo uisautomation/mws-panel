@@ -7,7 +7,6 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('sitesmanagement', '0004_auto_20140917_0917'),
         ('apimws', '0001_initial'),
     ]
 
