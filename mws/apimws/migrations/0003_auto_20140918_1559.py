@@ -7,7 +7,6 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('sitesmanagement', '0005_site_disabled'),
         ('apimws', '0002_ansibleconfiguration_site'),
     ]
 
