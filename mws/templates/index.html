@@ -20,7 +20,7 @@
                 <p><a href="{% url 'sitesmanagement.views.new' %}" class="campl-primary-cta">Register new site</a></p>
             {% endif %}
 
-            {% if all_sites %}
+            {% if sites_enabled %}
                 <h1>MWS sites for {{ user.username }}</h1>
                 <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
                     <thead>
@@ -32,7 +32,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                    {% for site in all_sites %}
+                    {% for site in sites_enabled %}
                         {% if site.is_admin_suspended %}
                             <tr class="site_suspended">
                                 <td>
@@ -63,6 +63,56 @@
                     {% endfor %}
                     </tbody>
                 </table>
+            {% endif %}
+
+            {% if sites_disabled %}
+                <div class="campl-theme-7">
+                    <h1>Disabled MWS sites for {{ user.username }}</h1>
+                    <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Domain Name</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for site in sites_disabled %}
+                            {% if site.is_admin_suspended %}
+                                <tr class="site_suspended">
+                                    <td>
+                                        {{ site.name }} <br/>
+                                        This site has been administratively suspended
+                            {% else %}
+                                <tr>
+                                    <td>
+                                        {{ site.name }}
+                            {% endif %}
+                                    </td>
+                                    <td>
+                                        {{ site.description }}
+                                    </td>
+                                    <td>
+                                        {% for domain in site.domain_names %}
+                                            {{ domain.name }}<br/>
+                                        {% endfor %}
+                                    </td>
+                                    <td style="width: 35px;">
+                                        {% if not site.is_admin_suspended %}
+                                            <form action={% url 'sitesmanagement.views.enable' site_id=site.id %} method="post">
+                                                <fieldset>
+                                                    {% csrf_token %}
+                                                    <input type="submit" value="Enable" class="campl-btn campl-primary-cta">
+                                                </fieldset>
+                                            </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             {% endif %}
         </div>
     </div>

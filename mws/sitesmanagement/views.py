@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
-from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException
+from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups
 from apimws.models import AnsibleConfiguration
 from apimws.platforms import PlatformsAPINotWorkingException, new_site_primary_vm, clone_vm
 from apimws.utils import email_confirmation, ip_register_api_request, launch_ansible
@@ -29,10 +29,13 @@ def index(request):
 
     sites += request.user.sites.all()
 
-    sites = filter(lambda site: not site.is_canceled(), sites)
+    sites_enabled = filter(lambda site: not site.is_canceled() and not site.is_disabled(), sites)
+
+    sites_disabled = filter(lambda site: not site.is_canceled() and site.is_disabled(), sites)
 
     return render(request, 'index.html', {
-        'all_sites': sorted(set(sites)),
+        'sites_enabled': sorted(set(sites_enabled)),
+        'sites_disabled': sorted(set(sites_disabled)),
         'deactivate_new': NetworkConfig.num_pre_allocated() < 1
     })
 
@@ -132,8 +135,7 @@ def delete(request, site_id):
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
         1: dict(name='Change information about your MWS',
                            url=reverse('sitesmanagement.views.edit', kwargs={'site_id': site.id})),
-        2: dict(name='Delete your MWS',
-                           url=reverse('sitesmanagement.views.delete', kwargs={'site_id': site.id}))
+        2: dict(name='Delete your MWS', url=reverse('sitesmanagement.views.delete', kwargs={'site_id': site.id}))
     }
 
     if request.method == 'POST':
@@ -147,6 +149,48 @@ def delete(request, site_id):
         'site': site,
         'breadcrumbs': breadcrumbs
     })
+
+
+@login_required
+def disable(request, site_id):
+    site = privileges_check(site_id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Change information about your MWS',
+                           url=reverse('sitesmanagement.views.edit', kwargs={'site_id': site.id})),
+        2: dict(name='Disable your MWS site', url=reverse(clone_vm_view, kwargs={'site_id': site.id}))
+    }
+
+    if request.method == 'POST':
+        if site.disable():
+            return redirect(index)
+
+    return render(request, 'mws/disable.html', {
+        'breadcrumbs': breadcrumbs,
+        'site': site,
+    })
+
+
+@login_required
+def enable(request, site_id):
+    site = get_object_or_404(Site, pk=site_id)
+
+    try:
+        if (not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all())) \
+                or site.is_admin_suspended() or site.is_canceled():
+            return HttpResponseForbidden()
+    except Exception:
+        return HttpResponseForbidden()
+
+    if request.method == 'POST':
+        if site.enable():
+            return redirect(show, site_id=site.id)
+
+    return redirect(index)
 
 
 @login_required
@@ -493,7 +537,7 @@ def system_packages(request, vm_id):
     if site.primary_vm is not None and site.primary_vm.is_ready is False:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
-    ansible_configuraton = get_object_or_None(AnsibleConfiguration, site=site, key="System Packages")
+    ansible_configuraton = get_object_or_None(AnsibleConfiguration, vm=vm, key="System Packages")
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
@@ -508,7 +552,7 @@ def system_packages(request, vm_id):
                 ansible_configuraton.value = ",".join(system_packages_form.cleaned_data.get('system_packages'))
                 ansible_configuraton.save()
             else:
-                AnsibleConfiguration.objects.create(site=site, key="System Packages",
+                AnsibleConfiguration.objects.create(vm=vm, key="System Packages",
                                                     value=",".join(
                                                         system_packages_form.cleaned_data.get('system_packages')))
             launch_ansible(site)  # to install or delete new/old packages selected by the user
@@ -523,7 +567,6 @@ def system_packages(request, vm_id):
 
     return render(request, 'mws/system_packages.html', {
         'breadcrumbs': breadcrumbs,
-        'site': site,
         'system_packages_form': system_packages_form,
         'vm': vm
     })
@@ -588,7 +631,7 @@ def clone_vm_view(request, site_id):
             if not clone_vm(site, False):
                 raise PlatformsAPINotWorkingException()
 
-        redirect(show, site_id = site.id)
+        return redirect(show, site_id = site.id)
 
     return render(request, 'mws/clone_vm.html', {
         'breadcrumbs': breadcrumbs,

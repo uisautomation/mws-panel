@@ -30,6 +30,9 @@ class Site(models.Model):
     # Authorised user groups per site
     groups = models.ManyToManyField(LookupGroup, related_name='sites', null=True, blank=True)
 
+    # Indicates if the site is disabled by the user
+    disabled = models.BooleanField(default=False)
+
     def __str__(self):
         return self.name
 
@@ -41,6 +44,9 @@ class Site(models.Model):
 
     def is_canceled(self):
         return self.end_date is not None
+
+    def is_disabled(self):
+        return self.disabled
 
     def suspend_now(self, input_reason):
         return Suspension.objects.create(reason=input_reason, start_date=datetime.today(), site=self)
@@ -99,6 +105,24 @@ class Site(models.Model):
             self.primary_vm.delete()
         if self.secondary_vm:
             self.secondary_vm.delete()
+
+    def disable(self):
+        self.disabled = True
+        self.save()
+        if self.primary_vm:
+            self.primary_vm.power_off()
+        if self.secondary_vm:
+            self.secondary_vm.power_off()
+        return True
+
+    def enable(self):
+        self.disabled = False
+        self.save()
+        if self.primary_vm:
+            self.primary_vm.power_on()
+        if self.secondary_vm:
+            self.secondary_vm.power_on()
+        return True
 
 
 class EmailConfirmation(models.Model):

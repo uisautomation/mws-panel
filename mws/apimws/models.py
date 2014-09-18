@@ -3,11 +3,11 @@ from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from apimws.platforms import destroy_vm, change_vm_power_state
-from sitesmanagement.models import VirtualMachine, Site
+from sitesmanagement.models import VirtualMachine
 
 
 class AnsibleConfiguration(models.Model):
-    site = models.ForeignKey(Site)
+    vm = models.ForeignKey(VirtualMachine)
     key = models.CharField(max_length=250, db_index=True)
     value = models.TextField()
 

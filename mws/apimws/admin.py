@@ -6,7 +6,7 @@ from apimws.models import AnsibleConfiguration
 class AnsibleConfigurationAdmin(ModelAdmin):
 
     model = AnsibleConfiguration
-    list_display = ('key', 'value', 'site')
+    list_display = ('key', 'value', 'vm')
 
 
 admin.site.register(AnsibleConfiguration, AnsibleConfigurationAdmin)
