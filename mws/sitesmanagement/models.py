@@ -24,9 +24,11 @@ class Site(models.Model):
     # webmaster email
     email = models.EmailField(null=True, blank=True)
 
-    # Authorised users per site
+    # Administrator users of a site
     users = models.ManyToManyField(User, related_name='sites')
-    # Authorised user groups per site
+    # SSH only users of a site
+    ssh_users = models.ManyToManyField(User, related_name='+')
+    # Administrator groups of a site
     groups = models.ManyToManyField(LookupGroup, related_name='sites', null=True, blank=True)
 
     # Indicates if the site is disabled by the user
