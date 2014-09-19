@@ -17,7 +17,7 @@ def platforms_email_api_request(site, primary):
               "Attached: autoyast.xml (with IPs, keys)\n" \
               "Please, when ready click here: %s/api/confirm_vm/" % settings.MAIN_DOMAIN \
               + str(vm.id)
-    from_email = "mws-admin@cam.ac.uk"
+    from_email = "mws3-support@cam.ac.uk"
     recipient_list = ('amc203@cam.ac.uk', )
     send_mail(subject, message, from_email, recipient_list, fail_silently=False)
 
@@ -32,7 +32,7 @@ def ip_register_api_request(vhost, domain_name):
               "IPv6: " + site.primary_vm.network_configuration.IPv6 + "\n" \
               "Please, when ready click here: %s/api/confirm_dns/" % settings.MAIN_DOMAIN \
               + str(domain_requested.id)
-    from_email = "mws-admin@cam.ac.uk"
+    from_email = "mws3-support@cam.ac.uk"
     recipient_list = ('amc203@cam.ac.uk', )
     send_mail(subject, message, from_email, recipient_list, fail_silently=False)
 
@@ -45,7 +45,7 @@ def email_confirmation(site):
     subject = "University of Cambridge Managed Web Service: Please confirm your email address"
     message = "Please, confirm your email address by clicking in the following link: " \
               "%s/confirm_email/%d/%s/" % (settings.MAIN_DOMAIN, email_conf.id, email_conf.token)
-    from_email = "mws-admin@cam.ac.uk"
+    from_email = "mws3-support@cam.ac.uk"
     recipient_list = (site.email, )
     send_mail(subject, message, from_email, recipient_list, fail_silently=False)
 
