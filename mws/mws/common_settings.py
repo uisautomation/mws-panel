@@ -30,6 +30,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     # The following app force all views to have @login_required https://github.com/mgrouchy/django-stronghold/
     'stronghold',
+    'reversion',
     'ucamwebauth',
     'ucamprojectlight',
     'ucamlookup',

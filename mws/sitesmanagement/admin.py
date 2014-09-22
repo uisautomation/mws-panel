@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
+from reversion import VersionAdmin
 from .models import Site, Billing, DomainName, NetworkConfig, Suspension, VirtualMachine, EmailConfirmation, Vhost
 from ucamlookup import get_institutions, get_institution_name_by_id
 
@@ -56,7 +57,7 @@ class NetworkConfigAdmin(ModelAdmin):
             return False
 
 
-class BillingAdmin(ModelAdmin):
+class BillingAdmin(VersionAdmin):
     list_display = ('site', 'group', )
 
 

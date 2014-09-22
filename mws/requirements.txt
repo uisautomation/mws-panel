@@ -1,6 +1,7 @@
 django>=1.7
 PyOpenSSL>=0.14
 django-stronghold>=0.2.6
+django-reversion>=1.8.4
 django-grappelli>=2.6
 django-ucamwebauth>=1.2
 django-ucamprojectlight>=1.1
