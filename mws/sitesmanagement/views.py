@@ -2,8 +2,10 @@ import datetime
 import socket
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
+from django.db import transaction
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
+import reversion
 from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups
 from apimws.models import AnsibleConfiguration
 from apimws.platforms import PlatformsAPINotWorkingException, new_site_primary_vm, clone_vm
@@ -234,6 +236,8 @@ def show(request, site_id):
 
 
 @login_required
+@transaction.atomic()
+@reversion.create_revision()
 def billing_management(request, site_id):
     site = privileges_check(site_id, request.user)
 
