@@ -34,7 +34,7 @@ class Site(models.Model):
     # Indicates if the site is disabled by the user
     disabled = models.BooleanField(default=False)
 
-    def __str__(self):
+    def __unicode__(self):
         return self.name
 
     def is_admin_suspended(self):
@@ -184,14 +184,23 @@ def full_domain_validator(hostname):
 class NetworkConfig(models.Model):
     """ The network configuration for a VM (IPv4, IPv6, and domain name associated
     """
+    STATUS_CHOICES = (
+        ('public', 'Public'),
+        ('private', 'Private'),
+    )
+
     IPv4 = models.GenericIPAddressField(protocol='IPv4')
-    IPv6 = models.GenericIPAddressField(protocol='IPv6')
+    IPv6 = models.GenericIPAddressField(protocol='IPv6', blank=True, null=True)
     SSHFP = models.CharField(max_length=250, null=True, blank=True)
     mws_domain = models.CharField(max_length=250, unique=True)
+    type = models.CharField(max_length=10, choices=STATUS_CHOICES)
 
     @classmethod
     def num_pre_allocated(cls):
         return cls.objects.filter(virtual_machine=None).count()
+
+    def is_public(self):
+        return self.type == 'public'
 
     def __unicode__(self):
         return self.IPv4 + " - " + self.mws_domain

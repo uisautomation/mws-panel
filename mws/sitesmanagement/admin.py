@@ -47,7 +47,7 @@ class SuspensionAdmin(ModelAdmin):
 
 
 class NetworkConfigAdmin(ModelAdmin):
-    list_display = ('IPv4', 'IPv6', 'mws_domain', 'virtual_machine')
+    list_display = ('IPv4', 'IPv6', 'mws_domain', 'virtual_machine', 'public')
     #list_filter = ('used', )
 
     def used(self, obj):
@@ -55,6 +55,11 @@ class NetworkConfigAdmin(ModelAdmin):
             return True
         else:
             return False
+
+    def public(self, obj):
+        return obj.is_public()
+
+    public.boolean = True
 
 
 class BillingAdmin(VersionAdmin):
