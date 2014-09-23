@@ -4,7 +4,14 @@
     <div class="campl-column12">
         <div class="campl-content-container">
             <h1 id="page-title">Install system packages</h1>
+            <p>Select the packages you want to install. Each option will install all the system packages needed to run
+            the specified service or application.</p>
+        </div>
+    </div>
 
+{% comment %}
+    <div class="campl-column12">
+        <div class="campl-content-container">
             <form action={% url 'sitesmanagement.views.system_packages' vm_id=vm.id %} method="post">{% csrf_token %}
                 <fieldset>
                     <p>Select those packages you want to install in your machine</p>
@@ -16,6 +23,80 @@
             </form>
         </div>
     </div>
+{% endcomment %}
+
+    <div class="campl-column4">
+        <div class="campl-content-container">
+            <div class="campl-horizontal-teaser campl-teaser clearfix campl-focus-teaser">
+                <div class="campl-focus-teaser-img">
+                    <div class="campl-content-container campl-horizontal-teaser-img">
+                        <a href="#" class="campl-teaser-img-link"><i class="fa fa-wordpress fa-6x"></i></a>
+                    </div>
+                </div>
+                <div class="campl-focus-teaser-txt">
+                    <div class="campl-content-container campl-horizontal-teaser-txt">
+                        <h3 class="campl-teaser-title"><a href="#">Wordpress packages</a></h3>
+                        <a href="#" class="ir campl-focus-link">Wordpress packages</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="campl-column4">
+        <div class="campl-content-container">
+            <div class="campl-horizontal-teaser campl-teaser clearfix campl-focus-teaser">
+                <div class="campl-focus-teaser-img">
+                    <div class="campl-content-container campl-horizontal-teaser-img">
+                        <a href="#" class="campl-teaser-img-link"><i class="fa fa-drupal fa-6x"></i></a>
+                    </div>
+                </div>
+                <div class="campl-focus-teaser-txt">
+                    <div class="campl-content-container campl-horizontal-teaser-txt">
+                        <h3 class="campl-teaser-title"><a href="#">Drupal packages</a></h3>
+                        <a href="#" class="ir campl-focus-link">Drupal packages</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="campl-column4">
+        <div class="campl-content-container">
+            <div class="campl-horizontal-teaser campl-teaser clearfix campl-focus-teaser">
+                <div class="campl-focus-teaser-img">
+                    <div class="campl-content-container campl-horizontal-teaser-img">
+                        <a href="#" class="campl-teaser-img-link"><i class="fa fa-git-square fa-6x"></i></a>
+                    </div>
+                </div>
+                <div class="campl-focus-teaser-txt">
+                    <div class="campl-content-container campl-horizontal-teaser-txt">
+                        <h3 class="campl-teaser-title"><a href="#">git packages</a></h3>
+                        <a href="#" class="ir campl-focus-link">git packages</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="campl-column4">
+        <div class="campl-content-container">
+            <div class="campl-horizontal-teaser campl-teaser clearfix campl-focus-teaser">
+                <div class="campl-focus-teaser-img">
+                    <div class="campl-content-container campl-horizontal-teaser-img">
+                        <a href="#" class="campl-teaser-img-link"><i class="fa fa-joomla fa-6x"></i></a>
+                    </div>
+                </div>
+                <div class="campl-focus-teaser-txt">
+                    <div class="campl-content-container campl-horizontal-teaser-txt">
+                        <h3 class="campl-teaser-title"><a href="#">joomla packages</a></h3>
+                        <a href="#" class="ir campl-focus-link">joomla packages</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}
 
 {% block campl_foot_js %}
