@@ -4,23 +4,6 @@ from django.core.mail import send_mail
 from django.conf import settings
 from sitesmanagement.models import VirtualMachine, NetworkConfig, DomainName, EmailConfirmation
 
-def platforms_email_api_request(site, primary):
-    network_configuration = NetworkConfig.objects.filter(virtual_machine=None).first()
-    vm = VirtualMachine.objects.create(primary=primary, status='requested',
-                                       network_configuration=network_configuration, site=site)
-
-    subject = "New request of a VM for the MWS"
-    message = "IPv4: " + network_configuration.IPv4 + "\n" \
-              "IPv6: " + network_configuration.IPv6 + "\n" \
-              "Domain Name: " + network_configuration.mws_domain + "\n" \
-              "Attached: autoyast.xml (with IPs, keys)\n" \
-              "Please, when ready click here: %s/api/confirm_vm/" % settings.MAIN_DOMAIN \
-              + str(vm.id)
-    from_email = "mws3-support@cam.ac.uk"
-    recipient_list = ('amc203@cam.ac.uk', )
-    send_mail(subject, message, from_email, recipient_list, fail_silently=False)
-
-
 def ip_register_api_request(vhost, domain_name):
     site = vhost.vm.site
     domain_requested = DomainName.objects.create(name=domain_name, status='requested', vhost=vhost)
