@@ -202,6 +202,14 @@ class NetworkConfig(models.Model):
     def is_public(self):
         return self.type == 'public'
 
+    @classmethod
+    def get_free_private_ip(self):
+        return self.objects.filter(virtual_machine=None, type='private').first()
+
+    @classmethod
+    def get_free_public_ip(self):
+        return self.objects.filter(virtual_machine=None, type='public').first()
+
     def __unicode__(self):
         return self.IPv4 + " - " + self.mws_domain
 
