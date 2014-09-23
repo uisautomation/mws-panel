@@ -33,6 +33,7 @@ def email_confirmation(site):
 
 
 def launch_ansible(site):
+    # TODO if ansible is already running, then mark a flag that to reexecute ansible once finished
     primary_vm = site.primary_vm
     primary_vm.status = 'ansible'
     primary_vm.save()

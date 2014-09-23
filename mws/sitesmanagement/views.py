@@ -210,7 +210,10 @@ def show(request, site_id):
     warning_messages = []
 
     if site.primary_vm is not None and site.primary_vm.status == 'ansible':
-        warning_messages.append("Your virtual machine is being configured.")
+        warning_messages.append("Your primary virtual machine is being configured.")
+
+    if site.secondary_vm is not None and site.secondary_vm.status == 'ansible':
+        warning_messages.append("Your secondary virtual machine is being configured.")
 
     if site.primary_vm is not None:
         for vhost in site.primary_vm.vhosts.all():
