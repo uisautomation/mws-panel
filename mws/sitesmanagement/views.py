@@ -90,7 +90,7 @@ def edit(request, site_id):
     if site is None:
         return HttpResponseForbidden()
 
-    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+    if site.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
@@ -107,6 +107,7 @@ def edit(request, site_id):
                 try:
                     if site.email:
                         email_confirmation(site)  # TODO do it in other place?
+                        # TODO launch ansible to update email associated
                 except Exception as e:
                     raise e  # TODO try again later. pass to celery?
             return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
@@ -127,7 +128,7 @@ def delete(request, site_id):
     if site is None:
         return HttpResponseForbidden()
 
-    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+    if site.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
@@ -156,6 +157,9 @@ def disable(request, site_id):
 
     if site is None:
         return HttpResponseForbidden()
+
+    if site.is_busy:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
@@ -274,6 +278,37 @@ def billing_management(request, site_id):
     })
 
 
+@login_required
+def clone_vm_view(request, site_id):
+    site = privileges_check(site_id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if not site.is_ready:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Clone your VM', url=reverse(clone_vm_view, kwargs={'site_id': site.id}))
+    }
+
+    if request.method == 'POST':
+        if request.POST.get('primary_vm') == "true":
+            if not clone_vm(site, True):
+                raise PlatformsAPINotWorkingException()
+        if request.POST.get('primary_vm') == "false":
+            if not clone_vm(site, False):
+                raise PlatformsAPINotWorkingException()
+
+        return redirect(show, site_id = site.id)
+
+    return render(request, 'mws/clone_vm.html', {
+        'breadcrumbs': breadcrumbs,
+        'site': site,
+    })
+
+
 def privacy(request):
     return render(request, 'index.html', {})
 
@@ -286,7 +321,7 @@ def vhosts_management(request, vm_id):
     if site is None:
         return HttpResponseForbidden()
 
-    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+    if vm.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
@@ -309,7 +344,7 @@ def add_vhost(request, vm_id):
     if site is None:
         return HttpResponseForbidden()
 
-    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+    if vm.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
@@ -339,12 +374,143 @@ def add_vhost(request, vm_id):
 
 
 @login_required
+def settings(request, vm_id):
+    vm = get_object_or_404(VirtualMachine, pk=vm_id)
+    site = privileges_check(vm.site.id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if vm.is_busy:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
+    if vm is None or vm.status != 'ready':
+        return redirect(reverse(show, kwargs={'site_id': site.id}))
+
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': vm.id}))
+    }
+
+    return render(request, 'mws/settings.html', {
+        'breadcrumbs': breadcrumbs,
+        'site': site,
+        'vm': vm,
+    })
+
+
+@login_required
+def check_vm_status(request, vm_id):
+    vm = get_object_or_404(VirtualMachine, pk=vm_id)
+    site = privileges_check(vm.site.id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if vm.is_busy:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
+    if vm is None or vm.status != 'ready':
+        return JsonResponse({'error': 'VMNotReady'})
+
+    try:
+        return JsonResponse({'vm_is_on': vm.is_on()})
+    except PlatformsAPINotWorkingException:
+        return JsonResponse({'error': 'PlatformsAPINotWorking'})
+
+
+@login_required
+def system_packages(request, vm_id):
+    vm = get_object_or_404(VirtualMachine, pk=vm_id)
+    site = privileges_check(vm.site.id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if vm.is_busy:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
+    ansible_configuraton = get_object_or_None(AnsibleConfiguration, vm=vm, key="System Packages")
+
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': vm.id})),
+        2: dict(name='System packages', url=reverse(system_packages, kwargs={'vm_id': vm.id}))
+    }
+
+    if request.method == 'POST':
+        system_packages_form = SystemPackagesForm(request.POST)
+        if system_packages_form.is_valid():
+            if ansible_configuraton is not None:
+                ansible_configuraton.value = ",".join(system_packages_form.cleaned_data.get('system_packages'))
+                ansible_configuraton.save()
+            else:
+                AnsibleConfiguration.objects.create(vm=vm, key="System Packages",
+                                                    value=",".join(
+                                                        system_packages_form.cleaned_data.get('system_packages')))
+            launch_ansible(site)  # to install or delete new/old packages selected by the user
+            return HttpResponseRedirect(reverse('sitesmanagement.views.show',
+                                                kwargs={'site_id': site.id}))
+    else:
+        if ansible_configuraton is not None:
+            system_packages_form = SystemPackagesForm(initial={'system_packages':
+                                                                   ansible_configuraton.value.split(",")})
+        else:
+            system_packages_form = SystemPackagesForm()
+
+    return render(request, 'mws/system_packages.html', {
+        'breadcrumbs': breadcrumbs,
+        'system_packages_form': system_packages_form,
+        'vm': vm
+    })
+
+
+@login_required
+def power_vm(request, vm_id):
+    vm = get_object_or_404(VirtualMachine, pk=vm_id)
+    site = privileges_check(vm.site.id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if not vm.is_ready:
+        return redirect(reverse(show, kwargs={'site_id': site.id}))
+
+    vm.power_on()
+
+    return redirect(settings, vm_id=vm.id)
+
+
+@login_required
+def reset_vm(request, vm_id):
+    vm = get_object_or_404(VirtualMachine, pk=vm_id)
+    site = privileges_check(vm.site.id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if not vm.is_ready:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
+    if vm is None or vm.status != 'ready':
+        return redirect(reverse(show, kwargs={'site_id': site.id}))
+
+    if vm.do_reset() is False:
+        pass  # TODO add error messages in session if it is False
+
+    return redirect(settings, vm_id=vm.id)
+
+
+@login_required
 def delete_vhost(request, vhost_id):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
     site = privileges_check(vhost.vm.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
+
+    if vhost.vm.is_busy:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     if request.method == 'DELETE':
         vhost.delete()
@@ -362,7 +528,7 @@ def domains_management(request, vhost_id):
     if site is None:
         return HttpResponseForbidden()
 
-    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+    if vhost.vm.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
@@ -380,29 +546,6 @@ def domains_management(request, vhost_id):
 
 
 @login_required
-def set_dn_as_main(request, domain_id):  # TODO remove vhost_id
-    domain = get_object_or_404(DomainName, pk=domain_id)
-    vhost = domain.vhost
-    site = privileges_check(vhost.vm.site.id, request.user)
-
-    if site is None:
-        return HttpResponseForbidden()
-
-    if site.primary_vm is not None and site.primary_vm.is_ready is False:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
-
-    if domain not in vhost.domain_names.all():
-        return HttpResponseForbidden()
-
-    if request.method == 'POST':
-        vhost.main_domain = domain
-        vhost.save()
-        launch_ansible(site)  # to update the vhost main domain name in the apache configuration
-
-    return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management', kwargs={'vhost_id': vhost.id}))
-
-
-@login_required
 def add_domain(request, vhost_id, socket_error=None):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
     site = privileges_check(vhost.vm.site.id, request.user)
@@ -410,7 +553,7 @@ def add_domain(request, vhost_id, socket_error=None):
     if site is None:
         return HttpResponseForbidden()
 
-    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+    if vhost.vm.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
@@ -461,6 +604,9 @@ def certificates(request, vhost_id):
     if site is None:
         return HttpResponseForbidden()
 
+    if vhost.vm.is_busy:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
         1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': vhost.vm.id})),
@@ -477,161 +623,23 @@ def certificates(request, vhost_id):
 
 
 @login_required
-def settings(request, vm_id):
-    vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.site.id, request.user)
+def set_dn_as_main(request, domain_id):  # TODO remove vhost_id
+    domain = get_object_or_404(DomainName, pk=domain_id)
+    vhost = domain.vhost
+    site = privileges_check(vhost.vm.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
 
-    if site.primary_vm is not None and site.primary_vm.is_ready is False:
+    if vhost.vm.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
-    vm = site.primary_vm
-
-    if vm is None or vm.status != 'ready':
-        return redirect(reverse(show, kwargs={'site_id': site.id}))
-
-    breadcrumbs = {
-        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': vm.id}))
-    }
-
-    return render(request, 'mws/settings.html', {
-        'breadcrumbs': breadcrumbs,
-        'site': site,
-        'vm': vm,
-    })
-
-
-@login_required
-def check_vm_status(request, vm_id):
-    vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.site.id, request.user)
-
-    if site is None:
+    if domain not in vhost.domain_names.all():
         return HttpResponseForbidden()
-
-    if site.primary_vm is not None and site.primary_vm.is_ready is False:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
-
-    if vm is None or vm.status != 'ready':
-        return JsonResponse({'error': 'VMNotReady'})
-
-    try:
-        return JsonResponse({'vm_is_on': vm.is_on()})
-    except PlatformsAPINotWorkingException:
-        return JsonResponse({'error': 'PlatformsAPINotWorking'})
-
-
-@login_required
-def system_packages(request, vm_id):
-    vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.site.id, request.user)
-
-    if site is None:
-        return HttpResponseForbidden()
-
-    if site.primary_vm is not None and site.primary_vm.is_ready is False:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
-
-    ansible_configuraton = get_object_or_None(AnsibleConfiguration, vm=vm, key="System Packages")
-
-    breadcrumbs = {
-        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': vm.id})),
-        2: dict(name='System packages', url=reverse(system_packages, kwargs={'vm_id': vm.id}))
-    }
 
     if request.method == 'POST':
-        system_packages_form = SystemPackagesForm(request.POST)
-        if system_packages_form.is_valid():
-            if ansible_configuraton is not None:
-                ansible_configuraton.value = ",".join(system_packages_form.cleaned_data.get('system_packages'))
-                ansible_configuraton.save()
-            else:
-                AnsibleConfiguration.objects.create(vm=vm, key="System Packages",
-                                                    value=",".join(
-                                                        system_packages_form.cleaned_data.get('system_packages')))
-            launch_ansible(site)  # to install or delete new/old packages selected by the user
-            return HttpResponseRedirect(reverse('sitesmanagement.views.show',
-                                                kwargs={'site_id': site.id}))
-    else:
-        if ansible_configuraton is not None:
-            system_packages_form = SystemPackagesForm(initial={'system_packages':
-                                                                   ansible_configuraton.value.split(",")})
-        else:
-            system_packages_form = SystemPackagesForm()
+        vhost.main_domain = domain
+        vhost.save()
+        launch_ansible(site)  # to update the vhost main domain name in the apache configuration
 
-    return render(request, 'mws/system_packages.html', {
-        'breadcrumbs': breadcrumbs,
-        'system_packages_form': system_packages_form,
-        'vm': vm
-    })
-
-
-@login_required
-def power_vm(request, vm_id):
-    vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.site.id, request.user)
-
-    if site is None:
-        return HttpResponseForbidden()
-
-    if site.primary_vm is not None and site.primary_vm.is_ready is False:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
-
-    if vm is None or vm.status != 'ready':
-        return redirect(reverse(show, kwargs={'site_id': site.id}))
-
-    vm.power_on()
-
-    return redirect(settings, vm_id=vm.id)
-
-
-@login_required
-def reset_vm(request, vm_id):
-    vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.site.id, request.user)
-
-    if site is None:
-        return HttpResponseForbidden()
-
-    if site.primary_vm is not None and site.primary_vm.is_ready is False:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
-
-    if vm is None or vm.status != 'ready':
-        return redirect(reverse(show, kwargs={'site_id': site.id}))
-
-    if vm.do_reset() is False:
-        pass  # TODO add error messages in session if it is False
-
-    return redirect(settings, vm_id=vm.id)
-
-
-@login_required
-def clone_vm_view(request, site_id):
-    site = privileges_check(site_id, request.user)
-
-    if site is None:
-        return HttpResponseForbidden()
-
-    breadcrumbs = {
-        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Clone your VM', url=reverse(clone_vm_view, kwargs={'site_id': site.id}))
-    }
-
-    if request.method == 'POST':
-        if request.POST.get('primary_vm') == "true":
-            if not clone_vm(site, True):
-                raise PlatformsAPINotWorkingException()
-        if request.POST.get('primary_vm') == "false":
-            if not clone_vm(site, False):
-                raise PlatformsAPINotWorkingException()
-
-        return redirect(show, site_id = site.id)
-
-    return render(request, 'mws/clone_vm.html', {
-        'breadcrumbs': breadcrumbs,
-        'site': site,
-    })
+    return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management', kwargs={'vhost_id': vhost.id}))

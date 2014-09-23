@@ -125,6 +125,30 @@ class Site(models.Model):
             self.secondary_vm.power_on()
         return True
 
+    @property
+    def is_busy(self):
+        if self.primary_vm:
+            if self.primary_vm.status != 'ready' and self.primary_vm.status != 'ansible':
+                return True
+        if self.secondary_vm:
+            if self.secondary_vm.status != 'ready' and self.secondary_vm.status != 'ansible':
+                return True
+        if not self.primary_vm and not self.secondary_vm:
+            return True
+        return False
+
+    @property
+    def is_ready(self):
+        if self.primary_vm:
+            if self.primary_vm.status != 'ready':
+                return False
+        if self.secondary_vm:
+            if self.secondary_vm.status != 'ready':
+                return False
+        if not self.primary_vm and not self.secondary_vm:
+            return False
+        return True
+
 
 class EmailConfirmation(models.Model):
     STATUS_CHOICES = (
@@ -236,6 +260,13 @@ class VirtualMachine(models.Model):
     def is_on(self):
         from apimws.platforms import get_vm_power_state
         if get_vm_power_state(self) == "On":
+            return True
+        else:
+            return False
+
+    @property
+    def is_busy(self):
+        if self.status != 'ready' and self.status != 'ansible':
             return True
         else:
             return False
