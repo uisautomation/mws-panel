@@ -529,6 +529,24 @@ def add_unix_group(request, vm_id):
 
 
 @login_required
+def delete_vm(request, vm_id):
+    vm = get_object_or_404(VirtualMachine, pk=vm_id)
+    site = privileges_check(vm.site.id, request.user)
+
+    if site is None or vm.primary:
+        return HttpResponseForbidden()
+
+    if vm.is_busy:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
+    #if request.method == 'DELETE':
+    vm.delete()  # TODO change this
+    return redirect(show, site_id=site.id)
+
+    return HttpResponseForbidden()
+
+
+@login_required
 def unix_group(request, ug_id):
     unix_group = get_object_or_404(UnixGroup, pk=ug_id)
     site = privileges_check(unix_group.vm.site.id, request.user)
