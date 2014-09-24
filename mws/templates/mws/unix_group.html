@@ -1,0 +1,18 @@
+{% extends 'project-light/campl-mws.html' %}
+{% load static %}
+{% block page_content %}
+    <div class="campl-column12 campl-main-content">
+        <div class="campl-content-container">
+            <h1>Edit the Unix Group "{{ unix_group.name }}"</h1>
+            <form action={% url 'sitesmanagement.views.unix_group' ug_id=unix_group_form.instance.id %} method="post">
+                <fieldset>
+                    {% csrf_token %}
+                    <div id="unix_group_form">
+                        {{ unix_group_form.as_p }}
+                    </div>
+                    <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+{% endblock %}

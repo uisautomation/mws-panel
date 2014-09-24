@@ -36,6 +36,10 @@ urlpatterns = patterns('',
     url(r'^clone_vm/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.clone_vm_view'),
     url(r'^settings/vm/(?P<vm_id>[0-9]+)/on/$', 'sitesmanagement.views.power_vm'),
     url(r'^settings/vm/(?P<vm_id>[0-9]+)/reset/$', 'sitesmanagement.views.reset_vm'),
+    url(r'^unix_groups/(?P<vm_id>[0-9]+)/$', 'sitesmanagement.views.unix_groups'),
+    url(r'^unix_groups/(?P<vm_id>[0-9]+)/add/$', 'sitesmanagement.views.add_unix_group'),
+    url(r'^unix_groups/edit/(?P<ug_id>[0-9]+)/$', 'sitesmanagement.views.unix_group'),
+    url(r'^unix_groups/delete/(?P<ug_id>[0-9]+)/$', 'sitesmanagement.views.delete_unix_group'),
 
     # apimws app
     url(r'^api/confirm_vm/(?P<vm_id>[0-9]+)/$', 'apimws.views.confirm_vm'),

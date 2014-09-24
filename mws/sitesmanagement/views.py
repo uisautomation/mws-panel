@@ -13,7 +13,7 @@ from apimws.utils import email_confirmation, ip_register_api_request, launch_ans
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.utils import is_camacuk, get_object_or_None
 from .models import SiteForm, DomainNameFormNew, BillingForm, DomainName, NetworkConfig, EmailConfirmation, \
-    VirtualMachine, SystemPackagesForm, Vhost, VhostForm, Site
+    VirtualMachine, SystemPackagesForm, Vhost, VhostForm, Site, UnixGroupForm, UnixGroup
 
 
 @login_required
@@ -466,6 +466,119 @@ def system_packages(request, vm_id):
         'system_packages_form': system_packages_form,
         'vm': vm
     })
+
+
+@login_required
+def unix_groups(request, vm_id):
+    vm = get_object_or_404(VirtualMachine, pk=vm_id)
+    site = privileges_check(vm.site.id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if vm.is_busy:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': vm.id})),
+        2: dict(name='Manage Unix Groups', url=reverse(unix_groups, kwargs={'vm_id': vm.id}))
+    }
+
+    return render(request, 'mws/unix_groups.html', {
+        'breadcrumbs': breadcrumbs,
+        'vm': vm
+    })
+
+
+@login_required
+def add_unix_group(request, vm_id):
+    vm = get_object_or_404(VirtualMachine, pk=vm_id)
+    site = privileges_check(vm.site.id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if vm.is_busy:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': vm.id})),
+        2: dict(name='Manage Unix Groups', url=reverse(unix_groups, kwargs={'vm_id': vm.id})),
+        3: dict(name='Add a new Unix Group', url=reverse(add_unix_group, kwargs={'vm_id': vm.id}))
+    }
+
+    if request.method == 'POST':
+        unix_group_form = UnixGroupForm(request.POST)
+        if unix_group_form.is_valid():
+            unix_group = unix_group_form.save(commit=False)
+            unix_group.vm = vm
+            unix_group.save()
+            unix_group_form.save_m2m()
+            launch_ansible(site)  # to apply these changes to the vm
+            return HttpResponseRedirect(reverse(unix_groups, kwargs={'vm_id': vm.id}))
+    else:
+        unix_group_form = UnixGroupForm()
+
+    return render(request, 'mws/add_unix_group.html', {
+        'breadcrumbs': breadcrumbs,
+        'vm': vm,
+        'unix_group_form': unix_group_form
+    })
+
+
+@login_required
+def unix_group(request, ug_id):
+    unix_group = get_object_or_404(UnixGroup, pk=ug_id)
+    site = privileges_check(unix_group.vm.site.id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if unix_group.vm.is_busy:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
+    breadcrumbs = {
+        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': unix_group.vm.id})),
+        2: dict(name='Manage Unix Groups', url=reverse(unix_groups, kwargs={'vm_id': unix_group.vm.id})),
+        3: dict(name='Edit Unix Group', url=reverse('sitesmanagement.views.unix_group',
+                                                    kwargs={'ug_id': unix_group.id}))
+    }
+
+    if request.method == 'POST':
+        unix_group_form = UnixGroupForm(request.POST, instance=unix_group)
+        if unix_group_form.is_valid():
+            unix_group_form.save()
+            launch_ansible(site)  # to apply these changes to the vm
+            return HttpResponseRedirect(reverse(unix_groups, kwargs={'vm_id': unix_group.vm.id}))
+    else:
+        unix_group_form = UnixGroupForm(instance=unix_group)
+
+    return render(request, 'mws/unix_group.html', {
+        'breadcrumbs': breadcrumbs,
+        'unix_group_form': unix_group_form
+    })
+
+
+@login_required
+def delete_unix_group(request, ug_id):
+    unix_group = get_object_or_404(UnixGroup, pk=ug_id)
+    site = privileges_check(unix_group.vm.site.id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if unix_group.vm.is_busy:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
+    if request.method == 'DELETE':
+        unix_group.delete()
+        launch_ansible(site)
+        return redirect(unix_groups, vm_id=unix_group.vm.id)
+
+    return HttpResponseForbidden()
 
 
 @login_required

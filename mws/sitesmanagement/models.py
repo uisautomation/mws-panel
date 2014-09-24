@@ -325,6 +325,11 @@ class DomainName(models.Model):
         return self.name
 
 
+class UnixGroup(models.Model):
+    name = models.CharField(max_length=16) # TODO add validator to comply with Ubuntu guidelines of Unix group names
+    vm = models.ForeignKey(VirtualMachine, related_name='unix_groups')
+    users = models.ManyToManyField(User)
+
 # FORMS
 
 class SiteForm(forms.ModelForm):
@@ -377,107 +382,10 @@ class BillingForm(forms.ModelForm):
 
 
 class SystemPackagesForm(forms.Form):
-        OPTIONS = (
-            ("1", "dwoo - PHP5 template engine"),
-            ("2", "php5-exactimage - fast image manipulation library (PHP bindings)"),
-            ("3", "php5-ffmpeg - audio and video support via ffmpeg for php5"),
-            ("4", "php5-gdcm - Grassroots DICOM PHP5 bindings"),
-            ("5", "php5-vtkgdcm - Grassroots DICOM VTK PHP bindings"),
-            ("6", "php-geshi - Generic Syntax Highlighter"),
-            ("7", "gosa-plugin-phpgw - phpgw plugin for GOsa"),
-            ("8", "gosa-plugin-phpscheduleit - phpscheduleit plugin for GOsa"),
-            ("9", "libgv-php5 - PHP5 bindings for graphviz"),
-            ("10", "jffnms - PHP Network Management System"),
-            ("11", "kdevelop-php - PHP plugin for KDevelop"),
-            ("12", "kdevelop-php-docs - PHP documentation plugin for KDevelop"),
-            ("13", "php5-lasso - Library for Liberty Alliance and SAML protocols - PHP 5 bindings"),
-            ("14", "libfpdf-tpl-php - PHP library to use PDF templates with FPDF"),
-            ("15", "libfpdi-php - PHP library for importing existing PDF documents into FPDF"),
-            ("16", "libkohana3.1-core-php - PHP5 framework core classes"),
-            ("17", "libkohana3.1-php - PHP5 framework metapackage"),
-            ("18", "libkohana3.2-core-php - PHP5 framework core classes"),
-            ("19", "libkohana3.2-php - PHP5 framework metapackage"),
-            ("20", "libmarkdown-php - PHP library for rendering Markdown data"),
-            ("21", "liboauth-php - PHP library implementing the OAuth secure authentication protocol"),
-            ("22", "php5-mapscript - php5-cgi module for MapServer"),
-            ("23", "php5-ming - Ming module for php5"),
-            ("24", "phamm - PHP front-end to manage virtual services on LDAP - main package"),
-            ("25", "phamm-ldap - PHP front-end to manage virtual services on LDAP - back-end files"),
-            ("26", "phamm-ldap-amavis - PHP front-end to manage virtual services on LDAP - back-end files"),
-            ("27", "phamm-ldap-vacation - PHP front-end to manage virtual services on LDAP - back-end files"),
-            ("28", "php5-adodb - Extension optimising the ADOdb database abstraction library"),
-            ("29", "php-apc - APC (Alternative PHP Cache) module for PHP 5"),
-            ("30", "php-auth - PHP PEAR modules for creating an authentication system"),
-            ("31", "php-auth-http - HTTP authentication"),
-            ("32", "php-auth-sasl - Abstraction of various SASL mechanism responses"),
-            ("33", "php-cache - framework for caching of arbitrary data"),
-            ("34", "php-cache-lite - Fast and lite data cache system"),
-            ("35", "php-cas - Central Authentication Service client library in php"),
-            ("36", "php-codecoverage - provides collection, processing and rendering for PHP code coverage "
-                   "information"),
-            ("37", "php-codesniffer - PHP, CSS and JavaScript coding standard analyzer and checker"),
-            ("38", "php-compat - Provides components to achieve PHP version independence"),
-            ("39", "php-config - Your configuration's swiss-army knife"),
-            ("40", "php-console-table - PHP PEAR module to make it easy to build console style tables"),
-            ("41", "php-crypt-blowfish - Allows for quick two-way blowfish encryption without requiring the MCrypt PHP "
-                   "extension"),
-            ("42", "php-crypt-cbc - PEAR class to emulate Perl's Crypt::CBC module"),
-            ("43", "php-date - PHP PEAR module for date and time manipulation"),
-            ("44", "php-db - PHP PEAR Database Abstraction Layer"),
-            ("45", "php-doc - Documentation for PHP5"),
-            ("46", "php-elisp - Emacs support for php files"),
-            ("47", "php-event-dispatcher - Dispatch notifications using PHP callbacks"),
-            ("48", "php-file - PHP Pear modules for common file and directory routines"),
-            ("49", "php-file-iterator - FilterIterator implementation for PHP"),
-            ("50", "php-fpdf - PHP class to generate PDF files"),
-            ("51", "php5-geoip - GeoIP module for php5"),
-            ("52", "php-getid3 - PHP script to extract informations from multimedia files"),
-            ("53", "php-gettext - read gettext MO files directly, without requiring anything other than PHP"),
-            ("54", "php-html-common - base class for other HTML classes"),
-            ("55", "php-html-safe - strip down all potentially dangerous content within HTML"),
-            ("56", "php-html-template-it - PEAR HTML Isotemplate API"),
-            ("57", "php-htmlpurifier - Standards-compliant HTML filter"),
-            ("58", "php-http - PHP PEAR module for HTTP related stuff"),
-            ("59", "php-http-request - PEAR class to provide an easy way to perform HTTP requests"),
-            ("60", "php-http-upload - Easy and secure management of files submitted via HTML Forms"),
-            ("61", "php-http-webdav-server - WebDAV server base class"),
-            ("62", "php-image-text - PEAR module to do advanced text manipulations in images"),
-            ("63", "php5-imagick - ImageMagick module for php5"),
-            ("64", "php-imlib - PHP Imlib2 Extension"),
-            ("65", "php-invoker - utility class for invoking callables with a timeout"),
-            ("66", "php-letodms-core - Document management system - Core files"),
-            ("67", "php-letodms-lucene - Document management system - Fulltext search"),
-            ("68", "php-log - log module for PEAR"),
-            ("69", "php-mail - PHP PEAR module for sending email"),
-            ("70", "php-mail-mime - PHP PEAR module for creating MIME messages"),
-            ("71", "php-mail-mimedecode - PHP PEAR module to decode MIME messages"),
-            ("72", "php-mdb2 - merge of the PEAR DB and Metabase php database abstraction layers"),
-            ("73", "php-mdb2-driver-mysql - PHP PEAR module to provide a MySQL driver for MDB2"),
-            ("74", "php-mdb2-driver-pgsql - PHP PEAR module to provide a PostgreSQL driver for MDB2"),
-            ("75", "php-mdb2-schema - XML based database schema manager"),
-            ("76", "php5-memcache - memcache extension module for PHP5"),
-            ("77", "php5-memcached - memcached extension module for PHP5, uses libmemcached"),
-            ("78", "php-mime-type - Utility class for dealing with MIME types"),
-            ("79", "php-net-checkip - check the syntax of IPv4 addresses"),
-            ("80", "php-net-dime - class that implements DIME encoding"),
-            ("81", "php-net-dnsbl - Checks if a given host or URL is listed on a DNSBL or SURBL"),
-            ("82", "php-net-ftp - provides an OO interface to the PHP FTP functions"),
-            ("83", "php-net-imap - Provides an implementation of the IMAP protocol"),
-            ("84", "php-net-ipv4 - IPv4 network calculations and validation"),
-            ("85", "php-net-ipv6 - Check and validate IPv6 addresses"),
-            ("86", "php-net-ldap - a OO interface for searching and manipulating LDAP-entries"),
-            ("87", "php-net-ldap2 - PHP PEAR module for searching and manipulating LDAP-entries"),
-            ("88", "php-net-lmtp - PHP PEAR module implementing LMTP protocol"),
-            ("89", "php-net-nntp - PHP Pear module for NNTP"),
-            ("90", "php-net-portscan - Portscanner utilities"),
-            ("91", "php-net-sieve - net_sieve module for PEAR"),
-            ("92", "php-net-smartirc - provides an OO interface to the PHP IRC functions"),
-            ("93", "php-net-smtp - PHP PEAR module implementing SMTP protocol"),
-            ("94", "php-net-socket - PHP PEAR Network Socket Interface module"),
-            ("95", "php-net-url - easy parsing of Urls"),
-            ("96", "php-net-url2 - Class for parsing and handling URL"),
-            ("97", "php-net-whois - PHP PEAR module for querying whois services"),
-            ("98", "php-numbers-words - PEAR module providing methods for spelling numerals in words"),
-            ("99", "php-openid - PHP OpenID library"),
-        )
-        system_packages = forms.MultipleChoiceField(widget=forms.SelectMultiple, choices=OPTIONS, label="")
+        system_packages = forms.MultipleChoiceField(widget=forms.SelectMultiple, label="")
+
+
+class UnixGroupForm(forms.ModelForm):
+    class Meta:
+        model = UnixGroup
+        fields = ('name', 'users')
