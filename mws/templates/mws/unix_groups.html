@@ -1,37 +1,33 @@
 {% extends 'project-light/campl-mws.html' %}
 {% load static %}
 {% block page_content %}
+
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
 
-            <h1>Domain names for the mws "{{ vm.site.name }}"</h1>
+            <h1>Unix groups for the site "{{ vm.site.name }}"</h1>
             <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
                 <thead>
                     <tr>
-                        <th>Vhost</th>
-                        <th>Domains</th>
+                        <th>Unix group name</th>
+                        <th>Users</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                {% for vhost in vm.vhosts.all %}
+                {% for unix_group in vm.unix_groups.all %}
                     <tr>
                         <td>
-                            {{ vhost.name }}
+                            {{ unix_group.name }}
                         </td>
                         <td>
-                            {% for domain_name in vhost.sorted_domain_names %}
-                                {{ domain_name.name }},
-                            {% endfor %}
+                            {{ unix_group.users.all|join:", " }}
                         </td>
                         <td style="width: 160px;">
-                            <a href="{% url 'sitesmanagement.views.domains_management' vhost_id=vhost.id %}">
-                                <i title="Domains associated to this vhost" class="fa fa-link fa-2x"></i>
+                            <a href="{% url 'sitesmanagement.views.unix_group' ug_id=unix_group.id %}">
+                                <i title="Users in this group" class="fa fa-group fa-2x"></i>
                             </a>
-                            <a href="{% url 'sitesmanagement.views.certificates' vhost_id=vhost.id %}">
-                                <i title="TLS/SSL" class="fa fa-lock fa-2x"></i>
-                            </a>
-                            <a class="delete_vhost" data-toggle="confirmation" data-href="javascript:delete_vhost('{% url 'sitesmanagement.views.delete_vhost' vhost_id=vhost.id %}')" href="#">
+                            <a class="delete_vhost" data-toggle="confirmation" data-href="javascript:delete_unix_group('{% url 'sitesmanagement.views.delete_unix_group' ug_id=unix_group.id %}')" href="#">
                                 <i title="Delete" class="fa fa-trash-o fa-2x"></i>
                             </a>
                         </td>
@@ -40,7 +36,7 @@
                 </tbody>
             </table>
 
-        <p><a href="{% url 'sitesmanagement.views.add_vhost' vm_id=vm.id %}" class="campl-primary-cta">Add a new vhost</a></p>
+        <p><a href="{% url 'sitesmanagement.views.add_unix_group' vm_id=vm.id %}" class="campl-primary-cta">Add a new Unix Group</a></p>
 
         </div>
     </div>
@@ -64,7 +60,7 @@
             return cookieValue;
         }
 
-        function delete_vhost(url) {
+        function delete_unix_group(url) {
             $.ajax({
                 url: url,
                 type: 'DELETE',

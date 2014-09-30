@@ -19,7 +19,8 @@ class NoPrealocatedPrivateIPsAvailable(Exception):
 
 
 def new_site_primary_vm(site, primary):
-    network_configuration = NetworkConfig.objects.filter(virtual_machine=None).first()
+    network_configuration = NetworkConfig.get_free_public_ip() if primary else NetworkConfig.get_free_private_ip()
+
     vm = VirtualMachine.objects.create(primary=primary, status='requested',
                                        network_configuration=network_configuration, site=site)
     return install_vm(vm)
@@ -53,12 +54,16 @@ def destroy_vm(vm):
 def clone_vm(site, primary_vm):
     if primary_vm:
         if site.secondary_vm:
+            network_configuration = site.secondary_vm.network_configuration
             site.secondary_vm.delete()
+        else:
+            network_configuration = NetworkConfig.get_free_private_ip()
     else:
         if site.primary_vm:
+            network_configuration = site.primary_vm.network_configuration
             site.primary_vm.delete()
-
-    network_configuration = NetworkConfig.objects.filter(virtual_machine=None).first()
+        else:
+            network_configuration = NetworkConfig.get_free_public_ip()
 
     if network_configuration is None:
         raise NoPrealocatedPrivateIPsAvailable()

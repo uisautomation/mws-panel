@@ -10,7 +10,7 @@
             </div>
         </div>
 
-        <div class="campl-column4">
+        <div class="campl-column3">
             <div class="campl-content-container campl-side-padding">
                 <article class="node node-external-link view-mode-focus_on clearfix
                                 campl-horizontal-teaser campl-teaser campl-focus-teaser">
@@ -45,7 +45,7 @@
             </div>
         </div>
 
-        <div class="campl-column4">
+        <div class="campl-column3">
             <div class="campl-content-container campl-side-padding">
                 <article class="node node-external-link view-mode-focus_on clearfix
                                 campl-horizontal-teaser campl-teaser campl-focus-teaser">
@@ -80,7 +80,42 @@
             </div>
         </div>
 
-        <div class="campl-column4">
+        <div class="campl-column3">
+            <div class="campl-content-container campl-side-padding">
+                <article class="node node-external-link view-mode-focus_on clearfix
+                                campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                    <div class="campl-focus-teaser-img">
+                        <div class="campl-content-container campl-horizontal-teaser-img">
+                            <a href="{% url 'sitesmanagement.views.unix_groups' vm_id=vm.id %}">
+                                <div class="field field-name-field-external-url-image field-type-image
+                                            field-label-hidden">
+                                    <div class="field-items">
+                                        <div class="field-item even">
+                                            <img class="campl-scale-with-grid"
+                                                 src="{% static "icons/user2.png" %}"
+                                                 height="128" style="margin: 10px;" alt="">
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="campl-focus-teaser-txt">
+                        <div class="campl-content-container campl-horizontal-teaser-txt">
+                            <h3 class="campl-teaser-title">
+                                <a href="{% url 'sitesmanagement.views.unix_groups' vm_id=vm.id %}">
+                                    Manage Unix Groups
+                                </a>
+                            </h3>
+                            <a href="{% url 'sitesmanagement.views.unix_groups' vm_id=vm.id %}"
+                               class="ir campl-focus-link">Manage Unix Groups</a>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+
+        <div class="campl-column6">
             <div class="campl-content-container campl-side-padding">
                 <article class="node node-external-link view-mode-focus_on clearfix
                                 campl-horizontal-teaser campl-teaser campl-focus-teaser">
@@ -109,6 +144,43 @@
                 </article>
             </div>
         </div>
+
+        {% if not vm.primary %}
+        <div class="campl-column3">
+            <div class="campl-content-container campl-side-padding">
+                <article class="node node-external-link view-mode-focus_on clearfix
+                                campl-horizontal-teaser campl-teaser campl-focus-teaser campl-focus-teaser-red">
+                    <div class="campl-focus-teaser-img">
+                        <div class="campl-content-container campl-horizontal-teaser-img">
+                            <a class="delete_vm" data-toggle="confirmation" data-href="javascript:delete_vm('{% url 'sitesmanagement.views.delete_vm' vm_id=vm.id %}')" href="#">
+                                <div class="field field-name-field-external-url-image field-type-image
+                                            field-label-hidden">
+                                    <div class="field-items">
+                                        <div class="field-item even">
+                                            <i class="fa fa-trash fa-6x" style="color: orangered; margin-top: 5px; margin-left: 15px;"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="campl-focus-teaser-txt">
+                        <div class="campl-content-container campl-horizontal-teaser-txt">
+                            <h3 class="campl-teaser-title">
+                                <a class="delete_vm" data-toggle="confirmation" data-href="javascript:delete_vm('{% url 'sitesmanagement.views.delete_vm' vm_id=vm.id %}')" href="#">
+                                    Delete the secondary VM
+                                </a>
+                            </h3>
+                            <a class="delete_vm ir campl-focus-link campl-focus-link-red" data-toggle="confirmation" data-href="javascript:delete_vm('{% url 'sitesmanagement.views.delete_vm' vm_id=vm.id %}')" href="#">
+                                Delete the secondary VM
+                            </a>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+        {% endif %}
+
     </div>
     <div id="translucidframe">
         <img src="{% static 'img/ajax_loader_orange_256.gif' %}">
@@ -143,5 +215,39 @@
                 }
             })
         );
+
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie != '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function delete_vm(url) {
+            $.ajax({
+                url: url,
+                type: 'DELETE',
+                success: function(result) {
+                    location.reload();
+                },
+                beforeSend: function(xhr, settings) {
+                    xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+                },
+                crossDomain: false
+            });
+        }
+
+        $(document).ready(function() {
+            $('[data-toggle="confirmation"]').confirmation({singleton:true, popout:true, placement:'top'});
+        })
     </script>
 {% endblock %}
