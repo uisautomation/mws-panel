@@ -138,7 +138,7 @@ fieldset[disabled] .btn {
   box-shadow: none;
 }
 .btn-default {
-  color: #333333;
+  color: #333333 !important;
   background-color: #ffffff;
   border-color: #cccccc;
 }
@@ -147,7 +147,7 @@ fieldset[disabled] .btn {
 .btn-default:active,
 .btn-default.active,
 .open .dropdown-toggle.btn-default {
-  color: #333333;
+  color: #333333 !important;
   background-color: #ebebeb;
   border-color: #adadad;
 }
