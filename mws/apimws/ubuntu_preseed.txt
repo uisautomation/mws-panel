@@ -81,7 +81,8 @@ d-i pkgsel/include string openssh-server emacs
 # bes-config,bes-update-check,open-vm-tools,dump,userv,ook-client-dump
 #and maybe mcv21?
 # Apply software updates as part of the installation
-d-i pkgsel/upgrade select full-upgrade
+# The full-upgrade (d-i pkgsel/upgrade select full-upgrade) does not work, it fails when installing initrd.img-3.13.0-24-generic
+d-i pkgsel/upgrade select none
 
 # This one makes grub-installer install to the MBR if it also finds some other
 # OS, which is less safe as it might not be able to boot that other OS.
