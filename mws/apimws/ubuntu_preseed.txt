@@ -44,6 +44,7 @@ d-i debian-installer/allow_unauthenticated string true
 #create with printf "password" | mkpasswd -s -m sha-512
 #possibly adding -R 500000 would be an improvement
 d-i passwd/root-password-crypted password $6$jnMlxbf.$Iqdcu7KEF4thHIsiy3ZNrtnG7UW2389rkkv/zWUJm8u3IiFaj2Xw2qwQP7/IqtjsNV8/.XB.ADTMZgCJq66/31
+d-i passwd/root-login boolean true
 
 #Skip creation of a normal user account.
 d-i passwd/make-user boolean false
