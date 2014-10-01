@@ -60,7 +60,7 @@ def new_site_primary_vm(site, primary):
 
 
 def install_vm(vm):
-    f = open(os.path.join(settings.BASE_DIR, 'apimws/debian_preseed.txt'), 'r')
+    f = open(os.path.join(settings.BASE_DIR, 'apimws/ubuntu_preseed.txt'), 'r')
     profile = f.read()
     f.close()
 
