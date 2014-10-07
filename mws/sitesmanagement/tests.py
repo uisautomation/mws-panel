@@ -4,8 +4,9 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+from apimws.platforms import PlatformsAPINotWorkingException
 from mwsauth.tests import do_test_login
-from models import NetworkConfig, Site
+from models import NetworkConfig, Site, VirtualMachine
 import views
 from utils import is_camacuk, get_object_or_None
 
@@ -82,7 +83,7 @@ class SiteManagementTests(TestCase):
         self.assertEqual(response.status_code, 302)  # There aren't prealocated network configurations
         self.assertTrue(response.url.endswith(reverse(views.index)))
 
-        NetworkConfig.objects.create(IPv4='1.1.1.1', IPv6='::1.1.1.1', mws_domain="1.mws.cam.ac.uk")
+        NetworkConfig.objects.create(IPv4='1.1.1.1', IPv6='::1.1.1.1', mws_domain="1.mws.cam.ac.uk", type="public")
 
         response = self.client.get(reverse(views.new))
         self.assertContains(response, "Request new site")
@@ -92,9 +93,11 @@ class SiteManagementTests(TestCase):
                                                          'siteform-email': 'amc203@cam.ac.uk'})
         self.assertContains(response, "This field is required.") # Empty name, error
 
-        response = self.client.post(reverse(views.new), {'siteform-name': 'Test Site', 'siteform-description': 'Desc',
+        response = self.client.post(reverse(views.new), {'siteform-name': 'Test Site',
+                                                         'siteform-description': 'Desc',
                                                          'siteform-institution_id': 'UIS',
                                                          'siteform-email': 'amc203@cam.ac.uk'})
+
         test_site = Site.objects.get(name='Test Site')
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith(reverse(views.show, kwargs={'site_id': test_site.id})))
@@ -113,6 +116,8 @@ class SiteManagementTests(TestCase):
         self.assertContains(response, "Your email &#39;%s&#39; is still unconfirmed, please check your email inbox and "
                                       "click on the link of the email we sent you." % test_site.email )
 
+        test_site.delete()
+
     def test_view_edit(self):
         response = self.client.get(reverse(views.edit, kwargs={'site_id': 1}))
         self.assertEqual(response.status_code, 302)  # Not logged in, redirected to login
@@ -125,6 +130,9 @@ class SiteManagementTests(TestCase):
         self.assertEqual(response.status_code, 404)  # The Site does not exist
 
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
+        netconf = NetworkConfig.objects.create(IPv4='1.1.1.1', IPv6='::1.1.1.1', mws_domain="1.mws.cam.ac.uk")
+        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", site=site,
+                                           network_configuration=netconf)
         response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)  # The User is not in the list of auth users
 

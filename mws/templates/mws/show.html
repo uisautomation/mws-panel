@@ -31,6 +31,7 @@
 
         {% if not site.primary_vm.is_busy %}
 
+            {% if site.primary_vm %}
             <div class="campl-column4">
                 <div class="campl-content-container campl-side-padding">
                     <article class="node node-external-link view-mode-focus_on clearfix
@@ -65,6 +66,7 @@
                     </article>
                 </div>
             </div>
+            {% endif %}
 
             <div class="campl-column4">
                 <div class="campl-content-container campl-side-padding">
