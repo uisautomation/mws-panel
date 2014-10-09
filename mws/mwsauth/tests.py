@@ -171,7 +171,7 @@ class AuthTestCases(TestCase):
         self.assertEqual(site_with_auth_users.users.first(), amc203_user)
         self.assertEqual(len(site_with_auth_users.groups.all()), 0)
         response = self.client.post(reverse(views.auth_change, kwargs={'site_id': site_with_auth_users.id}), {
-            'crsids': "amc203",
+            'users_crsids': "amc203",
             'groupids': "101888"
             # we authorise amc203 user and 101888 group
         })
@@ -198,7 +198,7 @@ class AuthTestCases(TestCase):
         self.assertEqual(len(site_with_auth_groups.groups.all()), 1)
         self.assertEqual(site_with_auth_groups.groups.first(), information_systems_group)
         response = self.client.post(reverse(views.auth_change, kwargs={'site_id': site_with_auth_groups.id}), {
-            'crsids': "amc203",
+            'users_crsids': "amc203",
             'groupids': "101888"
             # we authorise amc203 user and 101888 group
         })

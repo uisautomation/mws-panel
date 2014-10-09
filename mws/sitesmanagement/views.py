@@ -391,9 +391,6 @@ def settings(request, vm_id):
         return HttpResponseForbidden()
 
     if vm.is_busy:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
-
-    if vm is None or vm.status != 'ready':
         return redirect(reverse(show, kwargs={'site_id': site.id}))
 
     breadcrumbs = {
@@ -417,9 +414,6 @@ def check_vm_status(request, vm_id):
         return HttpResponseForbidden()
 
     if vm.is_busy:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
-
-    if vm is None or vm.status != 'ready':
         return JsonResponse({'error': 'VMNotReady'})
 
     try:
@@ -630,9 +624,6 @@ def reset_vm(request, vm_id):
         return HttpResponseForbidden()
 
     if not vm.is_ready:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
-
-    if vm is None or vm.status != 'ready':
         return redirect(reverse(show, kwargs={'site_id': site.id}))
 
     if vm.do_reset() is False:

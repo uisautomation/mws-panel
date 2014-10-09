@@ -233,11 +233,12 @@
         }
 
         function delete_vm(url) {
+            $("#translucidframe")[0].style.visibility = "visible";
             $.ajax({
                 url: url,
                 type: 'DELETE',
                 success: function(result) {
-                    location.reload();
+                    window.location = "{% url 'sitesmanagement.views.show' site_id=site.id %}";
                 },
                 beforeSend: function(xhr, settings) {
                     xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));

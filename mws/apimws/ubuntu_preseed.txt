@@ -2,9 +2,9 @@
 d-i debian-installer/locale string en_GB.UTF-8
 
 # Keyboard selection.
-# keymap is an alias for keyboard-configuration/xkb-keymap
-# ...but aliases can only be used on the command-line
-d-i keyboard-configuration/xkb-keymap select gb
+# Disable automatic (interactive) keymap detection.
+d-i console-setup/ask_detect boolean false
+d-i keyboard-configuration/layoutcode string gb
 
 # netcfg will choose an interface that has link if possible. This makes it
 # skip displaying a list if there is more than one interface.
@@ -14,13 +14,19 @@ d-i netcfg/choose_interface select auto
 d-i mirror/protocol string http
 d-i mirror/country string manual
 d-i mirror/http/hostname string www-uxsup.csx.cam.ac.uk 
-d-i mirror/http/directory string /pub/linux/debian
+d-i mirror/http/directory string /pub/linux/ubuntu
 d-i mirror/http/proxy string
 
+# Any hostname and domain names assigned from dhcp take precedence over
+# values set here. However, setting the values still prevents the questions
+# from being shown, even if values come from dhcp.
+d-i netcfg/get_hostname string unassigned-hostname
+d-i netcfg/get_domain string unassigned-domain
+
 # Suite to install.
-d-i mirror/suite string wheezy
+d-i mirror/suite string trusty
 # Suite to use for loading installer components (optional).
-d-i mirror/udeb/suite string wheezy
+d-i mirror/udeb/suite string trusty
 
 # Set up the Unix Support repository.
 d-i apt-setup/local0/repository string http://bes.csi.cam.ac.uk/ubuntu hardy-uxsup uxsup
@@ -38,6 +44,7 @@ d-i debian-installer/allow_unauthenticated string true
 #create with printf "password" | mkpasswd -s -m sha-512
 #possibly adding -R 500000 would be an improvement
 d-i passwd/root-password-crypted password $6$jnMlxbf.$Iqdcu7KEF4thHIsiy3ZNrtnG7UW2389rkkv/zWUJm8u3IiFaj2Xw2qwQP7/IqtjsNV8/.XB.ADTMZgCJq66/31
+d-i passwd/root-login boolean true
 
 #Skip creation of a normal user account.
 d-i passwd/make-user boolean false
@@ -74,7 +81,8 @@ d-i pkgsel/include string openssh-server emacs
 # bes-config,bes-update-check,open-vm-tools,dump,userv,ook-client-dump
 #and maybe mcv21?
 # Apply software updates as part of the installation
-d-i pkgsel/upgrade select full-upgrade
+# The full-upgrade (d-i pkgsel/upgrade select full-upgrade) does not work, it fails when installing initrd.img-3.13.0-24-generic
+d-i pkgsel/upgrade select none
 
 # This one makes grub-installer install to the MBR if it also finds some other
 # OS, which is less safe as it might not be able to boot that other OS.
