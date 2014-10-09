@@ -14,3 +14,6 @@ deployment/Vagrantfile
 
 # User uploaded files
 mws/media/*
+
+# Production secrets
+mws/mws/production_secrets.py
