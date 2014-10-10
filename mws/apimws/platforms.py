@@ -31,11 +31,7 @@ def get_api_username():
     return settings.PLATFORMS_API_USERNAME
 
 
-def new_site_primary_vm(site, primary):
-    network_configuration = NetworkConfig.get_free_public_ip() if primary else NetworkConfig.get_free_private_ip()
-
-    vm = VirtualMachine.objects.create(primary=primary, status='requested',
-                                       network_configuration=network_configuration, site=site)
+def new_site_primary_vm(vm):
     json_object = {
         'username': get_api_username(),
         'secret': get_api_secret(),
@@ -198,14 +194,17 @@ def clone_vm(site, primary_vm):
 
     destiantion_vm = VirtualMachine.objects.create(primary=(not primary_vm), status='requested',
                                                    network_configuration=network_configuration, site=site)
+    clone_vm_api_call.delay(orignal_vm, destiantion_vm)
 
+
+def clone_vm_api_call(orignal_vm, destiantion_vm):
     json_object = {
         'username': get_api_username(),
         'secret': get_api_secret(),
         'command': 'clone',
         'vmid': orignal_vm.name,
-        'ip': network_configuration.IPv4,
-        'hostname': network_configuration.mws_domain,
+        'ip': destiantion_vm.network_configuration.IPv4,
+        'hostname': destiantion_vm.network_configuration.mws_domain,
     }
     headers = {'Content-type': 'application/json'}
     try:
