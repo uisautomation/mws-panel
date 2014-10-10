@@ -155,6 +155,8 @@ def reset_vm(vm):
 
 
 def destroy_vm(vm):
+    change_vm_power_state(vm, "off")
+
     json_object = {
         'username': get_api_username(),
         'secret': get_api_secret(),
