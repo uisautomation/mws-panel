@@ -6,7 +6,7 @@ from django.db import transaction
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 import reversion
-from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups
+from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups, validate_crsids
 from apimws.models import AnsibleConfiguration
 from apimws.platforms import PlatformsAPINotWorkingException, new_site_primary_vm, clone_vm
 from apimws.utils import email_confirmation, ip_register_api_request, launch_ansible
@@ -20,7 +20,7 @@ from .models import SiteForm, DomainNameFormNew, BillingForm, DomainName, Networ
 def index(request):
     try:
         groups_id = get_group_ids_of_a_user_in_lookup(request.user)
-    except IbisException as e:
+    except IbisException:
         groups_id = []
 
     sites = []
@@ -95,7 +95,7 @@ def edit(request, site_id):
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
         1: dict(name='Change information about your MWS',
-                           url=reverse('sitesmanagement.views.edit', kwargs={'site_id': site.id}))
+                url=reverse('sitesmanagement.views.edit', kwargs={'site_id': site.id}))
     }
 
     if request.method == 'POST':
@@ -133,7 +133,7 @@ def delete(request, site_id):
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
         1: dict(name='Change information about your MWS',
-                           url=reverse('sitesmanagement.views.edit', kwargs={'site_id': site.id})),
+                url=reverse('sitesmanagement.views.edit', kwargs={'site_id': site.id})),
         2: dict(name='Delete your MWS', url=reverse('sitesmanagement.views.delete', kwargs={'site_id': site.id}))
     }
 
@@ -163,7 +163,7 @@ def disable(request, site_id):
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
         1: dict(name='Change information about your MWS',
-                           url=reverse('sitesmanagement.views.edit', kwargs={'site_id': site.id})),
+                url=reverse('sitesmanagement.views.edit', kwargs={'site_id': site.id})),
         2: dict(name='Disable your MWS site', url=reverse(clone_vm_view, kwargs={'site_id': site.id}))
     }
 
@@ -301,7 +301,7 @@ def clone_vm_view(request, site_id):
         if request.POST.get('primary_vm') == "false":
             clone_vm(site, False)
 
-        return redirect(show, site_id = site.id)
+        return redirect(show, site_id=site.id)
 
     return render(request, 'mws/clone_vm.html', {
         'breadcrumbs': breadcrumbs,
@@ -500,13 +500,22 @@ def add_unix_group(request, vm_id):
         3: dict(name='Add a new Unix Group', url=reverse(add_unix_group, kwargs={'vm_id': vm.id}))
     }
 
+    lookup_lists = {
+        'unix_users': []  # TODO to be removed once django-ucam-lookup is modified
+    }
+
     if request.method == 'POST':
         unix_group_form = UnixGroupForm(request.POST)
         if unix_group_form.is_valid():
+
             unix_group = unix_group_form.save(commit=False)
             unix_group.vm = vm
             unix_group.save()
-            unix_group_form.save_m2m()
+
+            unix_users = validate_crsids(request.POST.get('unix_users'))
+            # TODO If there are no users in the list return an Exception?
+            unix_group.users.add(*unix_users)
+
             launch_ansible(site)  # to apply these changes to the vm
             return HttpResponseRedirect(reverse(unix_groups, kwargs={'vm_id': vm.id}))
     else:
@@ -515,6 +524,7 @@ def add_unix_group(request, vm_id):
     return render(request, 'mws/add_unix_group.html', {
         'breadcrumbs': breadcrumbs,
         'vm': vm,
+        'lookup_lists': lookup_lists,  # TODO to be removed once django-ucam-lookup is modified
         'unix_group_form': unix_group_form
     })
 
@@ -556,10 +566,20 @@ def unix_group(request, ug_id):
                                                     kwargs={'ug_id': unix_group.id}))
     }
 
+    lookup_lists = {
+        'unix_users': unix_group.users.all()
+    }
+
     if request.method == 'POST':
         unix_group_form = UnixGroupForm(request.POST, instance=unix_group)
         if unix_group_form.is_valid():
             unix_group_form.save()
+
+            unix_users = validate_crsids(request.POST.get('unix_users'))
+            # TODO If there are no users in the list return an Exception?
+            unix_group.users.clear()
+            unix_group.users.add(*unix_users)
+
             launch_ansible(site)  # to apply these changes to the vm
             return HttpResponseRedirect(reverse(unix_groups, kwargs={'vm_id': unix_group.vm.id}))
     else:
@@ -567,6 +587,7 @@ def unix_group(request, ug_id):
 
     return render(request, 'mws/unix_group.html', {
         'breadcrumbs': breadcrumbs,
+        'lookup_lists': lookup_lists,
         'unix_group_form': unix_group_form
     })
 

@@ -386,4 +386,4 @@ class SystemPackagesForm(forms.Form):
 class UnixGroupForm(forms.ModelForm):
     class Meta:
         model = UnixGroup
-        fields = ('name', 'users')
+        fields = ('name', )
