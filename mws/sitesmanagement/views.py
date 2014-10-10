@@ -62,10 +62,9 @@ def new(request):
             # Save user that requested the site
             site.users.add(request.user)
 
-            try:
-                new_site_primary_vm(site, primary=True)  # TODO do it after saving a site
-            except Exception as e:
-                raise e  # TODO try again later. pass to celery?
+            vm = VirtualMachine.objects.create(primary=True, status='requested',
+                                               network_configuration=NetworkConfig.get_free_public_ip(), site=site)
+            new_site_primary_vm.delay(vm)
 
             try:
                 if site.email:
@@ -298,11 +297,9 @@ def clone_vm_view(request, site_id):
 
     if request.method == 'POST':
         if request.POST.get('primary_vm') == "true":
-            if not clone_vm(site, True):
-                raise PlatformsAPINotWorkingException()
+            clone_vm(site, True)
         if request.POST.get('primary_vm') == "false":
-            if not clone_vm(site, False):
-                raise PlatformsAPINotWorkingException()
+            clone_vm(site, False)
 
         return redirect(show, site_id = site.id)
 

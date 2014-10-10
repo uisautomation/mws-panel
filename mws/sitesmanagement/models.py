@@ -114,7 +114,6 @@ class Site(models.Model):
             self.primary_vm.power_off()
         if self.secondary_vm:
             self.secondary_vm.power_off()
-        return True
 
     def enable(self):
         self.disabled = False
@@ -123,7 +122,6 @@ class Site(models.Model):
             self.primary_vm.power_on()
         if self.secondary_vm:
             self.secondary_vm.power_on()
-        return True
 
     @property
     def is_busy(self):
@@ -280,11 +278,11 @@ class VirtualMachine(models.Model):
 
     def power_on(self):
         from apimws.platforms import change_vm_power_state
-        return change_vm_power_state(self, 'on')
+        change_vm_power_state(self, 'on')
 
     def power_off(self):
         from apimws.platforms import change_vm_power_state
-        return change_vm_power_state(self, 'off')
+        change_vm_power_state(self, 'off')
 
     def do_reset(self):
         from apimws.platforms import reset_vm
