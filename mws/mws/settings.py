@@ -1,4 +1,5 @@
 from common_settings import *
+from production_secrets import *
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '$a2byg9*bc5rcc_e5d5#3+mp^s=v0y_vz18ke-tzy_u!*&!txw'
