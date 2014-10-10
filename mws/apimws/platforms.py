@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from celery import shared_task
 import json
 import os
 import random
@@ -31,6 +33,7 @@ def get_api_username():
     return settings.PLATFORMS_API_USERNAME
 
 
+@shared_task
 def new_site_primary_vm(vm):
     json_object = {
         'username': get_api_username(),
@@ -55,6 +58,7 @@ def new_site_primary_vm(vm):
         return False  # TODO raise error
 
 
+@shared_task
 def install_vm(vm):
     f = open(os.path.join(settings.BASE_DIR, 'apimws/ubuntu_preseed.txt'), 'r')
     profile = f.read()
@@ -105,6 +109,7 @@ def get_vm_power_state(vm):
         pass  # TODO raise error
 
 
+@shared_task
 def change_vm_power_state(vm, on):
     if on != 'on' and on != 'off':
         raise PlatformsAPIInputException("passed wrong parameter power %s" % on)
@@ -129,6 +134,7 @@ def change_vm_power_state(vm, on):
         return False  # TODO raise error
 
 
+@shared_task
 def reset_vm(vm):
     json_object = {
         'username': get_api_username(),
@@ -150,6 +156,7 @@ def reset_vm(vm):
         return False # TODO raise error
 
 
+@shared_task
 def destroy_vm(vm):
     change_vm_power_state(vm, "off")
 
@@ -197,6 +204,7 @@ def clone_vm(site, primary_vm):
     clone_vm_api_call.delay(orignal_vm, destiantion_vm)
 
 
+@shared_task
 def clone_vm_api_call(orignal_vm, destiantion_vm):
     json_object = {
         'username': get_api_username(),

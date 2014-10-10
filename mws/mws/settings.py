@@ -54,3 +54,7 @@ LSxbGuFG9yfPFIqaSntlYMxKKB5ba/tIAMzyAOHxdEM5hi1DXRsOok3ElWjOw9oN
 wOq24EIbX5LquL9w+uvnfXw=
 -----END CERTIFICATE-----
 """}
+
+BROKER_URL = 'django://'
+INSTALLED_APPS = INSTALLED_APPS+('kombu.transport.django', )
+CELERY_IMPORTS = ('apimws.platforms', )

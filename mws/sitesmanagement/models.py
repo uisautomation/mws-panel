@@ -286,7 +286,7 @@ class VirtualMachine(models.Model):
 
     def do_reset(self):
         from apimws.platforms import reset_vm
-        return reset_vm(self)
+        return reset_vm.delay(self)
 
     def __unicode__(self):
         if self.name is None:
