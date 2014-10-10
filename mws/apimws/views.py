@@ -7,35 +7,9 @@ from django.shortcuts import get_object_or_404, render, redirect
 from stronghold.decorators import public
 from apimws.utils import launch_ansible
 from mwsauth.utils import get_or_create_group_by_groupid
-from sitesmanagement.models import VirtualMachine, DomainName, Site, EmailConfirmation
-from apimws.models import VMForm
+from sitesmanagement.models import DomainName, Site, EmailConfirmation
 from sitesmanagement.views import show
 from ucamlookup import user_in_groups
-
-
-@login_required
-def confirm_vm(request, vm_id):
-    # Check if the request.user is authorised to do so: member of the UIS Platforms or UIS Information Systems groups
-    if not user_in_groups(request.user,
-                          [get_or_create_group_by_groupid("101128"), get_or_create_group_by_groupid("101888")]):
-        return HttpResponseForbidden()
-
-    vm = get_object_or_404(VirtualMachine, pk=vm_id)
-
-    if request.method == 'POST':
-        vm_form = VMForm(request.POST, instance=vm)
-        if vm_form.is_valid():
-            vm = vm_form.save(commit=False)
-            vm.status = "accepted"
-            vm.save()
-            return render(request, 'api/success.html')
-    else:
-        vm_form = VMForm(instance=vm)
-
-    return render(request, 'api/confirm_vm.html', {
-        'vm': vm,
-        'vm_form': vm_form
-    })
 
 
 @login_required
