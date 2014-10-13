@@ -1,8 +1,10 @@
-import uuid
-from django.forms import ValidationError
+from __future__ import absolute_import
+from celery import shared_task
 from django.core.mail import send_mail
 from django.conf import settings
-from sitesmanagement.models import VirtualMachine, NetworkConfig, DomainName, EmailConfirmation
+from sitesmanagement.models import DomainName, EmailConfirmation
+import uuid
+
 
 def ip_register_api_request(vhost, domain_name):
     site = vhost.vm.site
@@ -19,6 +21,7 @@ def ip_register_api_request(vhost, domain_name):
     send_mail(subject, message, from_email, recipient_list, fail_silently=False)
 
 
+@shared_task
 def email_confirmation(site):
     previous = EmailConfirmation.objects.filter(site=site)
     if previous:

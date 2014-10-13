@@ -66,11 +66,8 @@ def new(request):
                                                network_configuration=NetworkConfig.get_free_public_ip(), site=site)
             new_site_primary_vm.delay(vm)
 
-            try:
-                if site.email:
-                    email_confirmation(site)  # TODO do it after saving a site
-            except Exception as e:
-                raise e  # TODO try again later. pass to celery?
+            if site.email:
+                email_confirmation.delay(site)
 
             return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
     else:
@@ -103,12 +100,9 @@ def edit(request, site_id):
         if site_form.is_valid():
             site_form.save()
             if 'email' in site_form.changed_data:
-                try:
-                    if site.email:
-                        email_confirmation(site)  # TODO do it in other place?
-                        # TODO launch ansible to update email associated
-                except Exception as e:
-                    raise e  # TODO try again later. pass to celery?
+                if site.email:
+                    email_confirmation.delay(site)
+                    # TODO launch ansible to update webmaster email address in host?
             return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
     else:
         site_form = SiteForm(user=request.user, instance=site)
