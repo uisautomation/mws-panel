@@ -1,6 +1,6 @@
 from django.core.management.base import NoArgsCommand, CommandError
 from optparse import make_option
-from sys import stdout
+import sys
 import json
 
 from sitesmanagement.models import VirtualMachine
@@ -18,10 +18,11 @@ class Command(NoArgsCommand):
         make_option("--host", action='store',
                     help="emit the configuration of a single MWS client"),
         )
-    def handle_noargs(self, list, host, **options):
+    def handle_noargs(self, list=None, host=None, outfile=None, **options):
         if (not list and not host) or (list and host):
             raise CommandError, (
                 "Exactly one of --list and --host must be specified.")
+        outfile = outfile or sys.stdout
         if list:
             vms = VirtualMachine.objects.filter(
                 status__in=('ansible', 'ready'))
@@ -30,15 +31,15 @@ class Command(NoArgsCommand):
             for vm in vms:
                 result['_meta']['hostvars'][self.hostid(vm)] = (
                     self.hostvars(vm))
-            json.dump(result, stdout)
-            print
+            json.dump(result, outfile)
+            outfile.write("\n")
         else:
             if not host.startswith(idprefix):
                 raise CommandError, "Host identifier not found"
             host = host[len(idprefix):]
             vm = VirtualMachine.objects.get(id=int(host))
-            json.dump(self.hostvars(vm), stdout)
-            print
+            json.dump(self.hostvars(vm), outfile)
+            outfile.write("\n")
     def hostid(self, vm):
         return idprefix + str(vm.id)
     def hostvars(self, vm):
