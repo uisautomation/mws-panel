@@ -24,9 +24,12 @@
                         <td>
                             {{ domain.get_status_display }}
                         </td>
-                        <td style="width: 35px;">
-                            <a href="#" onclick="javascript:set_as_master('{% url 'sitesmanagement.views.set_dn_as_main' domain_id=domain.id %}')">
+                        <td style="width: 135px;">
+                            <a href="#" onclick="javascript:ajax_call('{% url 'sitesmanagement.views.set_dn_as_main' domain_id=domain.id %}', 'POST')">
                                 Set as Master
+                            </a>
+                            <a class="delete_vhost" data-toggle="confirmation" data-href="javascript:ajax_call('{% url 'sitesmanagement.views.delete_dn' domain_id=domain.id %}', 'DELETE')" href="#">
+                                <i title="Delete" class="fa fa-trash-o fa-2x"></i>
                             </a>
                         </td>
                     </tr>
@@ -59,10 +62,10 @@
             return cookieValue;
         }
 
-        function set_as_master(url) {
+        function ajax_call(url, type) {
             $.ajax({
                 url: url,
-                type: 'POST',
+                type: type,
                 success: function(result) {
                     location.reload();
                 },
@@ -72,5 +75,9 @@
                 crossDomain: false
             });
         }
+
+        $(document).ready(function() {
+            $('[data-toggle="confirmation"]').confirmation({singleton:true, popout:true, placement:'top'});
+        })
     </script>
 {% endblock %}

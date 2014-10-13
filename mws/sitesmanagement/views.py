@@ -763,7 +763,7 @@ def certificates(request, vhost_id):
 
 
 @login_required
-def set_dn_as_main(request, domain_id):  # TODO remove vhost_id
+def set_dn_as_main(request, domain_id):
     domain = get_object_or_404(DomainName, pk=domain_id)
     vhost = domain.vhost
     site = privileges_check(vhost.vm.site.id, request.user)
@@ -774,12 +774,29 @@ def set_dn_as_main(request, domain_id):  # TODO remove vhost_id
     if vhost.vm.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
-    if domain not in vhost.domain_names.all():
-        return HttpResponseForbidden()
-
     if request.method == 'POST':
         vhost.main_domain = domain
         vhost.save()
         launch_ansible(site)  # to update the vhost main domain name in the apache configuration
 
     return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management', kwargs={'vhost_id': vhost.id}))
+
+
+@login_required
+def delete_dn(request, domain_id):
+    domain = get_object_or_404(DomainName, pk=domain_id)
+    vhost = domain.vhost
+    site = privileges_check(vhost.vm.site.id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if vhost.vm.is_busy:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
+    if request.method == 'DELETE':
+        domain.delete()
+        launch_ansible(site)
+        return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management', kwargs={'vhost_id': vhost.id}))
+
+    return HttpResponseForbidden()
