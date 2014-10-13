@@ -219,11 +219,14 @@ def show(request, site_id):
         warning_messages.append("No Billing, please add one.")
 
     if site.email:
-        site_email = EmailConfirmation.objects.get(email=site.email, site_id=site.id)
-        if site_email.status == 'pending':
-            warning_messages.append("Your email '%s' is still unconfirmed, please check your email inbox and click on "
-                                    "the link of the email we sent you."
-                                    % site.email)
+        try:
+            site_email = EmailConfirmation.objects.get(email=site.email, site_id=site.id)
+            if site_email.status == 'pending':
+                warning_messages.append("Your email '%s' is still unconfirmed, please check your email inbox and click on "
+                                        "the link of the email we sent you."
+                                        % site.email)
+        except EmailConfirmation.DoesNotExist:
+            pass
 
     if site.primary_vm is None or site.primary_vm.status == 'requested':
         warning_messages.append("Your Managed Web Server is being prepared")
