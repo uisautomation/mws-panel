@@ -277,7 +277,7 @@ class SiteManagementTests(TestCase):
         self.assertInHTML('<td>jw35</td>', response.content, count=1)
         self.assertInHTML('<td>amc203</td>', response.content, count=0)
 
-    def test_vhost(self):
+    def test_vhosts_management(self):
         do_test_login(self, user="test0001")
         site = self.create_site()
         response = self.client.post(reverse(views.add_vhost, kwargs={'vm_id': site.primary_vm.id}),
@@ -290,3 +290,44 @@ class SiteManagementTests(TestCase):
         response = self.client.delete(reverse(views.delete_vhost, kwargs={'vhost_id': vhost.id}))
         response = self.client.get(response.url)  # TODO assert that url is vhost_management
         self.assertInHTML('<td>testVhost</td>', response.content, count=0)
+
+    def test_domains_management(self):
+        do_test_login(self, user="test0001")
+        site = self.create_site()
+        response = self.client.post(reverse(views.add_vhost, kwargs={'vm_id': site.primary_vm.id}),
+                         {'name': 'testVhost'})
+        vhost = Vhost.objects.get(name='testVhost')
+
+        response = self.client.get(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}))  # TODO check it
+        response = self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}),
+                                    {'name': 'test.mws3.csx.cam.ac.uk'})
+        response = self.client.get(response.url)  # TODO assert that url is domains_management
+        self.assertInHTML('<tbody><tr><td>test.mws3.csx.cam.ac.uk</td><td>Requested</td>'
+                          '<td style="width: 135px;"><a href="#" onclick="javascript:ajax_call'
+                          '(\'/set_dn_as_main/1/\', \'POST\')">Set as Master</a><a class="delete_vhost" data-toggle='
+                          '"confirmation" data-href="javascript:ajax_call(\'/delete_domain/1/\', \'DELETE\')" href="#">'
+                          '<i title="Delete" class="fa fa-trash-o fa-2x"></i></a></td></tr></tbody>',
+                          response.content, count=1)
+        self.client.get(reverse(views.set_dn_as_main, kwargs={'domain_id': 1}))
+        self.assertInHTML('<tbody><tr><td>test.mws3.csx.cam.ac.uk</td><td>Requested</td>'
+                          '<td style="width: 135px;"><a href="#" onclick="javascript:ajax_call'
+                          '(\'/set_dn_as_main/1/\', \'POST\')">Set as Master</a><a class="delete_vhost" data-toggle='
+                          '"confirmation" data-href="javascript:ajax_call(\'/delete_domain/1/\', \'DELETE\')" href="#">'
+                          '<i title="Delete" class="fa fa-trash-o fa-2x"></i></a></td></tr></tbody>',
+                          response.content, count=1)
+        response = self.client.post(reverse(views.set_dn_as_main, kwargs={'domain_id': 1}))
+        response = self.client.get(response.url)
+        self.assertInHTML('<tbody><tr><td>test.mws3.csx.cam.ac.uk<br>This is the current main domain</td>'
+                          '<td>Requested</td><td style="width: 135px;"><a href="#" onclick="javascript:ajax_call'
+                          '(\'/set_dn_as_main/1/\', \'POST\')">Set as Master</a><a class="delete_vhost" data-toggle='
+                          '"confirmation" data-href="javascript:ajax_call(\'/delete_domain/1/\', \'DELETE\')" href="#">'
+                          '<i title="Delete" class="fa fa-trash-o fa-2x"></i></a></td></tr></tbody>',
+                          response.content, count=1)
+        response = self.client.delete(reverse(views.delete_dn, kwargs={'domain_id': 1}))
+        response = self.client.get(response.url)
+        self.assertInHTML('<tbody><tr><td>test.mws3.csx.cam.ac.uk<br>This is the current main domain</td>'
+                          '<td>Requested</td><td style="width: 135px;"><a href="#" onclick="javascript:ajax_call'
+                          '(\'/set_dn_as_main/1/\', \'POST\')">Set as Master</a><a class="delete_vhost" data-toggle='
+                          '"confirmation" data-href="javascript:ajax_call(\'/delete_domain/1/\', \'DELETE\')" href="#">'
+                          '<i title="Delete" class="fa fa-trash-o fa-2x"></i></a></td></tr></tbody>',
+                          response.content, count=0)

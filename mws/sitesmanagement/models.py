@@ -298,7 +298,7 @@ class VirtualMachine(models.Model):
 class Vhost(models.Model):
     name = models.CharField(max_length=250)
     # main domain name for this vhost
-    main_domain = models.ForeignKey('DomainName', related_name='+', null=True, blank=True)
+    main_domain = models.ForeignKey('DomainName', related_name='+', null=True, blank=True, on_delete=models.SET_NULL)
     vm = models.ForeignKey(VirtualMachine, related_name='vhosts')
 
     def sorted_domain_names(self):
