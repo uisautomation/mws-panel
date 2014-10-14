@@ -708,22 +708,16 @@ def add_domain(request, vhost_id, socket_error=None):
     if request.method == 'POST':
         domain_form = DomainNameFormNew(request.POST)
         if domain_form.is_valid():
-            try:
-                domain_requested = domain_form.save(commit=False)
-                if domain_requested.name != '':  # TODO do it after saving a domain request
-                    if is_camacuk(domain_requested.name):
-                        ip_register_api_request(vhost, domain_requested.name)
-                    else:
-                        new_domain = DomainName.objects.create(name=domain_requested.name, status='accepted',
-                                                               vhost=vhost)
-                        if vhost.main_domain is None:
-                            vhost.main_domain = new_domain
-                            vhost.save()
-                    launch_ansible(site)  # to add the new domain name to the vhost apache configuration
-            except socket.error as serr:
-                pass  # TODO sent an error to infosys email?
-            except Exception as e:
-                raise e  # TODO try again later. pass to celery?
+            domain_requested = domain_form.save(commit=False)
+            if domain_requested.name != '':  # TODO do it after saving a domain request
+                if is_camacuk(domain_requested.name):
+                    ip_register_api_request.delay(vhost, domain_requested.name)
+                else:
+                    new_domain = DomainName.objects.create(name=domain_requested.name, status='accepted', vhost=vhost)
+                    if vhost.main_domain is None:
+                        vhost.main_domain = new_domain
+                        vhost.save()
+                launch_ansible(site)  # to add the new domain name to the vhost apache configuration
             return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management',
                                                 kwargs={'vhost_id': vhost.id}))
     else:

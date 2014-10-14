@@ -6,6 +6,7 @@ from sitesmanagement.models import DomainName, EmailConfirmation
 import uuid
 
 
+@shared_task
 def ip_register_api_request(vhost, domain_name):
     site = vhost.vm.site
     domain_requested = DomainName.objects.create(name=domain_name, status='requested', vhost=vhost)
