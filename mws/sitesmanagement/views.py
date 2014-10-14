@@ -547,41 +547,41 @@ def delete_vm(request, vm_id):
 
 @login_required
 def unix_group(request, ug_id):
-    unix_group = get_object_or_404(UnixGroup, pk=ug_id)
-    site = privileges_check(unix_group.vm.site.id, request.user)
+    unix_group_i = get_object_or_404(UnixGroup, pk=ug_id)
+    site = privileges_check(unix_group_i.vm.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
 
-    if unix_group.vm.is_busy:
+    if unix_group_i.vm.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': unix_group.vm.id})),
-        2: dict(name='Manage Unix Groups', url=reverse(unix_groups, kwargs={'vm_id': unix_group.vm.id})),
+        1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': unix_group_i.vm.id})),
+        2: dict(name='Manage Unix Groups', url=reverse(unix_groups, kwargs={'vm_id': unix_group_i.vm.id})),
         3: dict(name='Edit Unix Group', url=reverse('sitesmanagement.views.unix_group',
-                                                    kwargs={'ug_id': unix_group.id}))
+                                                    kwargs={'ug_id': unix_group_i.id}))
     }
 
     lookup_lists = {
-        'unix_users': unix_group.users.all()
+        'unix_users': unix_group_i.users.all()
     }
 
     if request.method == 'POST':
-        unix_group_form = UnixGroupForm(request.POST, instance=unix_group)
+        unix_group_form = UnixGroupForm(request.POST, instance=unix_group_i)
         if unix_group_form.is_valid():
             unix_group_form.save()
 
             unix_users = validate_crsids(request.POST.get('unix_users'))
             # TODO If there are no users in the list return an Exception?
-            unix_group.users.clear()
-            unix_group.users.add(*unix_users)
+            unix_group_i.users.clear()
+            unix_group_i.users.add(*unix_users)
 
             launch_ansible(site)  # to apply these changes to the vm
-            return HttpResponseRedirect(reverse(unix_groups, kwargs={'vm_id': unix_group.vm.id}))
+            return HttpResponseRedirect(reverse(unix_groups, kwargs={'vm_id': unix_group_i.vm.id}))
     else:
-        unix_group_form = UnixGroupForm(instance=unix_group)
+        unix_group_form = UnixGroupForm(instance=unix_group_i)
 
     return render(request, 'mws/unix_group.html', {
         'breadcrumbs': breadcrumbs,
