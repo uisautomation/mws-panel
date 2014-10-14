@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
+from apimws.platforms import NoPrealocatedPrivateIPsAvailable
 from mwsauth.tests import do_test_login
 from models import NetworkConfig, Site, VirtualMachine, UnixGroup, Vhost
 import views
@@ -84,7 +85,8 @@ class SiteManagementTests(TestCase):
         self.assertEqual(response.status_code, 302)  # There aren't prealocated network configurations
         self.assertTrue(response.url.endswith(reverse(views.index)))
 
-        NetworkConfig.objects.create(IPv4='1.1.1.1', IPv6='::1.1.1.1', mws_domain="1.mws.cam.ac.uk", type="public")
+        NetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
+                                     mws_domain="mws-12940.mws3.csx.cam.ac.uk", type="public")
 
         response = self.client.get(reverse(views.new))
         self.assertContains(response, "Request new site")
@@ -129,7 +131,16 @@ class SiteManagementTests(TestCase):
         # TODO test that views are no longer restricted
         self.assertFalse(Site.objects.get(pk=test_site.id).disabled)
 
+        # Clone first VM into the secondary VM
+        with self.assertRaises(NoPrealocatedPrivateIPsAvailable):
+            self.client.post(reverse(views.clone_vm_view, kwargs={'site_id': test_site.id}), {'primary_vm': 'true'})
+        NetworkConfig.objects.create(IPv4='172.28.18.255', mws_domain="mws-08246.mws3.csx.private.cam.ac.uk",
+                                     type="private")
+        self.client.post(reverse(views.clone_vm_view, kwargs={'site_id': test_site.id}), {'primary_vm': 'true'})
 
+        while test_site.secondary_vm.is_busy:
+            time.sleep(0.25)
+        self.client.delete(reverse(views.delete_vm, kwargs={'vm_id': test_site.secondary_vm.id}))
 
         test_site.delete()
 

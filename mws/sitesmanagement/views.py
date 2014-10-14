@@ -537,9 +537,9 @@ def delete_vm(request, vm_id):
     if vm.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
-    #if request.method == 'DELETE':
-    vm.delete()  # TODO change this
-    return redirect(show, site_id=site.id)
+    if request.method == 'DELETE':
+        vm.delete()
+        return redirect(show, site_id=site.id)
 
     return HttpResponseForbidden()
 
