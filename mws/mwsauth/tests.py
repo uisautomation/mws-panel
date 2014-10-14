@@ -38,9 +38,8 @@ LSxbGuFG9yfPFIqaSntlYMxKKB5ba/tIAMzyAOHxdEM5hi1DXRsOok3ElWjOw9oN
 wOq24EIbX5LquL9w+uvnfXw=
 -----END CERTIFICATE-----"""}):
         self.client.get(reverse('raven_return'),
-                        {'WLS-Response': create_wls_response(
-                            raven_url=settings.UCAMWEBAUTH_RETURN_URL,
-                            raven_principal=user)})
+                        {'WLS-Response': create_wls_response(raven_issue=datetime.utcnow().strftime('%Y%m%dT%H%M%SZ'),
+                            raven_url=settings.UCAMWEBAUTH_RETURN_URL, raven_principal=user)})
         self.assertIn('_auth_user_id', self.client.session)
 
 
