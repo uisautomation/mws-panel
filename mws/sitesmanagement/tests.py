@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, time
 import os
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -10,11 +10,8 @@ import views
 from utils import is_camacuk, get_object_or_None
 
 
+@override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
 class SiteManagementTests(TestCase):
-
-    @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
-                       CELERY_ALWAYS_EAGER=True,
-                       BROKER_BACKEND='memory')
 
     def test_is_camacuk_helper(self):
         self.assertTrue(is_camacuk("www.cam.ac.uk"))
@@ -117,9 +114,22 @@ class SiteManagementTests(TestCase):
 
         response = self.client.get(response.url)
 
-        # TODO: Wait until celery tasks has finished to check the message
-        #self.assertContains(response, "Your email &#39;%s&#39; is still unconfirmed, please check your email inbox and "
-        #                              "click on the link of the email we sent you." % test_site.email )
+        self.assertContains(response, "Your email &#39;%s&#39; is still unconfirmed, please check your email inbox and "
+                                      "click on the link of the email we sent you." % test_site.email )
+
+        # Disable site
+        self.assertFalse(test_site.disabled)
+        while test_site.is_busy:
+            time.sleep(0.25)
+        response = self.client.post(reverse(views.disable, kwargs={'site_id': test_site.id}))
+        # TODO test that views are restricted
+        self.assertTrue(Site.objects.get(pk=test_site.id).disabled)
+        #Enable site
+        response = self.client.post(reverse(views.enable, kwargs={'site_id': test_site.id}))
+        # TODO test that views are no longer restricted
+        self.assertFalse(Site.objects.get(pk=test_site.id).disabled)
+
+
 
         test_site.delete()
 
@@ -331,3 +341,12 @@ class SiteManagementTests(TestCase):
                           '"confirmation" data-href="javascript:ajax_call(\'/delete_domain/1/\', \'DELETE\')" href="#">'
                           '<i title="Delete" class="fa fa-trash-o fa-2x"></i></a></td></tr></tbody>',
                           response.content, count=0)
+        response = self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}),
+                                    {'name': 'externaldomain.com'})
+        response = self.client.get(response.url)
+        self.assertInHTML('<tbody><tr><td>externaldomain.com<br>This is the current main domain</td><td>Accepted</td>'
+                          '<td style="width: 135px;"><a href="#" onclick="javascript:ajax_call'
+                          '(\'/set_dn_as_main/2/\', \'POST\')">Set as Master</a><a class="delete_vhost" data-toggle='
+                          '"confirmation" data-href="javascript:ajax_call(\'/delete_domain/2/\', \'DELETE\')" href="#">'
+                          '<i title="Delete" class="fa fa-trash-o fa-2x"></i></a></td></tr></tbody>',
+                          response.content, count=1)
