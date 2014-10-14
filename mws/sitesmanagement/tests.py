@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
 from apimws.platforms import NoPrealocatedPrivateIPsAvailable
 from mwsauth.tests import do_test_login
-from models import NetworkConfig, Site, VirtualMachine, UnixGroup, Vhost
+from models import NetworkConfig, Site, VirtualMachine, UnixGroup, Vhost, DomainName
 import views
 from utils import is_camacuk, get_object_or_None
 
@@ -38,7 +38,8 @@ class SiteManagementTests(TestCase):
                             "process any new request for a new Managed Web Server, please try again later.\n"
                             "                </p>")
 
-        NetworkConfig.objects.create(IPv4='1.1.1.1', IPv6='::1.1.1.1', mws_domain="1.mws.cam.ac.uk")
+        NetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
+                                     mws_domain="mws-12940.mws3.csx.cam.ac.uk", type="public")
         response = self.client.get(reverse(views.index))
         self.assertContains(response,
                             "<p><a href=\"%s\" class=\"campl-primary-cta\">Register new site</a></p>" %
@@ -162,7 +163,8 @@ class SiteManagementTests(TestCase):
         self.assertEqual(response.status_code, 404)  # The Site does not exist
 
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
-        netconf = NetworkConfig.objects.create(IPv4='1.1.1.1', IPv6='::1.1.1.1', mws_domain="1.mws.cam.ac.uk")
+        netconf = NetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
+                                                mws_domain="mws-12940.mws3.csx.cam.ac.uk", type="public")
         vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", site=site,
                                            network_configuration=netconf)
         response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
@@ -196,10 +198,9 @@ class SiteManagementTests(TestCase):
         self.assertEqual(site_changed.institution_id, 'UIS')
         self.assertEqual(site_changed.email, 'email@change.test')
 
-        # TODO: Wait until celery tasks has finished to check the message
-        #response = self.client.get(response.url)
-        #self.assertContains(response, "Your email &#39;%s&#39; is still unconfirmed, please check your email inbox and "
-        #                              "click on the link of the email we sent you." % site_changed.email )
+        response = self.client.get(response.url)
+        self.assertContains(response, "Your email &#39;%s&#39; is still unconfirmed, please check your email inbox and "
+                                      "click on the link of the email we sent you." % site_changed.email )
 
     def test_view_billing(self):
         response = self.client.get(reverse(views.billing_management, kwargs={'site_id': 1}))
@@ -267,13 +268,178 @@ class SiteManagementTests(TestCase):
         self.assertNotContains(response, "No Billing, please add one.")
         site_changed.billing.purchase_order.delete()
 
-    def no_permission_views_tests(site):
-        pass # TODO implement calls to views where site id is the main param
+    def test_no_permission_views_tests(self):
+        do_test_login(self, user="test0001")
+        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
+        netconf = NetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
+                                               mws_domain="mws-12940.mws3.csx.cam.ac.uk", type="public")
+        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", site=site,
+                                           network_configuration=netconf)
+        vhost = Vhost.objects.create(name="tests_vhost", vm=vm)
+        dn = DomainName.objects.create(name="testtestest.mws3.csx.cam.ac.uk", status="accepted", vhost=vhost)
+        unix_group = UnixGroup.objects.create(name="testUnixGroup", vm=vm)
+
+        # TODO test index empty
+        response = self.client.get(reverse(views.show, kwargs={'site_id': site.id}))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse(views.settings, kwargs={'vm_id': vm.id}))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id}))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse(views.delete, kwargs={'site_id': site.id}))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse(views.disable, kwargs={'site_id': site.id}))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse(views.enable, kwargs={'site_id': site.id}))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse(views.vhosts_management, kwargs={'vm_id': vm.id}))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse(views.add_vhost, kwargs={'vm_id': vm.id}))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse(views.system_packages, kwargs={'vm_id': vm.id}))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse(views.clone_vm_view, kwargs={'site_id': site.id}))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse('mwsauth.views.auth_change', kwargs={'site_id': site.id}))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse(views.delete_vm, kwargs={'vm_id': vm.id}))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse(views.power_vm, kwargs={'vm_id': vm.id}))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse(views.reset_vm, kwargs={'vm_id': vm.id}))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse(views.unix_groups, kwargs={'vm_id': vm.id}))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse(views.unix_groups, kwargs={'vm_id': vm.id}))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse(views.add_unix_group, kwargs={'vm_id': vm.id}))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse(views.check_vm_status, kwargs={'vm_id': vm.id}))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse(views.vhosts_management, kwargs={'vm_id': vm.id}))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse(views.domains_management, kwargs={'vhost_id': vhost.id}))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse(views.delete_vhost, kwargs={'vhost_id': vhost.id}))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse(views.certificates, kwargs={'vhost_id': vhost.id}))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse(views.delete_dn, kwargs={'domain_id': dn.id}))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse(views.set_dn_as_main, kwargs={'domain_id': dn.id}))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse(views.unix_group, kwargs={'ug_id': unix_group.id}))
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(reverse(views.delete_unix_group, kwargs={'ug_id': unix_group.id}))
+        self.assertEqual(response.status_code, 403)
+
+    def test_vm_is_busy(self):
+        do_test_login(self, user="test0001")
+        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
+        site.users.add(User.objects.get(username='test0001'))
+        netconf = NetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
+                                               mws_domain="mws-12940.mws3.csx.cam.ac.uk", type="public")
+        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="requested", site=site,
+                                           network_configuration=netconf)
+        netconf2 = NetworkConfig.objects.create(IPv4='172.28.18.255', mws_domain="mws-08246.mws3.csx.private.cam.ac.uk",
+                                                type="private")
+        vm2 = VirtualMachine.objects.create(name="test_vm2", primary=False, status="requested", site=site,
+                                            network_configuration=netconf2)
+        vhost = Vhost.objects.create(name="tests_vhost", vm=vm)
+        dn = DomainName.objects.create(name="testtestest.mws3.csx.cam.ac.uk", status="accepted", vhost=vhost)
+        unix_group = UnixGroup.objects.create(name="testUnixGroup", vm=vm)
+
+        # TODO test index not empty
+        response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
+        response = self.client.get(reverse(views.settings, kwargs={'vm_id': vm.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
+        response = self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id}))
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse(views.delete, kwargs={'site_id': site.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
+        response = self.client.get(reverse(views.disable, kwargs={'site_id': site.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
+        response = self.client.get(reverse(views.enable, kwargs={'site_id': site.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.endswith('%s' % (reverse(views.index))))
+        response = self.client.get(reverse(views.vhosts_management, kwargs={'vm_id': vm.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
+        response = self.client.get(reverse(views.add_vhost, kwargs={'vm_id': vm.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
+        response = self.client.get(reverse(views.system_packages, kwargs={'vm_id': vm.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
+        response = self.client.get(reverse(views.clone_vm_view, kwargs={'site_id': site.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
+        response = self.client.get(reverse('mwsauth.views.auth_change', kwargs={'site_id': site.id}))
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse(views.delete_vm, kwargs={'vm_id': vm.id}))
+        self.assertEqual(response.status_code, 403) # Primary VM cannot be deleted
+        response = self.client.get(reverse(views.delete_vm, kwargs={'vm_id': vm2.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
+        response = self.client.get(reverse(views.power_vm, kwargs={'vm_id': vm.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
+        response = self.client.get(reverse(views.reset_vm, kwargs={'vm_id': vm.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
+        response = self.client.get(reverse(views.unix_groups, kwargs={'vm_id': vm.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
+        response = self.client.get(reverse(views.unix_groups, kwargs={'vm_id': vm.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
+        response = self.client.get(reverse(views.add_unix_group, kwargs={'vm_id': vm.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
+        response = self.client.get(reverse(views.check_vm_status, kwargs={'vm_id': vm.id}))
+        self.assertEqual(response.status_code, 200) # The error is shown in JSON format
+        response = self.client.get(reverse(views.vhosts_management, kwargs={'vm_id': vm.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
+        response = self.client.get(reverse(views.domains_management, kwargs={'vhost_id': vhost.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
+        response = self.client.get(reverse(views.delete_vhost, kwargs={'vhost_id': vhost.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
+        response = self.client.get(reverse(views.certificates, kwargs={'vhost_id': vhost.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
+        response = self.client.get(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
+        response = self.client.get(reverse(views.delete_dn, kwargs={'domain_id': dn.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
+        response = self.client.get(reverse(views.set_dn_as_main, kwargs={'domain_id': dn.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
+        response = self.client.get(reverse(views.unix_group, kwargs={'ug_id': unix_group.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
+        response = self.client.get(reverse(views.delete_unix_group, kwargs={'ug_id': unix_group.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
 
     def create_site(self):
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
         site.users.add(User.objects.get(username='test0001'))
-        netconf = NetworkConfig.objects.create(IPv4='1.1.1.1', IPv6='::1.1.1.1', mws_domain="1.mws.cam.ac.uk")
+        netconf = NetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
+                                               mws_domain="mws-12940.mws3.csx.cam.ac.uk", type="public")
         VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", site=site,
                                       network_configuration=netconf)
         return site

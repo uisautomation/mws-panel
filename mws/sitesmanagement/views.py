@@ -403,11 +403,13 @@ def check_vm_status(request, vm_id):
 
     if vm.is_busy:
         return JsonResponse({'error': 'VMNotReady'})
+        #return JsonResponse({'error': 'VMNotReady'}, status_code=403) # TODO status_code in JsonResponse doesn't work
 
     try:
         return JsonResponse({'vm_is_on': vm.is_on()})
     except PlatformsAPINotWorkingException:
         return JsonResponse({'error': 'PlatformsAPINotWorking'})
+        #return JsonResponse({'error': 'PlatformsAPINotWorking'}, status_code=500) # TODO status_code doesn't work
 
 
 @login_required
