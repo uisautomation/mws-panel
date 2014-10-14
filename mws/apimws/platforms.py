@@ -14,8 +14,10 @@ from sitesmanagement.models import VirtualMachine, NetworkConfig
 class PlatformsAPINotWorkingException(Exception):
     pass
 
+
 class PlatformsAPIInputException(Exception):
     pass
+
 
 class NoPrealocatedPrivateIPsAvailable(Exception):
     pass
@@ -153,7 +155,7 @@ def reset_vm(vm):
     if response['result'] == 'Success':
         return True
     else:
-        return False # TODO raise error
+        return False  # TODO raise error
 
 
 @shared_task

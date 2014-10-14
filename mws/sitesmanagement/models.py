@@ -326,9 +326,10 @@ class DomainName(models.Model):
 
 
 class UnixGroup(models.Model):
-    name = models.CharField(max_length=16) # TODO add validator to comply with Ubuntu guidelines of Unix group names
+    name = models.CharField(max_length=16)  # TODO add validator to comply with Ubuntu guidelines of Unix group names
     vm = models.ForeignKey(VirtualMachine, related_name='unix_groups')
     users = models.ManyToManyField(User)
+
 
 # FORMS
 

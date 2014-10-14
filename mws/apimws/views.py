@@ -78,9 +78,10 @@ def confirm_email(request, ec_id, token):
 @public
 def dns_entries(request, token):
     # TODO test that the token matches the one we have stored
-    json_object = {}
-    json_object['protocol_version'] = 1
-    json_object['mwsv3_sites'] = []
+    json_object = {
+        'protocol_version': 1,
+        'mwsv3_sites': []
+    }
     for site in Site.objects.all():
         dns_entries = []
         primary_vm = site.primary_vm

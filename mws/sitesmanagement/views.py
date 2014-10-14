@@ -222,9 +222,8 @@ def show(request, site_id):
         try:
             site_email = EmailConfirmation.objects.get(email=site.email, site_id=site.id)
             if site_email.status == 'pending':
-                warning_messages.append("Your email '%s' is still unconfirmed, please check your email inbox and click on "
-                                        "the link of the email we sent you."
-                                        % site.email)
+                warning_messages.append("Your email '%s' is still unconfirmed, please check your email inbox and "
+                                        "click on the link of the email we sent you." % site.email)
         except EmailConfirmation.DoesNotExist:
             pass
 
@@ -446,8 +445,8 @@ def system_packages(request, vm_id):
                                                 kwargs={'site_id': site.id}))
     else:
         if ansible_configuraton is not None:
-            system_packages_form = SystemPackagesForm(initial={'system_packages':
-                                                                   ansible_configuraton.value.split(",")})
+            system_packages_form = SystemPackagesForm(initial={'system_packages': ansible_configuraton.
+                                                      value.split(",")})
         else:
             system_packages_form = SystemPackagesForm()
 
