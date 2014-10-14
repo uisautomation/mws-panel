@@ -142,6 +142,12 @@ class SiteManagementTests(TestCase):
             time.sleep(0.25)
         self.client.delete(reverse(views.delete_vm, kwargs={'vm_id': test_site.secondary_vm.id}))
 
+        self.client.post(reverse(views.delete, kwargs={'site_id': test_site.id}))
+        self.assertIsNone(Site.objects.get(pk=test_site.id).end_date)
+
+        self.client.post(reverse(views.delete, kwargs={'site_id': test_site.id}), {'confirmation': 'yes'})
+        self.assertIsNotNone(Site.objects.get(pk=test_site.id).end_date)
+
         test_site.delete()
 
     def test_view_edit(self):
@@ -297,6 +303,11 @@ class SiteManagementTests(TestCase):
         self.assertInHTML('<td>testUnixGroup</td>', response.content, count=0)
         self.assertInHTML('<td>jw35</td>', response.content, count=1)
         self.assertInHTML('<td>amc203</td>', response.content, count=0)
+
+        response = self.client.delete(reverse(views.delete_unix_group, kwargs={'ug_id': unix_group.id}))
+        response = self.client.get(response.url)
+        self.assertInHTML('<td>testUnixGroup2</td>', response.content, count=0)
+        self.assertInHTML('<td>jw35</td>', response.content, count=0)
 
     def test_vhosts_management(self):
         do_test_login(self, user="test0001")
