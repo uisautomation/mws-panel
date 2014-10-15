@@ -2,6 +2,7 @@ from django.core.management.base import NoArgsCommand, CommandError
 from optparse import make_option
 import sys
 import json
+from itertools import chain
 
 from sitesmanagement.models import VirtualMachine
 
@@ -43,4 +44,11 @@ class Command(NoArgsCommand):
     def hostid(self, vm):
         return idprefix + str(vm.id)
     def hostvars(self, vm):
-        return { 'ansible_ssh_host': vm.network_configuration.mws_domain }
+        v = { }
+        v['ansible_ssh_host'] = vm.network_configuration.mws_domain
+        v['mws_webmaster_email'] = vm.site.email
+        v['mws_users'] = [u.username for u in
+                          chain(vm.site.users, vm.site.ssh_users)]
+        v['mws_vhosts'] = [{ 'name': vh.name, 'domains': vh.domain_names}
+                           for vh in vm.vhosts]
+
