@@ -57,13 +57,13 @@ def new(request):
 
             site = site_form.save(commit=False)
             site.start_date = datetime.date.today()
+            site.network_configuration = NetworkConfig.get_free_config()  # TODO raise an error if None
             site.save()
 
             # Save user that requested the site
             site.users.add(request.user)
 
-            vm = VirtualMachine.objects.create(primary=True, status='requested',
-                                               network_configuration=NetworkConfig.get_free_public_ip(), site=site)
+            vm = VirtualMachine.objects.create(primary=True, status='requested', site=site)
             new_site_primary_vm.delay(vm)
 
             if site.email:

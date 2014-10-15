@@ -47,11 +47,11 @@ class SuspensionAdmin(ModelAdmin):
 
 
 class NetworkConfigAdmin(ModelAdmin):
-    list_display = ('IPv4', 'IPv6', 'mws_domain', 'virtual_machine', 'public')
+    list_display = ('IPv4', 'IPv6', 'mws_domain', 'site', 'IPv4private', 'mws_private_domain')
     #list_filter = ('used', )
 
     def used(self, obj):
-        if obj.virtual_machine:
+        if obj.site:
             return True
         else:
             return False
@@ -71,7 +71,7 @@ class VhostAdmin(ModelAdmin):
 
 
 class VirtualMachineAdmin(ModelAdmin):
-    list_display = ('name', 'site', 'primary', 'status', 'network_configuration')
+    list_display = ('name', 'site', 'primary', 'status')
 
 
 class EmailConfirmationAdmin(ModelAdmin):

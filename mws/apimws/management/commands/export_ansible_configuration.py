@@ -18,7 +18,7 @@ class Command(BaseCommand):
             except NetworkConfig.DoesNotExist:
                 raise CommandError('The IPv4 %s does not exist in the database' % site_ipv4)
 
-            ansibleconfiguration_set = nc.virtual_machine.site.ansibleconfiguration_set.all()
+            ansibleconfiguration_set = nc.site.ansibleconfiguration_set.all()
             ansibleconfiguration_dict = {}
             for ansibleconfiguration in ansibleconfiguration_set:
                 ansibleconfiguration_dict[ansibleconfiguration.key] = ansibleconfiguration.value

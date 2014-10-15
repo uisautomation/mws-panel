@@ -88,26 +88,25 @@ def dns_entries(request, token):
         secondary_vm = site.secondary_vm
         if primary_vm:
             dns_entries.append({
-                'name': primary_vm.network_configuration.mws_domain,
+                'name': site.network_configuration.mws_domain,
                 'values': {
-                    'A': primary_vm.network_configuration.IPv4,
-                    'AAAA': primary_vm.network_configuration.IPv6
+                    'A': site.network_configuration.IPv4,
+                    'AAAA': site.network_configuration.IPv6,
+                    'SSHFP': site.network_configuration.SSHFP
                 },
             })
         if secondary_vm:
             dns_entries.append({
-                'name': secondary_vm.network_configuration.mws_domain,
+                'name': site.network_configuration.mws_private_domain,
                 'values': {
-                    'A': secondary_vm.network_configuration.IPv4,
-                    'AAAA': secondary_vm.network_configuration.IPv6,
-                    'SSHFP': secondary_vm.network_configuration.SSHFP
+                    'A': site.network_configuration.IPv4private
                 },
             })
         for dn in site.domain_names.all():
             dns_entries.append({
                 'name': dn.name,
                 'values': {
-                    'CNAME': primary_vm.network_configuration.mws_domain
+                    'CNAME': site.network_configuration.mws_domain
                 },
             })
         if dns_entries:

@@ -19,10 +19,6 @@ class PlatformsAPIInputException(Exception):
     pass
 
 
-class NoPrealocatedPrivateIPsAvailable(Exception):
-    pass
-
-
 def get_api_secret():
     if platform.system() == 'Darwin':
         from passlib.hash import sha512_crypt
@@ -41,8 +37,8 @@ def new_site_primary_vm(vm):
         'username': get_api_username(),
         'secret': get_api_secret(),
         'command': 'create',
-        'ip': vm.network_configuration.IPv4,
-        'hostname': vm.network_configuration.mws_domain,
+        'ip': vm.ipv4,
+        'hostname': vm.hostname,
     }
     headers = {'Content-type': 'application/json'}
     try:
@@ -184,26 +180,16 @@ def destroy_vm(vm):
 
 def clone_vm(site, primary_vm):
     if primary_vm:
-        orignal_vm = site.primary_vm
+        original_vm = site.primary_vm
         if site.secondary_vm:
-            network_configuration = site.secondary_vm.network_configuration
             site.secondary_vm.delete()
-        else:
-            network_configuration = NetworkConfig.get_free_private_ip()
     else:
-        orignal_vm = site.secondary_vm
+        original_vm = site.secondary_vm
         if site.primary_vm:
-            network_configuration = site.primary_vm.network_configuration
             site.primary_vm.delete()
-        else:
-            network_configuration = NetworkConfig.get_free_public_ip()
 
-    if network_configuration is None:
-        raise NoPrealocatedPrivateIPsAvailable()
-
-    destiantion_vm = VirtualMachine.objects.create(primary=(not primary_vm), status='requested',
-                                                   network_configuration=network_configuration, site=site)
-    clone_vm_api_call.delay(orignal_vm, destiantion_vm)
+    destination_vm = VirtualMachine.objects.create(primary=(not primary_vm), status='requested', site=site)
+    clone_vm_api_call.delay(original_vm, destination_vm)
 
 
 @shared_task
@@ -213,8 +199,8 @@ def clone_vm_api_call(orignal_vm, destiantion_vm):
         'secret': get_api_secret(),
         'command': 'clone',
         'vmid': orignal_vm.name,
-        'ip': destiantion_vm.network_configuration.IPv4,
-        'hostname': destiantion_vm.network_configuration.mws_domain,
+        'ip': destiantion_vm.ipv4,
+        'hostname': destiantion_vm.hostname,
     }
     headers = {'Content-type': 'application/json'}
     try:
