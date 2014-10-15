@@ -8,6 +8,32 @@ from ucamlookup import get_institutions
 from ucamlookup.models import LookupGroup
 
 
+class NetworkConfig(models.Model):
+    """ The network configuration for the VMs of a site:
+     Primary VM: IPv4, IPv6, and domain name
+     Secondary VM: Private IPv4 and private domain name
+    """
+
+    IPv4 = models.GenericIPAddressField(protocol='IPv4', unique=True)
+    IPv6 = models.GenericIPAddressField(protocol='IPv6', unique=True)
+    SSHFP = models.CharField(max_length=250, null=True, blank=True)
+    mws_domain = models.CharField(max_length=250, unique=True)
+
+    IPv4private = models.GenericIPAddressField(protocol='IPv4', unique=True)
+    mws_private_domain = models.CharField(max_length=250, unique=True)
+
+    @classmethod
+    def num_pre_allocated(cls):
+        return cls.objects.filter(site=None).count()
+
+    @classmethod
+    def get_free_config(cls):
+        return cls.objects.filter(site=None).first()
+
+    def __unicode__(self):
+        return self.IPv4 + " - " + self.mws_domain
+
+
 class Site(models.Model):
     # Name of the site
     name = models.CharField(max_length=100, unique=True)
@@ -33,6 +59,9 @@ class Site(models.Model):
 
     # Indicates if the site is disabled by the user
     disabled = models.BooleanField(default=False)
+
+    # The network configuration for the VMs of this site
+    network_configuration = models.OneToOneField(NetworkConfig, related_name='site')
 
     def __unicode__(self):
         return self.name
@@ -205,39 +234,6 @@ def full_domain_validator(hostname):
             raise ValidationError("Unallowed characters in label '%(label)s'." % {'label': label})
 
 
-class NetworkConfig(models.Model):
-    """ The network configuration for a VM (IPv4, IPv6, and domain name associated
-    """
-    STATUS_CHOICES = (
-        ('public', 'Public'),
-        ('private', 'Private'),
-    )
-
-    IPv4 = models.GenericIPAddressField(protocol='IPv4')
-    IPv6 = models.GenericIPAddressField(protocol='IPv6', blank=True, null=True)
-    SSHFP = models.CharField(max_length=250, null=True, blank=True)
-    mws_domain = models.CharField(max_length=250, unique=True)
-    type = models.CharField(max_length=10, choices=STATUS_CHOICES)
-
-    @classmethod
-    def num_pre_allocated(cls):
-        return cls.objects.filter(virtual_machine=None).count()
-
-    def is_public(self):
-        return self.type == 'public'
-
-    @classmethod
-    def get_free_private_ip(self):
-        return self.objects.filter(virtual_machine=None, type='private').first()
-
-    @classmethod
-    def get_free_public_ip(self):
-        return self.objects.filter(virtual_machine=None, type='public').first()
-
-    def __unicode__(self):
-        return self.IPv4 + " - " + self.mws_domain
-
-
 class VirtualMachine(models.Model):
     """ A virtual machine is associated to a site and has a network configuration. Its attributes include
         a name and a boolean to indicate if it's the primary or secondary VM of a Site.
@@ -254,7 +250,6 @@ class VirtualMachine(models.Model):
     primary = models.BooleanField(default=True)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES)
 
-    network_configuration = models.OneToOneField(NetworkConfig, related_name='virtual_machine')
     site = models.ForeignKey(Site, related_name='virtual_machines')
 
     def is_on(self):
@@ -289,6 +284,20 @@ class VirtualMachine(models.Model):
     def do_reset(self):
         from apimws.platforms import reset_vm
         return reset_vm.delay(self)
+
+    @property
+    def ipv4(self):
+        if self.primary:
+            return self.site.network_configuration.IPv4
+        else:
+            return self.site.network_configuration.IPv4private
+
+    @property
+    def hostname(self):
+        if self.primary:
+            return self.site.network_configuration.mws_domain
+        else:
+            return self.site.network_configuration.mws_private_domain
 
     def __unicode__(self):
         if self.name is None:

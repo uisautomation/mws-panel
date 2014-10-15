@@ -1,10 +1,10 @@
-from datetime import datetime, time
+from datetime import datetime
+import time
 import os
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
-from apimws.platforms import NoPrealocatedPrivateIPsAvailable
 from mwsauth.tests import do_test_login
 from models import NetworkConfig, Site, VirtualMachine, UnixGroup, Vhost, DomainName
 import views
@@ -38,14 +38,18 @@ class SiteManagementTests(TestCase):
                             "process any new request for a new Managed Web Server, please try again later.\n"
                             "                </p>")
 
-        NetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
-                                     mws_domain="mws-12940.mws3.csx.cam.ac.uk", type="public")
+        netconf = NetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
+                                               IPv4private='172.28.18.255',
+                                               mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
+                                               mws_domain="mws-12940.mws3.csx.cam.ac.uk")
+
         response = self.client.get(reverse(views.index))
         self.assertContains(response,
                             "<p><a href=\"%s\" class=\"campl-primary-cta\">Register new site</a></p>" %
                             reverse(views.new))
 
-        site = Site.objects.create(name="testSite", institution_id="testinst", start_date=datetime.today())
+        site = Site.objects.create(name="testSite", institution_id="testinst", start_date=datetime.today(),
+                                   network_configuration=netconf)
 
         response = self.client.get(reverse(views.index))
         self.assertNotContains(response, "testSite")
@@ -66,7 +70,13 @@ class SiteManagementTests(TestCase):
         response = self.client.get(reverse(views.show, kwargs={'site_id': 1}))
         self.assertEqual(response.status_code, 404)  # The Site does not exist
 
-        site = Site.objects.create(name="testSite", institution_id="testinst", start_date=datetime.today())
+        netconf = NetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
+                                               IPv4private='172.28.18.255',
+                                               mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
+                                               mws_domain="mws-12940.mws3.csx.cam.ac.uk")
+
+        site = Site.objects.create(name="testSite", institution_id="testinst", start_date=datetime.today(),
+                                   network_configuration=netconf)
         response = self.client.get(reverse(views.show, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)  # The User is not in the list of auth users
 
@@ -86,8 +96,9 @@ class SiteManagementTests(TestCase):
         self.assertEqual(response.status_code, 302)  # There aren't prealocated network configurations
         self.assertTrue(response.url.endswith(reverse(views.index)))
 
-        NetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
-                                     mws_domain="mws-12940.mws3.csx.cam.ac.uk", type="public")
+        NetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255', IPv4private='172.28.18.255',
+                                     mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
+                                     mws_domain="mws-12940.mws3.csx.cam.ac.uk")
 
         response = self.client.get(reverse(views.new))
         self.assertContains(response, "Request new site")
@@ -133,10 +144,6 @@ class SiteManagementTests(TestCase):
         self.assertFalse(Site.objects.get(pk=test_site.id).disabled)
 
         # Clone first VM into the secondary VM
-        with self.assertRaises(NoPrealocatedPrivateIPsAvailable):
-            self.client.post(reverse(views.clone_vm_view, kwargs={'site_id': test_site.id}), {'primary_vm': 'true'})
-        NetworkConfig.objects.create(IPv4='172.28.18.255', mws_domain="mws-08246.mws3.csx.private.cam.ac.uk",
-                                     type="private")
         self.client.post(reverse(views.clone_vm_view, kwargs={'site_id': test_site.id}), {'primary_vm': 'true'})
 
         while test_site.secondary_vm.is_busy:
@@ -162,11 +169,13 @@ class SiteManagementTests(TestCase):
         response = self.client.get(reverse(views.edit, kwargs={'site_id': 1}))
         self.assertEqual(response.status_code, 404)  # The Site does not exist
 
-        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
         netconf = NetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
-                                                mws_domain="mws-12940.mws3.csx.cam.ac.uk", type="public")
-        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", site=site,
+                                               IPv4private='172.28.18.255',
+                                               mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
+                                               mws_domain="mws-12940.mws3.csx.cam.ac.uk")
+        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today(),
                                            network_configuration=netconf)
+        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", site=site)
         response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)  # The User is not in the list of auth users
 
@@ -213,7 +222,12 @@ class SiteManagementTests(TestCase):
         response = self.client.get(reverse(views.billing_management, kwargs={'site_id': 1}))
         self.assertEqual(response.status_code, 404)  # The Site does not exist
 
-        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
+        netconf = NetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
+                                               IPv4private='172.28.18.255',
+                                               mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
+                                               mws_domain="mws-12940.mws3.csx.cam.ac.uk")
+        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today(),
+                                   network_configuration=netconf)
         response = self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)  # The User is not in the list of auth users
 
@@ -270,11 +284,13 @@ class SiteManagementTests(TestCase):
 
     def test_no_permission_views_tests(self):
         do_test_login(self, user="test0001")
-        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
         netconf = NetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
-                                               mws_domain="mws-12940.mws3.csx.cam.ac.uk", type="public")
-        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", site=site,
+                                               IPv4private='172.28.18.255',
+                                               mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
+                                               mws_domain="mws-12940.mws3.csx.cam.ac.uk")
+        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today(),
                                            network_configuration=netconf)
+        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", site=site)
         vhost = Vhost.objects.create(name="tests_vhost", vm=vm)
         dn = DomainName.objects.create(name="testtestest.mws3.csx.cam.ac.uk", status="accepted", vhost=vhost)
         unix_group = UnixGroup.objects.create(name="testUnixGroup", vm=vm)
@@ -339,16 +355,15 @@ class SiteManagementTests(TestCase):
 
     def test_vm_is_busy(self):
         do_test_login(self, user="test0001")
-        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
-        site.users.add(User.objects.get(username='test0001'))
         netconf = NetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
-                                               mws_domain="mws-12940.mws3.csx.cam.ac.uk", type="public")
-        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="requested", site=site,
+                                               IPv4private='172.28.18.255',
+                                               mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
+                                               mws_domain="mws-12940.mws3.csx.cam.ac.uk")
+        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today(),
                                            network_configuration=netconf)
-        netconf2 = NetworkConfig.objects.create(IPv4='172.28.18.255', mws_domain="mws-08246.mws3.csx.private.cam.ac.uk",
-                                                type="private")
-        vm2 = VirtualMachine.objects.create(name="test_vm2", primary=False, status="requested", site=site,
-                                            network_configuration=netconf2)
+        site.users.add(User.objects.get(username='test0001'))
+        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="requested", site=site)
+        vm2 = VirtualMachine.objects.create(name="test_vm2", primary=False, status="requested", site=site)
         vhost = Vhost.objects.create(name="tests_vhost", vm=vm)
         dn = DomainName.objects.create(name="testtestest.mws3.csx.cam.ac.uk", status="accepted", vhost=vhost)
         unix_group = UnixGroup.objects.create(name="testUnixGroup", vm=vm)
@@ -436,12 +451,14 @@ class SiteManagementTests(TestCase):
         self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
 
     def create_site(self):
-        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
-        site.users.add(User.objects.get(username='test0001'))
         netconf = NetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
-                                               mws_domain="mws-12940.mws3.csx.cam.ac.uk", type="public")
-        VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", site=site,
+                                               IPv4private='172.28.18.255',
+                                               mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
+                                               mws_domain="mws-12940.mws3.csx.cam.ac.uk")
+        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today(),
                                       network_configuration=netconf)
+        site.users.add(User.objects.get(username='test0001'))
+        VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", site=site)
         return site
 
     def test_unix_groups(self):
