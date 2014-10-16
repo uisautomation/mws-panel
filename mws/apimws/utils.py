@@ -2,11 +2,12 @@ from __future__ import absolute_import
 from celery import shared_task
 from django.core.mail import send_mail
 from django.conf import settings
+from apimws.platforms import TaskWithFailure
 from sitesmanagement.models import DomainName, EmailConfirmation
 import uuid
 
 
-@shared_task
+@shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
 def ip_register_api_request(vhost, domain_name):
     site = vhost.vm.site
     domain_requested = DomainName.objects.create(name=domain_name, status='requested', vhost=vhost)
@@ -22,7 +23,7 @@ def ip_register_api_request(vhost, domain_name):
     send_mail(subject, message, from_email, recipient_list, fail_silently=False)
 
 
-@shared_task
+@shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
 def email_confirmation(site):
     previous = EmailConfirmation.objects.filter(site=site)
     if previous:

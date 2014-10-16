@@ -1,6 +1,7 @@
 from __future__ import absolute_import
-from celery import shared_task
+from celery import shared_task, Task
 import json
+from django.core.mail import send_mail
 import os
 import random
 import string
@@ -31,7 +32,20 @@ def get_api_username():
     return settings.PLATFORMS_API_USERNAME
 
 
-@shared_task
+class TaskWithFailure(Task):
+    abstract = True
+
+    def on_failure(self, exc, task_id, args, kwargs, einfo):
+        subject = "MWS3: Platform's VM API ERROR"
+        message = "An error happened when trying to communicate with Platform's VM API.\n The task id is " \
+                  "%s. \n\n The parameters passed to the task were: %s \n\n " \
+                  "The traceback is: \n %s" % (task_id, args, einfo)
+        from_email = "mws3-support@cam.ac.uk"
+        recipient_list = ("amc203@cam.ac.uk", )
+        send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+
+
+@shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
 def new_site_primary_vm(vm):
     json_object = {
         'username': get_api_username(),
@@ -45,7 +59,8 @@ def new_site_primary_vm(vm):
         response = json.loads(requests.post("https://bes.csi.cam.ac.uk/mws-api/v1/vm.json",
                                             data=json.dumps(json_object), headers=headers).text)
     except Exception as e:
-        raise PlatformsAPINotWorkingException(e.message)  # TODO capture exception where it is called
+        print "An error happened1!"
+        raise new_site_primary_vm.retry(exc=e)
 
     if response['result'] == 'Success':
         vm.name = response['vmid']
@@ -56,7 +71,7 @@ def new_site_primary_vm(vm):
         return False  # TODO raise error
 
 
-@shared_task
+@shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
 def install_vm(vm):
     f = open(os.path.join(settings.BASE_DIR, 'apimws/ubuntu_preseed.txt'), 'r')
     profile = f.read()
@@ -107,7 +122,7 @@ def get_vm_power_state(vm):
         pass  # TODO raise error
 
 
-@shared_task
+@shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
 def change_vm_power_state(vm, on):
     if on != 'on' and on != 'off':
         raise PlatformsAPIInputException("passed wrong parameter power %s" % on)
@@ -132,7 +147,7 @@ def change_vm_power_state(vm, on):
         return False  # TODO raise error
 
 
-@shared_task
+@shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
 def reset_vm(vm):
     json_object = {
         'username': get_api_username(),
@@ -154,7 +169,7 @@ def reset_vm(vm):
         return False  # TODO raise error
 
 
-@shared_task
+@shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
 def destroy_vm(vm):
     change_vm_power_state(vm, "off")
 
@@ -192,7 +207,7 @@ def clone_vm(site, primary_vm):
     clone_vm_api_call.delay(original_vm, destination_vm)
 
 
-@shared_task
+@shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
 def clone_vm_api_call(orignal_vm, destiantion_vm):
     json_object = {
         'username': get_api_username(),
