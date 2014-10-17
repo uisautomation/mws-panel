@@ -48,3 +48,14 @@ def auth_change(request, site_id):
         'breadcrumbs': breadcrumbs,
         'site': site
     })
+
+
+@login_required
+def user_panel(request):
+    breadcrumbs = {
+        0: dict(name='User panel', url=reverse(user_panel))
+    }
+
+    return render(request, 'user/panel.html', {
+        'breadcrumbs': breadcrumbs
+    })
