@@ -293,6 +293,13 @@ class VirtualMachine(models.Model):
             return self.site.network_configuration.IPv4private
 
     @property
+    def ipv6(self):
+        if self.primary:
+            return self.site.network_configuration.IPv6
+        else:
+            return None
+
+    @property
     def hostname(self):
         if self.primary:
             return self.site.network_configuration.mws_domain
