@@ -45,10 +45,12 @@ class Command(NoArgsCommand):
         return idprefix + str(vm.id)
     def hostvars(self, vm):
         v = { }
-        v['ansible_ssh_host'] = vm.network_configuration.mws_domain
+        v['ansible_ssh_host'] = vm.hostname
         v['mws_webmaster_email'] = vm.site.email
-        v['mws_users'] = [u.username for u in
-                          chain(vm.site.users, vm.site.ssh_users)]
-        v['mws_vhosts'] = [{ 'name': vh.name, 'domains': vh.domain_names}
-                           for vh in vm.vhosts]
-
+        v['mws_users'] = [u.username for u in chain(
+            vm.site.users.all(), vm.site.ssh_users.all())]
+        v['mws_vhosts'] = [{ 'name': vh.name,
+                             'domains': [dom.name for dom in
+                                vh.domain_names.filter(status='accepted')]}
+                            for vh in vm.vhosts.all()]
+        return v
