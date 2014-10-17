@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                 ('deleted', models.BooleanField(default=False)),
                 ('email', models.EmailField(max_length=75, null=True)),
                 ('users', models.ManyToManyField(to=settings.AUTH_USER_MODEL)),
-                ('group', models.ManyToManyField(to=b'auth.Group', null=True)),
+                ('groups', models.ManyToManyField(to=b'auth.Group', null=True, blank=True)),
             ],
             options={
             },
@@ -63,7 +63,6 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('IPv4', models.GenericIPAddressField(protocol=b'IPv4')),
                 ('IPv6', models.GenericIPAddressField(protocol=b'IPv6')),
-                ('main_domain', models.OneToOneField(to='sitesmanagement.DomainName', to_field='id')),
             ],
             options={
             },
@@ -113,16 +112,6 @@ class Migration(migrations.Migration):
             field=models.CharField(default=b'requested', max_length=50, choices=[(b'requested', b'Requested'), (b'accepted', b'Accepted'), (b'denied', b'Denied')]),
             preserve_default=True,
         ),
-        migrations.RenameField(
-            model_name='site',
-            old_name='group',
-            new_name='groups',
-        ),
-        migrations.AlterField(
-            model_name='site',
-            name='groups',
-            field=models.ManyToManyField(to=b'auth.Group', null=True, blank=True),
-        ),
         migrations.AlterField(
             model_name='site',
             name='end_date',
@@ -133,10 +122,6 @@ class Migration(migrations.Migration):
             name='mws_domain',
             field=models.CharField(default=None, unique=True, max_length=250),
             preserve_default=False,
-        ),
-        migrations.RemoveField(
-            model_name='networkconfig',
-            name='main_domain',
         ),
         migrations.AlterField(
             model_name='domainname',
