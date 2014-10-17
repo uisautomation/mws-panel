@@ -32,6 +32,16 @@ def get_api_username():
     return settings.PLATFORMS_API_USERNAME
 
 
+def on_vm_api_failure(request, response):
+        subject = "MWS3: Platform's VM API ERROR"
+        message = "An error was returned when sending a request to Platform's VM API.\n\n The request was: \n %s \n\n " \
+                  "The answer was: \n %s" % (request, response)
+        from_email = settings.EMAIL_MWS3_SUPPORT
+        recipient_list = (settings.EMAIL_MWS3_SUPPORT, )
+        send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+        return False # TODO raise exception?
+
+
 class TaskWithFailure(Task):
     abstract = True
 
@@ -59,7 +69,6 @@ def new_site_primary_vm(vm):
         response = json.loads(requests.post("https://bes.csi.cam.ac.uk/mws-api/v1/vm.json",
                                             data=json.dumps(json_object), headers=headers).text)
     except Exception as e:
-        print "An error happened1!"
         raise new_site_primary_vm.retry(exc=e)
 
     if response['result'] == 'Success':
@@ -68,7 +77,7 @@ def new_site_primary_vm(vm):
         vm.save()
         return install_vm(vm)
     else:
-        return False  # TODO raise error
+        return on_vm_api_failure(json.dumps(json_object), response)
 
 
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
@@ -89,12 +98,12 @@ def install_vm(vm):
         response = json.loads(requests.post("https://bes.csi.cam.ac.uk/mws-api/v1/vm.json",
                                             data=json.dumps(json_object), headers=headers).text)
     except Exception as e:
-        raise PlatformsAPINotWorkingException(e.message)  # TODO capture exception where it is called
+        raise install_vm.retry(exc=e)
 
     if response['result'] == 'Success':
         return True
     else:
-        return False  # TODO raise error
+        return on_vm_api_failure(json.dumps(json_object), response)
 
 
 def get_vm_power_state(vm):
@@ -139,12 +148,12 @@ def change_vm_power_state(vm, on):
         response = json.loads(requests.post("https://bes.csi.cam.ac.uk/mws-api/v1/vm.json",
                                             data=json.dumps(json_object), headers=headers).text)
     except Exception as e:
-        raise PlatformsAPINotWorkingException(e.message)  # TODO capture exception where it is called
+        raise change_vm_power_state.retry(exc=e)
 
     if response['result'] == 'Success':
         return True
     else:
-        return False  # TODO raise error
+        return on_vm_api_failure(json.dumps(json_object), response)
 
 
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
@@ -161,12 +170,12 @@ def reset_vm(vm):
     try:
         response = json.loads(r.text)
     except Exception as e:
-        raise PlatformsAPINotWorkingException(e.message)  # TODO capture exception where it is called
+        raise reset_vm.retry(exc=e) # TODO are we sure we want to do that?
 
     if response['result'] == 'Success':
         return True
     else:
-        return False  # TODO raise error
+        return on_vm_api_failure(json.dumps(json_object), response)
 
 
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
@@ -185,12 +194,12 @@ def destroy_vm(vm):
     try:
         response = json.loads(r.text)
     except Exception as e:
-        raise PlatformsAPINotWorkingException(e.message)  # TODO capture exception where it is called
+        raise destroy_vm.retry(exc=e)
 
     if response['result'] == 'Success':
         return True
     else:
-        raise PlatformsAPINotWorkingException()  # TODO capture exception where it is called
+        return on_vm_api_failure(json.dumps(json_object), response)
 
 
 def clone_vm(site, primary_vm):
@@ -222,7 +231,7 @@ def clone_vm_api_call(orignal_vm, destiantion_vm):
         response = json.loads(requests.post("https://bes.csi.cam.ac.uk/mws-api/v1/vm.json",
                                             data=json.dumps(json_object), headers=headers).text)
     except Exception as e:
-        raise PlatformsAPINotWorkingException(e.message)  # TODO capture exception where it is called
+        raise clone_vm_api_call.retry(exc=e)
 
     if response['result'] == 'Success':
         destiantion_vm.name = response['vmid']
@@ -230,4 +239,4 @@ def clone_vm_api_call(orignal_vm, destiantion_vm):
         destiantion_vm.save()
         return True
     else:
-        return False  # TODO raise error
+        return on_vm_api_failure(json.dumps(json_object), response)
