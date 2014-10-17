@@ -40,8 +40,8 @@ class TaskWithFailure(Task):
         message = "An error happened when trying to communicate with Platform's VM API.\n The task id is " \
                   "%s. \n\n The parameters passed to the task were: %s \n\n " \
                   "The traceback is: \n %s" % (task_id, args, einfo)
-        from_email = "mws3-support@cam.ac.uk"
-        recipient_list = ("amc203@cam.ac.uk", )
+        from_email = settings.EMAIL_MWS3_SUPPORT
+        recipient_list = (settings.EMAIL_MWS3_SUPPORT, )
         send_mail(subject, message, from_email, recipient_list, fail_silently=False)
 
 

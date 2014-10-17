@@ -98,6 +98,9 @@ STATICFILES_FINDERS = (
 )
 GRAPPELLI_ADMIN_TITLE = "Managed Web Service"
 
+# email address where all the error messages will be sent to
+EMAIL_MWS3_SUPPORT = "mws3-support@cam.ac.uk"
+
 # ucamwebauth configuration
 UCAMWEBAUTH_CREATE_USER = True
 UCAMWEBAUTH_TIMEOUT = 30
