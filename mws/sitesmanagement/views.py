@@ -762,6 +762,36 @@ def certificates(request, vhost_id):
 
 
 @login_required
+def generate_csr(request, vhost_id):
+    vhost = get_object_or_404(Vhost, pk=vhost_id)
+    site = privileges_check(vhost.vm.site.id, request.user)
+
+    if request.method == 'POST':
+        if vhost.main_domain is None:
+            breadcrumbs = {
+                0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+                1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': vhost.vm.id})),
+                2: dict(name='Vhosts Management: %s' % vhost.name, url=reverse(vhosts_management,
+                                                                               kwargs={'vm_id': vhost.vm.id})),
+                3: dict(name='TLS/SSL Certificates', url=reverse(certificates, kwargs={'vhost_id': vhost.id})),
+            }
+
+            return render(request, 'mws/certificates.html', {
+                'breadcrumbs': breadcrumbs,
+                'vhost': vhost,
+                'site': site,
+                'error_main_domain': True
+            })
+        launch_ansible(site) # with a task to create the CSR
+        # include all domain names in the common name field in the CSR
+        # country is always GB
+        # all other parameters/fields are optional and won't appear in the certificate, just ignore them.
+        return redirect(reverse(settings, kwargs={'vm_id': vhost.vm.id}))
+
+    return redirect(reverse(certificates, kwargs={'vhost_id': vhost.id}))
+
+
+@login_required
 def set_dn_as_main(request, domain_id):
     domain = get_object_or_404(DomainName, pk=domain_id)
     vhost = domain.vhost

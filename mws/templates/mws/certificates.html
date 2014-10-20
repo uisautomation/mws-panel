@@ -4,19 +4,31 @@
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
             <h1>TLS/SSL certificates</h1>
-
-            <form action={% url 'sitesmanagement.views.certificates' vhost_id=vhost.id %} method="post">{% csrf_token %}
+            {% if error_main_domain %}
+                <div class="campl-notifications-panel campl-warning-panel campl-notifications-container clearfix">
+					<div class="campl-column4">
+						<p class="campl-notifications-icon campl-warning-icon">Warning:</p>
+					</div>
+					<div class="campl-column8">
+						<p>A CSR couldn't be generated because you don't have a master domain assigned to this vhost.</p>
+					</div>
+                </div>
+            {% endif %}
+            <form action="{% url 'sitesmanagement.views.generate_csr' vhost_id=vhost.id %}" method="post">
                 <fieldset>
-                    <p><a href="#">Generate CSR</a></p>
-                    <p>Upload the crt file: <input type="file" name="crt"></p>
+                    {% csrf_token %}
+                    <p><input type="submit" value="Generate CSR" class="campl-btn campl-primary-cta campl-primary-blue"/></p>
+                </fieldset>
+            </form>
+            <form action="{% url 'sitesmanagement.views.certificates' vhost_id=vhost.id %}" method="post">{% csrf_token %}
+                <fieldset>
+                    {% csrf_token %}
+                    <p>Upload the key file: <input type="file" name="key"></p>
                     <p>Upload the ca-bundle file: <input type="file" name="cabundle"></p>
                     <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
                 </fieldset>
             </form>
+
         </div>
     </div>
-{% endblock %}
-
-{% block campl_foot_js %}
-
 {% endblock %}
