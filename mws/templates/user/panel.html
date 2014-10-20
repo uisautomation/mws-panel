@@ -8,7 +8,7 @@
                 <fieldset>
                     {% csrf_token %}
                     <div id="user_form">
-                        Here goes options for the user
+                        {{ mwsuser_form.as_p }}
                     </div>
                     <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
                 </fieldset>

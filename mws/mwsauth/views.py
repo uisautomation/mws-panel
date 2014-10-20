@@ -1,13 +1,12 @@
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, redirect
 from apimws.utils import launch_ansible
+from mwsauth.models import MWSUserForm
 from mwsauth.utils import privileges_check
-from sitesmanagement.models import Site
-from sitesmanagement.views import show
+from sitesmanagement.views import show, index
 from mwsauth.validators import validate_crsids, validate_groupids
-from ucamlookup import user_in_groups
 
 
 @login_required
@@ -56,6 +55,16 @@ def user_panel(request):
         0: dict(name='User panel', url=reverse(user_panel))
     }
 
+    if request.method == 'POST':
+        mws_user_form = MWSUserForm(request.POST)
+        if mws_user_form.is_valid():
+            mws_user = mws_user_form.save(commit=False)
+            mws_user.user = request.user
+            mws_user.save()
+            return redirect(index)
+
     return render(request, 'user/panel.html', {
-        'breadcrumbs': breadcrumbs
+        'breadcrumbs': breadcrumbs,
+        'mwsuser_form': MWSUserForm(instance=request.user.mws_user) if hasattr(request.user, 'mws_user')
+        else MWSUserForm(),
     })
