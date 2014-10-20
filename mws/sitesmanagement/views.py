@@ -34,9 +34,13 @@ def index(request):
 
     sites_disabled = filter(lambda site: not site.is_canceled() and site.is_disabled(), sites)
 
+    sites_authorised = filter(lambda site: not site.is_canceled() and not site.is_disabled(),
+                              request.user.sites_auth_as_user.all())
+
     return render(request, 'index.html', {
         'sites_enabled': sorted(set(sites_enabled)),
         'sites_disabled': sorted(set(sites_disabled)),
+        'sites_authorised': sorted(set(sites_authorised)),
         'deactivate_new': NetworkConfig.num_pre_allocated() < 1
     })
 

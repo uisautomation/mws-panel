@@ -53,7 +53,7 @@ class Site(models.Model):
     # Administrator users of a site
     users = models.ManyToManyField(User, related_name='sites')
     # SSH only users of a site
-    ssh_users = models.ManyToManyField(User, related_name='+')
+    ssh_users = models.ManyToManyField(User, related_name='sites_auth_as_user')
     # Administrator groups of a site
     groups = models.ManyToManyField(LookupGroup, related_name='sites', null=True, blank=True)
 
@@ -291,6 +291,10 @@ class VirtualMachine(models.Model):
             return self.site.network_configuration.IPv4
         else:
             return self.site.network_configuration.IPv4private
+
+    @property
+    def sshfp(self):
+        return self.site.network_configuration.SSHFP
 
     @property
     def ipv6(self):
