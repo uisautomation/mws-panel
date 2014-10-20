@@ -83,6 +83,12 @@ ul.errorlist + p textarea {
     background-color: #630C0C;
 }
 
+.campl-breadcrumb{
+    width: 75%;
+    float: left;
+    margin-right: 10px;
+    padding: 0;
+}
 
 
 
