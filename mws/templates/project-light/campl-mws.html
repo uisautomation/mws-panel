@@ -28,6 +28,11 @@
 {% endblock %}
 
 {% block search_bar %}
+    <div class="campl-column12">
+        <p style="color: white; text-align: right;">
+            Welcome <a href="{% url 'mwsauth.views.user_panel' %}">{{ request.user.last_name }} ({{ request.user.username }})</a>
+        </p>
+    </div>
 {% endblock %}
 
 {% block campl_tabs_header %}
