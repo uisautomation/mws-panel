@@ -3,13 +3,13 @@
 {% block page_content %}
     <div class="campl-column12">
         <div class="campl-content-container">
-            <h1 id="page-title">Clone your VM</h1>
+            <h1 id="page-title">Clone Virtual Machines</h1>
 
             <form action={% url 'sitesmanagement.views.clone_vm_view' site_id=site.id %} method="post">{% csrf_token %}
                 <fieldset>
                     {% if site.primary_vm %}
                         <div>
-                            <p>Clone your Primary VM to a Secondary VM</p>
+                            <p>Clone your primary VM to a secondary VM</p>
 
                             {% if site.secondary_vm %}
                                 <p>

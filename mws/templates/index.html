@@ -4,13 +4,19 @@
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
 
-            <p>This site allows member of the university to request a managed web server</p>
+            <p>This site allows members of the university to request a managed web server. We provide the user with a
+                web server that they can use without having to worry about configuration or operating system
+                maintenance. A managed web server has the following characteristics:</p>
 
-            <p>When you request a MWS you automatically get the right to
-            manage it in the future. {% if all_metadatas %} A list of
-            the sites that you manage appears below. {% endif %} For
-            any site that you manage you can nominate additional
-            managers, and you are strongly advised to do so.</p>
+            <ul>
+                <li>A virtual machine with 1 Core CPU, 2 GB of RAM, and xxGb of disk space</li>
+                <li>A public IPv4 and IPv6</li>
+                <li>A secondary virtual machine for testing purposes (testing updates for example)</li>
+                <li>A simple web based control panel to control all the features of the Managed Web Server</li>
+                <li>Only costs £xx/month</li>
+            </ul>
+
+            <p>Warning: If you don't enter the billings details for your site in less than a month, it may be deleted.</p>
 
             {% if deactivate_new %}
                 <p class="campl-notifications-icon campl-warning-icon" style="float:none; margin-bottom: 10px;">
@@ -21,7 +27,7 @@
             {% endif %}
 
             {% if sites_enabled %}
-                <h1>MWS sites where you are authorised as admin</h1>
+                <h1>MWS sites where you are the administrator</h1>
                 <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
                     <thead>
                         <tr>
@@ -67,7 +73,7 @@
 
             {% if sites_disabled %}
                 <div class="campl-theme-7">
-                    <h1>Disabled MWS sites where you are the admin</h1>
+                    <h1>Disabled MWS sites where you are the administrator</h1>
                     <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
                         <thead>
                             <tr>

@@ -95,7 +95,7 @@ def edit(request, site_id):
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Change information about your MWS',
+        1: dict(name='Manage Web Server settings',
                 url=reverse('sitesmanagement.views.edit', kwargs={'site_id': site.id}))
     }
 
@@ -292,7 +292,7 @@ def clone_vm_view(request, site_id):
 
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Clone your VM', url=reverse(clone_vm_view, kwargs={'site_id': site.id}))
+        1: dict(name='Clone Virtual Machines', url=reverse(clone_vm_view, kwargs={'site_id': site.id}))
     }
 
     if request.method == 'POST':
@@ -310,7 +310,7 @@ def clone_vm_view(request, site_id):
 
 
 def privacy(request):
-    return render(request, 'index.html', {})
+    return render(request, 'privacy.html', {})
 
 
 @login_required
@@ -327,12 +327,13 @@ def vhosts_management(request, vm_id):
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
         1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': vm.id})),
-        2: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'vm_id': vm.id}))
+        2: dict(name='Web Server Management', url=reverse(vhosts_management, kwargs={'vm_id': vm.id}))
     }
 
     return render(request, 'mws/vhosts.html', {
         'breadcrumbs': breadcrumbs,
-        'vm': vm
+        'vm': vm,
+        'vhost_form': VhostForm()
     })
 
 
@@ -347,13 +348,6 @@ def add_vhost(request, vm_id):
     if vm.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
-    breadcrumbs = {
-        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': vm.id})),
-        2: dict(name='Vhosts Management', url=reverse(vhosts_management, kwargs={'vm_id': vm.id})),
-        3: dict(name='Add Vhost', url=reverse(add_vhost, kwargs={'vm_id': vm.id}))
-    }
-
     if request.method == 'POST':
         vhost_form = VhostForm(request.POST)
         if vhost_form.is_valid():
@@ -361,16 +355,8 @@ def add_vhost(request, vm_id):
             vhost.vm = vm
             vhost.save()
             launch_ansible(site)  # to create a new vhost configuration file
-            return HttpResponseRedirect(reverse('sitesmanagement.views.vhosts_management',
-                                                kwargs={'vm_id': vm.id}))
-    else:
-        vhost_form = VhostForm()
 
-    return render(request, 'mws/add_vhost.html', {
-        'breadcrumbs': breadcrumbs,
-        'vm': vm,
-        'vhost_form': vhost_form,
-    })
+    return redirect(reverse('sitesmanagement.views.vhosts_management', kwargs={'vm_id': vm.id}))
 
 
 @login_required
@@ -679,14 +665,15 @@ def domains_management(request, vhost_id):
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
         1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': vhost.vm.id})),
-        2: dict(name='Vhosts Management: %s' % vhost.name, url=reverse(vhosts_management,
+        2: dict(name='Web Servers Management: %s' % vhost.name, url=reverse(vhosts_management,
                                                                        kwargs={'vm_id': vhost.vm.id})),
-        3: dict(name='Domains Management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id}))
+        3: dict(name='Domain Names Management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id}))
     }
 
     return render(request, 'mws/domains.html', {
         'breadcrumbs': breadcrumbs,
-        'vhost': vhost
+        'vhost': vhost,
+        'domain_form': DomainNameFormNew()
     })
 
 
@@ -701,38 +688,23 @@ def add_domain(request, vhost_id, socket_error=None):
     if vhost.vm.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
-    breadcrumbs = {
-        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': vhost.vm.id})),
-        2: dict(name='Vhosts Management: %s' % vhost.name, url=reverse(vhosts_management,
-                                                                       kwargs={'vm_id': vhost.vm.id})),
-        3: dict(name='Domains Management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id})),
-        4: dict(name='Add Domain', url=reverse(add_domain, kwargs={'vhost_id': vhost.id}))
-    }
-
     if request.method == 'POST':
         domain_form = DomainNameFormNew(request.POST)
         if domain_form.is_valid():
             domain_requested = domain_form.save(commit=False)
             if domain_requested.name != '':  # TODO do it after saving a domain request
                 if is_camacuk(domain_requested.name):
-                    ip_register_api_request.delay(vhost, domain_requested.name)
+                    new_domain = DomainName.objects.create(name=domain_requested.name, status='requested',
+                                                                 vhost=vhost)
+                    ip_register_api_request.delay(new_domain)
                 else:
                     new_domain = DomainName.objects.create(name=domain_requested.name, status='accepted', vhost=vhost)
                     if vhost.main_domain is None:
                         vhost.main_domain = new_domain
                         vhost.save()
                 launch_ansible(site)  # to add the new domain name to the vhost apache configuration
-            return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management',
-                                                kwargs={'vhost_id': vhost.id}))
-    else:
-        domain_form = DomainNameFormNew()
 
-    return render(request, 'mws/add_domain.html', {
-        'breadcrumbs': breadcrumbs,
-        'vhost': vhost,
-        'domain_form': domain_form,
-    })
+    return redirect(reverse('sitesmanagement.views.domains_management', kwargs={'vhost_id': vhost.id}))
 
 
 @login_required
@@ -749,9 +721,9 @@ def certificates(request, vhost_id):
     breadcrumbs = {
         0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
         1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': vhost.vm.id})),
-        2: dict(name='Vhosts Management: %s' % vhost.name, url=reverse(vhosts_management,
+        2: dict(name='Web Servers Management: %s' % vhost.name, url=reverse(vhosts_management,
                                                                        kwargs={'vm_id': vhost.vm.id})),
-        3: dict(name='TLS/SSL Certificates', url=reverse(certificates, kwargs={'vhost_id': vhost.id})),
+        3: dict(name='TLS/SSL Certificate', url=reverse(certificates, kwargs={'vhost_id': vhost.id})),
     }
 
     return render(request, 'mws/certificates.html', {

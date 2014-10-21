@@ -3,7 +3,7 @@
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
 
-            <h1>Domain names for the vhost "{{ vhost.name }}" of the mws "{{ vhost.vm.site.name }}"</h1>
+            <h1>Domain Names for the Web Server "{{ vhost.name }}" of the MWS "{{ vhost.vm.site.name }}"</h1>
             <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
                 <thead>
                     <tr>
@@ -37,7 +37,19 @@
                 </tbody>
             </table>
 
-            <p><a href="{% url 'sitesmanagement.views.add_domain' vhost_id=vhost.id %}" class="campl-primary-cta">Add a new domain</a></p>
+            <p><a id="add_domain_button" href="#" class="campl-primary-cta">Add a new domain</a></p>
+
+            <div id="add_domain_div" style="display: none; margin-top: 20px">
+                <form action={% url 'sitesmanagement.views.add_domain' vhost_id=vhost.id %} method="post">
+                    <fieldset>
+                        {% csrf_token %}
+                        <div id="domain_form">
+                            {{ domain_form.as_p }}
+                        </div>
+                        <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
+                    </fieldset>
+                </form>
+            </div>
 
         </div>
     </div>
@@ -78,6 +90,9 @@
 
         $(document).ready(function() {
             $('[data-toggle="confirmation"]').confirmation({singleton:true, popout:true, placement:'top'});
+            $('#add_domain_button').click(function() {
+                $('#add_domain_div').show("fast")
+            })
         })
     </script>
 {% endblock %}

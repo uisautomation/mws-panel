@@ -8,16 +8,14 @@ import uuid
 
 
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
-def ip_register_api_request(vhost, domain_name):
-    site = vhost.vm.site
-    domain_requested = DomainName.objects.create(name=domain_name, status='requested', vhost=vhost)
+def ip_register_api_request(domain_name):
 
     subject = "New request of a Domain Name for the MWS"
     message = "Domain Name requested: " + domain_name + "\n" \
-              "IPv4: " + site.network_configuration.IPv4 + "\n" \
-              "IPv6: " + site.network_configuration.IPv6 + "\n" \
+              "IPv4: " + domain_name.vhost.vm.site.network_configuration.IPv4 + "\n" \
+              "IPv6: " + domain_name.vhost.vm.site.network_configuration.IPv6 + "\n" \
               "Please, when ready click here: %s/api/confirm_dns/" % settings.MAIN_DOMAIN \
-              + str(domain_requested.id)
+              + str(domain_name.id)
     from_email = "mws3-support@cam.ac.uk"
     recipient_list = ('amc203@cam.ac.uk', )
     send_mail(subject, message, from_email, recipient_list, fail_silently=False)

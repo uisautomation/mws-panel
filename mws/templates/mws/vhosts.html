@@ -4,12 +4,12 @@
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
 
-            <h1>Domain names for the mws "{{ vm.site.name }}"</h1>
+            <h1>Web Server for the MWS "{{ vm.site.name }}"</h1>
             <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
                 <thead>
                     <tr>
-                        <th>Vhost</th>
-                        <th>Domains</th>
+                        <th>Web server</th>
+                        <th>Domain Names associated</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -40,7 +40,18 @@
                 </tbody>
             </table>
 
-        <p><a href="{% url 'sitesmanagement.views.add_vhost' vm_id=vm.id %}" class="campl-primary-cta">Add a new vhost</a></p>
+            <p><a id="add_vhost_button" href="#" class="campl-primary-cta">Add a new Web Server</a></p>
+
+            <div id="add_vhost_div" style="display: none; margin-top: 20px">
+                <form action={% url 'sitesmanagement.views.add_vhost' vm_id=vm.id %} method="post">{% csrf_token %}
+                    <fieldset>
+                        <div id="vhost_form">
+                            {{ vhost_form.as_p }}
+                        </div>
+                        <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
+                    </fieldset>
+                </form>
+            </div>
 
         </div>
     </div>
@@ -80,6 +91,9 @@
 
         $(document).ready(function() {
             $('[data-toggle="confirmation"]').confirmation({singleton:true, popout:true, placement:'top'});
+            $('#add_vhost_button').click(function() {
+                $('#add_vhost_div').show("fast")
+            })
         })
     </script>
 {% endblock %}
