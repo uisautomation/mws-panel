@@ -9,10 +9,9 @@ class Command(BaseCommand):
            'Existing users will be ignored'
 
     def handle(self, *args, **options):
-        for i in range(1, 10):
-            for j in range(1, 124):
+        for i in range(1, 3):
+            for j in range(1, 254):
                 NetworkConfig.objects.create(IPv4="10.0.%d.%d" % (i, j), IPv6="::ffff:10.0.%d.%d" % (i, j),
-                                             mws_domain="%d.%d.mws.csx.cam.ac.uk" % (i, j), type="public")
-            for j in range(125, 250):
-                NetworkConfig.objects.create(IPv4="10.0.%d.%d" % (i, j), IPv6="::ffff:10.0.%d.%d" % (i, j),
-                                             mws_domain="%d.%d.mws.csx.cam.ac.uk" % (i, j), type="private")
+                                             mws_domain="%d.%d.mws.csx.cam.ac.uk" % (i, j),
+                                             IPv4private="192.168.%d.%d" % (i, j),
+                                             mws_private_domain="%d.%d.mws.priv.csx.cam.ac.uk" % (i, j))
