@@ -51,7 +51,7 @@ def new(request):
         return HttpResponseRedirect(reverse('sitesmanagement.views.index'))
 
     breadcrumbs = {
-        0: dict(name='New Manage Web Server', url=reverse(new))
+        0: dict(name='New Manage Web Service server', url=reverse(new))
     }
 
     # TODO: FIX: if SiteForm's name field is empty then DomainNameForm errors are also shown
@@ -94,8 +94,8 @@ def edit(request, site_id):
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
-        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Manage Web Server settings',
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Manage Web Service account settings',
                 url=reverse('sitesmanagement.views.edit', kwargs={'site_id': site.id}))
     }
 
@@ -129,7 +129,7 @@ def delete(request, site_id):
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
-        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
         1: dict(name='Change information about your MWS',
                 url=reverse('sitesmanagement.views.edit', kwargs={'site_id': site.id})),
         2: dict(name='Delete your MWS', url=reverse('sitesmanagement.views.delete', kwargs={'site_id': site.id}))
@@ -159,7 +159,7 @@ def disable(request, site_id):
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
-        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
         1: dict(name='Change information about your MWS',
                 url=reverse('sitesmanagement.views.edit', kwargs={'site_id': site.id})),
         2: dict(name='Disable your MWS site', url=reverse(clone_vm_view, kwargs={'site_id': site.id}))
@@ -201,16 +201,16 @@ def show(request, site_id):
         return HttpResponseForbidden()
 
     breadcrumbs = {
-        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id}))
     }
 
     warning_messages = []
 
     if site.primary_vm is not None and site.primary_vm.status == 'ansible':
-        warning_messages.append("Your primary virtual machine is being configured.")
+        warning_messages.append("Your server is being configured.")
 
     if site.secondary_vm is not None and site.secondary_vm.status == 'ansible':
-        warning_messages.append("Your secondary virtual machine is being configured.")
+        warning_messages.append("Your test server is being configured.")
 
     if site.primary_vm is not None:
         for vhost in site.primary_vm.vhosts.all():
@@ -232,7 +232,7 @@ def show(request, site_id):
             pass
 
     if site.primary_vm is None or site.primary_vm.status == 'requested':
-        warning_messages.append("Your Managed Web Server is being prepared")
+        warning_messages.append("Your request in the Managed Web Service is being processed")
 
     return render(request, 'mws/show.html', {
         'breadcrumbs': breadcrumbs,
@@ -251,7 +251,7 @@ def billing_management(request, site_id):
         return HttpResponseForbidden()
 
     breadcrumbs = {
-        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
         1: dict(name='Billing', url=reverse(billing_management, kwargs={'site_id': site.id}))
     }
 
@@ -291,8 +291,8 @@ def clone_vm_view(request, site_id):
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
-        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Clone Virtual Machines', url=reverse(clone_vm_view, kwargs={'site_id': site.id}))
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Production and test servers management', url=reverse(clone_vm_view, kwargs={'site_id': site.id}))
     }
 
     if request.method == 'POST':
@@ -325,9 +325,10 @@ def vhosts_management(request, vm_id):
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
-        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': vm.id})),
-        2: dict(name='Web Server Management', url=reverse(vhosts_management, kwargs={'vm_id': vm.id}))
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Server settings' if vm.primary else 'Test server settings', url=reverse(settings,
+                                                                                              kwargs={'vm_id': vm.id})),
+        2: dict(name='Web sites management', url=reverse(vhosts_management, kwargs={'vm_id': vm.id}))
     }
 
     return render(request, 'mws/vhosts.html', {
@@ -371,8 +372,9 @@ def settings(request, vm_id):
         return redirect(reverse(show, kwargs={'site_id': site.id}))
 
     breadcrumbs = {
-        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': vm.id}))
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Server settings' if vm.primary else 'Test server settings', url=reverse(settings,
+                                                                                              kwargs={'vm_id': vm.id}))
     }
 
     return render(request, 'mws/settings.html', {
@@ -415,8 +417,9 @@ def system_packages(request, vm_id):
     ansible_configuraton = get_object_or_None(AnsibleConfiguration, vm=vm, key="System Packages")
 
     breadcrumbs = {
-        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': vm.id})),
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Server settings' if vm.primary else 'Test server settings', url=reverse(settings,
+                                                                                              kwargs={'vm_id': vm.id})),
         2: dict(name='System packages', url=reverse(system_packages, kwargs={'vm_id': vm.id}))
     }
 
@@ -459,8 +462,9 @@ def unix_groups(request, vm_id):
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
-        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': vm.id})),
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Server settings' if vm.primary else 'Test server settings', url=reverse(settings,
+                                                                                              kwargs={'vm_id': vm.id})),
         2: dict(name='Manage Unix Groups', url=reverse(unix_groups, kwargs={'vm_id': vm.id}))
     }
 
@@ -482,8 +486,9 @@ def add_unix_group(request, vm_id):
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
-        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': vm.id})),
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Server settings' if vm.primary else 'Test server settings', url=reverse(settings,
+                                                                                              kwargs={'vm_id': vm.id})),
         2: dict(name='Manage Unix Groups', url=reverse(unix_groups, kwargs={'vm_id': vm.id})),
         3: dict(name='Add a new Unix Group', url=reverse(add_unix_group, kwargs={'vm_id': vm.id}))
     }
@@ -547,8 +552,9 @@ def unix_group(request, ug_id):
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
-        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': unix_group_i.vm.id})),
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Server settings' if unix_group_i.vm.primary else 'Test server settings',
+                url=reverse(settings, kwargs={'vm_id': unix_group_i.vm.id})),
         2: dict(name='Manage Unix Groups', url=reverse(unix_groups, kwargs={'vm_id': unix_group_i.vm.id})),
         3: dict(name='Edit Unix Group', url=reverse('sitesmanagement.views.unix_group',
                                                     kwargs={'ug_id': unix_group_i.id}))
@@ -663,11 +669,12 @@ def domains_management(request, vhost_id):
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
-        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': vhost.vm.id})),
-        2: dict(name='Web Servers Management: %s' % vhost.name, url=reverse(vhosts_management,
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Server settings' if vhost.vm.primary else 'Test server settings',
+                url=reverse(settings, kwargs={'vm_id': vhost.vm.id})),
+        2: dict(name='Web sites management: %s' % vhost.name, url=reverse(vhosts_management,
                                                                        kwargs={'vm_id': vhost.vm.id})),
-        3: dict(name='Domain Names Management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id}))
+        3: dict(name='Domain Names management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id}))
     }
 
     return render(request, 'mws/domains.html', {
@@ -719,9 +726,10 @@ def certificates(request, vhost_id):
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
-        0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': vhost.vm.id})),
-        2: dict(name='Web Servers Management: %s' % vhost.name, url=reverse(vhosts_management,
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Server settings' if vhost.vm.primary else 'Test server settings',
+                url=reverse(settings, kwargs={'vm_id': vhost.vm.id})),
+        2: dict(name='Web sites management: %s' % vhost.name, url=reverse(vhosts_management,
                                                                        kwargs={'vm_id': vhost.vm.id})),
         3: dict(name='TLS/SSL Certificate', url=reverse(certificates, kwargs={'vhost_id': vhost.id})),
     }
@@ -741,8 +749,10 @@ def generate_csr(request, vhost_id):
     if request.method == 'POST':
         if vhost.main_domain is None:
             breadcrumbs = {
-                0: dict(name='Manage Web Server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-                1: dict(name='Settings', url=reverse(settings, kwargs={'vm_id': vhost.vm.id})),
+                0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show,
+                                                                                         kwargs={'site_id': site.id})),
+                1: dict(name='Server settings' if vhost.vm.primary else 'Test server settings',
+                         url=reverse(settings, kwargs={'vm_id': vhost.vm.id})),
                 2: dict(name='Vhosts Management: %s' % vhost.name, url=reverse(vhosts_management,
                                                                                kwargs={'vm_id': vhost.vm.id})),
                 3: dict(name='TLS/SSL Certificates', url=reverse(certificates, kwargs={'vhost_id': vhost.id})),

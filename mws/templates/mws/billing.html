@@ -3,7 +3,7 @@
 {% block page_content %}
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
-            <h1>Change billing data</h1>
+            <h1>Billing data</h1>
 
             <form enctype="multipart/form-data" action={% url 'sitesmanagement.views.billing_management' site_id=site.id %} method="post">{% csrf_token %}
                 <fieldset>

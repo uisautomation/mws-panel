@@ -1,4 +1,5 @@
 from datetime import datetime
+import threading
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -355,7 +356,7 @@ class UnixGroup(models.Model):
 
 class SiteForm(forms.ModelForm):
     institution_id = forms.ChoiceField(label='The University institution responsible for this site')
-    description = forms.CharField(label='Description for the Managed Web Server (e.g. Web server for St Botolph\'s '
+    description = forms.CharField(label='Description for the MWS (e.g. Web server for St Botolph\'s '
                                         'College main website)',
                                   widget=forms.Textarea(attrs={'maxlength': 250}),
                                   max_length=250,
@@ -370,7 +371,7 @@ class SiteForm(forms.ModelForm):
         model = Site
         fields = ('name', 'description', 'institution_id', 'email')
         labels = {
-            'name': 'A short name for this Managed Web Server (e.g. St Botolph\'s main site)',
+            'name': 'A short name for this Managed Web Service account (e.g. St Botolph\'s main site)',
             'email': 'The webmaster email (please use a role email when possible)'
         }
 
@@ -380,7 +381,7 @@ class VhostForm(forms.ModelForm):
         model = Vhost
         fields = ('name', )
         labels = {
-            'name': 'Web Server name',
+            'name': 'Web site name',
         }
 
 
@@ -392,7 +393,7 @@ class DomainNameFormNew(forms.ModelForm):
         model = DomainName
         fields = ('name', )
         labels = {
-            'name': 'DomainName',
+            'name': 'Domain Name',
         }
 
 

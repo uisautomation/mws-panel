@@ -3,7 +3,7 @@ from celery import shared_task
 from django.core.mail import send_mail
 from django.conf import settings
 from apimws.platforms import TaskWithFailure
-from sitesmanagement.models import DomainName, EmailConfirmation
+from sitesmanagement.models import EmailConfirmation
 import uuid
 
 

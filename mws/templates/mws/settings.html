@@ -5,7 +5,7 @@
         <div class="view-header">
             <div class="campl-content-container">
                 <div class="campl-heading-container">
-                    <h1 id="page-title">Settings of the {% if vm.primary %}primary{% else %}secondary{% endif %} VM of the MWS site <span style="">{{ site.name }}</span></h1>
+                    <h1 id="page-title">{% if vm.primary %}Server{% else %}Test server{% endif %} settings</h1>
                 </div>
             </div>
         </div>
@@ -34,11 +34,11 @@
                         <div class="campl-content-container campl-horizontal-teaser-txt">
                             <h3 class="campl-teaser-title">
                                 <a href="{% url 'sitesmanagement.views.vhosts_management' vm_id=vm.id %}">
-                                    Web servers
+                                    Web sites
                                 </a>
                             </h3>
                             <a href="{% url 'sitesmanagement.views.vhosts_management' vm_id=vm.id %}"
-                               class="ir campl-focus-link">Web servers</a>
+                               class="ir campl-focus-link">Web sites</a>
                         </div>
                     </div>
                 </article>
@@ -125,7 +125,7 @@
                                         field-label-hidden">
                                 <div class="field-items">
                                     <div id="vm_status_message" class="field-item even" style="color: #ffffff">
-                                        Checking the status of the {% if vm.primary %}primary{% else %}secondary{% endif %} Virtual Machine
+                                        Checking the status of the {% if not vm.primary %}test {% endif %} server
                                     </div>
                                 </div>
                             </div>
@@ -168,11 +168,11 @@
                         <div class="campl-content-container campl-horizontal-teaser-txt">
                             <h3 class="campl-teaser-title">
                                 <a class="delete_vm" data-toggle="confirmation" data-href="javascript:delete_vm('{% url 'sitesmanagement.views.delete_vm' vm_id=vm.id %}')" href="#">
-                                    Delete the secondary Virtual Machine
+                                    Delete the test server
                                 </a>
                             </h3>
                             <a class="delete_vm ir campl-focus-link campl-focus-link-red" data-toggle="confirmation" data-href="javascript:delete_vm('{% url 'sitesmanagement.views.delete_vm' vm_id=vm.id %}')" href="#">
-                                Delete the secondary Virtual Machine
+                                Delete the test server
                             </a>
                         </div>
                     </div>
@@ -198,12 +198,12 @@
                         $("#vm_status_message_link").html("Please try again later.");
                     } else {
                         if (result['vm_is_on'] == true) {
-                            $("#vm_status_message").html("The {% if vm.primary %}primary{% else %}secondary{% endif %} Virtual Machine is currently ON");
+                            $("#vm_status_message").html("The {% if not vm.primary %}test {% endif %} server is currently ON");
                             $("#vm_status_message_link").attr("href", "{% url 'sitesmanagement.views.reset_vm' vm_id=vm.id %}");
                             $("#vm_status_message_link").html("If the it does not respond you can do a hard reset, clicking here");
                             $("#vm_status_link").attr("href", "{% url 'sitesmanagement.views.reset_vm' vm_id=vm.id %}");
                         } else if (result['vm_is_on'] == false) {
-                            $("#vm_status_message").html("The {% if vm.primary %}primary{% else %}secondary{% endif %} Virtual Machine is currently OFF");
+                            $("#vm_status_message").html("The {% if not vm.primary %}test {% endif %} server is currently OFF");
                             $("#vm_status_message_link").attr("href", "{% url 'sitesmanagement.views.power_vm' vm_id=vm.id %}");
                             $("#vm_status_message_link").html("Power it on");
                             $("#vm_status_link").attr("href", "{% url 'sitesmanagement.views.power_vm' vm_id=vm.id %}");

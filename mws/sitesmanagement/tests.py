@@ -35,7 +35,7 @@ class SiteManagementTests(TestCase):
         self.assertContains(response,
                             "                <p class=\"campl-notifications-icon campl-warning-icon\" "
                             "style=\"float:none; margin-bottom: 10px;\">\n                    At this moment we cannot "
-                            "process any new request for a new Managed Web Server, please try again later.\n"
+                            "process any new request for the Managed Web Service, please try again later.\n"
                             "                </p>")
 
         netconf = NetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
@@ -181,7 +181,7 @@ class SiteManagementTests(TestCase):
 
         site.users.add(User.objects.get(username="test0001"))
         response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
-        self.assertContains(response, "Change information about your MWS")
+        self.assertContains(response, "Managed Web Service account settings")
 
         suspension = site.suspend_now(input_reason="test suspension")
         response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
@@ -190,7 +190,7 @@ class SiteManagementTests(TestCase):
         suspension.active = False
         suspension.save()
         response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
-        self.assertContains(response, "Change information about your MWS")
+        self.assertContains(response, "Managed Web Service account settings")
 
         self.assertNotEqual(site.name, 'testSiteChange')
         self.assertNotEqual(site.description, 'testDescChange')
