@@ -1,4 +1,5 @@
 from common_settings import *
+from production_secrets import *
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '$a2byg9*bc5rcc_e5d5#3+mp^s=v0y_vz18ke-tzy_u!*&!txw'
@@ -53,3 +54,7 @@ LSxbGuFG9yfPFIqaSntlYMxKKB5ba/tIAMzyAOHxdEM5hi1DXRsOok3ElWjOw9oN
 wOq24EIbX5LquL9w+uvnfXw=
 -----END CERTIFICATE-----
 """}
+
+BROKER_URL = 'django://'
+INSTALLED_APPS = INSTALLED_APPS+('kombu.transport.django', )
+CELERY_IMPORTS = ('apimws.platforms', 'apimws.utils')

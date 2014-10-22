@@ -3,20 +3,20 @@
 {% block page_content %}
     <div class="campl-column12">
         <div class="campl-content-container">
-            <h1 id="page-title">Clone your VM</h1>
+            <h1 id="page-title">Production and test servers management</h1>
 
             <form action={% url 'sitesmanagement.views.clone_vm_view' site_id=site.id %} method="post">{% csrf_token %}
                 <fieldset>
                     {% if site.primary_vm %}
                         <div>
-                            <p>Clone your Primary VM to a Secondary VM</p>
+                            <p>Clone the production server into the test server</p>
 
                             {% if site.secondary_vm %}
                                 <p>
                                     <img src="{% static 'images/interface/icon-warning.png' %}">
                                     Warning:
                                 </p>
-                                <p>The contents of your secondary VM will be lost when cloning your primary vm into your secondary vm</p>
+                                <p>The contents of the test server will be lost when cloning the production server into the test server</p>
                             {% endif %}
 
                             <p>
@@ -27,14 +27,14 @@
                     {% endif %}
                     {% if site.secondary_vm %}
                         <div>
-                            <p>Clone your Secondary VM to a Primary VM</p>
+                            <p>Clone the test server into the production server</p>
 
                             {% if site.primary_vm %}
                                 <p>
                                     <img src="{% static 'images/interface/icon-warning.png' %}">
                                     Warning:
                                 </p>
-                                <p>The contents of your primary VM will be lost when cloning your secondary vm into your primary vm</p>
+                                <p>The contents of the production server will be lost when cloning the test server into the production server</p>
                             {% endif %}
 
                             <p>

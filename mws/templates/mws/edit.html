@@ -3,7 +3,7 @@
 {% block page_content %}
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
-            <h1>Change information about your MWS</h1>
+            <h1>Managed Web Service account settings</h1>
 
             <form action={% url 'sitesmanagement.views.edit' site_id=site.id %} method="post">
                 <fieldset>
@@ -14,8 +14,8 @@
                     <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
                 </fieldset>
             </form>
-            <p><a href="{% url 'sitesmanagement.views.disable' site_id=site.id %}" class="campl-btn campl-primary-cta campl-primary-red">Disable this Managed Web Service</a></p>
-            <p><a href="{% url 'sitesmanagement.views.delete' site_id=site.id %}" class="campl-btn campl-primary-cta campl-primary-red">Cancel this Managed Web Service</a></p>
+            <p><a href="{% url 'sitesmanagement.views.disable' site_id=site.id %}" class="campl-btn campl-primary-cta campl-primary-red">Disable this Managed Web Service server</a></p>
+            <p><a href="{% url 'sitesmanagement.views.delete' site_id=site.id %}" class="campl-btn campl-primary-cta campl-primary-red">Cancel this Managed Web Service account</a></p>
         </div>
     </div>
 {% endblock %}

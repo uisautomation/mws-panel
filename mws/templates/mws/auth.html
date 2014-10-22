@@ -2,7 +2,7 @@
 {% block page_content %}
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
-            <h1>Change authorised users and groups</h1>
+            <h1>Authorised users and groups</h1>
 
             <form action={% url 'mwsauth.views.auth_change' site_id=site.id %} method="post">{% csrf_token %}
                 <fieldset>

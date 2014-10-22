@@ -7,35 +7,9 @@ from django.shortcuts import get_object_or_404, render, redirect
 from stronghold.decorators import public
 from apimws.utils import launch_ansible
 from mwsauth.utils import get_or_create_group_by_groupid
-from sitesmanagement.models import VirtualMachine, DomainName, Site, EmailConfirmation
-from apimws.models import VMForm
+from sitesmanagement.models import DomainName, Site, EmailConfirmation
 from sitesmanagement.views import show
 from ucamlookup import user_in_groups
-
-
-@login_required
-def confirm_vm(request, vm_id):
-    # Check if the request.user is authorised to do so: member of the UIS Platforms or UIS Information Systems groups
-    if not user_in_groups(request.user,
-                          [get_or_create_group_by_groupid("101128"), get_or_create_group_by_groupid("101888")]):
-        return HttpResponseForbidden()
-
-    vm = get_object_or_404(VirtualMachine, pk=vm_id)
-
-    if request.method == 'POST':
-        vm_form = VMForm(request.POST, instance=vm)
-        if vm_form.is_valid():
-            vm = vm_form.save(commit=False)
-            vm.status = "accepted"
-            vm.save()
-            return render(request, 'api/success.html')
-    else:
-        vm_form = VMForm(instance=vm)
-
-    return render(request, 'api/confirm_vm.html', {
-        'vm': vm,
-        'vm_form': vm_form
-    })
 
 
 @login_required
@@ -104,35 +78,35 @@ def confirm_email(request, ec_id, token):
 @public
 def dns_entries(request, token):
     # TODO test that the token matches the one we have stored
-    json_object = {}
-    json_object['protocol_version'] = 1
-    json_object['mwsv3_sites'] = []
+    json_object = {
+        'protocol_version': 1,
+        'mwsv3_sites': []
+    }
     for site in Site.objects.all():
         dns_entries = []
         primary_vm = site.primary_vm
         secondary_vm = site.secondary_vm
         if primary_vm:
             dns_entries.append({
-                'name': primary_vm.network_configuration.mws_domain,
+                'name': site.network_configuration.mws_domain,
                 'values': {
-                    'A': primary_vm.network_configuration.IPv4,
-                    'AAAA': primary_vm.network_configuration.IPv6
+                    'A': site.network_configuration.IPv4,
+                    'AAAA': site.network_configuration.IPv6,
+                    'SSHFP': site.network_configuration.SSHFP
                 },
             })
         if secondary_vm:
             dns_entries.append({
-                'name': secondary_vm.network_configuration.mws_domain,
+                'name': site.network_configuration.mws_private_domain,
                 'values': {
-                    'A': secondary_vm.network_configuration.IPv4,
-                    'AAAA': secondary_vm.network_configuration.IPv6,
-                    'SSHFP': secondary_vm.network_configuration.SSHFP
+                    'A': site.network_configuration.IPv4private
                 },
             })
         for dn in site.domain_names.all():
             dns_entries.append({
                 'name': dn.name,
                 'values': {
-                    'CNAME': primary_vm.network_configuration.mws_domain
+                    'CNAME': site.network_configuration.mws_domain
                 },
             })
         if dns_entries:

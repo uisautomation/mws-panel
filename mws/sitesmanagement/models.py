@@ -9,6 +9,32 @@ from ucamlookup import get_institutions
 from ucamlookup.models import LookupGroup
 
 
+class NetworkConfig(models.Model):
+    """ The network configuration for the VMs of a site:
+     Primary VM: IPv4, IPv6, and domain name
+     Secondary VM: Private IPv4 and private domain name
+    """
+
+    IPv4 = models.GenericIPAddressField(protocol='IPv4', unique=True)
+    IPv6 = models.GenericIPAddressField(protocol='IPv6', unique=True)
+    SSHFP = models.CharField(max_length=250, null=True, blank=True)
+    mws_domain = models.CharField(max_length=250, unique=True)
+
+    IPv4private = models.GenericIPAddressField(protocol='IPv4', unique=True)
+    mws_private_domain = models.CharField(max_length=250, unique=True)
+
+    @classmethod
+    def num_pre_allocated(cls):
+        return cls.objects.filter(site=None).count()
+
+    @classmethod
+    def get_free_config(cls):
+        return cls.objects.filter(site=None).first()
+
+    def __unicode__(self):
+        return self.IPv4 + " - " + self.mws_domain
+
+
 class Site(models.Model):
     # Name of the site
     name = models.CharField(max_length=100, unique=True)
@@ -28,12 +54,15 @@ class Site(models.Model):
     # Administrator users of a site
     users = models.ManyToManyField(User, related_name='sites')
     # SSH only users of a site
-    ssh_users = models.ManyToManyField(User, related_name='+')
+    ssh_users = models.ManyToManyField(User, related_name='sites_auth_as_user')
     # Administrator groups of a site
     groups = models.ManyToManyField(LookupGroup, related_name='sites', null=True, blank=True)
 
     # Indicates if the site is disabled by the user
     disabled = models.BooleanField(default=False)
+
+    # The network configuration for the VMs of this site
+    network_configuration = models.OneToOneField(NetworkConfig, related_name='site')
 
     def __unicode__(self):
         return self.name
@@ -206,39 +235,6 @@ def full_domain_validator(hostname):
             raise ValidationError("Unallowed characters in label '%(label)s'." % {'label': label})
 
 
-class NetworkConfig(models.Model):
-    """ The network configuration for a VM (IPv4, IPv6, and domain name associated
-    """
-    STATUS_CHOICES = (
-        ('public', 'Public'),
-        ('private', 'Private'),
-    )
-
-    IPv4 = models.GenericIPAddressField(protocol='IPv4')
-    IPv6 = models.GenericIPAddressField(protocol='IPv6', blank=True, null=True)
-    SSHFP = models.CharField(max_length=250, null=True, blank=True)
-    mws_domain = models.CharField(max_length=250, unique=True)
-    type = models.CharField(max_length=10, choices=STATUS_CHOICES)
-
-    @classmethod
-    def num_pre_allocated(cls):
-        return cls.objects.filter(virtual_machine=None).count()
-
-    def is_public(self):
-        return self.type == 'public'
-
-    @classmethod
-    def get_free_private_ip(self):
-        return self.objects.filter(virtual_machine=None, type='private').first()
-
-    @classmethod
-    def get_free_public_ip(self):
-        return self.objects.filter(virtual_machine=None, type='public').first()
-
-    def __unicode__(self):
-        return self.IPv4 + " - " + self.mws_domain
-
-
 class VirtualMachine(models.Model):
     """ A virtual machine is associated to a site and has a network configuration. Its attributes include
         a name and a boolean to indicate if it's the primary or secondary VM of a Site.
@@ -255,8 +251,7 @@ class VirtualMachine(models.Model):
     primary = models.BooleanField(default=True)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES)
 
-    network_configuration = models.OneToOneField(NetworkConfig, related_name='virtual_machine')
-    site = models.ForeignKey(Site, related_name='virtual_machines')
+    site = models.ForeignKey(Site, related_name='virtual_machines', null=True)
 
     def is_on(self):
         if self.vm_status_demo.status == 'on':
@@ -288,14 +283,14 @@ class VirtualMachine(models.Model):
         self.vm_status_demo.save()
         return True
         from apimws.platforms import change_vm_power_state
-        return change_vm_power_state(self, 'on')
+        change_vm_power_state(self, 'on')
 
     def power_off(self):
         self.vm_status_demo.status = 'off'
         self.vm_status_demo.save()
         return True
         from apimws.platforms import change_vm_power_state
-        return change_vm_power_state(self, 'off')
+        change_vm_power_state(self, 'off')
 
     def do_reset(self):
         self.vm_status_demo.status = 'off'
@@ -303,6 +298,31 @@ class VirtualMachine(models.Model):
         return True
         from apimws.platforms import reset_vm
         return reset_vm(self)
+
+    @property
+    def ipv4(self):
+        if self.primary:
+            return self.site.network_configuration.IPv4
+        else:
+            return self.site.network_configuration.IPv4private
+
+    @property
+    def sshfp(self):
+        return self.site.network_configuration.SSHFP
+
+    @property
+    def ipv6(self):
+        if self.primary:
+            return self.site.network_configuration.IPv6
+        else:
+            return None
+
+    @property
+    def hostname(self):
+        if self.primary:
+            return self.site.network_configuration.mws_domain
+        else:
+            return self.site.network_configuration.mws_private_domain
 
     def __unicode__(self):
         if self.name is None:
@@ -314,7 +334,7 @@ class VirtualMachine(models.Model):
 class Vhost(models.Model):
     name = models.CharField(max_length=250)
     # main domain name for this vhost
-    main_domain = models.ForeignKey('DomainName', related_name='+', null=True, blank=True)
+    main_domain = models.ForeignKey('DomainName', related_name='+', null=True, blank=True, on_delete=models.SET_NULL)
     vm = models.ForeignKey(VirtualMachine, related_name='vhosts')
 
     def sorted_domain_names(self):
@@ -340,16 +360,17 @@ class DomainName(models.Model):
 
 
 class UnixGroup(models.Model):
-    name = models.CharField(max_length=16) # TODO add validator to comply with Ubuntu guidelines of Unix group names
+    name = models.CharField(max_length=16)  # TODO add validator to comply with Ubuntu guidelines of Unix group names
     vm = models.ForeignKey(VirtualMachine, related_name='unix_groups')
     users = models.ManyToManyField(User)
+
 
 # FORMS
 
 class SiteForm(forms.ModelForm):
     institution_id = forms.ChoiceField(label='The University institution responsible for this site')
-    description = forms.CharField(label='Description for the web server (e.g. Web server for St Botolph\'s College '
-                                        'main website)',
+    description = forms.CharField(label='Description for the MWS (e.g. Web server for St Botolph\'s '
+                                        'College main website)',
                                   widget=forms.Textarea(attrs={'maxlength': 250}),
                                   max_length=250,
                                   required=False)
@@ -363,7 +384,7 @@ class SiteForm(forms.ModelForm):
         model = Site
         fields = ('name', 'description', 'institution_id', 'email')
         labels = {
-            'name': 'A short name for this web server (e.g. St Botolph\'s main site)',
+            'name': 'A short name for this Managed Web Service account (e.g. St Botolph\'s main site)',
             'email': 'The webmaster email (please use a role email when possible)'
         }
 
@@ -373,7 +394,7 @@ class VhostForm(forms.ModelForm):
         model = Vhost
         fields = ('name', )
         labels = {
-            'name': 'Vhost name',
+            'name': 'Web site name',
         }
 
 
@@ -385,7 +406,7 @@ class DomainNameFormNew(forms.ModelForm):
         model = DomainName
         fields = ('name', )
         labels = {
-            'name': 'DomainName',
+            'name': 'Domain Name',
         }
 
 
@@ -437,4 +458,4 @@ class SiteRequestDemo(models.Model):
 class UnixGroupForm(forms.ModelForm):
     class Meta:
         model = UnixGroup
-        fields = ('name', 'users')
+        fields = ('name', )

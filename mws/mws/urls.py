@@ -29,7 +29,9 @@ urlpatterns = patterns('',
     url(r'^vhosts/(?P<vm_id>[0-9]+)/$', 'sitesmanagement.views.vhosts_management'),
     url(r'^vhosts/(?P<vhost_id>[0-9]+)/delete/$', 'sitesmanagement.views.delete_vhost'),
     url(r'^vhosts/(?P<vhost_id>[0-9]+)/certificates/$', 'sitesmanagement.views.certificates'),
+    url(r'^vhosts/(?P<vhost_id>[0-9]+)/generate_csr/$', 'sitesmanagement.views.generate_csr'),
     url(r'^add_domain/(?P<vhost_id>[0-9]+)/$', 'sitesmanagement.views.add_domain'),
+    url(r'^delete_domain/(?P<domain_id>[0-9]+)/$', 'sitesmanagement.views.delete_dn'),
     url(r'^add_vhost/(?P<vm_id>[0-9]+)/$', 'sitesmanagement.views.add_vhost'),
     url(r'^set_dn_as_main/(?P<domain_id>[0-9]+)/$', 'sitesmanagement.views.set_dn_as_main'),
     url(r'^system_packages/(?P<vm_id>[0-9]+)/$', 'sitesmanagement.views.system_packages'),
@@ -43,7 +45,6 @@ urlpatterns = patterns('',
     url(r'^unix_groups/delete/(?P<ug_id>[0-9]+)/$', 'sitesmanagement.views.delete_unix_group'),
 
     # apimws app
-    url(r'^api/confirm_vm/(?P<vm_id>[0-9]+)/$', 'apimws.views.confirm_vm'),
     url(r'^api/confirm_dns/(?P<dn_id>[0-9]+)/$', 'apimws.views.confirm_dns'),
     url(r'^api/finance/billing/(?P<year>20[0-9]{2})/$', 'apimws.views.billing_year'),
     url(r'^confirm_email/(?P<ec_id>[0-9]+)/(?P<token>(\w|\-)+)/$', 'apimws.views.confirm_email'),
@@ -55,5 +56,7 @@ urlpatterns = patterns('',
     # mwsauth app
     url(r'^auth/(?P<site_id>[0-9]+)/$', 'mwsauth.views.auth_change'),
 
+    # user panel
+    url(r'^user_panel/$', 'mwsauth.views.user_panel'),
 
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

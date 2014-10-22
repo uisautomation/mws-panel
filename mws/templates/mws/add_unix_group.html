@@ -9,9 +9,18 @@
                     {% csrf_token %}
                     <div id="unix_group_form">
                         {{ unix_group_form.as_p }}
+                        <p>
+                            Users:<br/>
+                            <input id="input-lookup-users-ajax" name="unix_users">
+                        </p>
                     </div>
                     <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
                 </fieldset>
+            </form>
         </div>
     </div>
+{% endblock %}
+
+{% block campl_foot_js %}
+    {% include 'ucamlookup_users.html' with input_tag_id="input-lookup-users-ajax" multiple="true" user_list="unix_users" %}
 {% endblock %}

@@ -12,6 +12,13 @@
 
 {% block head_title %}Managed Web Service administration site{% endblock %}
 
+{% block all_breadcrumbs %}
+    {{ block.super }}
+    <p style="color: white; text-align: right;">
+        Welcome <a href="{% url 'mwsauth.views.user_panel' %}">{{ request.user.last_name }} ({{ request.user.username }})</a>
+    </p>
+{% endblock %}
+
 {% block static_breadcrumbs %}
     {# My parent organisation #}
     <li>

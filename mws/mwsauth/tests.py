@@ -38,9 +38,9 @@ LSxbGuFG9yfPFIqaSntlYMxKKB5ba/tIAMzyAOHxdEM5hi1DXRsOok3ElWjOw9oN
 wOq24EIbX5LquL9w+uvnfXw=
 -----END CERTIFICATE-----"""}):
         self.client.get(reverse('raven_return'),
-                        {'WLS-Response': create_wls_response(
-                            raven_url=settings.UCAMWEBAUTH_RETURN_URL,
-                            raven_principal=user)})
+                        {'WLS-Response': create_wls_response(raven_issue=datetime.utcnow().strftime('%Y%m%dT%H%M%SZ'),
+                                                             raven_url=settings.UCAMWEBAUTH_RETURN_URL,
+                                                             raven_principal=user)})
         self.assertIn('_auth_user_id', self.client.session)
 
 
@@ -134,11 +134,13 @@ class AuthTestCases(TestCase):
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': 1}))
         self.assertEqual(response.status_code, 404)  # Site does not exists
 
-        site_without_auth_users = Site.objects.create(name="test_site1", start_date=datetime.today())
-        VirtualMachine.objects.create(primary=True, status='requested', site=site_without_auth_users,
-                                      network_configuration=NetworkConfig.objects.create(IPv4="1.1.1.1",
-                                                                                         IPv6="::ffff:1.1.1.1",
-                                                                                         mws_domain="1.mws.cam.ac.uk"))
+        netconf = NetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
+                                               IPv4private='172.28.18.255',
+                                               mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
+                                               mws_domain="mws-12940.mws3.csx.cam.ac.uk")
+        site_without_auth_users = Site.objects.create(name="test_site1", start_date=datetime.today(),
+                                                      network_configuration=netconf)
+        VirtualMachine.objects.create(primary=True, status='requested', site=site_without_auth_users)
 
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_without_auth_users.id}))
         self.assertEqual(response.status_code, 403)  # User is not authorised
@@ -147,19 +149,22 @@ class AuthTestCases(TestCase):
         site_with_auth_users = site_without_auth_users
 
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_with_auth_users.id}))
-        self.assertContains(response, "amc203", status_code=200)  # User is authorised
+        self.assertContains(response, 'crsid: "amc203"', status_code=200)  # User is authorised
 
-        site_with_auth_groups = Site.objects.create(name="test_site2", start_date=datetime.today())
+        netconf2 = NetworkConfig.objects.create(IPv4='131.111.58.254', IPv6='2001:630:212:8::8c:254',
+                                                IPv4private='172.28.18.254',
+                                                mws_private_domain='mws-23169.mws3.csx.private.ca.ac.uk',
+                                                mws_domain="mws-39595.mws3.csx.cam.ac.uk")
+
+        site_with_auth_groups = Site.objects.create(name="test_site2", start_date=datetime.today(),
+                                                    network_configuration=netconf2)
         information_systems_group = get_or_create_group_by_groupid(101888)
         site_with_auth_groups.groups.add(information_systems_group)
-        VirtualMachine.objects.create(primary=True, status='requested', site=site_with_auth_groups,
-                                      network_configuration=NetworkConfig.objects.create(IPv4="1.1.1.2",
-                                                                                         IPv6="::ffff:1.1.1.2",
-                                                                                         mws_domain="2.mws.cam.ac.uk"))
+        VirtualMachine.objects.create(primary=True, status='requested', site=site_with_auth_groups)
 
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_with_auth_groups.id}))
         self.assertContains(response, "101888", status_code=200)  # User is in an authorised group
-        self.assertNotContains(response, "amc203", status_code=200)
+        self.assertNotContains(response, 'crsid: "amc203"', status_code=200)
 
         suspension = Suspension.objects.create(reason="test_suspension", site=site_with_auth_users,
                                                start_date=datetime.today())
