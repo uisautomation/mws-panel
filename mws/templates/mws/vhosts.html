@@ -5,40 +5,45 @@
         <div class="campl-content-container">
 
             <h1>Web sites for the MWS "{{ vm.site.name }}"</h1>
-            <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
-                <thead>
-                    <tr>
-                        <th>Web sites</th>
-                        <th>Domain Names associated</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for vhost in vm.vhosts.all %}
-                    <tr>
-                        <td>
-                            {{ vhost.name }}
-                        </td>
-                        <td>
-                            {% for domain_name in vhost.sorted_domain_names %}
-                                {{ domain_name.name }},
-                            {% endfor %}
-                        </td>
-                        <td style="width: 160px;">
-                            <a href="{% url 'sitesmanagement.views.domains_management' vhost_id=vhost.id %}">
-                                <i title="Domains associated to this vhost" class="fa fa-link fa-2x"></i>
-                            </a>
-                            <a href="{% url 'sitesmanagement.views.certificates' vhost_id=vhost.id %}">
-                                <i title="TLS/SSL" class="fa fa-lock fa-2x"></i>
-                            </a>
-                            <a class="delete_vhost" data-toggle="confirmation" data-href="javascript:delete_vhost('{% url 'sitesmanagement.views.delete_vhost' vhost_id=vhost.id %}')" href="#">
-                                <i title="Delete" class="fa fa-trash-o fa-2x"></i>
-                            </a>
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+
+            {% if vm.vhosts.all %}
+                <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
+                    <thead>
+                        <tr>
+                            <th>Web sites</th>
+                            <th>Domain Names associated</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for vhost in vm.vhosts.all %}
+                        <tr>
+                            <td>
+                                {{ vhost.name }}
+                            </td>
+                            <td>
+                                {% for domain_name in vhost.sorted_domain_names %}
+                                    {{ domain_name.name }},
+                                {% endfor %}
+                            </td>
+                            <td style="width: 160px;">
+                                <a href="{% url 'sitesmanagement.views.domains_management' vhost_id=vhost.id %}">
+                                    <i title="Domains associated to this vhost" class="fa fa-link fa-2x"></i>
+                                </a>
+                                <a href="{% url 'sitesmanagement.views.certificates' vhost_id=vhost.id %}">
+                                    <i title="TLS/SSL" class="fa fa-lock fa-2x"></i>
+                                </a>
+                                <a class="delete_vhost" data-toggle="confirmation" data-href="javascript:delete_vhost('{% url 'sitesmanagement.views.delete_vhost' vhost_id=vhost.id %}')" href="#">
+                                    <i title="Delete" class="fa fa-trash-o fa-2x"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p style="margin-top: 20px; margin-bottom: 20px">The server doesn't have web sites configured</p>
+            {% endif %}
 
             <p><a id="add_vhost_button" href="#" class="campl-primary-cta">Add a new Web site</a></p>
 

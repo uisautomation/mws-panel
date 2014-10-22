@@ -6,35 +6,40 @@
         <div class="campl-content-container">
 
             <h1>Unix groups for the site "{{ vm.site.name }}"</h1>
-            <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
-                <thead>
-                    <tr>
-                        <th>Unix group name</th>
-                        <th>Users</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for unix_group in vm.unix_groups.all %}
-                    <tr>
-                        <td>
-                            {{ unix_group.name }}
-                        </td>
-                        <td>
-                            {{ unix_group.users.all|join:", " }}
-                        </td>
-                        <td style="width: 160px;">
-                            <a href="{% url 'sitesmanagement.views.unix_group' ug_id=unix_group.id %}">
-                                <i title="Users in this group" class="fa fa-group fa-2x"></i>
-                            </a>
-                            <a class="delete_vhost" data-toggle="confirmation" data-href="javascript:delete_unix_group('{% url 'sitesmanagement.views.delete_unix_group' ug_id=unix_group.id %}')" href="#">
-                                <i title="Delete" class="fa fa-trash-o fa-2x"></i>
-                            </a>
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+
+            {% if vm.unix_groups.all %}
+                <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
+                    <thead>
+                        <tr>
+                            <th>Unix group name</th>
+                            <th>Users</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for unix_group in vm.unix_groups.all %}
+                        <tr>
+                            <td>
+                                {{ unix_group.name }}
+                            </td>
+                            <td>
+                                {{ unix_group.users.all|join:", " }}
+                            </td>
+                            <td style="width: 160px;">
+                                <a href="{% url 'sitesmanagement.views.unix_group' ug_id=unix_group.id %}">
+                                    <i title="Users in this group" class="fa fa-group fa-2x"></i>
+                                </a>
+                                <a class="delete_vhost" data-toggle="confirmation" data-href="javascript:delete_unix_group('{% url 'sitesmanagement.views.delete_unix_group' ug_id=unix_group.id %}')" href="#">
+                                    <i title="Delete" class="fa fa-trash-o fa-2x"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p style="margin-top: 20px; margin-bottom: 20px">The server doesn't have Unix Groups configured</p>
+            {% endif %}
 
         <p><a href="{% url 'sitesmanagement.views.add_unix_group' vm_id=vm.id %}" class="campl-primary-cta">Add a new Unix Group</a></p>
 

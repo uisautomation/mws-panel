@@ -4,38 +4,43 @@
         <div class="campl-content-container">
 
             <h1>Domain Names for the web site "{{ vhost.name }}" of the MWS "{{ vhost.vm.site.name }}"</h1>
-            <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
-                <thead>
-                    <tr>
-                        <th>Domain Name</th>
-                        <th>Status</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for domain in vhost.domain_names.all %}
-                    <tr>
-                        <td>
-                            {{ domain.name }}
-                            {% if domain == vhost.main_domain %}
-                                <br/>This is the current main domain
-                            {% endif %}
-                        </td>
-                        <td>
-                            {{ domain.get_status_display }}
-                        </td>
-                        <td style="width: 135px;">
-                            <a href="#" onclick="javascript:ajax_call('{% url 'sitesmanagement.views.set_dn_as_main' domain_id=domain.id %}', 'POST')">
-                                Set as Master
-                            </a>
-                            <a class="delete_vhost" data-toggle="confirmation" data-href="javascript:ajax_call('{% url 'sitesmanagement.views.delete_dn' domain_id=domain.id %}', 'DELETE')" href="#">
-                                <i title="Delete" class="fa fa-trash-o fa-2x"></i>
-                            </a>
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+
+            {% if vhost.domain_names.all %}
+                <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
+                    <thead>
+                        <tr>
+                            <th>Domain Name</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for domain in vhost.domain_names.all %}
+                        <tr>
+                            <td>
+                                {{ domain.name }}
+                                {% if domain == vhost.main_domain %}
+                                    <br/>This is the current main domain
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ domain.get_status_display }}
+                            </td>
+                            <td style="width: 135px;">
+                                <a href="#" onclick="javascript:ajax_call('{% url 'sitesmanagement.views.set_dn_as_main' domain_id=domain.id %}', 'POST')">
+                                    Set as Master
+                                </a>
+                                <a class="delete_vhost" data-toggle="confirmation" data-href="javascript:ajax_call('{% url 'sitesmanagement.views.delete_dn' domain_id=domain.id %}', 'DELETE')" href="#">
+                                    <i title="Delete" class="fa fa-trash-o fa-2x"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p style="margin-top: 20px; margin-bottom: 20px">The server doesn't have web sites configured</p>
+            {% endif %}
 
             <p><a id="add_domain_button" href="#" class="campl-primary-cta">Add a new domain</a></p>
 
