@@ -14,4 +14,8 @@ class AnsibleConfiguration(models.Model):
 
 @receiver(pre_delete, sender=VirtualMachine)
 def api_call_to_delete_vm(instance, **kwargs):
-    destroy_vm.delay(instance)
+    if instance.name:
+        if instance.site:
+            destroy_vm.delay(instance)
+        else:
+            destroy_vm(instance)

@@ -250,7 +250,7 @@ class VirtualMachine(models.Model):
     primary = models.BooleanField(default=True)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES)
 
-    site = models.ForeignKey(Site, related_name='virtual_machines')
+    site = models.ForeignKey(Site, related_name='virtual_machines', null=True)
 
     def is_on(self):
         from apimws.platforms import get_vm_power_state

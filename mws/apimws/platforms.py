@@ -39,7 +39,7 @@ def on_vm_api_failure(request, response):
         from_email = settings.EMAIL_MWS3_SUPPORT
         recipient_list = (settings.EMAIL_MWS3_SUPPORT, )
         send_mail(subject, message, from_email, recipient_list, fail_silently=False)
-        return False # TODO raise exception?
+        return False # TODO raise exception? and log it in the logger
 
 
 class TaskWithFailure(Task):
@@ -52,7 +52,7 @@ class TaskWithFailure(Task):
                   "The traceback is: \n %s" % (task_id, args, einfo)
         from_email = settings.EMAIL_MWS3_SUPPORT
         recipient_list = (settings.EMAIL_MWS3_SUPPORT, )
-        send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+        send_mail(subject, message, from_email, recipient_list, fail_silently=False) # TODO raise exception? and log it in the logger
 
 
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
@@ -203,28 +203,37 @@ def destroy_vm(vm):
 
 
 def clone_vm(site, primary_vm):
+    delete_vm = None
+
     if primary_vm:
         original_vm = site.primary_vm
         if site.secondary_vm:
-            site.secondary_vm.delete()
+            delete_vm = site.secondary_vm
     else:
         original_vm = site.secondary_vm
         if site.primary_vm:
-            site.primary_vm.delete()
+            delete_vm = site.primary_vm
+
+    if delete_vm:
+        delete_vm.site = None
+        delete_vm.save()
 
     destination_vm = VirtualMachine.objects.create(primary=(not primary_vm), status='requested', site=site)
-    clone_vm_api_call.delay(original_vm, destination_vm)
+    clone_vm_api_call.delay(original_vm, destination_vm, delete_vm)
 
 
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
-def clone_vm_api_call(orignal_vm, destiantion_vm):
+def clone_vm_api_call(orignal_vm, destination_vm, delete_vm):
+    if delete_vm:
+        delete_vm.delete()
+
     json_object = {
         'username': get_api_username(),
         'secret': get_api_secret(),
         'command': 'clone',
         'vmid': orignal_vm.name,
-        'ip': destiantion_vm.ipv4,
-        'hostname': destiantion_vm.hostname,
+        'ip': destination_vm.ipv4,
+        'hostname': destination_vm.hostname,
     }
     headers = {'Content-type': 'application/json'}
     try:
@@ -234,9 +243,9 @@ def clone_vm_api_call(orignal_vm, destiantion_vm):
         raise clone_vm_api_call.retry(exc=e)
 
     if response['result'] == 'Success':
-        destiantion_vm.name = response['vmid']
-        destiantion_vm.status = 'ready'
-        destiantion_vm.save()
+        destination_vm.name = response['vmid']
+        destination_vm.status = 'ready'
+        destination_vm.save()
         return True
     else:
         return on_vm_api_failure(json.dumps(json_object), response)
