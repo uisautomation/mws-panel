@@ -149,7 +149,7 @@ class AuthTestCases(TestCase):
         site_with_auth_users = site_without_auth_users
 
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_with_auth_users.id}))
-        self.assertContains(response, "amc203", status_code=200)  # User is authorised
+        self.assertContains(response, 'crsid: "amc203"', status_code=200)  # User is authorised
 
         netconf2 = NetworkConfig.objects.create(IPv4='131.111.58.254', IPv6='2001:630:212:8::8c:254',
                                                 IPv4private='172.28.18.254',
@@ -164,7 +164,7 @@ class AuthTestCases(TestCase):
 
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_with_auth_groups.id}))
         self.assertContains(response, "101888", status_code=200)  # User is in an authorised group
-        self.assertNotContains(response, "amc203", status_code=200)
+        self.assertNotContains(response, 'crsid: "amc203"', status_code=200)
 
         suspension = Suspension.objects.create(reason="test_suspension", site=site_with_auth_users,
                                                start_date=datetime.today())
