@@ -18,6 +18,10 @@
                         Administrators groups:<br/>
                         <input id="input-lookup-groups-ajax" name="groupids">
                     </p>
+                    <p>
+                        SSH-only groups:<br/>
+                        <input id="input-lookup-sshgroups-ajax" name="sshgroupids">
+                    </p>
                     <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
                 </fieldset>
             </form>
@@ -29,4 +33,5 @@
     {% include 'ucamlookup_users.html' with input_tag_id="input-lookup-users-ajax" multiple="true" user_list="authorised_users" %}
     {% include 'ucamlookup_users.html' with input_tag_id="input-lookup-sshusers-ajax" multiple="true" user_list="sshuserlist" %}
     {% include 'ucamlookup_groups.html' with input_tag_id="input-lookup-groups-ajax" multiple="true" group_list="authorised_groups" %}
+    {% include 'ucamlookup_groups.html' with input_tag_id="input-lookup-sshgroups-ajax" multiple="true" group_list="sshusers_groups" %}
 {% endblock %}
