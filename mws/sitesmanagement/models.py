@@ -49,7 +49,7 @@ class Site(models.Model):
     # is the site deleted?
     deleted = models.BooleanField(default=False)
     # webmaster email
-    email = models.EmailField(null=True, blank=True)
+    email = models.EmailField(null=False, blank=False)
 
     # Administrator users of a site
     users = models.ManyToManyField(User, related_name='sites')
