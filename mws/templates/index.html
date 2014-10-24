@@ -37,6 +37,8 @@
                             <th>Name</th>
                             <th>Description</th>
                             <th>Domain Name</th>
+                            <th>Production server</th>
+                            <th>Test server</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -61,7 +63,22 @@
                                         {{ domain.name }}<br/>
                                     {% endfor %}
                                 </td>
-                                <td style="width: 35px;">
+                                <td>
+                                    {% if site.primary_vm %}
+                                        IPv4: {{ site.primary_vm.ipv4 }}<br/>
+                                        IPv6: {{ site.primary_vm.ipv6 }}<br/>
+                                        hostname: {{ site.primary_vm.hostname }}<br/>
+                                        hostkey fingerprint: {{ site.primary_vm.sshfp }}<br/>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if site.secondary_vm %}
+                                        IPv4: {{ site.secondary_vm.ipv4 }}<br/>
+                                        hostname: {{ site.secondary_vm.hostname }}<br/>
+                                        hostkey fingerprint: {{ site.secondary_vm.sshfp }}<br/>
+                                    {% endif %}
+                                </td>
+                                <td style="width: 30px; padding-left: 0px; padding-right: 0px;">
                                     {% if not site.is_admin_suspended %}
                                         <a href="{% url 'sitesmanagement.views.show' site_id=site.id %}">
                                             <i title="Details of your site" class="fa fa-angle-double-right fa-2x"></i>
@@ -132,8 +149,8 @@
                             <tr>
                                 <th>Name</th>
                                 <th>Description</th>
-                                <th>Primary VM</th>
-                                <th>Secondary VM</th>
+                                <th>Production server</th>
+                                <th>Test server</th>
                             </tr>
                         </thead>
                         <tbody>
