@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('ucamlookup', '0001_initial'),
-        ('sitesmanagement', '0012_auto_20141022_1217'),
+        ('sitesmanagement', '0008_auto_20141022_1456'),
     ]
 
     operations = [
@@ -17,5 +17,10 @@ class Migration(migrations.Migration):
             name='ssh_groups',
             field=models.ManyToManyField(related_name=b'sites_auth_as_user', null=True, to='ucamlookup.LookupGroup', blank=True),
             preserve_default=True,
+        ),
+        migrations.AlterField(
+            model_name='site',
+            name='email',
+            field=models.EmailField(max_length=75),
         ),
     ]
