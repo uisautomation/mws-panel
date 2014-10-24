@@ -7,7 +7,8 @@ from django import forms
 
 class MWSUser(models.Model):
     ssh_public_key = models.TextField()
-    user = models.OneToOneField(User, related_name='mws_user')
+    uid = models.IntegerField()
+    user = models.OneToOneField(User, to_field='username', related_name='mws_user')
 
 
 class MWSUserForm(forms.ModelForm):
