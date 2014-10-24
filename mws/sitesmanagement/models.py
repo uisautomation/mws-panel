@@ -49,7 +49,7 @@ class Site(models.Model):
     # is the site deleted?
     deleted = models.BooleanField(default=False)
     # webmaster email
-    email = models.EmailField(null=True, blank=True)
+    email = models.EmailField(null=False, blank=False)
 
     # Administrator users of a site
     users = models.ManyToManyField(User, related_name='sites')
@@ -57,6 +57,8 @@ class Site(models.Model):
     ssh_users = models.ManyToManyField(User, related_name='sites_auth_as_user')
     # Administrator groups of a site
     groups = models.ManyToManyField(LookupGroup, related_name='sites', null=True, blank=True)
+    # SSH only groups
+    ssh_groups = models.ManyToManyField(LookupGroup, related_name='sites_auth_as_user', null=True, blank=True)
 
     # Indicates if the site is disabled by the user
     disabled = models.BooleanField(default=False)

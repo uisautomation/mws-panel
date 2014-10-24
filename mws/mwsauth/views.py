@@ -19,13 +19,15 @@ def auth_change(request, site_id):
     lookup_lists = {
         'authorised_users': site.users.all(),
         'sshuserlist': site.ssh_users.all(),
-        'authorised_groups': site.groups.all()
+        'authorised_groups': site.groups.all(),
+        'sshusers_groups': site.ssh_groups.all()
     }
 
     if request.method == 'POST':
         authuserlist = validate_crsids(request.POST.get('users_crsids'))
         sshuserlist = validate_crsids(request.POST.get('sshusers_crsids'))
         authgrouplist = validate_groupids(request.POST.get('groupids'))
+        sshauthgrouplist = validate_groupids(request.POST.get('sshgroupids'))
         # TODO If there are no users in the list return an Exception? No users authorised but maybe a group currently a
         # ValidationError is raised in validate_groupids
         site.users.clear()
@@ -34,6 +36,8 @@ def auth_change(request, site_id):
         site.ssh_users.add(*sshuserlist)
         site.groups.clear()
         site.groups.add(*authgrouplist)
+        site.ssh_groups.clear()
+        site.ssh_groups.add(*sshauthgrouplist)
         launch_ansible(site)  # to add or delete users from the ssh/login auth list of the server
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 

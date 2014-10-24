@@ -1,9 +1,11 @@
 from __future__ import absolute_import
+import subprocess
 from celery import shared_task
 from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
 from apimws.platforms import TaskWithFailure
+from mwsauth.models import MWSUser
 from sitesmanagement.models import EmailConfirmation
 import uuid
 
@@ -34,6 +36,29 @@ def email_confirmation(site):
     from_email = "mws3-support@cam.ac.uk"
     recipient_list = (site.email, )
     send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+
+
+def extract_crsid_and_uuid(text_to_be_parsed):
+    text_parsed = text_to_be_parsed.split(',')
+    crsid = text_parsed[0].lower().lower()
+    uid = int(text_parsed[2])
+
+    try:
+        MWSUser.objects.get(user_id=crsid)
+    except MWSUser.DoesNotExist:
+        MWSUser.objects.create(user_id=crsid, uid=uid)
+
+    return (crsid, uid)
+
+
+def jackdaw_api():
+    jackdaw_response = subprocess.check_output(["ssh", "root@boarstall", "ssh", "mwsv3@jackdaw.csi.cam.ac.uk", "test",
+                                                "get_people"])
+    jackdaw_response_parsed = jackdaw_response.splitlines()
+    if jackdaw_response_parsed.pop(0) != "Databae:jdawtest":
+        return False # TODO Raise a custom exception
+    jackdaw_response_parsed = map(extract_crsid_and_uuid, jackdaw_response_parsed)
+    return jackdaw_response_parsed  # TODO remove those users that are no longer in Jackdaw
 
 
 def launch_ansible(site):
