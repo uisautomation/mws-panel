@@ -60,7 +60,8 @@ def user_panel(request):
     }
 
     if request.method == 'POST':
-        mws_user_form = MWSUserForm(request.POST)
+        mws_user_form = MWSUserForm(request.POST, instance=request.user.mws_user) if hasattr(request.user, 'mws_user') \
+            else MWSUserForm(request.POST)
         if mws_user_form.is_valid():
             mws_user = mws_user_form.save(commit=False)
             mws_user.user = request.user
