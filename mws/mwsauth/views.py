@@ -2,11 +2,12 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, redirect
+from ucamlookup import validate_crsids
 from apimws.utils import launch_ansible
 from mwsauth.models import MWSUserForm
 from mwsauth.utils import privileges_check
 from sitesmanagement.views import show, index
-from mwsauth.validators import validate_crsids, validate_groupids
+from mwsauth.validators import validate_groupids
 
 
 @login_required
