@@ -11,17 +11,23 @@ def extract_crsid_and_uuid(text_to_be_parsed):
         return crsid  # TODO temporal workaround for jackdaw users without uid
     uid = int(text_parsed[2])
     MWSUser.objects.update_or_create(user_id=crsid, uid=uid) # Assumption that the uid is never going to change in jackdaw
+    # TODO if we let users enter to MWS site if they are not in jackdaw change to get_or_create
     return crsid
+
+
+def deactive_this_user(user_crsid):
+    User.objects.filter(username=user_crsid).update(is_active=False)
+    MWSUser.objects.filter(user_id=user_crsid).delete()
 
 
 def deactivate_users(list_of_users_crsid_from_jackdaw):
     all_users_crsid = User.objects.values_list('username', flat=True)
-    deactive_this_users_crsid = filter(lambda user: user not in all_users_crsid, list_of_users_crsid_from_jackdaw)
-    map(lambda crsid: User.objects.filter(username=crsid).update(is_active=False), deactive_this_users_crsid)
+    deactive_these_users_crsid = filter(lambda user: user not in all_users_crsid, list_of_users_crsid_from_jackdaw)
+    map(deactive_this_user, deactive_these_users_crsid)
 
 
 def reactivate_this_user(user_crsid):
-    User.objects.filter(username=user_crsid).update(is_active=True)  # TODO look for sites suspended that this user had
+    User.objects.filter(username=user_crsid).update(is_active=True)
 
 
 def reactivate_users(list_of_users_crsid_from_jackdaw):
