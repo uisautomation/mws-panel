@@ -3,7 +3,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, redirect
 from ucamlookup import validate_crsids
-from apimws.utils import launch_ansible
+from apimws.utils import launch_ansible_site
 from mwsauth.models import MWSUserForm
 from mwsauth.utils import privileges_check
 from sitesmanagement.views import show, index
@@ -39,7 +39,7 @@ def auth_change(request, site_id):
         site.groups.add(*authgrouplist)
         site.ssh_groups.clear()
         site.ssh_groups.add(*sshauthgrouplist)
-        launch_ansible(site)  # to add or delete users from the ssh/login auth list of the server
+        launch_ansible_site(site)  # to add or delete users from the ssh/login auth list of the server
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {

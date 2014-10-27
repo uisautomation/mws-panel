@@ -355,7 +355,7 @@ def add_vhost(request, vm_id):
             vhost = vhost_form.save(commit=False)
             vhost.vm = vm
             vhost.save()
-            launch_ansible(site)  # to create a new vhost configuration file
+            launch_ansible(vm)  # to create a new vhost configuration file
 
     return redirect(reverse('sitesmanagement.views.vhosts_management', kwargs={'vm_id': vm.id}))
 
@@ -433,7 +433,7 @@ def system_packages(request, vm_id):
                 AnsibleConfiguration.objects.create(vm=vm, key="System Packages",
                                                     value=",".join(
                                                         system_packages_form.cleaned_data.get('system_packages')))
-            launch_ansible(site)  # to install or delete new/old packages selected by the user
+            launch_ansible(vm)  # to install or delete new/old packages selected by the user
             return HttpResponseRedirect(reverse('sitesmanagement.views.show',
                                                 kwargs={'site_id': site.id}))
     else:
@@ -509,7 +509,7 @@ def add_unix_group(request, vm_id):
             # TODO If there are no users in the list return an Exception?
             unix_group.users.add(*unix_users)
 
-            launch_ansible(site)  # to apply these changes to the vm
+            launch_ansible(vm)  # to apply these changes to the vm
             return HttpResponseRedirect(reverse(unix_groups, kwargs={'vm_id': vm.id}))
     else:
         unix_group_form = UnixGroupForm()
@@ -574,7 +574,7 @@ def unix_group(request, ug_id):
             unix_group_i.users.clear()
             unix_group_i.users.add(*unix_users)
 
-            launch_ansible(site)  # to apply these changes to the vm
+            launch_ansible(unix_group_i.vm)  # to apply these changes to the vm
             return HttpResponseRedirect(reverse(unix_groups, kwargs={'vm_id': unix_group_i.vm.id}))
     else:
         unix_group_form = UnixGroupForm(instance=unix_group_i)
@@ -599,7 +599,7 @@ def delete_unix_group(request, ug_id):
 
     if request.method == 'DELETE':
         unix_group.delete()
-        launch_ansible(site)
+        launch_ansible(unix_group.vm)
         return redirect(unix_groups, vm_id=unix_group.vm.id)
 
     return HttpResponseForbidden()
@@ -651,7 +651,7 @@ def delete_vhost(request, vhost_id):
 
     if request.method == 'DELETE':
         vhost.delete()
-        launch_ansible(site)
+        launch_ansible(vhost.vm)
         return redirect(show, site_id=site.id)
 
     return HttpResponseForbidden()
@@ -709,7 +709,7 @@ def add_domain(request, vhost_id, socket_error=None):
                     if vhost.main_domain is None:
                         vhost.main_domain = new_domain
                         vhost.save()
-                launch_ansible(site)  # to add the new domain name to the vhost apache configuration
+                launch_ansible(vhost.vm)  # to add the new domain name to the vhost apache configuration
 
     return redirect(reverse('sitesmanagement.views.domains_management', kwargs={'vhost_id': vhost.id}))
 
@@ -764,7 +764,7 @@ def generate_csr(request, vhost_id):
                 'site': site,
                 'error_main_domain': True
             })
-        launch_ansible(site) # with a task to create the CSR
+        launch_ansible(vhost.vm) # with a task to create the CSR
         # include all domain names in the common name field in the CSR
         # country is always GB
         # all other parameters/fields are optional and won't appear in the certificate, just ignore them.
@@ -788,7 +788,7 @@ def set_dn_as_main(request, domain_id):
     if request.method == 'POST':
         vhost.main_domain = domain
         vhost.save()
-        launch_ansible(site)  # to update the vhost main domain name in the apache configuration
+        launch_ansible(vhost.vm)  # to update the vhost main domain name in the apache configuration
 
     return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management', kwargs={'vhost_id': vhost.id}))
 
@@ -807,7 +807,7 @@ def delete_dn(request, domain_id):
 
     if request.method == 'DELETE':
         domain.delete()
-        launch_ansible(site)
+        launch_ansible(vhost.vm)
         return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management', kwargs={'vhost_id': vhost.id}))
 
     return HttpResponseForbidden()

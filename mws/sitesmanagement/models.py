@@ -265,6 +265,7 @@ class VirtualMachine(models.Model):
         ('accepted', 'Accepted'),
         ('denied', 'Denied'),
         ('ansible', 'Running Ansible'),
+        ('ansible_queued', 'Ansible queued'),
         ('ready', 'Ready'),
     )
 
