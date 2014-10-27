@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from ucamlookup import user_in_groups
+from ucamlookup import user_in_groups, get_or_create_user_by_crsid, GroupMethods, conn
 from ucamlookup.models import LookupGroup
 
 
@@ -31,3 +31,14 @@ def privileges_check(site_id, user):
         return None
 
     return site
+
+
+# TODO move this function to django-ucam-lookup
+def get_users_of_a_group(group):
+    """ Returns the list of users of a LookupGroup
+    :param group: The LookupGroup
+    :return: the list of Users
+    """
+
+    return map(lambda user: get_or_create_user_by_crsid(user.identifier.value),
+               GroupMethods(conn).getMembers(groupid=group.lookup_id))
