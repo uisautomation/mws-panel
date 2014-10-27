@@ -193,6 +193,13 @@ class Site(models.Model):
         final_list_of_ssh_users = list(set(list_of_ssh_users_in_lookup_groups + list_of_ssh_users_directly_assigned))
         return [item for item in final_list_of_ssh_users if item not in self.list_of_admins()]
 
+    def list_of_all_type_of_users(self):
+        list_of_ssh_users_in_lookup_groups = list(chain.from_iterable(map(get_users_of_a_group, self.ssh_groups.all())))
+        list_of_ssh_users_directly_assigned = list(self.ssh_users.all())
+        final_list_of_ssh_users = list_of_ssh_users_in_lookup_groups + list_of_ssh_users_directly_assigned
+        final_list_of_all_type_of_users = final_list_of_ssh_users + self.list_of_admins()
+        return list(set(final_list_of_all_type_of_users))
+
 
 class EmailConfirmation(models.Model):
     STATUS_CHOICES = (
