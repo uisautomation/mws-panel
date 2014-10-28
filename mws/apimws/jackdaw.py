@@ -17,6 +17,7 @@ def extract_crsid_and_uuid(text_to_be_parsed):
 
 def deactive_this_user(user_crsid):
     User.objects.filter(username=user_crsid).update(is_active=False)
+    # TODO pass to ansible the uid of the user so it can delete this user
     MWSUser.objects.filter(user_id=user_crsid).delete()
 
 
@@ -39,8 +40,8 @@ def reactivate_users(list_of_users_crsid_from_jackdaw):
 
 @shared_task()
 def jackdaw_api():
-    jackdaw_response = subprocess.check_output(["ssh", "root@boarstall", "ssh", "mwsv3@jackdaw.csi.cam.ac.uk", "test",
-                                                "get_people"])
+    jackdaw_response = subprocess.check_output(["ssh", "root@boarstall", "ssh", "-xa", "mwsv3@jackdaw.csi.cam.ac.uk",
+                                                "test", "get_people"])
     jackdaw_response_parsed = jackdaw_response.splitlines()
     if jackdaw_response_parsed.pop(0) != "Databae:jdawtest":
         return False # TODO Raise a custom exception
