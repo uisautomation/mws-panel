@@ -48,6 +48,7 @@ def launch_ansible(vm):
     elif vm.status == 'ansible':
         vm.status = 'ansible_queued'
         vm.save()
+        launch_ansible_async.delay(vm)
     else:
         raise UnexpectedVMStatus()
 
