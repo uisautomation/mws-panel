@@ -6,7 +6,10 @@
             <div class="campl-content-container"></div>
         </div>
 
+
         <div class="view-content">
+
+            {% if warning_messages %}
             <div class="campl-column12">
                 <div class="campl-content-container campl-side-padding">
                     <article class="node node-external-link view-mode-focus_on clearfix campl-horizontal-teaser
@@ -24,6 +27,7 @@
                     </article>
                 </div>
             </div>
+            {% endif %}
 
         {% if not site.primary_vm.is_busy %}
 
