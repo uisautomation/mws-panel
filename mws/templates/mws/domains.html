@@ -31,7 +31,7 @@
                                     Set as Master
                                 </a>
                                 <a class="delete_vhost" data-toggle="confirmation" data-href="javascript:ajax_call('{% url 'sitesmanagement.views.delete_dn' domain_id=domain.id %}', 'DELETE')" href="#">
-                                    <i title="Delete" class="fa fa-trash-o fa-2x"></i>
+                                    <i title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i>
                                 </a>
                             </td>
                         </tr>
@@ -95,9 +95,10 @@
 
         $(document).ready(function() {
             $('[data-toggle="confirmation"]').confirmation({singleton:true, popout:true, placement:'top'});
+            $('[data-toggle="tooltip"]').tooltip({'placement': 'top'});
             $('#add_domain_button').click(function() {
                 $('#add_domain_div').show("fast")
-            })
+            });
         })
     </script>
 {% endblock %}
