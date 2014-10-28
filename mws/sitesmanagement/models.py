@@ -284,7 +284,7 @@ class VirtualMachine(models.Model):
 
     @property
     def is_busy(self):
-        if self.status != 'ready' and self.status != 'ansible':
+        if self.status != 'ready' and self.status != 'ansible' and self.status != 'ansible_queued':
             return True
         else:
             return False

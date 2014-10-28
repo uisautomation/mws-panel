@@ -107,4 +107,4 @@ UCAMWEBAUTH_TIMEOUT = 30
 UCAMWEBAUTH_LOGOUT_REDIRECT = 'http://www.cam.ac.uk/'
 
 STRONGHOLD_PUBLIC_NAMED_URLS = ('raven_login', 'raven_return')
-CELERY_ACCEPT_CONTENT = ['json']
+#CELERY_ACCEPT_CONTENT = ['json'] # TODO
