@@ -201,6 +201,15 @@ class Site(models.Model):
         final_list_of_all_type_of_users = final_list_of_ssh_users + self.list_of_admins()
         return list(set(final_list_of_all_type_of_users))
 
+    def list_of_active_admins(self):
+        return filter(lambda user: user.is_active, self.list_of_admins())
+
+    def list_of_active_ssh_users(self):
+        return filter(lambda user: user.is_active, self.list_of_ssh_users())
+
+    def list_of_all_type_of_active_users(self):
+        return filter(lambda user: user.is_active, self.list_of_all_type_of_users())
+
 
 class EmailConfirmation(models.Model):
     STATUS_CHOICES = (
