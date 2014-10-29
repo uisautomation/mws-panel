@@ -1,5 +1,6 @@
 from datetime import datetime
 import uuid
+from itertools import chain
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -7,6 +8,7 @@ from django import forms
 import re
 from ucamlookup import get_institutions
 from ucamlookup.models import LookupGroup
+from mwsauth.utils import get_users_of_a_group
 
 
 class NetworkConfig(models.Model):
@@ -181,6 +183,24 @@ class Site(models.Model):
             return False
         return True
 
+    def list_of_admins(self):
+        list_of_admins_in_lookup_groups = list(chain.from_iterable(map(get_users_of_a_group, self.groups.all())))
+        list_of_admins_directly_assigned = list(self.users.all())
+        return list(set(list_of_admins_in_lookup_groups + list_of_admins_directly_assigned))
+
+    def list_of_ssh_users(self):
+        list_of_ssh_users_in_lookup_groups = list(chain.from_iterable(map(get_users_of_a_group, self.ssh_groups.all())))
+        list_of_ssh_users_directly_assigned = list(self.ssh_users.all())
+        final_list_of_ssh_users = list(set(list_of_ssh_users_in_lookup_groups + list_of_ssh_users_directly_assigned))
+        return [item for item in final_list_of_ssh_users if item not in self.list_of_admins()]
+
+    def list_of_all_type_of_users(self):
+        list_of_ssh_users_in_lookup_groups = list(chain.from_iterable(map(get_users_of_a_group, self.ssh_groups.all())))
+        list_of_ssh_users_directly_assigned = list(self.ssh_users.all())
+        final_list_of_ssh_users = list_of_ssh_users_in_lookup_groups + list_of_ssh_users_directly_assigned
+        final_list_of_all_type_of_users = final_list_of_ssh_users + self.list_of_admins()
+        return list(set(final_list_of_all_type_of_users))
+
 
 class EmailConfirmation(models.Model):
     STATUS_CHOICES = (
@@ -246,6 +266,7 @@ class VirtualMachine(models.Model):
         ('accepted', 'Accepted'),
         ('denied', 'Denied'),
         ('ansible', 'Running Ansible'),
+        ('ansible_queued', 'Ansible queued'),
         ('ready', 'Ready'),
     )
 
@@ -268,7 +289,7 @@ class VirtualMachine(models.Model):
 
     @property
     def is_busy(self):
-        if self.status != 'ready' and self.status != 'ansible':
+        if self.status != 'ready' and self.status != 'ansible' and self.status != 'ansible_queued':
             return True
         else:
             return False
@@ -447,7 +468,7 @@ class SiteRequestDemo(models.Model):
                 vm.status = 'ready'
                 VMStatusDemo.objects.create(vm=vm)
                 vm.save()
-            if vm.status == 'ansible':
+            if vm.status == 'ansible' or vm.status == 'ansible_queued':
                 vm.status = 'ready'
                 vm.save()
             for vhost in vm.vhosts.all():

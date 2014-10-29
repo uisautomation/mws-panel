@@ -2,11 +2,12 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, redirect
-from apimws.utils import launch_ansible
+from ucamlookup import validate_crsids
+from apimws.utils import launch_ansible_site
 from mwsauth.models import MWSUserForm
 from mwsauth.utils import privileges_check
 from sitesmanagement.views import show, index
-from mwsauth.validators import validate_crsids, validate_groupids
+from mwsauth.validators import validate_groupids
 
 
 @login_required
@@ -38,7 +39,7 @@ def auth_change(request, site_id):
         site.groups.add(*authgrouplist)
         site.ssh_groups.clear()
         site.ssh_groups.add(*sshauthgrouplist)
-        launch_ansible(site)  # to add or delete users from the ssh/login auth list of the server
+        launch_ansible_site(site)  # to add or delete users from the ssh/login auth list of the server
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
@@ -60,7 +61,8 @@ def user_panel(request):
     }
 
     if request.method == 'POST':
-        mws_user_form = MWSUserForm(request.POST)
+        mws_user_form = MWSUserForm(request.POST, instance=request.user.mws_user) if hasattr(request.user, 'mws_user') \
+            else MWSUserForm(request.POST)
         if mws_user_form.is_valid():
             mws_user = mws_user_form.save(commit=False)
             mws_user.user = request.user

@@ -86,7 +86,8 @@
                                 <td style="width: 30px; padding-left: 0px; padding-right: 0px;">
                                     {% if not site.is_admin_suspended %}
                                         <a href="{% url 'sitesmanagement.views.show' site_id=site.id %}">
-                                            <i title="Details of your site" class="fa fa-angle-double-right fa-2x"></i>
+                                            <i title="Administrator panel" class="fa fa-angle-double-right fa-2x"
+                                               data-toggle="tooltip"></i>
                                         </a>
                                     {% endif %}
                                 </td>
@@ -197,4 +198,12 @@
             {% endif %}
         </div>
     </div>
+{% endblock %}
+
+{% block campl_foot_js %}
+    <script>
+        $(document).ready(function() {
+            $('[data-toggle="tooltip"]').tooltip({'placement': 'top'});
+        })
+    </script>
 {% endblock %}

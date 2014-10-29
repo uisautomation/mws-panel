@@ -1,24 +1,6 @@
-from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
-from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
-from ucamlookup import user_in_groups
+from ucamlookup import user_in_groups, get_or_create_user_by_crsid, GroupMethods, conn
 from ucamlookup.models import LookupGroup
-from sitesmanagement.models import Site
-
-
-def get_or_create_user_by_crsid(crsid):
-    """ Returns the django user corresponding to the crsid parameter.
-        :param crsid: the crsid of the retrieved user
-    """
-
-    user = User.objects.filter(username=crsid)
-    if user.exists():
-        user = user.first()
-    else:
-        user = User.objects.create_user(username=crsid)
-
-    return user
 
 
 def get_or_create_group_by_groupid(groupid):
@@ -36,6 +18,7 @@ def get_or_create_group_by_groupid(groupid):
 
 
 def privileges_check(site_id, user):
+    from sitesmanagement.models import Site
     site = get_object_or_404(Site, pk=site_id)
 
     # If the user is not in the user auth list of the site and neither belongs to a group in the group auth list or
@@ -48,3 +31,14 @@ def privileges_check(site_id, user):
         return None
 
     return site
+
+
+# TODO move this function to django-ucam-lookup
+def get_users_of_a_group(group):
+    """ Returns the list of users of a LookupGroup
+    :param group: The LookupGroup
+    :return: the list of Users
+    """
+
+    return map(lambda user: get_or_create_user_by_crsid(user.identifier.value),
+               GroupMethods(conn).getMembers(groupid=group.lookup_id))

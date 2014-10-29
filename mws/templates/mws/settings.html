@@ -115,35 +115,50 @@
             </div>
         </div>
 
-        <div class="campl-column6">
-            <div class="campl-content-container campl-side-padding">
-                <article class="node node-external-link view-mode-focus_on clearfix
-                                campl-horizontal-teaser campl-teaser campl-focus-teaser">
-                    <div class="campl-focus-teaser-img">
-                        <div class="campl-content-container campl-horizontal-teaser-txt">
-                            <div class="field field-name-field-external-url-image field-type-image
-                                        field-label-hidden">
-                                <div class="field-items">
-                                    <div id="vm_status_message" class="field-item even" style="color: #ffffff">
-                                        Checking the status of the {% if not vm.primary %}test {% endif %} server
+        {% if vm.is_ready %}
+            <div class="campl-column6">
+                <div class="campl-content-container campl-side-padding">
+                    <article class="node node-external-link view-mode-focus_on clearfix
+                                    campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                        <div class="campl-focus-teaser-img">
+                            <div class="campl-content-container campl-horizontal-teaser-txt">
+                                <div class="field field-name-field-external-url-image field-type-image
+                                            field-label-hidden">
+                                    <div class="field-items">
+                                        <div id="vm_status_message" class="field-item even" style="color: #ffffff">
+                                            Checking the status of the {% if not vm.primary %}test {% endif %} server
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="campl-focus-teaser-txt">
-                        <div class="campl-content-container campl-horizontal-teaser-txt">
-                            <h3 class="campl-teaser-title">
-                                <a id="vm_status_message_link" href="#"
+                        <div class="campl-focus-teaser-txt">
+                            <div class="campl-content-container campl-horizontal-teaser-txt">
+                                <h3 class="campl-teaser-title">
+                                    <a id="vm_status_message_link" href="#"
+                                       onclick='$("#translucidframe")[0].style.visibility = "visible"'></a>
+                                </h3>
+                                <a id="vm_status_link" href="#" class="ir campl-focus-link"
                                    onclick='$("#translucidframe")[0].style.visibility = "visible"'></a>
-                            </h3>
-                            <a id="vm_status_link" href="#" class="ir campl-focus-link"
-                               onclick='$("#translucidframe")[0].style.visibility = "visible"'></a>
+                            </div>
                         </div>
-                    </div>
-                </article>
+                    </article>
+                </div>
             </div>
-        </div>
+        {% else %}
+            <div class="campl-column6">
+                <div class="campl-content-container campl-side-padding">
+                    <article class="node node-external-link view-mode-focus_on clearfix
+                                    campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                            <div class="campl-content-container campl-horizontal-teaser-txt">
+                                <div id="vm_status_busy" class="field-item even" style="color: #ffffff">
+                                    The server is busy, we are configuring it
+                                </div>
+                            </div>
+                    </article>
+                </div>
+            </div>
+        {% endif %}
 
         {% if not vm.primary %}
         <div class="campl-column3">

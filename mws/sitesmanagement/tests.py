@@ -32,11 +32,9 @@ class SiteManagementTests(TestCase):
         do_test_login(self, user="test0001")
 
         response = self.client.get(reverse(views.index))
-        self.assertContains(response,
-                            "                <p class=\"campl-notifications-icon campl-warning-icon\" "
-                            "style=\"float:none; margin-bottom: 10px;\">\n                    At this moment we cannot "
-                            "process any new request for the Managed Web Service, please try again later.\n"
-                            "                </p>")
+        self.assertInHTML("<p class=\"campl-notifications-icon campl-warning-icon\" style=\"float:none; margin-bottom: "
+                          "10px;\">At this moment we cannot process any new request for the Managed Web Service, please"
+                          " try again later.</p>", response.content)
 
         netconf = NetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
                                                IPv4private='172.28.18.255',
@@ -44,9 +42,8 @@ class SiteManagementTests(TestCase):
                                                mws_domain="mws-12940.mws3.csx.cam.ac.uk")
 
         response = self.client.get(reverse(views.index))
-        self.assertContains(response,
-                            "<p><a href=\"%s\" class=\"campl-primary-cta\">Register new site</a></p>" %
-                            reverse(views.new))
+        self.assertInHTML("<p><a href=\"%s\" class=\"campl-primary-cta\">Register new server</a></p>" %
+                          reverse(views.new), response.content)
 
         site = Site.objects.create(name="testSite", institution_id="testinst", start_date=datetime.today(),
                                    network_configuration=netconf)
@@ -233,7 +230,7 @@ class SiteManagementTests(TestCase):
 
         site.users.add(User.objects.get(username="test0001"))
         response = self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id}))
-        self.assertContains(response, "Change billing data")
+        self.assertContains(response, "Billing data")
         response = self.client.get(reverse(views.show, kwargs={'site_id': site.id}))
         self.assertContains(response, "No Billing, please add one.")
 
@@ -244,7 +241,7 @@ class SiteManagementTests(TestCase):
         suspension.active = False
         suspension.save()
         response = self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id}))
-        self.assertContains(response, "Change billing data")
+        self.assertContains(response, "Billing data")
 
         self.assertFalse(hasattr(site, 'billing'))
         with open(os.path.join(settings.BASE_DIR, 'requirements.txt')) as fp:

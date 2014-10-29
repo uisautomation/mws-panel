@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
 from stronghold.decorators import public
-from apimws.utils import launch_ansible
+from apimws.utils import launch_ansible_site
 from mwsauth.utils import get_or_create_group_by_groupid
 from sitesmanagement.models import DomainName, Site, EmailConfirmation
 from sitesmanagement.views import show
@@ -69,7 +69,7 @@ def confirm_email(request, ec_id, token):
     if email_confirmation.token == token:
         email_confirmation.status = 'accepted'
         email_confirmation.save()
-        launch_ansible(email_confirmation.site)  # to update server email associated
+        launch_ansible_site(email_confirmation.site)  # to update server email associated
         return redirect(show, site_id=email_confirmation.site.id)
     else:
         raise Exception  # TODO change this exception for an error message
