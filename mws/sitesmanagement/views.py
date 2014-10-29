@@ -710,6 +710,23 @@ def add_domain(request, vhost_id, socket_error=None):
                         vhost.main_domain = new_domain
                         vhost.save()
                 launch_ansible(vhost.vm)  # to add the new domain name to the vhost apache configuration
+        else:
+            breadcrumbs = {
+                0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show,
+                                                                                         kwargs={'site_id': site.id})),
+                1: dict(name='Server settings' if vhost.vm.primary else 'Test server settings',
+                        url=reverse(settings, kwargs={'vm_id': vhost.vm.id})),
+                2: dict(name='Web sites management: %s' % vhost.name, url=reverse(vhosts_management,
+                                                                               kwargs={'vm_id': vhost.vm.id})),
+                3: dict(name='Domain Names management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id}))
+            }
+
+            return render(request, 'mws/domains.html', {
+                'breadcrumbs': breadcrumbs,
+                'vhost': vhost,
+                'domain_form': domain_form,
+                'error': True
+            })
 
     return redirect(reverse('sitesmanagement.views.domains_management', kwargs={'vhost_id': vhost.id}))
 
@@ -806,7 +823,11 @@ def delete_dn(request, domain_id):
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     if request.method == 'DELETE':
-        domain.delete()
+        if is_camacuk(domain.name):
+            domain.status = 'to_be_deleted'
+            domain.save()
+        else:
+            domain.delete()
         launch_ansible(vhost.vm)
         return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management', kwargs={'vhost_id': vhost.id}))
 

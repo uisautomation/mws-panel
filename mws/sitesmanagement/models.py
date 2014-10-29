@@ -8,6 +8,7 @@ import re
 from ucamlookup import get_institutions
 from ucamlookup.models import LookupGroup
 from mwsauth.utils import get_users_of_a_group
+from sitesmanagement.utils import is_camacuk
 
 
 class NetworkConfig(models.Model):
@@ -333,6 +334,15 @@ class VirtualMachine(models.Model):
         else:
             return self.site.network_configuration.mws_private_domain
 
+    @property
+    def ip_register_domains(self):
+        domains = []
+        for vhost in self.vhosts.all():
+            for domain in vhost.domain_names.all():
+                if is_camacuk(domain.name) and domain.status == 'accepted':
+                    domains.append(domain)
+        return sorted(set(domains))
+
     def __unicode__(self):
         if self.name is None:
             return "<Under request>"
@@ -358,6 +368,7 @@ class DomainName(models.Model):
         ('requested', 'Requested'),
         ('accepted', 'Accepted'),
         ('denied', 'Denied'),
+        ('to_be_deleted', 'Removing...'),
     )
 
     name = models.CharField(max_length=250, unique=True, validators=[full_domain_validator])
