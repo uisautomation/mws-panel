@@ -6,105 +6,30 @@
             <h1 id="page-title">Install system packages</h1>
             <p>Select the packages you want to install. Each option will install all the system packages needed to run
             the specified service or application.</p>
+
+            {% include "mws/system_packages_snippet.html" with system_package_id=1 system_package_name="Wordpress" system_package_image="fa-wordpress" %}
+            {% include "mws/system_packages_snippet.html" with system_package_id=2 system_package_name="Drupal" system_package_image="fa-drupal" %}
+            {% include "mws/system_packages_snippet.html" with system_package_id=3 system_package_name="git" system_package_image="fa-git-square" %}
+            {% include "mws/system_packages_snippet.html" with system_package_id=4 system_package_name="joomla" system_package_image="fa-joomla" %}
+
         </div>
     </div>
 
-{% comment %}
-    <div class="campl-column12">
-        <div class="campl-content-container">
-            <form action={% url 'sitesmanagement.views.system_packages' vm_id=vm.id %} method="post">{% csrf_token %}
-                <fieldset>
-                    <p>Select those packages you want to install in your machine</p>
-                    <div id="system_packages_form">
-                        {{ system_packages_form.as_p }}
-                    </div>
-                    <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"></p>
-                </fieldset>
-            </form>
-        </div>
-    </div>
-{% endcomment %}
-
-    <div class="campl-column4">
-        <div class="campl-content-container">
-            <div class="campl-horizontal-teaser campl-teaser clearfix campl-focus-teaser">
-                <div class="campl-focus-teaser-img">
-                    <div class="campl-content-container campl-horizontal-teaser-img">
-                        <a href="#" class="campl-teaser-img-link"><i class="fa fa-wordpress fa-6x"></i></a>
-                    </div>
-                </div>
-                <div class="campl-focus-teaser-txt">
-                    <div class="campl-content-container campl-horizontal-teaser-txt">
-                        <h3 class="campl-teaser-title"><a href="#">Wordpress packages</a></h3>
-                        <a href="#" class="ir campl-focus-link">Wordpress packages</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="campl-column4">
-        <div class="campl-content-container">
-            <div class="campl-horizontal-teaser campl-teaser clearfix campl-focus-teaser">
-                <div class="campl-focus-teaser-img">
-                    <div class="campl-content-container campl-horizontal-teaser-img">
-                        <a href="#" class="campl-teaser-img-link"><i class="fa fa-drupal fa-6x"></i></a>
-                    </div>
-                </div>
-                <div class="campl-focus-teaser-txt">
-                    <div class="campl-content-container campl-horizontal-teaser-txt">
-                        <h3 class="campl-teaser-title"><a href="#">Drupal packages</a></h3>
-                        <a href="#" class="ir campl-focus-link">Drupal packages</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="campl-column4">
-        <div class="campl-content-container">
-            <div class="campl-horizontal-teaser campl-teaser clearfix campl-focus-teaser">
-                <div class="campl-focus-teaser-img">
-                    <div class="campl-content-container campl-horizontal-teaser-img">
-                        <a href="#" class="campl-teaser-img-link"><i class="fa fa-git-square fa-6x"></i></a>
-                    </div>
-                </div>
-                <div class="campl-focus-teaser-txt">
-                    <div class="campl-content-container campl-horizontal-teaser-txt">
-                        <h3 class="campl-teaser-title"><a href="#">git packages</a></h3>
-                        <a href="#" class="ir campl-focus-link">git packages</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="campl-column4">
-        <div class="campl-content-container">
-            <div class="campl-horizontal-teaser campl-teaser clearfix campl-focus-teaser">
-                <div class="campl-focus-teaser-img">
-                    <div class="campl-content-container campl-horizontal-teaser-img">
-                        <a href="#" class="campl-teaser-img-link"><i class="fa fa-joomla fa-6x"></i></a>
-                    </div>
-                </div>
-                <div class="campl-focus-teaser-txt">
-                    <div class="campl-content-container campl-horizontal-teaser-txt">
-                        <h3 class="campl-teaser-title"><a href="#">joomla packages</a></h3>
-                        <a href="#" class="ir campl-focus-link">joomla packages</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    <form id="package_number_form" action={% url 'sitesmanagement.views.system_packages' vm_id=vm.id %} method="post">
+        {% csrf_token %}
+        <input type="hidden" name="package_number" id="package_number">
+    </form>
 {% endblock %}
 
 {% block campl_foot_js %}
-    <script src="{% static 'js/jquery.multi-select.js' %}" type="text/javascript"></script>
     <script>
-        $('#id_system_packages').multiSelect({
-            selectableHeader: "<p>List of available packages:</p>",
-            selectionHeader: "<p>List of installed packages:</p>"
+        function system_package_selection(package_id) {
+            $('#package_number')[0].value = package_id;
+            $('#package_number_form')[0].submit();
+        }
+
+        $(document).ready(function() {
+            $('[data-toggle="confirmation"]').confirmation({singleton:true, popout:true, placement:'top'});
         })
     </script>
 {% endblock %}

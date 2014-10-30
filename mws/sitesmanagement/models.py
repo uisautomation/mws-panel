@@ -445,10 +445,6 @@ class BillingForm(forms.ModelForm):
         fields = ('purchase_order_number', 'group', 'purchase_order')
 
 
-class SystemPackagesForm(forms.Form):
-        system_packages = forms.MultipleChoiceField(widget=forms.SelectMultiple, label="")
-
-
 class UnixGroupForm(forms.ModelForm):
     class Meta:
         model = UnixGroup

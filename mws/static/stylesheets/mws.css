@@ -116,6 +116,9 @@ ul.errorlist + p textarea {
     color: #171717;
 }
 
+.fa-white {
+    color: white;
+}
 
 /*! normalize.css v3.0.0 | MIT License | git.io/normalize */
 

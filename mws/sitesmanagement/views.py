@@ -1,3 +1,4 @@
+import bisect
 import datetime
 import socket
 from django.contrib.auth.decorators import login_required
@@ -13,7 +14,7 @@ from apimws.utils import email_confirmation, ip_register_api_request, launch_ans
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.utils import is_camacuk, get_object_or_None
 from .models import SiteForm, DomainNameFormNew, BillingForm, DomainName, NetworkConfig, EmailConfirmation, \
-    VirtualMachine, SystemPackagesForm, Vhost, VhostForm, Site, UnixGroupForm, UnixGroup
+    VirtualMachine, Vhost, VhostForm, Site, UnixGroupForm, UnixGroup
 
 
 @login_required
@@ -414,7 +415,10 @@ def system_packages(request, vm_id):
     if vm.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
-    ansible_configuraton = get_object_or_None(AnsibleConfiguration, vm=vm, key="System Packages")
+    ansible_configuraton = get_object_or_None(AnsibleConfiguration, vm=vm, key="system_packages")
+
+    packages_installed = list(int(x) for x in ansible_configuraton.value.split(",")) if ansible_configuraton is not \
+                                                                                         None else []
 
     breadcrumbs = {
         0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
@@ -423,29 +427,28 @@ def system_packages(request, vm_id):
         2: dict(name='System packages', url=reverse(system_packages, kwargs={'vm_id': vm.id}))
     }
 
+    package_number_list = [1,2,3,4] # TODO extract this to settings
+
     if request.method == 'POST':
-        system_packages_form = SystemPackagesForm(request.POST)
-        if system_packages_form.is_valid():
-            if ansible_configuraton is not None:
-                ansible_configuraton.value = ",".join(system_packages_form.cleaned_data.get('system_packages'))
-                ansible_configuraton.save()
+        package_number = int(request.POST['package_number'])
+        if package_number in package_number_list:
+            if packages_installed:
+                if package_number in packages_installed:
+                    packages_installed.remove(package_number)
+                    ansible_configuraton.value = ",".join(str(x) for x in packages_installed)
+                    ansible_configuraton.save()
+                else:
+                    bisect.insort_left(packages_installed, package_number)
+                    ansible_configuraton.value = ",".join(str(x) for x in packages_installed)
+                    ansible_configuraton.save()
             else:
-                AnsibleConfiguration.objects.create(vm=vm, key="System Packages",
-                                                    value=",".join(
-                                                        system_packages_form.cleaned_data.get('system_packages')))
+                AnsibleConfiguration.objects.create(vm=vm, key="system_packages",
+                                                    value=package_number)
             launch_ansible(vm)  # to install or delete new/old packages selected by the user
-            return HttpResponseRedirect(reverse('sitesmanagement.views.show',
-                                                kwargs={'site_id': site.id}))
-    else:
-        if ansible_configuraton is not None:
-            system_packages_form = SystemPackagesForm(initial={'system_packages': ansible_configuraton.
-                                                      value.split(",")})
-        else:
-            system_packages_form = SystemPackagesForm()
 
     return render(request, 'mws/system_packages.html', {
         'breadcrumbs': breadcrumbs,
-        'system_packages_form': system_packages_form,
+        'packages_installed': packages_installed,
         'vm': vm
     })
 
