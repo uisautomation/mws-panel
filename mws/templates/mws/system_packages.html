@@ -19,17 +19,39 @@
         {% csrf_token %}
         <input type="hidden" name="package_number" id="package_number">
     </form>
+
+    <!-- Modal -->
+    <div class="modal fade" id="install_confirmation_modal" tabindex="-1" role="dialog" aria-labelledby="install_confirmation_label" aria-hidden="true">
+      <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+          <div class="modal-body">
+            Are you sure do you want to <span class="uninstall_text">un</span>install <span id="package_name" style="font-weight: bold;"></span> system packages?
+          </div>
+          <div class="modal-footer" style="padding: 10px 20px 10px;">
+            <button type="button" class="campl-btn campl-primary-cta campl-primary-red" data-dismiss="modal">Cancel</button>
+            <button type="button" class="campl-btn campl-primary-cta" id="submit_modal_button"><span class="uninstall_text">Uni</span><span class="install_text">I</span>nstall</button>
+          </div>
+        </div>
+      </div>
+    </div>
 {% endblock %}
 
 {% block campl_foot_js %}
     <script>
-        function system_package_selection(package_id) {
+        function system_package_selection(package_id, package_name, installed) {
             $('#package_number')[0].value = package_id;
+            $('#package_name')[0].innerHTML = package_name;
+            if (installed) {
+                $('.uninstall_text').css( "display", "inline" );
+                $('.install_text').css( "display", "none" );
+            } else {
+                $('.uninstall_text').css( "display", "none" );
+                $('.install_text').css( "display", "inline" );
+            };
+            $('#install_confirmation_modal').modal();
+        };
+        $( "#submit_modal_button" ).click(function() {
             $('#package_number_form')[0].submit();
-        }
-
-        $(document).ready(function() {
-            $('[data-toggle="confirmation"]').confirmation({singleton:true, popout:true, placement:'top'});
-        })
+        });
     </script>
 {% endblock %}

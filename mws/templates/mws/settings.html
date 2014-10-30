@@ -167,7 +167,7 @@
                                 campl-horizontal-teaser campl-teaser campl-focus-teaser campl-focus-teaser-red">
                     <div class="campl-focus-teaser-img">
                         <div class="campl-content-container campl-horizontal-teaser-img">
-                            <a class="delete_vm" data-toggle="confirmation" data-href="javascript:delete_vm('{% url 'sitesmanagement.views.delete_vm' vm_id=vm.id %}')" href="#">
+                            <a class="delete_vm" data-href="javascript:delete_vm('{% url 'sitesmanagement.views.delete_vm' vm_id=vm.id %}')" href="#">
                                 <div class="field field-name-field-external-url-image field-type-image
                                             field-label-hidden">
                                     <div class="field-items">
@@ -182,11 +182,11 @@
                     <div class="campl-focus-teaser-txt">
                         <div class="campl-content-container campl-horizontal-teaser-txt">
                             <h3 class="campl-teaser-title">
-                                <a class="delete_vm" data-toggle="confirmation" data-href="javascript:delete_vm('{% url 'sitesmanagement.views.delete_vm' vm_id=vm.id %}')" href="#">
+                                <a class="delete_vm" data-href="javascript:delete_vm('{% url 'sitesmanagement.views.delete_vm' vm_id=vm.id %}')" href="#">
                                     Delete the test server
                                 </a>
                             </h3>
-                            <a class="delete_vm ir campl-focus-link campl-focus-link-red" data-toggle="confirmation" data-href="javascript:delete_vm('{% url 'sitesmanagement.views.delete_vm' vm_id=vm.id %}')" href="#">
+                            <a class="delete_vm ir campl-focus-link campl-focus-link-red" data-href="javascript:delete_vm('{% url 'sitesmanagement.views.delete_vm' vm_id=vm.id %}')" href="#">
                                 Delete the test server
                             </a>
                         </div>
@@ -197,8 +197,20 @@
         {% endif %}
 
     </div>
-    <div id="translucidframe">
-        <img src="{% static 'img/ajax_loader_orange_256.gif' %}">
+
+    <!-- Modal -->
+    <div class="modal fade" id="delete_modal" tabindex="-1" role="dialog" aria-labelledby="delete_modal_label" aria-hidden="true">
+      <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+          <div class="modal-body">
+            Are you sure do you want to delete the test server?
+          </div>
+          <div class="modal-footer" style="padding: 10px 20px 10px;">
+            <button type="button" class="campl-btn campl-primary-cta" data-dismiss="modal">Cancel</button>
+            <a class="campl-btn campl-primary-cta campl-primary-red" id="delete_modal_button">Delete</a>
+          </div>
+        </div>
+      </div>
     </div>
 {% endblock %}
 
@@ -248,7 +260,6 @@
         }
 
         function delete_vm(url) {
-            $("#translucidframe")[0].style.visibility = "visible";
             $.ajax({
                 url: url,
                 type: 'DELETE',
@@ -262,8 +273,9 @@
             });
         }
 
-        $(document).ready(function() {
-            $('[data-toggle="confirmation"]').confirmation({singleton:true, popout:true, placement:'top'});
-        })
+        $('.delete_vm').click(function() {
+            $("#delete_modal_button").attr("href", $( this ).attr('data-href'));
+            $('#delete_modal').modal();
+        });
     </script>
 {% endblock %}
