@@ -27,12 +27,14 @@
                                 {{ domain.get_status_display }}
                             </td>
                             <td style="width: 135px;">
+                                {% if domain.status != 'to_be_deleted' %}
                                 <a href="#" onclick="javascript:ajax_call('{% url 'sitesmanagement.views.set_dn_as_main' domain_id=domain.id %}', 'POST')">
                                     Set as Master
                                 </a>
-                                <a class="delete_vhost" data-toggle="confirmation" data-href="javascript:ajax_call('{% url 'sitesmanagement.views.delete_dn' domain_id=domain.id %}', 'DELETE')" href="#">
+                                <a class="delete_domain" data-href="javascript:ajax_call('{% url 'sitesmanagement.views.delete_dn' domain_id=domain.id %}', 'DELETE')" href="#">
                                     <i title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i>
                                 </a>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}
@@ -44,7 +46,7 @@
 
             <p><a id="add_domain_button" href="#" class="campl-primary-cta">Add a new domain</a></p>
 
-            <div id="add_domain_div" style="display: none; margin-top: 20px">
+            <div id="add_domain_div" style="{% if not error %}display: none; {% endif %}margin-top: 20px">
                 <form action={% url 'sitesmanagement.views.add_domain' vhost_id=vhost.id %} method="post">
                     <fieldset>
                         {% csrf_token %}
@@ -57,6 +59,21 @@
             </div>
 
         </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="delete_modal" tabindex="-1" role="dialog" aria-labelledby="delete_modal_label" aria-hidden="true">
+      <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+          <div class="modal-body">
+            Are you sure do you want to delete the domain name?
+          </div>
+          <div class="modal-footer" style="padding: 10px 20px 10px;">
+            <button type="button" class="campl-btn campl-primary-cta" data-dismiss="modal">Cancel</button>
+            <a class="campl-btn campl-primary-cta campl-primary-red" id="delete_modal_button">Delete</a>
+          </div>
+        </div>
+      </div>
     </div>
 {% endblock %}
 
@@ -93,12 +110,15 @@
             });
         }
 
-        $(document).ready(function() {
-            $('[data-toggle="confirmation"]').confirmation({singleton:true, popout:true, placement:'top'});
-            $('[data-toggle="tooltip"]').tooltip({'placement': 'top'});
-            $('#add_domain_button').click(function() {
-                $('#add_domain_div').show("fast")
-            });
-        })
+        $('[data-toggle="tooltip"]').tooltip({'placement': 'top'});
+
+        $('#add_domain_button').click(function() {
+            $('#add_domain_div').show("fast")
+        });
+
+        $('.delete_domain').click(function() {
+            $("#delete_modal_button").attr("href", $( this ).attr('data-href'));
+            $('#delete_modal').modal();
+        });
     </script>
 {% endblock %}

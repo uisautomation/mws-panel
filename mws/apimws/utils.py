@@ -33,6 +33,7 @@ def email_confirmation(site):
               "%s/confirm_email/%d/%s/" % (settings.MAIN_DOMAIN, email_conf.id, email_conf.token)
     from_email = "mws3-support@cam.ac.uk"
     recipient_list = (site.email, )
+    headers = {'Reply-To': from_email}
     send_mail(subject, message, from_email, recipient_list, fail_silently=False)
 
 
@@ -54,6 +55,8 @@ def launch_ansible(vm):
         demo = vm.site.site_request_demo
         demo.date_submitted = timezone.now()
         demo.save()
+    elif vm.status == 'ansible_queued':
+        return
     else:
         raise UnexpectedVMStatus()
 
