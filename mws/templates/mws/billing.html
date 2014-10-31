@@ -5,8 +5,16 @@
         <div class="campl-content-container">
             <h1>Billing data</h1>
 
-            <form enctype="multipart/form-data" action={% url 'sitesmanagement.views.billing_management' site_id=site.id %} method="post">{% csrf_token %}
+            <p>Please, upload your billing data using the following form, you will need to include the purchase order
+            number, the name of the group that raised the purchase order, and a copy (in PDF please) of the purchase
+            order.</p>
+
+            <p>You have 30 days since the start of your MWS to include this billing data, otherwise this MWS will be
+                cancelled. This does not applies to other MWS servers where you have already upload the billing data.
+            </p>
+            <form enctype="multipart/form-data" action={% url 'sitesmanagement.views.billing_management' site_id=site.id %} method="post">
                 <fieldset>
+                    {% csrf_token %}
                     <div id="site_form">
                         {{ billing_form.as_p }}
                     </div>

@@ -5,7 +5,7 @@
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
 
-            <h1>Unix groups for the site "{{ vm.site.name }}"</h1>
+            <h1>Unix Group of your "{{ vm.site.name }}" {% if vm.primary %}production{% else %}test{% endif %} server</h1>
 
             {% if vm.unix_groups.all %}
                 <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">

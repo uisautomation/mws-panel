@@ -5,16 +5,16 @@
         <div class="campl-content-container">
 
             <p>This site allows members of the university to request a new server in the managed web service. We
-                provide to the user with a server that they can use without having to worry about manual configuration
+                provide to the user a server that they can use without having to worry about manual configuration
                 or operating system maintenance. A server in the managed web service has the following characteristics:
             </p>
 
             <ul>
                 <li>A server with 1 Core CPU, 2 GB of RAM, and xxGb of disk space</li>
-                <li>A public IPv4 and IPv6</li>
+                <li>A public IPv4 and IPv6 addresses</li>
                 <li>A secondary test server for testing purposes (testing updates for example)</li>
                 <li>A simple web based control panel to control all the features of the Managed Web Service</li>
-                <li>Only costs £xx/month</li>
+                <li>A cost of only £xx/month</li>
             </ul>
 
             <p>Warning: If you don't enter the billings details for your site in less than a month, it may be deleted.
@@ -31,7 +31,7 @@
 
             {% if sites_enabled %}
                 <h1>MWS servers where you are the administrator</h1>
-                <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
+                <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table clickable_rows">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -45,12 +45,12 @@
                     <tbody>
                     {% for site in sites_enabled %}
                         {% if site.is_admin_suspended %}
-                            <tr class="site_suspended">
+                            <tr class="site_suspended" data-href="{% url 'sitesmanagement.views.show' site_id=site.id %}">
                                 <td>
                                     {{ site.name }} <br/>
                                     This server has been administratively suspended
                         {% else %}
-                            <tr>
+                            <tr data-href="{% url 'sitesmanagement.views.show' site_id=site.id %}">
                                 <td>
                                     {{ site.name }}
                         {% endif %}
@@ -197,8 +197,9 @@
 
 {% block campl_foot_js %}
     <script>
-        $(document).ready(function() {
-            $('[data-toggle="tooltip"]').tooltip({'placement': 'top'});
-        })
+        $('[data-toggle="tooltip"]').tooltip({'placement': 'top'});
+        $(".clickable_rows tr").click(function() {
+                window.document.location = $(this).data('href');
+          });
     </script>
 {% endblock %}

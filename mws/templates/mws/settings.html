@@ -10,108 +10,110 @@
             </div>
         </div>
 
-        <div class="campl-column3">
-            <div class="campl-content-container campl-side-padding">
-                <article class="node node-external-link view-mode-focus_on clearfix
-                                campl-horizontal-teaser campl-teaser campl-focus-teaser">
-                    <div class="campl-focus-teaser-img">
-                        <div class="campl-content-container campl-horizontal-teaser-img">
-                            <a href="{% url 'sitesmanagement.views.vhosts_management' vm_id=vm.id %}">
-                                <div class="field field-name-field-external-url-image field-type-image
-                                            field-label-hidden">
-                                    <div class="field-items">
-                                        <div class="field-item even">
-                                            <img class="campl-scale-with-grid"
-                                                 src="{% static "icons/dns.png" %}"
-                                                 height="128" style="margin: 10px;" alt="">
-                                        </div>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="campl-focus-teaser-txt">
-                        <div class="campl-content-container campl-horizontal-teaser-txt">
-                            <h3 class="campl-teaser-title">
+        <div class="campl-column12">
+            <div class="campl-column3">
+                <div class="campl-content-container campl-side-padding">
+                    <article class="node node-external-link view-mode-focus_on clearfix
+                                    campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                        <div class="campl-focus-teaser-img">
+                            <div class="campl-content-container campl-horizontal-teaser-img">
                                 <a href="{% url 'sitesmanagement.views.vhosts_management' vm_id=vm.id %}">
-                                    Web sites
-                                </a>
-                            </h3>
-                            <a href="{% url 'sitesmanagement.views.vhosts_management' vm_id=vm.id %}"
-                               class="ir campl-focus-link">Web sites</a>
-                        </div>
-                    </div>
-                </article>
-            </div>
-        </div>
-
-        <div class="campl-column3">
-            <div class="campl-content-container campl-side-padding">
-                <article class="node node-external-link view-mode-focus_on clearfix
-                                campl-horizontal-teaser campl-teaser campl-focus-teaser">
-                    <div class="campl-focus-teaser-img">
-                        <div class="campl-content-container campl-horizontal-teaser-img">
-                            <a href="{% url 'sitesmanagement.views.system_packages' vm_id=vm.id %}">
-                                <div class="field field-name-field-external-url-image field-type-image
-                                            field-label-hidden">
-                                    <div class="field-items">
-                                        <div class="field-item even">
-                                            <img class="campl-scale-with-grid"
-                                                 src="{% static "icons/system_packages.png" %}"
-                                                 height="128" style="margin: 10px;" alt="">
+                                    <div class="field field-name-field-external-url-image field-type-image
+                                                field-label-hidden">
+                                        <div class="field-items">
+                                            <div class="field-item even">
+                                                <img class="campl-scale-with-grid"
+                                                     src="{% static "icons/site.png" %}"
+                                                     height="128" style="margin: 10px;" alt="">
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </a>
+                                </a>
+                            </div>
                         </div>
-                    </div>
-                    <div class="campl-focus-teaser-txt">
-                        <div class="campl-content-container campl-horizontal-teaser-txt">
-                            <h3 class="campl-teaser-title">
+                        <div class="campl-focus-teaser-txt">
+                            <div class="campl-content-container campl-horizontal-teaser-txt">
+                                <h3 class="campl-teaser-title">
+                                    <a href="{% url 'sitesmanagement.views.vhosts_management' vm_id=vm.id %}">
+                                        Web sites
+                                    </a>
+                                </h3>
+                                <a href="{% url 'sitesmanagement.views.vhosts_management' vm_id=vm.id %}"
+                                   class="ir campl-focus-link">Web sites</a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <div class="campl-column3">
+                <div class="campl-content-container campl-side-padding">
+                    <article class="node node-external-link view-mode-focus_on clearfix
+                                    campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                        <div class="campl-focus-teaser-img">
+                            <div class="campl-content-container campl-horizontal-teaser-img">
                                 <a href="{% url 'sitesmanagement.views.system_packages' vm_id=vm.id %}">
-                                    System packages
-                                </a>
-                            </h3>
-                            <a href="{% url 'sitesmanagement.views.system_packages' vm_id=vm.id %}"
-                               class="ir campl-focus-link">System packages</a>
-                        </div>
-                    </div>
-                </article>
-            </div>
-        </div>
-
-        <div class="campl-column3">
-            <div class="campl-content-container campl-side-padding">
-                <article class="node node-external-link view-mode-focus_on clearfix
-                                campl-horizontal-teaser campl-teaser campl-focus-teaser">
-                    <div class="campl-focus-teaser-img">
-                        <div class="campl-content-container campl-horizontal-teaser-img">
-                            <a href="{% url 'sitesmanagement.views.unix_groups' vm_id=vm.id %}">
-                                <div class="field field-name-field-external-url-image field-type-image
-                                            field-label-hidden">
-                                    <div class="field-items">
-                                        <div class="field-item even">
-                                            <img class="campl-scale-with-grid"
-                                                 src="{% static "icons/user2.png" %}"
-                                                 height="128" style="margin: 10px;" alt="">
+                                    <div class="field field-name-field-external-url-image field-type-image
+                                                field-label-hidden">
+                                        <div class="field-items">
+                                            <div class="field-item even">
+                                                <img class="campl-scale-with-grid"
+                                                     src="{% static "icons/system_packages.png" %}"
+                                                     height="128" style="margin: 10px;" alt="">
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="campl-focus-teaser-txt">
-                        <div class="campl-content-container campl-horizontal-teaser-txt">
-                            <h3 class="campl-teaser-title">
-                                <a href="{% url 'sitesmanagement.views.unix_groups' vm_id=vm.id %}">
-                                    Unix Groups
                                 </a>
-                            </h3>
-                            <a href="{% url 'sitesmanagement.views.unix_groups' vm_id=vm.id %}"
-                               class="ir campl-focus-link">Unix Groups</a>
+                            </div>
                         </div>
-                    </div>
-                </article>
+                        <div class="campl-focus-teaser-txt">
+                            <div class="campl-content-container campl-horizontal-teaser-txt">
+                                <h3 class="campl-teaser-title">
+                                    <a href="{% url 'sitesmanagement.views.system_packages' vm_id=vm.id %}">
+                                        System packages
+                                    </a>
+                                </h3>
+                                <a href="{% url 'sitesmanagement.views.system_packages' vm_id=vm.id %}"
+                                   class="ir campl-focus-link">System packages</a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <div class="campl-column3">
+                <div class="campl-content-container campl-side-padding">
+                    <article class="node node-external-link view-mode-focus_on clearfix
+                                    campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                        <div class="campl-focus-teaser-img">
+                            <div class="campl-content-container campl-horizontal-teaser-img">
+                                <a href="{% url 'sitesmanagement.views.unix_groups' vm_id=vm.id %}">
+                                    <div class="field field-name-field-external-url-image field-type-image
+                                                field-label-hidden">
+                                        <div class="field-items">
+                                            <div class="field-item even">
+                                                <img class="campl-scale-with-grid"
+                                                     src="{% static "icons/user2.png" %}"
+                                                     height="128" style="margin: 10px;" alt="">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="campl-focus-teaser-txt">
+                            <div class="campl-content-container campl-horizontal-teaser-txt">
+                                <h3 class="campl-teaser-title">
+                                    <a href="{% url 'sitesmanagement.views.unix_groups' vm_id=vm.id %}">
+                                        Unix Groups
+                                    </a>
+                                </h3>
+                                <a href="{% url 'sitesmanagement.views.unix_groups' vm_id=vm.id %}"
+                                   class="ir campl-focus-link">Unix Groups</a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
             </div>
         </div>
 
@@ -227,7 +229,7 @@
                         if (result['vm_is_on'] == true) {
                             $("#vm_status_message").html("The {% if not vm.primary %}test {% endif %} server is currently ON");
                             $("#vm_status_message_link").attr("href", "{% url 'sitesmanagement.views.reset_vm' vm_id=vm.id %}");
-                            $("#vm_status_message_link").html("If the it does not respond you can do a hard reset, clicking here");
+                            $("#vm_status_message_link").html("If it does not respond you can do a hard reset by clicking here");
                             $("#vm_status_link").attr("href", "{% url 'sitesmanagement.views.reset_vm' vm_id=vm.id %}");
                         } else if (result['vm_is_on'] == false) {
                             $("#vm_status_message").html("The {% if not vm.primary %}test {% endif %} server is currently OFF");
