@@ -777,21 +777,18 @@ def certificates(request, vhost_id):
 
         if 'cert' in request.FILES and 'key' in request.FILES and error_message is None:
             try:
-                pub=cert.get_pubkey()
+                pub = cert.get_pubkey()
 
-                # This seems to work with public as well
-                pub_asn1=c.dump_privatekey(c.FILETYPE_ASN1, pub)
-                priv_asn1=c.dump_privatekey(c.FILETYPE_ASN1, priv)
+                pub_asn1 = c.dump_privatekey(c.FILETYPE_ASN1, pub)
+                priv_asn1 = c.dump_privatekey(c.FILETYPE_ASN1, priv)
 
-                # Decode DER
-                pub_der=asn1.DerSequence()
+                pub_der = asn1.DerSequence()
                 pub_der.decode(pub_asn1)
-                priv_der=asn1.DerSequence()
+                priv_der = asn1.DerSequence()
                 priv_der.decode(priv_asn1)
 
-                # Get the modulus
-                pub_modulus=pub_der[1]
-                priv_modulus=priv_der[1]
+                pub_modulus = pub_der[1]
+                priv_modulus = priv_der[1]
 
                 if pub_modulus != priv_modulus:
                     error_message = "The key doesn't match the certificate"
