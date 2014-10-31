@@ -1,7 +1,9 @@
 import bisect
 import datetime
-import socket
+from Crypto.Util import asn1
+import OpenSSL.crypto
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
@@ -754,10 +756,56 @@ def certificates(request, vhost_id):
         3: dict(name='TLS/SSL Certificate', url=reverse(certificates, kwargs={'vhost_id': vhost.id})),
     }
 
+    error_message = None
+
+    if request.method == 'POST':
+        c=OpenSSL.crypto
+
+        if 'cert' in request.FILES:
+            try:
+                cert = c.load_certificate(c.FILETYPE_PEM, request.FILES['cert'].file.read())
+            except Exception as e:
+                error_message = "The certificate file is invalid"
+                # raise ValidationError(e)
+
+        if 'key' in request.FILES and error_message is None:
+            try:
+                priv = c.load_privatekey(c.FILETYPE_PEM, request.FILES['key'].file.read())
+            except Exception as e:
+                error_message = "The key file is invalid"
+                # raise ValidationError(e)
+
+        if 'cert' in request.FILES and 'key' in request.FILES and error_message is None:
+            try:
+                pub=cert.get_pubkey()
+
+                # This seems to work with public as well
+                pub_asn1=c.dump_privatekey(c.FILETYPE_ASN1, pub)
+                priv_asn1=c.dump_privatekey(c.FILETYPE_ASN1, priv)
+
+                # Decode DER
+                pub_der=asn1.DerSequence()
+                pub_der.decode(pub_asn1)
+                priv_der=asn1.DerSequence()
+                priv_der.decode(priv_asn1)
+
+                # Get the modulus
+                pub_modulus=pub_der[1]
+                priv_modulus=priv_der[1]
+
+                if pub_modulus != priv_modulus:
+                    error_message = "The key doesn't match the certificate"
+                    # raise ValidationError(e)
+
+            except Exception as e:
+                error_message = "The key doesn't match the certificate"
+                # raise ValidationError(e)
+
     return render(request, 'mws/certificates.html', {
         'breadcrumbs': breadcrumbs,
         'vhost': vhost,
         'site': site,
+        'error_message': error_message
     })
 
 
