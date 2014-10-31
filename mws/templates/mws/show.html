@@ -80,7 +80,7 @@
                                         <div class="field-items">
                                             <div class="field-item even">
                                                 <img class="campl-scale-with-grid"
-                                                     src="{% static "icons/site.png" %}"
+                                                     src="{% static "icons/document.png" %}"
                                                      height="128" style="margin: 10px;" alt="">
                                             </div>
                                         </div>
@@ -92,11 +92,11 @@
                             <div class="campl-content-container campl-horizontal-teaser-txt">
                                 <h3 class="campl-teaser-title">
                                     <a href="{% url 'sitesmanagement.views.edit' site_id=site.id %}">
-                                        Managed Web Service account settings
+                                        MWS account settings
                                     </a>
                                 </h3>
                                 <a href="{% url 'sitesmanagement.views.edit' site_id=site.id %}"
-                                   class="ir campl-focus-link">Managed Web Service account settings</a>
+                                   class="ir campl-focus-link">MWS account settings</a>
                             </div>
                         </div>
                     </article>
@@ -127,11 +127,11 @@
                             <div class="campl-content-container campl-horizontal-teaser-txt">
                                 <h3 class="campl-teaser-title">
                                     <a href="{% url 'mwsauth.views.auth_change' site_id=site.id %}">
-                                        Users and groups authorised management
+                                        Manage authorised users and groups
                                     </a>
                                 </h3>
                                 <a href="{% url 'mwsauth.views.auth_change' site_id=site.id %}"
-                                   class="ir campl-focus-link">Manage the users and groups authorised to use this site</a>
+                                   class="ir campl-focus-link">Manage authorised users and groups</a>
                             </div>
                         </div>
                     </article>
@@ -152,7 +152,7 @@
                                         <div class="field-items">
                                             <div class="field-item even">
                                                 <img class="campl-scale-with-grid"
-                                                     src="{% static "icons/cloud.png" %}"
+                                                     src="{% static "icons/server.png" %}"
                                                      height="128" style="margin: 10px;" alt="">
                                             </div>
                                         </div>
@@ -164,11 +164,11 @@
                             <div class="campl-content-container campl-horizontal-teaser-txt">
                                 <h3 class="campl-teaser-title">
                                     <a href="{% url 'sitesmanagement.views.clone_vm_view' site_id=site.id %}">
-                                        Production and test servers management
+                                        Manage production and test servers
                                     </a>
                                 </h3>
                                 <a href="{% url 'sitesmanagement.views.clone_vm_view' site_id=site.id %}"
-                                   class="ir campl-focus-link">Production and test servers management</a>
+                                   class="ir campl-focus-link">Manage production and test servers</a>
                             </div>
                         </div>
                     </article>

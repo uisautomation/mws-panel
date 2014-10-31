@@ -457,6 +457,11 @@ class BillingForm(forms.ModelForm):
     class Meta:
         model = Billing
         fields = ('purchase_order_number', 'group', 'purchase_order')
+        labels = {
+            'purchase_order_number': 'Purchase order number (PO)',
+            'group': 'The group name that raised the purchase order',
+            'purchase_order': 'A PDF file with the purchase order'
+        }
 
 
 class UnixGroupForm(forms.ModelForm):

@@ -226,7 +226,7 @@ def show(request, site_id):
                                             domain_name.name)
 
     if not hasattr(site, 'billing'):
-        warning_messages.append("No Billing, please add one.")
+        warning_messages.append("No billing details are available, please add them.")
 
     if site.email:
         try:

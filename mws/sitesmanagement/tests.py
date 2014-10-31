@@ -516,39 +516,39 @@ class SiteManagementTests(TestCase):
         response = self.client.get(response.url)  # TODO assert that url is domains_management
         self.assertInHTML('<tbody><tr><td>test.mws3.csx.cam.ac.uk</td><td>Requested</td>'
                           '<td style="width: 135px;"><a href="#" onclick="javascript:ajax_call'
-                          '(\'/set_dn_as_main/1/\', \'POST\')">Set as Master</a><a class="delete_vhost" data-toggle='
-                          '"confirmation" data-href="javascript:ajax_call(\'/delete_domain/1/\', \'DELETE\')" href="#">'
-                          '<i title="Delete" class="fa fa-trash-o fa-2x"></i></a></td></tr></tbody>',
+                          '(\'/set_dn_as_main/1/\', \'POST\')">Set as Master</a><a class="delete_domain" '
+                          'data-href="javascript:ajax_call(\'/delete_domain/1/\', \'DELETE\')" href="#"> <i '
+                          'title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i></a></td></tr></tbody>',
                           response.content, count=1)
         self.client.get(reverse(views.set_dn_as_main, kwargs={'domain_id': 1}))
         self.assertInHTML('<tbody><tr><td>test.mws3.csx.cam.ac.uk</td><td>Requested</td>'
                           '<td style="width: 135px;"><a href="#" onclick="javascript:ajax_call'
-                          '(\'/set_dn_as_main/1/\', \'POST\')">Set as Master</a><a class="delete_vhost" data-toggle='
-                          '"confirmation" data-href="javascript:ajax_call(\'/delete_domain/1/\', \'DELETE\')" href="#">'
-                          '<i title="Delete" class="fa fa-trash-o fa-2x"></i></a></td></tr></tbody>',
+                          '(\'/set_dn_as_main/1/\', \'POST\')">Set as Master</a><a class="delete_domain" '
+                          'data-href="javascript:ajax_call(\'/delete_domain/1/\', \'DELETE\')" href="#"> <i '
+                          'title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i></a></td></tr></tbody>',
                           response.content, count=1)
         response = self.client.post(reverse(views.set_dn_as_main, kwargs={'domain_id': 1}))
         response = self.client.get(response.url)
         self.assertInHTML('<tbody><tr><td>test.mws3.csx.cam.ac.uk<br>This is the current main domain</td>'
                           '<td>Requested</td><td style="width: 135px;"><a href="#" onclick="javascript:ajax_call'
-                          '(\'/set_dn_as_main/1/\', \'POST\')">Set as Master</a><a class="delete_vhost" data-toggle='
-                          '"confirmation" data-href="javascript:ajax_call(\'/delete_domain/1/\', \'DELETE\')" href="#">'
-                          '<i title="Delete" class="fa fa-trash-o fa-2x"></i></a></td></tr></tbody>',
+                          '(\'/set_dn_as_main/1/\', \'POST\')">Set as Master</a><a class="delete_domain" '
+                          'data-href="javascript:ajax_call(\'/delete_domain/1/\', \'DELETE\')" href="#"> <i '
+                          'title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i></a></td></tr></tbody>',
                           response.content, count=1)
         response = self.client.delete(reverse(views.delete_dn, kwargs={'domain_id': 1}))
         response = self.client.get(response.url)
         self.assertInHTML('<tbody><tr><td>test.mws3.csx.cam.ac.uk<br>This is the current main domain</td>'
                           '<td>Requested</td><td style="width: 135px;"><a href="#" onclick="javascript:ajax_call'
-                          '(\'/set_dn_as_main/1/\', \'POST\')">Set as Master</a><a class="delete_vhost" data-toggle='
-                          '"confirmation" data-href="javascript:ajax_call(\'/delete_domain/1/\', \'DELETE\')" href="#">'
-                          '<i title="Delete" class="fa fa-trash-o fa-2x"></i></a></td></tr></tbody>',
+                          '(\'/set_dn_as_main/1/\', \'POST\')">Set as Master</a><a class="delete_domain" '
+                          'data-href="javascript:ajax_call(\'/delete_domain/1/\', \'DELETE\')" href="#"> <i '
+                          'title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i></a></td></tr></tbody>',
                           response.content, count=0)
         response = self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}),
                                     {'name': 'externaldomain.com'})
         response = self.client.get(response.url)
-        self.assertInHTML('<tbody><tr><td>externaldomain.com<br>This is the current main domain</td><td>Accepted</td>'
+        self.assertInHTML('<tr><td>externaldomain.com</td><td>Accepted</td>'
                           '<td style="width: 135px;"><a href="#" onclick="javascript:ajax_call'
-                          '(\'/set_dn_as_main/2/\', \'POST\')">Set as Master</a><a class="delete_vhost" data-toggle='
-                          '"confirmation" data-href="javascript:ajax_call(\'/delete_domain/2/\', \'DELETE\')" href="#">'
-                          '<i title="Delete" class="fa fa-trash-o fa-2x"></i></a></td></tr></tbody>',
+                          '(\'/set_dn_as_main/2/\', \'POST\')">Set as Master</a><a class="delete_domain" '
+                          'data-href="javascript:ajax_call(\'/delete_domain/2/\', \'DELETE\')" href="#"> <i '
+                          'title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i></a></td></tr>',
                           response.content, count=1)
