@@ -880,3 +880,32 @@ def delete_dn(request, domain_id):
         return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management', kwargs={'vhost_id': vhost.id}))
 
     return HttpResponseForbidden()
+
+
+@login_required
+def change_db_root_password(request, vm_id):
+    vm = get_object_or_404(VirtualMachine, pk=vm_id)
+    site = privileges_check(vm.site.id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if vm.is_busy:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
+    breadcrumbs = {
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Server settings' if vm.primary else 'Test server settings', url=reverse(settings,
+                                                                                              kwargs={'vm_id': vm.id})),
+        2: dict(name='Change db root pass', url=reverse(change_db_root_password, kwargs={'vm_id': vm.id})),
+    }
+
+    if request.method == 'POST':
+        new_root_passwd = request.POST['new_root_passwd']
+        # do something
+        return HttpResponseRedirect(reverse(settings, kwargs={'vm_id': vm.id}))
+
+    return render(request, 'mws/change_db_root_password.html', {
+        'breadcrumbs': breadcrumbs,
+        'vm': vm,
+    })
