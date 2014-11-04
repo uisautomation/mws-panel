@@ -76,10 +76,9 @@ d-i partman/confirm_nooverwrite boolean true
 
 tasksel tasksel/first multiselect standard
 # Individual additional packages to install
-d-i pkgsel/include string openssh-server emacs
+d-i pkgsel/include string openssh-server emacs vim apache2 mysql-server php5-mysql php5 libapache2-mod-php5 php5-mcrypt
 #XXX fixme XXX we probably also want
 # bes-config,bes-update-check,open-vm-tools,dump,userv,ook-client-dump
-#and maybe mcv21?
 # Apply software updates as part of the installation
 # The full-upgrade (d-i pkgsel/upgrade select full-upgrade) does not work, it fails when installing initrd.img-3.13.0-24-generic
 d-i pkgsel/upgrade select none
