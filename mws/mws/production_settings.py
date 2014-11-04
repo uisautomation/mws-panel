@@ -5,6 +5,8 @@ from production_secrets import *
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
+ADMIN = (('Abraham', 'amc203@cam.ac.uk'), )
+
 TEMPLATE_DEBUG = False
 
 # ucamwebauth configuration
