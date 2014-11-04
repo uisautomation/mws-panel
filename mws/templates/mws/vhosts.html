@@ -27,6 +27,11 @@
                                 {% endfor %}
                             </td>
                             <td style="width: 160px;">
+                                {% if vhost.main_domain %}
+                                <a href="{% url 'sitesmanagement.views.visit_vhost' vhost_id=vhost.id %}" target="_blank">
+                                    <i title="Visit website" class="fa fa-eye fa-2x" data-toggle="tooltip"></i>
+                                </a>
+                                {% endif %}
                                 <a href="{% url 'sitesmanagement.views.domains_management' vhost_id=vhost.id %}"
                                    style="text-decoration: none;">
                                     <i title="Domains associated to this web site" class="fa fa-link fa-2x"

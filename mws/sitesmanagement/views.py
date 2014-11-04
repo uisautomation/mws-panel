@@ -909,3 +909,17 @@ def change_db_root_password(request, vm_id):
         'breadcrumbs': breadcrumbs,
         'vm': vm,
     })
+
+
+@login_required
+def visit_vhost(request, vhost_id):
+    vhost = get_object_or_404(Vhost, pk=vhost_id)
+    site = privileges_check(vhost.vm.site.id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if vhost.vm.is_busy:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
+    return redirect("http://"+str(vhost.main_domain.name))
