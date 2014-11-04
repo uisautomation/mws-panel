@@ -58,7 +58,7 @@
                                         <div class="field-items">
                                             <div class="field-item even">
                                                 <img class="campl-scale-with-grid"
-                                                     src="{% static "icons/system_packages.png" %}"
+                                                     src="{% static "icons/packages.png" %}"
                                                      height="128" style="margin: 10px;" alt="">
                                             </div>
                                         </div>
@@ -110,6 +110,41 @@
                                 </h3>
                                 <a href="{% url 'sitesmanagement.views.unix_groups' vm_id=vm.id %}"
                                    class="ir campl-focus-link">Unix Groups</a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <div class="campl-column3">
+                <div class="campl-content-container campl-side-padding">
+                    <article class="node node-external-link view-mode-focus_on clearfix
+                                    campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                        <div class="campl-focus-teaser-img">
+                            <div class="campl-content-container campl-horizontal-teaser-img">
+                                <a href="{% url 'sitesmanagement.views.change_db_root_password' vm_id=vm.id %}">
+                                    <div class="field field-name-field-external-url-image field-type-image
+                                                field-label-hidden">
+                                        <div class="field-items">
+                                            <div class="field-item even">
+                                                <img class="campl-scale-with-grid"
+                                                     src="{% static "icons/layers.png" %}"
+                                                     height="128" style="margin: 10px;" alt="">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="campl-focus-teaser-txt">
+                            <div class="campl-content-container campl-horizontal-teaser-txt">
+                                <h3 class="campl-teaser-title">
+                                    <a href="{% url 'sitesmanagement.views.change_db_root_password' vm_id=vm.id %}">
+                                        Change database root password
+                                    </a>
+                                </h3>
+                                <a href="{% url 'sitesmanagement.views.change_db_root_password' vm_id=vm.id %}"
+                                   class="ir campl-focus-link">Change database root password</a>
                             </div>
                         </div>
                     </article>

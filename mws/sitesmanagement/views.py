@@ -1,6 +1,9 @@
 import bisect
 import datetime
+import OpenSSL.crypto
+from Crypto.Util import asn1
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
@@ -759,10 +762,53 @@ def certificates(request, vhost_id):
         3: dict(name='TLS/SSL Certificate', url=reverse(certificates, kwargs={'vhost_id': vhost.id})),
     }
 
+    error_message = None
+
+    if request.method == 'POST':
+        c=OpenSSL.crypto
+
+        if 'cert' in request.FILES:
+            try:
+                cert = c.load_certificate(c.FILETYPE_PEM, request.FILES['cert'].file.read())
+            except Exception as e:
+                error_message = "The certificate file is invalid"
+                # raise ValidationError(e)
+
+        if 'key' in request.FILES and error_message is None:
+            try:
+                priv = c.load_privatekey(c.FILETYPE_PEM, request.FILES['key'].file.read())
+            except Exception as e:
+                error_message = "The key file is invalid"
+                # raise ValidationError(e)
+
+        if 'cert' in request.FILES and 'key' in request.FILES and error_message is None:
+            try:
+                pub = cert.get_pubkey()
+
+                pub_asn1 = c.dump_privatekey(c.FILETYPE_ASN1, pub)
+                priv_asn1 = c.dump_privatekey(c.FILETYPE_ASN1, priv)
+
+                pub_der = asn1.DerSequence()
+                pub_der.decode(pub_asn1)
+                priv_der = asn1.DerSequence()
+                priv_der.decode(priv_asn1)
+
+                pub_modulus = pub_der[1]
+                priv_modulus = priv_der[1]
+
+                if pub_modulus != priv_modulus:
+                    error_message = "The key doesn't match the certificate"
+                    # raise ValidationError(e)
+
+            except Exception as e:
+                error_message = "The key doesn't match the certificate"
+                # raise ValidationError(e)
+
     return render(request, 'mws/certificates.html', {
         'breadcrumbs': breadcrumbs,
         'vhost': vhost,
         'site': site,
+        'error_message': error_message
     })
 
 
@@ -840,3 +886,46 @@ def delete_dn(request, domain_id):
         return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management', kwargs={'vhost_id': vhost.id}))
 
     return HttpResponseForbidden()
+
+
+@login_required
+def change_db_root_password(request, vm_id):
+    vm = get_object_or_404(VirtualMachine, pk=vm_id)
+    site = privileges_check(vm.site.id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if vm.is_busy:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
+    breadcrumbs = {
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Server settings' if vm.primary else 'Test server settings', url=reverse(settings,
+                                                                                              kwargs={'vm_id': vm.id})),
+        2: dict(name='Change db root pass', url=reverse(change_db_root_password, kwargs={'vm_id': vm.id})),
+    }
+
+    if request.method == 'POST':
+        new_root_passwd = request.POST['new_root_passwd']
+        # do something
+        return HttpResponseRedirect(reverse(settings, kwargs={'vm_id': vm.id}))
+
+    return render(request, 'mws/change_db_root_password.html', {
+        'breadcrumbs': breadcrumbs,
+        'vm': vm,
+    })
+
+
+@login_required
+def visit_vhost(request, vhost_id):
+    vhost = get_object_or_404(Vhost, pk=vhost_id)
+    site = privileges_check(vhost.vm.site.id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if vhost.vm.is_busy:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
+    return redirect("http://"+str(vhost.main_domain.name))

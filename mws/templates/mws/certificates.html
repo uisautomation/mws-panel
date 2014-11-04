@@ -20,11 +20,12 @@
                     <p><input type="submit" value="Generate CSR" class="campl-btn campl-primary-cta campl-primary-blue"/></p>
                 </fieldset>
             </form>
-            <form action="{% url 'sitesmanagement.views.certificates' vhost_id=vhost.id %}" method="post">{% csrf_token %}
+            <form enctype="multipart/form-data" action="{% url 'sitesmanagement.views.certificates' vhost_id=vhost.id %}" method="post">
+                {% if error_message %}<p style="color: red">Error: {{ error_message }}</p>{% endif %}
                 <fieldset>
                     {% csrf_token %}
                     <p>Upload the key file: <input type="file" name="key"></p>
-                    <p>Upload the ca-bundle file: <input type="file" name="cabundle"></p>
+                    <p>Upload the certificate file: <input type="file" name="cert"></p>
                     <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
                 </fieldset>
             </form>
