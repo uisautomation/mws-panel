@@ -120,7 +120,7 @@ ul.errorlist + p textarea {
     color: white;
 }
 
-.clickable_rows tr {
+.clickable_rows tbody tr {
     cursor: pointer;
 }
 
