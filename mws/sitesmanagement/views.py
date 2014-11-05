@@ -1,5 +1,6 @@
 import bisect
 import datetime
+import subprocess
 from Crypto.Util import asn1
 import OpenSSL.crypto
 from django.contrib.auth.decorators import login_required
@@ -800,6 +801,10 @@ def certificates(request, vhost_id):
                 error_message = "The key doesn't match the certificate"
                 # raise ValidationError(e)
 
+        if 'cert' in request.FILES:
+            vhost.certificate = cert
+            vhost.save()
+
     return render(request, 'mws/certificates.html', {
         'breadcrumbs': breadcrumbs,
         'vhost': vhost,
@@ -831,11 +836,14 @@ def generate_csr(request, vhost_id):
                 'site': site,
                 'error_main_domain': True
             })
-        launch_ansible(vhost.vm) # with a task to create the CSR
+
+        vhost.csr = subprocess.check_output(["openssl", "req", "-new", "-newkey", "rsa:2048", "-nodes", "-keyout",
+                                             "/dev/null", "-subj", "/C=GB/CN=%s" % vhost.main_domain.name])
+        vhost.save()
+        # launch_ansible(vhost.vm) # with a task to create the CSR
         # include all domain names in the common name field in the CSR
         # country is always GB
         # all other parameters/fields are optional and won't appear in the certificate, just ignore them.
-        return redirect(reverse(settings, kwargs={'vm_id': vhost.vm.id}))
 
     return redirect(reverse(certificates, kwargs={'vhost_id': vhost.id}))
 
