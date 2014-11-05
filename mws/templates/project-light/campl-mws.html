@@ -50,17 +50,28 @@
                     <li><a>Panels for MWS "{{ site.name }}": </a></li>
                     <li><a href="{% url 'sitesmanagement.views.show' site_id=site.id %}">Main Panel</a></li>
                     <li><a href="{% url 'mwsauth.views.auth_change' site_id=site.id %}">Auth Panel</a></li>
-                        {% if vm %}
-                        <li>
-                            <a>{% if vm.primary %}Production{% else %}Test{% endif %} Server</a>
-                            <ul class="campl-unstyled-list">
-                                <li><a href="{% url 'sitesmanagement.views.settings' vm_id=vm.id %}">Settings</a></li>
-                                <li><a href="{% url 'sitesmanagement.views.vhosts_management' vm_id=vm.id %}">Web Sites</a></li>
-                                <li><a href="{% url 'sitesmanagement.views.system_packages' vm_id=vm.id %}">System Packages</a></li>
-                                <li><a href="{% url 'sitesmanagement.views.unix_groups' vm_id=vm.id %}">Unix Groups</a></li>
-                            </ul>
-                        </li>
-                        {% endif %}
+                    {% if site.primary_vm %}
+                    <li>
+                        <a>Production Server</a>
+                        <ul class="campl-unstyled-list">
+                            <li><a href="{% url 'sitesmanagement.views.settings' vm_id=site.primary_vm.id %}">Settings</a></li>
+                            <li><a href="{% url 'sitesmanagement.views.vhosts_management' vm_id=site.primary_vm.id %}">Web Sites</a></li>
+                            <li><a href="{% url 'sitesmanagement.views.system_packages' vm_id=site.primary_vm.id %}">System Packages</a></li>
+                            <li><a href="{% url 'sitesmanagement.views.unix_groups' vm_id=site.primary_vm.id %}">Unix Groups</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    {% if site.secondary_vm %}
+                    <li>
+                        <a>Test Server</a>
+                        <ul class="campl-unstyled-list">
+                            <li><a href="{% url 'sitesmanagement.views.settings' vm_id=site.secondary_vm.id %}">Settings</a></li>
+                            <li><a href="{% url 'sitesmanagement.views.vhosts_management' vm_id=site.secondary_vm.id %}">Web Sites</a></li>
+                            <li><a href="{% url 'sitesmanagement.views.system_packages' vm_id=site.secondary_vm.id %}">System Packages</a></li>
+                            <li><a href="{% url 'sitesmanagement.views.unix_groups' vm_id=site.secondary_vm.id %}">Unix Groups</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
                     {% endif %}
                 </ul>
             </div>
