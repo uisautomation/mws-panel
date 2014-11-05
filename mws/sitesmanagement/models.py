@@ -264,7 +264,12 @@ def full_domain_validator(hostname):
             raise ValidationError(
                 "The label '%(label)s' is too long (maximum is 63 characters)." % {'label': label})
         if not HOSTNAME_LABEL_PATTERN.match(label):
-            raise ValidationError("Unallowed characters in label '%(label)s'." % {'label': label})
+            raise ValidationError("Unallowed characters in label '%(label)s'. Domain names may be formed from the set "
+                                  "of alphanumeric ASCII characters (a-z, A-Z, 0-9), but characters are "
+                                  "case-insensitive. In addition the hyphen is permitted if it is surrounded by a "
+                                  "characters or digits, i.e., it is not the start or end of a label. Labels are "
+                                  "always separated by the full stop (period) character in the textual name "
+                                  "representation." % {'label': label})
 
 
 class VirtualMachine(models.Model):
@@ -378,6 +383,8 @@ class Vhost(models.Model):
     # main domain name for this vhost
     main_domain = models.ForeignKey('DomainName', related_name='+', null=True, blank=True, on_delete=models.SET_NULL)
     vm = models.ForeignKey(VirtualMachine, related_name='vhosts')
+    csr = models.TextField(null=True)
+    certificate = models.TextField(null=True)
 
     def sorted_domain_names(self):
         return sorted(set(self.domain_names.all()))

@@ -17,19 +17,33 @@
             <form action="{% url 'sitesmanagement.views.generate_csr' vhost_id=vhost.id %}" method="post">
                 <fieldset>
                     {% csrf_token %}
-                    <p><input type="submit" value="Generate CSR" class="campl-btn campl-primary-cta campl-primary-blue"/></p>
+                    <p><input type="submit" value="Generate {% if vhost.csr %}new {% endif %}CSR and key" class="campl-btn campl-primary-cta campl-primary-blue"/></p>
                 </fieldset>
             </form>
-            <form enctype="multipart/form-data" action="{% url 'sitesmanagement.views.certificates' vhost_id=vhost.id %}" method="post">
+            {% if vhost.csr %}
+            <pre>{{ vhost.csr }}</pre>
+            {% endif %}
+            <p><a id="own_key_cert" class="campl-btn campl-primary-cta campl-primary-blue">Upload your own key and certificate</a></p>
+            <form id="key_cert_form" enctype="multipart/form-data" action="{% url 'sitesmanagement.views.certificates' vhost_id=vhost.id %}" method="post">
                 {% if error_message %}<p style="color: red">Error: {{ error_message }}</p>{% endif %}
                 <fieldset>
                     {% csrf_token %}
-                    <p>Upload the key file: <input type="file" name="key"></p>
-                    <p>Upload the certificate file: <input type="file" name="cert"></p>
-                    <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
+                    <p style="display: none;">Upload the key file: <input type="file" name="key"></p>
+                    <p {% if not vhost.csr %}style="display: none;"{% endif %}>
+                        Upload the certificate file: <input type="file" name="cert"></p>
+                    <p {% if not vhost.csr %}style="display: none;"{% endif %}>
+                        <input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
                 </fieldset>
             </form>
 
         </div>
     </div>
+{% endblock %}
+
+{% block campl_foot_js %}
+    <script>
+        $('#own_key_cert').click(function() {
+            $('#key_cert_form fieldset p').show("fast")
+        });
+    </script>
 {% endblock %}

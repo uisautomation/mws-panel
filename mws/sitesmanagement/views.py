@@ -1,9 +1,9 @@
 import bisect
 import datetime
+import subprocess
 import OpenSSL.crypto
 from Crypto.Util import asn1
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
@@ -343,6 +343,7 @@ def vhosts_management(request, vm_id):
     return render(request, 'mws/vhosts.html', {
         'breadcrumbs': breadcrumbs,
         'vm': vm,
+        'site': site,
         'vhost_form': VhostForm()
     })
 
@@ -457,6 +458,7 @@ def system_packages(request, vm_id):
     return render(request, 'mws/system_packages.html', {
         'breadcrumbs': breadcrumbs,
         'packages_installed': packages_installed,
+        'site': site,
         'vm': vm
     })
 
@@ -481,6 +483,7 @@ def unix_groups(request, vm_id):
 
     return render(request, 'mws/unix_groups.html', {
         'breadcrumbs': breadcrumbs,
+        'site': site,
         'vm': vm
     })
 
@@ -527,6 +530,7 @@ def add_unix_group(request, vm_id):
 
     return render(request, 'mws/add_unix_group.html', {
         'breadcrumbs': breadcrumbs,
+        'site': site,
         'vm': vm,
         'lookup_lists': lookup_lists,  # TODO to be removed once django-ucam-lookup is modified
         'unix_group_form': unix_group_form
@@ -593,6 +597,8 @@ def unix_group(request, ug_id):
     return render(request, 'mws/unix_group.html', {
         'breadcrumbs': breadcrumbs,
         'lookup_lists': lookup_lists,
+        'site': site,
+        'vm': unix_group_i.vm,
         'unix_group_form': unix_group_form
     })
 
@@ -691,6 +697,8 @@ def domains_management(request, vhost_id):
     return render(request, 'mws/domains.html', {
         'breadcrumbs': breadcrumbs,
         'vhost': vhost,
+        'site': site,
+        'vm': vhost.vm,
         'domain_form': DomainNameFormNew()
     })
 
@@ -735,6 +743,8 @@ def add_domain(request, vhost_id, socket_error=None):
             return render(request, 'mws/domains.html', {
                 'breadcrumbs': breadcrumbs,
                 'vhost': vhost,
+                'site': site,
+                'vm': vhost.vm,
                 'domain_form': domain_form,
                 'error': True
             })
@@ -752,6 +762,9 @@ def certificates(request, vhost_id):
 
     if vhost.vm.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
+    if not vhost.domain_names.all():
+        return redirect(reverse(vhosts_management, kwargs={'vm_id': vhost.vm.id}))
 
     breadcrumbs = {
         0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
@@ -804,9 +817,14 @@ def certificates(request, vhost_id):
                 error_message = "The key doesn't match the certificate"
                 # raise ValidationError(e)
 
+        if 'cert' in request.FILES:
+            vhost.certificate = cert
+            vhost.save()
+
     return render(request, 'mws/certificates.html', {
         'breadcrumbs': breadcrumbs,
         'vhost': vhost,
+        'vm': vhost.vm,
         'site': site,
         'error_message': error_message
     })
@@ -832,14 +850,18 @@ def generate_csr(request, vhost_id):
             return render(request, 'mws/certificates.html', {
                 'breadcrumbs': breadcrumbs,
                 'vhost': vhost,
+                'vm': vhost.vm,
                 'site': site,
                 'error_main_domain': True
             })
-        launch_ansible(vhost.vm) # with a task to create the CSR
+
+        vhost.csr = subprocess.check_output(["openssl", "req", "-new", "-newkey", "rsa:2048", "-nodes", "-keyout",
+                                             "/dev/null", "-subj", "/C=GB/CN=%s" % vhost.main_domain.name])
+        vhost.save()
+        # launch_ansible(vhost.vm) # with a task to create the CSR
         # include all domain names in the common name field in the CSR
         # country is always GB
         # all other parameters/fields are optional and won't appear in the certificate, just ignore them.
-        return redirect(reverse(settings, kwargs={'vm_id': vhost.vm.id}))
 
     return redirect(reverse(certificates, kwargs={'vhost_id': vhost.id}))
 
@@ -914,6 +936,7 @@ def change_db_root_password(request, vm_id):
     return render(request, 'mws/change_db_root_password.html', {
         'breadcrumbs': breadcrumbs,
         'vm': vm,
+        'site': site,
     })
 
 

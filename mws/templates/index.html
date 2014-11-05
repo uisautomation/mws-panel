@@ -64,9 +64,7 @@
                                     {{ site.description }}
                                 </td>
                                 <td>
-                                    {% for domain in site.domain_names %}
-                                        {{ domain.name }}<br/>
-                                    {% endfor %}
+                                    {{ site.domain_names|join:"<br/>" }}
                                 </td>
                                 <td>
                                     {% if site.primary_vm %}
@@ -126,9 +124,7 @@
                                         {{ site.description }}
                                     </td>
                                     <td>
-                                        {% for domain in site.domain_names %}
-                                            {{ domain.name }}<br/>
-                                        {% endfor %}
+                                        {{ site.domain_names|join:"<br/>" }}
                                     </td>
                                     <td style="width: 35px;">
                                         {% if not site.is_admin_suspended %}
@@ -203,7 +199,7 @@
 {% block campl_foot_js %}
     <script>
         $('[data-toggle="tooltip"]').tooltip({'placement': 'top'});
-        $(".clickable_rows tr").click(function() {
+        $(".clickable_rows tbody tr").click(function() {
                 window.document.location = $(this).data('href');
           });
     </script>
