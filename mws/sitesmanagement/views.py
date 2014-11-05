@@ -3,7 +3,6 @@ import datetime
 from Crypto.Util import asn1
 import OpenSSL.crypto
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
@@ -746,6 +745,9 @@ def certificates(request, vhost_id):
 
     if vhost.vm.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
+    if not vhost.domain_names.all():
+        return redirect(reverse(vhosts_management, kwargs={'vm_id': vhost.vm.id}))
 
     breadcrumbs = {
         0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
