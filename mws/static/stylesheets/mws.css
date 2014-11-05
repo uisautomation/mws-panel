@@ -120,6 +120,10 @@ ul.errorlist + p textarea {
     color: white;
 }
 
+.clickable_rows tr {
+    cursor: pointer;
+}
+
 /*! normalize.css v3.0.0 | MIT License | git.io/normalize */
 
 .btn {
