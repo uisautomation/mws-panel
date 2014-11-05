@@ -22,9 +22,7 @@
                                 {{ vhost.name }}
                             </td>
                             <td>
-                                {% for domain_name in vhost.sorted_domain_names %}
-                                    {{ domain_name.name }},
-                                {% endfor %}
+                                {{ vhost.sorted_domain_names|join:", " }}
                             </td>
                             <td style="width: 160px;">
                                 {% if vhost.main_domain %}

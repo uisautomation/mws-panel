@@ -59,9 +59,7 @@
                                     {{ site.description }}
                                 </td>
                                 <td>
-                                    {% for domain in site.domain_names %}
-                                        {{ domain.name }}<br/>
-                                    {% endfor %}
+                                    {{ site.domain_names|join:"<br/>" }}
                                 </td>
                                 <td>
                                     {% if site.primary_vm %}
@@ -121,9 +119,7 @@
                                         {{ site.description }}
                                     </td>
                                     <td>
-                                        {% for domain in site.domain_names %}
-                                            {{ domain.name }}<br/>
-                                        {% endfor %}
+                                        {{ site.domain_names|join:"<br/>" }}
                                     </td>
                                     <td style="width: 35px;">
                                         {% if not site.is_admin_suspended %}
