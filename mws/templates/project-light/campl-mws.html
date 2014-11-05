@@ -6,6 +6,7 @@
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
     {% include 'ucamlookup_headers.html' with jquery=False %}
     <link href="{% static 'stylesheets/font-awesome.css' %}" media="screen" rel="stylesheet" type="text/css" />
+    <script src="{% static 'js/custom.js' %}"></script>
 {% endblock %}
 
 {% block head_title %}Managed Web Service administration site{% endblock %}
@@ -36,6 +37,35 @@
 {% endblock %}
 
 {% block campl_tabs_header %}
+{% endblock %}
+
+{% block campl_page_header %}
+    {{ block.super }}
+    <div class="campl-row campl-page-header">
+        <div class="campl-wrap clearfix campl-local-navigation" id="local-nav">
+            <div class="campl-local-navigation-container campl-mobile">
+                <ul class="campl-unstyled-list">
+                    <li><a href="{% url 'sitesmanagement.views.index' %}">List of MWS Servers</a></li>
+                    {% if site %}
+                    <li><a>Panels for MWS "{{ site.name }}": </a></li>
+                    <li><a href="{% url 'sitesmanagement.views.show' site_id=site.id %}">Main Panel</a></li>
+                    <li><a href="{% url 'mwsauth.views.auth_change' site_id=site.id %}">Auth Panel</a></li>
+                        {% if vm %}
+                        <li>
+                            <a>{% if vm.primary %}Production{% else %}Test{% endif %} Server</a>
+                            <ul class="campl-unstyled-list">
+                                <li><a href="{% url 'sitesmanagement.views.settings' vm_id=vm.id %}">Settings</a></li>
+                                <li><a href="{% url 'sitesmanagement.views.vhosts_management' vm_id=vm.id %}">Web Sites</a></li>
+                                <li><a href="{% url 'sitesmanagement.views.system_packages' vm_id=vm.id %}">System Packages</a></li>
+                                <li><a href="{% url 'sitesmanagement.views.unix_groups' vm_id=vm.id %}">Unix Groups</a></li>
+                            </ul>
+                        </li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block blurb %}The Managed Web Service is provided by the <a href="http://www.uis.cam.ac.uk">University Information Services</a>.{% endblock %}

@@ -337,6 +337,7 @@ def vhosts_management(request, vm_id):
     return render(request, 'mws/vhosts.html', {
         'breadcrumbs': breadcrumbs,
         'vm': vm,
+        'site': site,
         'vhost_form': VhostForm()
     })
 
@@ -451,6 +452,7 @@ def system_packages(request, vm_id):
     return render(request, 'mws/system_packages.html', {
         'breadcrumbs': breadcrumbs,
         'packages_installed': packages_installed,
+        'site': site,
         'vm': vm
     })
 
@@ -475,6 +477,7 @@ def unix_groups(request, vm_id):
 
     return render(request, 'mws/unix_groups.html', {
         'breadcrumbs': breadcrumbs,
+        'site': site,
         'vm': vm
     })
 
@@ -521,6 +524,7 @@ def add_unix_group(request, vm_id):
 
     return render(request, 'mws/add_unix_group.html', {
         'breadcrumbs': breadcrumbs,
+        'site': site,
         'vm': vm,
         'lookup_lists': lookup_lists,  # TODO to be removed once django-ucam-lookup is modified
         'unix_group_form': unix_group_form
@@ -587,6 +591,8 @@ def unix_group(request, ug_id):
     return render(request, 'mws/unix_group.html', {
         'breadcrumbs': breadcrumbs,
         'lookup_lists': lookup_lists,
+        'site': site,
+        'vm': unix_group_i.vm,
         'unix_group_form': unix_group_form
     })
 
@@ -685,6 +691,8 @@ def domains_management(request, vhost_id):
     return render(request, 'mws/domains.html', {
         'breadcrumbs': breadcrumbs,
         'vhost': vhost,
+        'site': site,
+        'vm': vhost.vm,
         'domain_form': DomainNameFormNew()
     })
 
@@ -729,6 +737,8 @@ def add_domain(request, vhost_id, socket_error=None):
             return render(request, 'mws/domains.html', {
                 'breadcrumbs': breadcrumbs,
                 'vhost': vhost,
+                'site': site,
+                'vm': vhost.vm,
                 'domain_form': domain_form,
                 'error': True
             })
@@ -808,6 +818,7 @@ def certificates(request, vhost_id):
     return render(request, 'mws/certificates.html', {
         'breadcrumbs': breadcrumbs,
         'vhost': vhost,
+        'vm': vhost.vm,
         'site': site,
         'error_message': error_message
     })
@@ -833,6 +844,7 @@ def generate_csr(request, vhost_id):
             return render(request, 'mws/certificates.html', {
                 'breadcrumbs': breadcrumbs,
                 'vhost': vhost,
+                'vm': vhost.vm,
                 'site': site,
                 'error_main_domain': True
             })
@@ -918,6 +930,7 @@ def change_db_root_password(request, vm_id):
     return render(request, 'mws/change_db_root_password.html', {
         'breadcrumbs': breadcrumbs,
         'vm': vm,
+        'site': site,
     })
 
 
