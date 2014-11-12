@@ -9,7 +9,7 @@ import crypt
 from django.conf import settings
 import requests
 import platform
-from sitesmanagement.models import VirtualMachine, NetworkConfig
+from sitesmanagement.models import VirtualMachine
 
 
 class PlatformsAPINotWorkingException(Exception):
@@ -82,6 +82,9 @@ def new_site_primary_vm(vm):
 
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
 def install_vm(vm):
+    from apimws.models import AnsibleConfiguration
+    AnsibleConfiguration.objects.create(vm=vm, key='os', value=json.dumps(settings.OS_VERSION))
+
     f = open(os.path.join(settings.BASE_DIR, 'apimws/ubuntu_preseed.txt'), 'r')
     profile = f.read()
     f.close()

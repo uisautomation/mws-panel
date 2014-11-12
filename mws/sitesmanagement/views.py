@@ -17,6 +17,7 @@ from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.utils import is_camacuk, get_object_or_None
 from .models import SiteForm, DomainNameFormNew, BillingForm, DomainName, NetworkConfig, EmailConfirmation, \
     VirtualMachine, Vhost, VhostForm, Site, UnixGroupForm, UnixGroup
+from django.conf import settings as django_settings
 
 
 @login_required
@@ -208,15 +209,20 @@ def show(request, site_id):
     }
 
     warning_messages = []
+    primary_vm = site.primary_vm
 
-    if site.primary_vm is not None and site.primary_vm.status == 'ansible':
+    if primary_vm is not None and primary_vm.status == 'ansible':
         warning_messages.append("Your server is being configured.")
 
     if site.secondary_vm is not None and site.secondary_vm.status == 'ansible':
         warning_messages.append("Your test server is being configured.")
 
-    if site.primary_vm is not None:
-        for vhost in site.primary_vm.vhosts.all():
+    if primary_vm is not None:
+        if primary_vm.due_update():
+            warning_messages.append("Your server is due to an OS update. From %s %.2f to %s %.2f" %
+                                    (primary_vm.os_type, primary_vm.os_version, primary_vm.os_type,
+                                     django_settings.OS_VERSION[primary_vm.os_type]))
+        for vhost in primary_vm.vhosts.all():
             for domain_name in vhost.domain_names.all():
                 if domain_name.status == 'requested':
                     warning_messages.append("Your domain name %s has been requested and is under review." %

@@ -1,5 +1,7 @@
 from datetime import datetime
 from itertools import chain
+import json
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -8,7 +10,7 @@ import re
 from ucamlookup import get_institutions
 from ucamlookup.models import LookupGroup
 from mwsauth.utils import get_users_of_a_group
-from sitesmanagement.utils import is_camacuk
+from sitesmanagement.utils import is_camacuk, get_object_or_None
 
 
 class NetworkConfig(models.Model):
@@ -356,6 +358,41 @@ class VirtualMachine(models.Model):
                 if is_camacuk(domain.name) and domain.status == 'accepted':
                     domains.append(domain)
         return sorted(set(domains))
+
+    @property
+    def operating_system(self):
+        from apimws.models import AnsibleConfiguration
+        ansible_configuraton = get_object_or_None(AnsibleConfiguration, vm=self, key="os")
+        if ansible_configuraton:
+            return json.loads(ansible_configuraton.value)
+        else:
+            return None
+
+    def due_update(self):
+        operating_system_dict = self.operating_system
+        if operating_system_dict:
+            if settings.OS_VERSION[operating_system_dict.keys()[0]] > operating_system_dict.values()[0]:
+                return True
+            else:
+                return False
+        else:
+            return False # TODO also raise an exception?
+
+    @property
+    def os_type(self):
+        operating_system_dict = self.operating_system
+        if operating_system_dict:
+            return operating_system_dict.keys()[0]
+        else:
+            return ""
+
+    @property
+    def os_version(self):
+        operating_system_dict = self.operating_system
+        if operating_system_dict:
+            return operating_system_dict.values()[0]
+        else:
+            return ""
 
     def __unicode__(self):
         if self.name is None:
