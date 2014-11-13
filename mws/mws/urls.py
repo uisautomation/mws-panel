@@ -45,6 +45,7 @@ urlpatterns = patterns('',
     url(r'^unix_groups/edit/(?P<ug_id>[0-9]+)/$', 'sitesmanagement.views.unix_group'),
     url(r'^unix_groups/delete/(?P<ug_id>[0-9]+)/$', 'sitesmanagement.views.delete_unix_group'),
     url(r'^settings/vm/(?P<vm_id>[0-9]+)/db_root_pass/$', 'sitesmanagement.views.change_db_root_password'),
+    url(r'^update_os/(?P<vm_id>[0-9]+)/$', 'sitesmanagement.views.update_os'),
 
     # apimws app
     url(r'^api/confirm_dns/(?P<dn_id>[0-9]+)/$', 'apimws.views.confirm_dns'),
