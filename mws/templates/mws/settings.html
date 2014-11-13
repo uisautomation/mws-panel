@@ -197,43 +197,77 @@
             </div>
         {% endif %}
 
-        {% if vm.primary and vm.due_update %}
-        <div class="campl-column3">
-            <div class="campl-content-container campl-side-padding">
-                <article class="node node-external-link view-mode-focus_on clearfix
-                                campl-horizontal-teaser campl-teaser campl-focus-teaser campl-focus-teaser-red">
-                    <div class="campl-focus-teaser-img">
-                        <div class="campl-content-container campl-horizontal-teaser-img">
-                            <a class="update_os_vm" data-href="javascript:update_os_vm('{% url 'sitesmanagement.views.update_os' vm_id=vm.id %}')" href="#">
-                                <div class="field field-name-field-external-url-image field-type-image
-                                            field-label-hidden">
-                                    <div class="field-items">
-                                        <div class="field-item even">
-                                            <i class="fa fa-refresh fa-6x" style="color: orangered; margin-top: 10px; margin-left: 15px; margin-bottom: 10px;"></i>
+        {% if vm.primary %}
+            <div class="campl-column3">
+                <div class="campl-content-container campl-side-padding">
+                    <article class="node node-external-link view-mode-focus_on clearfix
+                                    campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                        <div class="campl-focus-teaser-img">
+                            <div class="campl-content-container campl-horizontal-teaser-img">
+                                <a href="{% url 'sitesmanagement.views.backups' vm_id=vm.id %}">
+                                    <div class="field field-name-field-external-url-image field-type-image
+                                                field-label-hidden">
+                                        <div class="field-items">
+                                            <div class="field-item even">
+                                                <img class="campl-scale-with-grid"
+                                                     src="{% static "icons/hdd.png" %}"
+                                                     height="128" style="margin: 10px;" alt="">
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </a>
+                                </a>
+                            </div>
                         </div>
-                    </div>
-                    <div class="campl-focus-teaser-txt">
-                        <div class="campl-content-container campl-horizontal-teaser-txt">
-                            <h3 class="campl-teaser-title">
+                        <div class="campl-focus-teaser-txt">
+                            <div class="campl-content-container campl-horizontal-teaser-txt">
+                                <h3 class="campl-teaser-title">
+                                    <a href="{% url 'sitesmanagement.views.backups' vm_id=vm.id %}">
+                                        Restore backup
+                                    </a>
+                                </h3>
+                                <a href="{% url 'sitesmanagement.views.backups' vm_id=vm.id %}"
+                                   class="ir campl-focus-link">Restore backup</a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+            {% if vm.due_update %}
+            <div class="campl-column3">
+                <div class="campl-content-container campl-side-padding">
+                    <article class="node node-external-link view-mode-focus_on clearfix
+                                    campl-horizontal-teaser campl-teaser campl-focus-teaser campl-focus-teaser-red">
+                        <div class="campl-focus-teaser-img">
+                            <div class="campl-content-container campl-horizontal-teaser-img">
                                 <a class="update_os_vm" data-href="javascript:update_os_vm('{% url 'sitesmanagement.views.update_os' vm_id=vm.id %}')" href="#">
+                                    <div class="field field-name-field-external-url-image field-type-image
+                                                field-label-hidden">
+                                        <div class="field-items">
+                                            <div class="field-item even">
+                                                <i class="fa fa-refresh fa-6x" style="color: orangered; margin-top: 10px; margin-left: 15px; margin-bottom: 10px;"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="campl-focus-teaser-txt">
+                            <div class="campl-content-container campl-horizontal-teaser-txt">
+                                <h3 class="campl-teaser-title">
+                                    <a class="update_os_vm" data-href="javascript:update_os_vm('{% url 'sitesmanagement.views.update_os' vm_id=vm.id %}')" href="#">
+                                        Update {{ vm.os_type }}
+                                    </a>
+                                </h3>
+                                <a class="update_os_vm ir campl-focus-link campl-focus-link-red" data-href="javascript:update_os_vm('{% url 'sitesmanagement.views.update_os' vm_id=vm.id %}')" href="#">
                                     Update {{ vm.os_type }}
                                 </a>
-                            </h3>
-                            <a class="update_os_vm ir campl-focus-link campl-focus-link-red" data-href="javascript:update_os_vm('{% url 'sitesmanagement.views.update_os' vm_id=vm.id %}')" href="#">
-                                Update {{ vm.os_type }}
-                            </a>
+                            </div>
                         </div>
-                    </div>
-                </article>
+                    </article>
+                </div>
             </div>
-        </div>
-        {% endif %}
-
-        {% if not vm.primary %}
+            {% endif %}
+        {% else %}
         <div class="campl-column3">
             <div class="campl-content-container campl-side-padding">
                 <article class="node node-external-link view-mode-focus_on clearfix

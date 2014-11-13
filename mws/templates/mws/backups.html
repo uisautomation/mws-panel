@@ -1,0 +1,17 @@
+{% extends 'project-light/campl-mws.html' %}
+{% load static %}
+{% block page_content %}
+    <div class="campl-column12 campl-main-content">
+        <div class="campl-content-container">
+            <h1>Restore backups</h1>
+            <form action="{% url 'sitesmanagement.views.backups' vm_id=vm.id %}" method="post">
+                <fieldset>
+                    {% csrf_token %}
+                    <p>Choose date</p>
+                    <p><input type="date" name="backupdate" id="datepicker" class="datepicker" min="{{ fromdate|date:"Y-m-d" }}" max="{{ todate|date:"Y-m-d" }}" /></p>
+                    <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+{% endblock %}

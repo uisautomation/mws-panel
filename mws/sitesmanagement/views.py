@@ -663,7 +663,7 @@ def update_os(request, vm_id):
     if site is None:
         return HttpResponseForbidden()
 
-    if not vm.is_ready:
+    if not vm.is_ready: # TODO change the button format (disabled) if the vm is not ready
         return redirect(reverse(show, kwargs={'site_id': site.id}))
 
     # TODO Launch ansible task to update the Operating System
@@ -946,7 +946,7 @@ def change_db_root_password(request, vm_id):
 
     if request.method == 'POST':
         new_root_passwd = request.POST['new_root_passwd']
-        # do something
+        # TODO do something
         return HttpResponseRedirect(reverse(settings, kwargs={'vm_id': vm.id}))
 
     return render(request, 'mws/change_db_root_password.html', {
@@ -968,3 +968,34 @@ def visit_vhost(request, vhost_id):
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     return redirect("http://"+str(vhost.main_domain.name))
+
+
+@login_required
+def backups(request, vm_id):
+    vm = get_object_or_404(VirtualMachine, pk=vm_id)
+    site = privileges_check(vm.site.id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if vm.is_busy:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
+    breadcrumbs = {
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Server settings' if vm.primary else 'Test server settings', url=reverse(settings,
+                                                                                              kwargs={'vm_id': vm.id})),
+        2: dict(name='Restore backup', url=reverse(backups, kwargs={'vm_id': vm.id})),
+    }
+
+    if request.method == 'POST':
+        # TODO do something + check that dates are correct
+        return HttpResponseRedirect(reverse(settings, kwargs={'vm_id': vm.id}))
+
+    return render(request, 'mws/backups.html', {
+        'breadcrumbs': breadcrumbs,
+        'vm': vm,
+        'site': site,
+        'fromdate': datetime.date.today()-datetime.timedelta(days=30),
+        'todate': datetime.date.today()-datetime.timedelta(days=1),
+    })
