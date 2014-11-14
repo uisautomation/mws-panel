@@ -1,3 +1,6 @@
+import subprocess
+from tempfile import NamedTemporaryFile
+import OpenSSL
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
@@ -61,12 +64,30 @@ def user_panel(request):
     }
 
     if request.method == 'POST':
+        if 'ssh_public_key' in request.FILES:
+            try:
+                ssh_public_key = request.FILES['ssh_public_key'].file.read()
+                ssh_public_key_temp_file = NamedTemporaryFile()
+                ssh_public_key_temp_file.write(ssh_public_key)
+                ssh_public_key_temp_file.flush()
+                command_response = subprocess.check_output(["ssh-keygen", "-lf", ssh_public_key_temp_file.name])
+                ssh_public_key_temp_file.close()
+            except Exception as e:
+                error_message = "The key file is invalid"
+                return render(request, 'user/panel.html', {
+                    'breadcrumbs': breadcrumbs,
+                    'ssh_public_key': request.user.mws_user.ssh_public_key
+                    if hasattr(request.user, 'mws_user') else None,
+                    'error_message': error_message
+                })
+
         if hasattr(request.user, 'mws_user'):
             mws_user = request.user.mws_user
-            mws_user.ssh_public_key = 123
+            mws_user.ssh_public_key = ssh_public_key
             mws_user.save()
         else:
-            mws_user = MWSUser.objects.create(user=request.user, ssh_public_key=123)
+            mws_user = MWSUser.objects.create(user=request.user, ssh_public_key=ssh_public_key)
+
         return redirect(index)
 
     return render(request, 'user/panel.html', {
