@@ -3,6 +3,7 @@ import datetime
 import subprocess
 from Crypto.Util import asn1
 import OpenSSL.crypto
+from django.utils import dateparse
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.db import transaction
@@ -988,14 +989,25 @@ def backups(request, vm_id):
         2: dict(name='Restore backup', url=reverse(backups, kwargs={'vm_id': vm.id})),
     }
 
-    if request.method == 'POST':
-        # TODO do something + check that dates are correct
-        return HttpResponseRedirect(reverse(settings, kwargs={'vm_id': vm.id}))
-
-    return render(request, 'mws/backups.html', {
+    parameters = {
         'breadcrumbs': breadcrumbs,
         'vm': vm,
         'site': site,
         'fromdate': datetime.date.today()-datetime.timedelta(days=30),
         'todate': datetime.date.today()-datetime.timedelta(days=1),
-    })
+    }
+
+    if request.method == 'POST':
+        try:
+            backup_date = dateparse.parse_date(request.POST['backupdate'])
+            if backup_date is None or backup_date >= datetime.date.today() \
+                    or backup_date < (datetime.date.today()-datetime.timedelta(days=30)):
+                raise ValueError
+        except ValueError:
+            parameters['error_message'] = "Incorrect date"
+            return render(request, 'mws/backups.html', parameters)
+
+        # TODO do something + check that dates are correct
+        return HttpResponseRedirect(reverse(show, kwargs={'site_id': site.id}))
+
+    return render(request, 'mws/backups.html', parameters)
