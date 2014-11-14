@@ -4,15 +4,31 @@
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
             <h1>User panel for {{ request.user.last_name }} ({{ request.user.username }})</h1>
-            <form action={% url 'mwsauth.views.user_panel' %} method="post">
+            {% if ssh_public_key %}
+                <pre>{{ ssh_public_key }}</pre>
+                <p><a id="new_key" class="campl-btn campl-primary-cta campl-primary-blue">Upload a new certificate</a></p>
+
+            {% endif %}
+            <form {% if ssh_public_key %}style="display: none;"{% endif %} id="ssh_key_form"
+                  action={% url 'mwsauth.views.user_panel' %} method="post">
                 <fieldset>
                     {% csrf_token %}
+                    {% if not ssh_public_key %}<p>If you upload your public ssh key, you will be able to access to all
+                    the servers where you have been authorised through ssh using your private key</p>{% endif %}
                     <div id="user_form">
-                        {{ mwsuser_form.as_p }}
+                        Public ssh key: <input type="file" name="ssh_public_key"></p>
                     </div>
                     <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
                 </fieldset>
             </form>
         </div>
     </div>
+{% endblock %}
+
+{% block campl_foot_js %}
+    <script>
+        $('#new_key').click(function() {
+            $('#ssh_key_form').show("fast")
+        });
+    </script>
 {% endblock %}
