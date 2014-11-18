@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
 from reversion import VersionAdmin
-from .models import Site, Billing, DomainName, NetworkConfig, Suspension, VirtualMachine, EmailConfirmation, Vhost
+from .models import Site, Billing, DomainName, NetworkConfig, Suspension, VirtualMachine, EmailConfirmation, Vhost, \
+    UnixGroup
 from ucamlookup import get_institutions, get_institution_name_by_id
 
 
@@ -34,7 +35,7 @@ class SiteAdmin(ModelAdmin):
     institution.admin_order_field = 'institution_id'
 
 
-class DomainNameAdmin(ModelAdmin):
+class DomainNameAdmin(VersionAdmin):
     list_display = ('name', 'vhost', 'status')
     ordering = ('name', )
     search_fields = ('name', )
@@ -66,11 +67,11 @@ class BillingAdmin(VersionAdmin):
     list_display = ('site', 'group', )
 
 
-class VhostAdmin(ModelAdmin):
+class VhostAdmin(VersionAdmin):
     list_display = ('name', 'vm', )
 
 
-class VirtualMachineAdmin(ModelAdmin):
+class VirtualMachineAdmin(VersionAdmin):
     list_display = ('name', 'site', 'primary', 'status')
 
 
@@ -86,3 +87,4 @@ admin.site.register(NetworkConfig, NetworkConfigAdmin)
 admin.site.register(Suspension, SuspensionAdmin)
 admin.site.register(VirtualMachine, VirtualMachineAdmin)
 admin.site.register(EmailConfirmation, EmailConfirmationAdmin)
+admin.site.register(UnixGroup, VersionAdmin)

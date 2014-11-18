@@ -7,7 +7,7 @@ from sitesmanagement.models import VirtualMachine
 
 
 class AnsibleConfiguration(models.Model):
-    vm = models.ForeignKey(VirtualMachine)
+    vm = models.ForeignKey(VirtualMachine, related_name='ansible_configuration')
     key = models.CharField(max_length=250, db_index=True)
     value = models.TextField()
 

@@ -253,7 +253,7 @@ def show(request, site_id):
 
 @login_required
 @transaction.atomic()
-@reversion.create_revision()
+#@reversion.create_revision()
 def billing_management(request, site_id):
     site = privileges_check(site_id, request.user)
 

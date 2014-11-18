@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django import forms
 import re
+import reversion
 from ucamlookup import get_institutions
 from ucamlookup.models import LookupGroup
 from mwsauth.utils import get_users_of_a_group
@@ -498,3 +499,9 @@ class UnixGroupForm(forms.ModelForm):
     class Meta:
         model = UnixGroup
         fields = ('name', )
+
+
+reversion.register(VirtualMachine, follow=["unix_groups", "ansible_configuration", "vhosts"])
+reversion.register(Vhost, follow=["domain_names", "vm"])
+reversion.register(DomainName, follow=["vhost"])
+reversion.register(UnixGroup, follow=["vm"])
