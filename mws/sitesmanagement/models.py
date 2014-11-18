@@ -36,7 +36,7 @@ class NetworkConfig(models.Model):
     def get_free_config(cls):
         return cls.objects.filter(site=None).first()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.IPv4 + " - " + self.mws_domain
 
 
@@ -71,7 +71,7 @@ class Site(models.Model):
     # The network configuration for the VMs of this site
     network_configuration = models.OneToOneField(NetworkConfig, related_name='site')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def is_admin_suspended(self):
@@ -395,7 +395,7 @@ class VirtualMachine(models.Model):
         else:
             return ""
 
-    def __unicode__(self):
+    def __str__(self):
         if self.name is None:
             return "<Under request>"
         else:
@@ -413,7 +413,7 @@ class Vhost(models.Model):
     def sorted_domain_names(self):
         return sorted(set(self.domain_names.all()))
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -429,7 +429,7 @@ class DomainName(models.Model):
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='requested')
     vhost = models.ForeignKey(Vhost, related_name='domain_names')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -437,6 +437,9 @@ class UnixGroup(models.Model):
     name = models.CharField(max_length=16)  # TODO add validator to comply with Ubuntu guidelines of Unix group names
     vm = models.ForeignKey(VirtualMachine, related_name='unix_groups')
     users = models.ManyToManyField(User)
+
+    def __str__(self):
+        return self.name
 
 
 # FORMS
