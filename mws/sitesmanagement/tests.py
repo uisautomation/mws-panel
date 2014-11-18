@@ -79,7 +79,7 @@ class SiteManagementTests(TestCase):
 
         site.users.add(User.objects.get(username="test0001"))
         response = self.client.get(reverse(views.show, kwargs={'site_id': site.id}))
-        self.assertContains(response, "No Billing, please add one.")
+        self.assertContains(response, "No billing details are available, please add them.")
 
     def test_view_new(self):
         response = self.client.get(reverse(views.new))
@@ -232,7 +232,7 @@ class SiteManagementTests(TestCase):
         response = self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id}))
         self.assertContains(response, "Billing data")
         response = self.client.get(reverse(views.show, kwargs={'site_id': site.id}))
-        self.assertContains(response, "No Billing, please add one.")
+        self.assertContains(response, "No billing details are available, please add them.")
 
         suspension = site.suspend_now(input_reason="test suspension")
         response = self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id}))
