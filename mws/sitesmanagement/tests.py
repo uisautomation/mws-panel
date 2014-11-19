@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
+from django.utils import unittest
 from mwsauth.tests import do_test_login
 from models import NetworkConfig, Site, VirtualMachine, UnixGroup, Vhost, DomainName
 import views
@@ -81,6 +82,8 @@ class SiteManagementTests(TestCase):
         response = self.client.get(reverse(views.show, kwargs={'site_id': site.id}))
         self.assertContains(response, "No billing details are available, please add them.")
 
+    @unittest.skipUnless(hasattr(settings, 'PLATFORMS_API_USERNAME'),
+	"Platforms API login details not available.")
     def test_view_new(self):
         response = self.client.get(reverse(views.new))
         self.assertEqual(response.status_code, 302)  # Not logged in, redirected to login
