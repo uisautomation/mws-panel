@@ -573,8 +573,14 @@ class SiteManagementTests(TestCase):
     def test_certificates(self):
         do_test_login(self, user="test0001")
         site = self.create_site()
+
         self.client.post(reverse(views.add_vhost, kwargs={'vm_id': site.primary_vm.id}), {'name': 'testVhost'})
         vhost = Vhost.objects.get(name='testVhost')
+        response = self.client.post(reverse(views.generate_csr, kwargs={'vhost_id': vhost.id}))
+        self.assertContains(response, "A CSR couldn't be generated because you don't have a master domain assigned to "
+                                      "this vhost.")
+        self.assertIsNone(vhost.csr)
+
         self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}), {'name': 'randomdomain.co.uk'})
         vhost = Vhost.objects.get(name='testVhost')
         self.assertIsNone(vhost.csr)
