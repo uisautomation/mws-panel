@@ -1,4 +1,5 @@
 from datetime import datetime
+import tempfile
 import time
 import os
 from django.conf import settings
@@ -6,6 +7,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
 from django.utils import unittest
+import subprocess
 from apimws.models import AnsibleConfiguration
 from mwsauth.tests import do_test_login
 from models import NetworkConfig, Site, VirtualMachine, UnixGroup, Vhost, DomainName
@@ -134,8 +136,6 @@ class SiteManagementTests(TestCase):
 
         # Disable site
         self.assertFalse(test_site.disabled)
-        while test_site.is_busy:
-            time.sleep(0.25)
         response = self.client.post(reverse(views.disable, kwargs={'site_id': test_site.id}))
         # TODO test that views are restricted
         self.assertTrue(Site.objects.get(pk=test_site.id).disabled)
@@ -147,8 +147,6 @@ class SiteManagementTests(TestCase):
         # Clone first VM into the secondary VM
         self.client.post(reverse(views.clone_vm_view, kwargs={'site_id': test_site.id}), {'primary_vm': 'true'})
 
-        while test_site.secondary_vm.is_busy:
-            time.sleep(0.25)
         self.client.delete(reverse(views.delete_vm, kwargs={'vm_id': test_site.secondary_vm.id}))
 
         self.client.post(reverse(views.delete, kwargs={'site_id': test_site.id}))
@@ -571,3 +569,57 @@ class SiteManagementTests(TestCase):
         self.assertContains(response, "Drupal &lt;installed&gt;")
         self.client.post(reverse(views.system_packages, kwargs={'vm_id': site.primary_vm.id}), {'package_number': 1})
         self.assertEqual(AnsibleConfiguration.objects.get(key="system_packages").value, "2")
+
+    def test_certificates(self):
+        do_test_login(self, user="test0001")
+        site = self.create_site()
+        self.client.post(reverse(views.add_vhost, kwargs={'vm_id': site.primary_vm.id}), {'name': 'testVhost'})
+        vhost = Vhost.objects.get(name='testVhost')
+        self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}), {'name': 'randomdomain.co.uk'})
+        vhost = Vhost.objects.get(name='testVhost')
+        self.assertIsNone(vhost.csr)
+        self.assertIsNone(vhost.certificate)
+        self.assertIsNotNone(vhost.main_domain)
+        self.client.post(reverse(views.generate_csr, kwargs={'vhost_id': vhost.id}))
+        vhost = Vhost.objects.get(name='testVhost')
+        self.assertIsNotNone(vhost.csr)
+
+        privatekeyfile = tempfile.NamedTemporaryFile()
+        csrfile = tempfile.NamedTemporaryFile()
+        certificatefile = tempfile.NamedTemporaryFile()
+        subprocess.check_output(["openssl", "req", "-new", "-newkey", "rsa:2048", "-nodes", "-keyout",
+                                 privatekeyfile.name, "-subj", "/C=GB/CN=%s" % vhost.main_domain.name,
+                                 "-out", csrfile.name])
+        subprocess.check_output(["openssl", "x509", "-req", "-days", "365", "-in", csrfile.name, "-signkey",
+                                 privatekeyfile.name, "-out", certificatefile.name])
+
+        self.client.post(reverse(views.certificates, kwargs={'vhost_id': vhost.id}),
+                         {'key': privatekeyfile, 'cert': certificatefile})
+        vhost = Vhost.objects.get(name='testVhost')
+        self.assertIsNotNone(vhost.certificate)
+
+        certificatefile.seek(0)
+        self.assertEqual(vhost.certificate, certificatefile.read())
+
+        privatekeyfile.seek(0)
+        response = self.client.post(reverse(views.certificates, kwargs={'vhost_id': vhost.id}),
+                                    {'cert': privatekeyfile})
+        self.assertContains(response, "The certificate file is invalid")
+
+        certificatefile.seek(0)
+        response = self.client.post(reverse(views.certificates, kwargs={'vhost_id': vhost.id}),
+                                    {'key': certificatefile})
+        self.assertContains(response, "The key file is invalid")
+
+        privatekeyfile.close()
+        privatekeyfile = tempfile.NamedTemporaryFile()
+        subprocess.check_output(["openssl", "genrsa", "-out", privatekeyfile.name, "2048"])
+
+        certificatefile.seek(0)
+        response = self.client.post(reverse(views.certificates, kwargs={'vhost_id': vhost.id}),
+                                    {'key': privatekeyfile, 'cert': certificatefile})
+        self.assertContains(response, "The key doesn&#39;t match the certificate")
+
+        privatekeyfile.close()
+        csrfile.close()
+        certificatefile.close()

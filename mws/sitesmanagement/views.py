@@ -799,14 +799,16 @@ def certificates(request, vhost_id):
 
         if 'cert' in request.FILES:
             try:
-                cert = c.load_certificate(c.FILETYPE_PEM, request.FILES['cert'].file.read())
+                certificates_str = request.FILES['cert'].file.read()
+                cert = c.load_certificate(c.FILETYPE_PEM, certificates_str)
             except Exception as e:
                 error_message = "The certificate file is invalid"
                 # raise ValidationError(e)
 
         if 'key' in request.FILES and error_message is None:
             try:
-                priv = c.load_privatekey(c.FILETYPE_PEM, request.FILES['key'].file.read())
+                key_str = request.FILES['key'].file.read()
+                priv = c.load_privatekey(c.FILETYPE_PEM, key_str)
             except Exception as e:
                 error_message = "The key file is invalid"
                 # raise ValidationError(e)
@@ -834,8 +836,8 @@ def certificates(request, vhost_id):
                 error_message = "The key doesn't match the certificate"
                 # raise ValidationError(e)
 
-        if 'cert' in request.FILES:
-            vhost.certificate = cert
+        if 'cert' in request.FILES and not error_message:
+            vhost.certificate = certificates_str
             vhost.save()
 
     return render(request, 'mws/certificates.html', {
