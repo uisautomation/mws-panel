@@ -252,8 +252,6 @@ def show(request, site_id):
 
 
 @login_required
-@transaction.atomic()
-#@reversion.create_revision()
 def billing_management(request, site_id):
     site = privileges_check(site_id, request.user)
 
@@ -452,9 +450,11 @@ def system_packages(request, vm_id):
                     ansible_configuraton.value = ",".join(str(x) for x in packages_installed)
                     ansible_configuraton.save()
             else:
-                AnsibleConfiguration.objects.create(vm=vm, key="system_packages",
-                                                    value=package_number)
+                ansible_configuraton = AnsibleConfiguration.objects.create(vm=vm, key="system_packages",
+                                                                           value=str(package_number))
             launch_ansible(vm)  # to install or delete new/old packages selected by the user
+            packages_installed = list(int(x) for x in ansible_configuraton.value.split(",")) if ansible_configuraton \
+                                                                                                is not None else []
 
     return render(request, 'mws/system_packages.html', {
         'breadcrumbs': breadcrumbs,

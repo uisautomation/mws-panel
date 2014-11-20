@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
 from django.utils import unittest
+from apimws.models import AnsibleConfiguration
 from mwsauth.tests import do_test_login
 from models import NetworkConfig, Site, VirtualMachine, UnixGroup, Vhost, DomainName
 import views
@@ -555,3 +556,16 @@ class SiteManagementTests(TestCase):
                           'data-href="javascript:ajax_call(\'/delete_domain/2/\', \'DELETE\')" href="#"> <i '
                           'title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i></a></td></tr>',
                           response.content, count=1)
+
+    def test_system_packages(self):
+        do_test_login(self, user="test0001")
+        site = self.create_site()
+        response = self.client.post(reverse(views.system_packages, kwargs={'vm_id': site.primary_vm.id}),
+                         {'package_number': 1})
+        self.assertEqual(AnsibleConfiguration.objects.get(key="system_packages").value, "1")
+        self.assertContains(response, "Wordpress &lt;installed&gt;")
+        response = self.client.post(reverse(views.system_packages, kwargs={'vm_id': site.primary_vm.id}),
+                         {'package_number': 2})
+        self.assertEqual(AnsibleConfiguration.objects.get(key="system_packages").value, "1,2")
+        self.assertContains(response, "Wordpress &lt;installed&gt;")
+        self.assertContains(response, "Drupal &lt;installed&gt;")
