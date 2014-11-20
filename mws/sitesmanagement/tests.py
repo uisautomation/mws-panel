@@ -569,3 +569,5 @@ class SiteManagementTests(TestCase):
         self.assertEqual(AnsibleConfiguration.objects.get(key="system_packages").value, "1,2")
         self.assertContains(response, "Wordpress &lt;installed&gt;")
         self.assertContains(response, "Drupal &lt;installed&gt;")
+        self.client.post(reverse(views.system_packages, kwargs={'vm_id': site.primary_vm.id}), {'package_number': 1})
+        self.assertEqual(AnsibleConfiguration.objects.get(key="system_packages").value, "2")
