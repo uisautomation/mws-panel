@@ -1003,8 +1003,14 @@ def backups(request, vm_id):
             if backup_date is None or backup_date >= datetime.date.today() \
                     or backup_date < (datetime.date.today()-datetime.timedelta(days=30)):
                 raise ValueError
+            launch_ansible(vm) # TODO restore data, once successfully completed restore database data
+            version = reversion.get_for_date(vm, backup_date)
+            version.revision.revert(delete=True)
         except ValueError:
             parameters['error_message'] = "Incorrect date"
+            return render(request, 'mws/backups.html', parameters)
+        except Exception as e:
+            parameters['error_message'] = str(e)
             return render(request, 'mws/backups.html', parameters)
 
         # TODO do something + check that dates are correct
