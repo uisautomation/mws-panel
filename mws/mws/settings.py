@@ -18,6 +18,10 @@ ALLOWED_HOSTS = []
 
 MAIN_DOMAIN = 'http://localhost:8000'
 
+INSTALLED_APPS = INSTALLED_APPS + (
+    'debug_toolbar',
+)
+
 # Database
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 
