@@ -361,6 +361,14 @@ class VirtualMachine(models.Model):
         return sorted(set(domains))
 
     @property
+    def all_domain_names(self):
+        domains = []
+        for vhost in self.vhosts.all():
+            for domain in vhost.domain_names.all():
+                domains.append(domain)
+        return domains
+
+    @property
     def operating_system(self):
         from apimws.models import AnsibleConfiguration
         ansible_configuraton = get_object_or_None(AnsibleConfiguration, vm=self, key="os")

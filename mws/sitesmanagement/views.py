@@ -1008,6 +1008,13 @@ def backups(request, vm_id):
             launch_ansible(vm) # TODO restore data, once successfully completed restore database data
             version = reversion.get_for_date(vm, backup_date)
             version.revision.revert(delete=True)
+            for domain in vm.all_domain_names:
+                if domain.status == "requested":
+                    last_version = reversion.get_for_object(domain)[0]
+                    if last_version.field_dict['id'] != domain.id:
+                        raise Exception # TODO change this to a custom exception
+                    domain.status = last_version.field_dict['status']
+                    domain.save()
         except ValueError:
             parameters['error_message'] = "Incorrect date"
             return render(request, 'mws/backups.html', parameters)
