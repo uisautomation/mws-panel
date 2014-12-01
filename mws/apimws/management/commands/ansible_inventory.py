@@ -46,6 +46,7 @@ class Command(NoArgsCommand):
     def hostvars(self, vm):
         v = { }
         v['ansible_ssh_host'] = vm.hostname
+        v['mws_name'] = vm.site.name
         v['mws_webmaster_email'] = vm.site.email
         v['mws_users'] = [u.username for u in chain(
             vm.site.users.all(), vm.site.ssh_users.all())]
@@ -53,4 +54,5 @@ class Command(NoArgsCommand):
                              'domains': [dom.name for dom in
                                 vh.domain_names.filter(status='accepted')]}
                             for vh in vm.vhosts.all()]
+        v['mws_is_primary'] = vm == vm.site.primary_vm
         return v
