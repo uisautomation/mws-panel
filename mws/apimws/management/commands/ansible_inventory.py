@@ -54,5 +54,5 @@ class Command(NoArgsCommand):
                              'domains': [dom.name for dom in
                                 vh.domain_names.filter(status='accepted')]}
                             for vh in vm.vhosts.all()]
-        v['mws_is_primary'] = vm == vm.site.primary_vm
+        v['mws_is_primary'] = vm.primary
         return v
