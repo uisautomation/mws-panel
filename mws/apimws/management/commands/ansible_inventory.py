@@ -55,4 +55,6 @@ class Command(NoArgsCommand):
                                 vh.domain_names.filter(status='accepted')]}
                             for vh in vm.vhosts.all()]
         v['mws_is_primary'] = vm.primary
+        v['mws_ipv4'] = vm.ipv4
+        v['mws_ipv6'] = vm.ipv6
         return v
