@@ -1,4 +1,5 @@
 from datetime import datetime
+import uuid
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -140,7 +141,8 @@ class AuthTestCases(TestCase):
                                                mws_domain="mws-12940.mws3.csx.cam.ac.uk")
         site_without_auth_users = Site.objects.create(name="test_site1", start_date=datetime.today(),
                                                       network_configuration=netconf)
-        VirtualMachine.objects.create(primary=True, status='requested', site=site_without_auth_users)
+        VirtualMachine.objects.create(primary=True, status='requested', token=uuid.uuid4(),
+                                      site=site_without_auth_users)
 
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_without_auth_users.id}))
         self.assertEqual(response.status_code, 403)  # User is not authorised
@@ -160,7 +162,7 @@ class AuthTestCases(TestCase):
                                                     network_configuration=netconf2)
         information_systems_group = get_or_create_group_by_groupid(101888)
         site_with_auth_groups.groups.add(information_systems_group)
-        VirtualMachine.objects.create(primary=True, status='requested', site=site_with_auth_groups)
+        VirtualMachine.objects.create(primary=True, status='requested', token=uuid.uuid4(), site=site_with_auth_groups)
 
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_with_auth_groups.id}))
         self.assertContains(response, "101888", status_code=200)  # User is in an authorised group

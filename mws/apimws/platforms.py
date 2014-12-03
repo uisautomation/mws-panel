@@ -1,7 +1,9 @@
 from __future__ import absolute_import
+import uuid
 from celery import shared_task, Task
 import json
 from django.core.mail import send_mail
+from django.core.urlresolvers import reverse
 import os
 import random
 import string
@@ -73,7 +75,7 @@ def new_site_primary_vm(vm):
 
     if response['result'] == 'Success':
         vm.name = response['vmid']
-        vm.status = 'ready'
+        vm.status = 'installing'
         vm.save()
         return install_vm(vm)
     else:
@@ -88,6 +90,12 @@ def install_vm(vm):
     f = open(os.path.join(settings.BASE_DIR, 'apimws/ubuntu_preseed.txt'), 'r')
     profile = f.read()
     f.close()
+
+    from apimws.views import post_installation
+    profile += '\n' \
+               'd-i preseed/late_command string ' \
+               'curl --data "vm=%s&token=%s" %s%s\n' % (vm.id, vm.token, settings.MAIN_DOMAIN,
+                                                        reverse(post_installation))
 
     json_object = {
         'username': get_api_username(),
@@ -221,7 +229,8 @@ def clone_vm(site, primary_vm):
         delete_vm.site = None
         delete_vm.save()
 
-    destination_vm = VirtualMachine.objects.create(primary=(not primary_vm), status='requested', site=site)
+    destination_vm = VirtualMachine.objects.create(primary=(not primary_vm), status='requested', token=uuid.uuid4(),
+                                                   site=site)
     clone_vm_api_call.delay(original_vm, destination_vm, delete_vm)
 
 

@@ -282,6 +282,7 @@ class VirtualMachine(models.Model):
         ('requested', 'Requested'),
         ('accepted', 'Accepted'),
         ('denied', 'Denied'),
+        ('installing', 'Installing OS'),
         ('ansible', 'Running Ansible'),
         ('ansible_queued', 'Ansible queued'),
         ('ready', 'Ready'),
@@ -290,6 +291,7 @@ class VirtualMachine(models.Model):
     name = models.CharField(max_length=250, blank=True, null=True)
     primary = models.BooleanField(default=True)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES)
+    token = models.CharField(max_length=50)
 
     site = models.ForeignKey(Site, related_name='virtual_machines', null=True)
 

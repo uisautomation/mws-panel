@@ -4,10 +4,11 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
+from django.views.decorators.csrf import csrf_exempt
 from stronghold.decorators import public
 from apimws.utils import launch_ansible_site
 from mwsauth.utils import get_or_create_group_by_groupid
-from sitesmanagement.models import DomainName, Site, EmailConfirmation
+from sitesmanagement.models import DomainName, Site, EmailConfirmation, VirtualMachine
 from sitesmanagement.views import show
 from ucamlookup import user_in_groups
 
@@ -118,3 +119,22 @@ def dns_entries(request, token):
         return False # TODO Read errors
 
     # TODO check aliases_deleted
+
+
+@public
+@csrf_exempt
+def post_installation(request):
+    if request.method == 'POST':
+        vm_id = request.POST['vm']
+        token = request.POST['token']
+        if not vm_id or not token:
+            return HttpResponseForbidden()
+
+        vm = VirtualMachine.objects.get(id=vm_id)
+
+        if vm.token == token:
+            vm.status = 'ready'
+            vm.save()
+            return HttpResponse()
+
+    return HttpResponseForbidden()

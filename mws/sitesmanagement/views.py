@@ -1,6 +1,7 @@
 import bisect
 import datetime
 import subprocess
+import uuid
 from Crypto.Util import asn1
 import OpenSSL.crypto
 from django.utils import dateparse
@@ -72,7 +73,7 @@ def new(request):
             # Save user that requested the site
             site.users.add(request.user)
 
-            vm = VirtualMachine.objects.create(primary=True, status='requested', site=site)
+            vm = VirtualMachine.objects.create(primary=True, status='requested', site=site, token=uuid.uuid4())
             new_site_primary_vm.delay(vm)
 
             if site.email:

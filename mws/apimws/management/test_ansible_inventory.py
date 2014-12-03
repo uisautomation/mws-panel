@@ -1,3 +1,4 @@
+import uuid
 from django.test import TestCase
 from django.core.management.base import CommandError
 import json
@@ -40,7 +41,7 @@ class TestsWithData(TestCase):
                                    start_date=datetime.today(),
                                    network_configuration=netconf)
         self.vm = VirtualMachine.objects.create(
-            name="test_vm", primary=True, status="ready", site=site)
+            name="test_vm", primary=True, status="ready", token=uuid.uuid4(), site=site)
     def test_list(self):
         s = StringIO()
         Command().handle_noargs(list=True, outfile=s)

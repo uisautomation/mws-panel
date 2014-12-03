@@ -1,5 +1,6 @@
 from datetime import datetime
 import tempfile
+import uuid
 import os
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -9,6 +10,7 @@ from django.utils import unittest
 import subprocess
 import reversion
 from apimws.models import AnsibleConfiguration
+from apimws.views import post_installation
 from mwsauth.tests import do_test_login
 from models import NetworkConfig, Site, VirtualMachine, UnixGroup, Vhost, DomainName
 import views
@@ -134,6 +136,10 @@ class SiteManagementTests(TestCase):
         self.assertContains(response, "Your email &#39;%s&#39; is still unconfirmed, please check your email inbox and "
                                       "click on the link of the email we sent you." % test_site.email )
 
+        # Force post installation ACK
+        self.client.post(reverse(post_installation), {'vm': test_site.primary_vm.id,
+                                                      'token': test_site.primary_vm.token})
+
         # Disable site
         self.assertFalse(test_site.disabled)
         response = self.client.post(reverse(views.disable, kwargs={'site_id': test_site.id}))
@@ -174,7 +180,7 @@ class SiteManagementTests(TestCase):
                                                mws_domain="mws-12940.mws3.csx.cam.ac.uk")
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today(),
                                            network_configuration=netconf)
-        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", site=site)
+        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(), site=site)
         response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)  # The User is not in the list of auth users
 
@@ -289,7 +295,7 @@ class SiteManagementTests(TestCase):
                                                mws_domain="mws-12940.mws3.csx.cam.ac.uk")
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today(),
                                            network_configuration=netconf)
-        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", site=site)
+        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(), site=site)
         vhost = Vhost.objects.create(name="tests_vhost", vm=vm)
         dn = DomainName.objects.create(name="testtestest.mws3.csx.cam.ac.uk", status="accepted", vhost=vhost)
         unix_group = UnixGroup.objects.create(name="testUnixGroup", vm=vm)
@@ -361,8 +367,10 @@ class SiteManagementTests(TestCase):
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today(),
                                            network_configuration=netconf)
         site.users.add(User.objects.get(username='test0001'))
-        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="requested", site=site)
-        vm2 = VirtualMachine.objects.create(name="test_vm2", primary=False, status="requested", site=site)
+        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="requested", token=uuid.uuid4(),
+                                           site=site)
+        vm2 = VirtualMachine.objects.create(name="test_vm2", primary=False, status="requested", token=uuid.uuid4(),
+                                            site=site)
         vhost = Vhost.objects.create(name="tests_vhost", vm=vm)
         dn = DomainName.objects.create(name="testtestest.mws3.csx.cam.ac.uk", status="accepted", vhost=vhost)
         unix_group = UnixGroup.objects.create(name="testUnixGroup", vm=vm)
@@ -457,7 +465,7 @@ class SiteManagementTests(TestCase):
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today(),
                                       network_configuration=netconf)
         site.users.add(User.objects.get(username='test0001'))
-        VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", site=site)
+        VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(), site=site)
         return site
 
     def test_unix_groups(self):
