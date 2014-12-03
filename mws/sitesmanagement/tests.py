@@ -1,6 +1,5 @@
 from datetime import datetime
 import tempfile
-import time
 import os
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -8,6 +7,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
 from django.utils import unittest
 import subprocess
+import reversion
 from apimws.models import AnsibleConfiguration
 from mwsauth.tests import do_test_login
 from models import NetworkConfig, Site, VirtualMachine, UnixGroup, Vhost, DomainName
@@ -629,3 +629,24 @@ class SiteManagementTests(TestCase):
         privatekeyfile.close()
         csrfile.close()
         certificatefile.close()
+
+    def test_backups(self):
+        do_test_login(self, user="test0001")
+        site = self.create_site()
+
+        self.client.post(reverse(views.add_vhost, kwargs={'vm_id': site.primary_vm.id}), {'name': 'testVhost'})
+        vhost = Vhost.objects.get(name='testVhost')
+        self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}), {'name': 'testDomain.cam.ac.uk'})
+
+        restore_date = datetime.now()
+
+        with reversion.create_revision():
+            domain = DomainName.objects.get(name='testDomain.cam.ac.uk')
+            domain.name = "error"
+            domain.status = 'accepted'
+            domain.save()
+
+        self.client.post(reverse(views.backups, kwargs={'vm_id': vhost.vm.id}), {'backupdate': restore_date})
+        domain = DomainName.objects.get(name='testDomain.cam.ac.uk')
+        self.assertEqual(domain.status, 'accepted')
+        self.assertEqual(domain.name, 'testDomain.cam.ac.uk')

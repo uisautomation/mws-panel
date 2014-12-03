@@ -1001,9 +1001,9 @@ def backups(request, vm_id):
 
     if request.method == 'POST':
         try:
-            backup_date = dateparse.parse_date(request.POST['backupdate'])
-            if backup_date is None or backup_date >= datetime.date.today() \
-                    or backup_date < (datetime.date.today()-datetime.timedelta(days=30)):
+            backup_date = dateparse.parse_datetime(request.POST['backupdate'])
+            if backup_date is None or backup_date > datetime.datetime.now() \
+                    or backup_date < (datetime.datetime.now()-datetime.timedelta(days=30)): # TODO or backup_date >= datetime.date.today() ????
                 raise ValueError
             launch_ansible(vm) # TODO restore data, once successfully completed restore database data
             version = reversion.get_for_date(vm, backup_date)
