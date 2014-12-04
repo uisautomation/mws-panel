@@ -57,6 +57,7 @@ class Command(NoArgsCommand):
                                 vh.domain_names.filter(status='accepted')]
             if vh.main_domain:
                 vhv['main_domain'] = vh.main_domain.name
+            return vhv
         v['mws_vhosts'] = [ vhost_vars(vh) for vh in vm.vhosts.all()]
         v['mws_is_primary'] = vm.primary
         v['mws_ipv4'] = vm.ipv4
