@@ -52,9 +52,11 @@ class Command(NoArgsCommand):
             vm.site.users.all(), vm.site.ssh_users.all())]
         v['mws_vhosts'] = [{ 'name': vh.name,
                              'domains': [dom.name for dom in
-                                vh.domain_names.filter(status='accepted')]}
+                                vh.domain_names.filter(status='accepted')],
+                             'main_domain': vh.main_domain.name }
                             for vh in vm.vhosts.all()]
         v['mws_is_primary'] = vm.primary
         v['mws_ipv4'] = vm.ipv4
         v['mws_ipv6'] = vm.ipv6
+        v['mws_tls_enabled'] = False
         return v
