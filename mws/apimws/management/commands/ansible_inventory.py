@@ -50,11 +50,14 @@ class Command(NoArgsCommand):
         v['mws_webmaster_email'] = vm.site.email
         v['mws_users'] = [u.username for u in chain(
             vm.site.users.all(), vm.site.ssh_users.all())]
-        v['mws_vhosts'] = [{ 'name': vh.name,
-                             'domains': [dom.name for dom in
-                                vh.domain_names.filter(status='accepted')],
-                             'main_domain': vh.main_domain.name }
-                            for vh in vm.vhosts.all()]
+        def vhost_vars(vh):
+            vhv = { }
+            vhv['name'] = vh.name
+            vhv['domains'] = [dom.name for dom in
+                                vh.domain_names.filter(status='accepted')]
+            if vh.main_domain:
+                vhv['main_domain'] = vh.main_domain.name
+        v['mws_vhosts'] = [ vhost_vars(vh) for vh in vm.vhosts.all()]
         v['mws_is_primary'] = vm.primary
         v['mws_ipv4'] = vm.ipv4
         v['mws_ipv6'] = vm.ipv6
