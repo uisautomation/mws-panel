@@ -187,7 +187,7 @@
                                     <div class="field-items">
                                         <div class="field-item even">
                                             <img class="campl-scale-with-grid"
-                                                 src="{% static "icons/cloud.png" %}"
+                                                 src="{% static "icons/server.png" %}"
                                                  height="128" style="margin: 10px;" alt="">
                                         </div>
                                     </div>
@@ -274,7 +274,38 @@
                                     </a>
                                 </h3>
                                 <a href="{% url 'sitesmanagement.views.billing_management' site_id=site.id %}"
-                                   class="ir campl-focus-link">Billing settings</a
+                                   class="ir campl-focus-link">Billing settings</a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <div class="campl-column8">
+                <div class="campl-content-container campl-side-padding">
+                    <article class="node node-external-link view-mode-focus_on clearfix
+                                    campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                        <div style="width: 50%; float: left; margin-right: 0; padding: 0;">
+                            <div class="campl-content-container campl-horizontal-teaser-txt">
+                                <a>
+                                    Production server<br/>
+                                    IPv4: {{ site.primary_vm.ipv4 }}<br/>
+                                    IPv6: {{ site.primary_vm.ipv6 }}<br/>
+                                    hostname: {{ site.primary_vm.hostname }}<br/>
+                                    hostkey fingerprint: {{ site.primary_vm.sshfp }}<br/>
+                                </a>
+                            </div>
+                        </div>
+                        <div style="width: 50%; float: left; margin-right: 0; padding: 0;">
+                            <div class="campl-content-container campl-horizontal-teaser-txt">
+                                <a>
+                                    {% if site.secondary_vm %}
+                                    Test server<br/>
+                                    IPv4: {{ site.secondary_vm.ipv4 }}<br/>
+                                    hostname: {{ site.secondary_vm.hostname }}<br/>
+                                    hostkey fingerprint: {{ site.secondary_vm.sshfp }}<br/>
+                                    {% endif %}
+                                </a>
                             </div>
                         </div>
                     </article>
