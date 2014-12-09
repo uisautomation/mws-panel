@@ -668,7 +668,10 @@ def update_os(request, vm_id):
     if not vm.is_ready: # TODO change the button format (disabled) if the vm is not ready
         return redirect(reverse(show, kwargs={'site_id': site.id}))
 
-    # TODO Launch ansible task to update the Operating System
+    # TODO 1) Warn about the secondary VM if exists
+    # TODO 2) Delete secondary VM if exists
+    # TODO 3) Create a new VM with the new OS and launch an ansible task to restore the state of the DB
+    # TODO 4) Put it as a secondary VM?
 
     return HttpResponse('')
 

@@ -152,6 +152,9 @@ class SiteManagementTests(TestCase):
 
         # Clone first VM into the secondary VM
         self.client.post(reverse(views.clone_vm_view, kwargs={'site_id': test_site.id}), {'primary_vm': 'true'})
+        secondary_vm = test_site.secondary_vm
+        secondary_vm.status = 'ready'
+        secondary_vm.save()
 
         self.client.delete(reverse(views.delete_vm, kwargs={'vm_id': test_site.secondary_vm.id}))
 
