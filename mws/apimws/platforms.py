@@ -1,14 +1,13 @@
 from __future__ import absolute_import
+import uuid
 from celery import shared_task, Task
 import json
 from django.core.mail import send_mail
+from django.core.urlresolvers import reverse
 import os
-import random
-import string
-import crypt
 from django.conf import settings
 import requests
-from sitesmanagement.models import VirtualMachine, NetworkConfig
+from sitesmanagement.models import VirtualMachine
 
 
 class PlatformsAPINotWorkingException(Exception):
@@ -92,7 +91,8 @@ def clone_vm(site, primary_vm):
         delete_vm.site = None
         delete_vm.save()
 
-    destination_vm = VirtualMachine.objects.create(primary=(not primary_vm), status='requested', site=site)
+    destination_vm = VirtualMachine.objects.create(primary=(not primary_vm), status='requested', token=uuid.uuid4(),
+                                                   site=site)
     clone_vm_api_call(original_vm, destination_vm, delete_vm)
 
 

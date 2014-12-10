@@ -1,10 +1,13 @@
+import subprocess
+from tempfile import NamedTemporaryFile
+import OpenSSL
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, redirect
 from ucamlookup import validate_crsids
 from apimws.utils import launch_ansible_site
-from mwsauth.models import MWSUserForm
+from mwsauth.models import MWSUser
 from mwsauth.utils import privileges_check
 from sitesmanagement.views import show, index
 from mwsauth.validators import validate_groupids
@@ -61,16 +64,33 @@ def user_panel(request):
     }
 
     if request.method == 'POST':
-        mws_user_form = MWSUserForm(request.POST, instance=request.user.mws_user) if hasattr(request.user, 'mws_user') \
-            else MWSUserForm(request.POST)
-        if mws_user_form.is_valid():
-            mws_user = mws_user_form.save(commit=False)
-            mws_user.user = request.user
+        if 'ssh_public_key' in request.FILES:
+            try:
+                ssh_public_key = request.FILES['ssh_public_key'].file.read()
+                ssh_public_key_temp_file = NamedTemporaryFile()
+                ssh_public_key_temp_file.write(ssh_public_key)
+                ssh_public_key_temp_file.flush()
+                command_response = subprocess.check_output(["ssh-keygen", "-lf", ssh_public_key_temp_file.name])
+                ssh_public_key_temp_file.close()
+            except Exception as e:
+                error_message = "The key file is invalid"
+                return render(request, 'user/panel.html', {
+                    'breadcrumbs': breadcrumbs,
+                    'ssh_public_key': request.user.mws_user.ssh_public_key
+                    if hasattr(request.user, 'mws_user') else None,
+                    'error_message': error_message
+                })
+
+        if hasattr(request.user, 'mws_user'):
+            mws_user = request.user.mws_user
+            mws_user.ssh_public_key = ssh_public_key
             mws_user.save()
-            return redirect(index)
+        else:
+            mws_user = MWSUser.objects.create(user=request.user, ssh_public_key=ssh_public_key)
+
+        return redirect(index)
 
     return render(request, 'user/panel.html', {
         'breadcrumbs': breadcrumbs,
-        'mwsuser_form': MWSUserForm(instance=request.user.mws_user) if hasattr(request.user, 'mws_user')
-        else MWSUserForm(),
+        'ssh_public_key': request.user.mws_user.ssh_public_key if hasattr(request.user, 'mws_user') else None
     })

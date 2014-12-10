@@ -1,3 +1,4 @@
+import uuid
 from django.test import TestCase
 from django.core.management.base import CommandError
 import json
@@ -36,11 +37,17 @@ class TestsWithData(TestCase):
             IPv4private='192.0.2.255',
             mws_private_domain='mws-08246.mws3.private.example',
             mws_domain="mws-12940.mws3.example")
-        site = Site.objects.create(name="testSite", institution_id="testinst",
-                                   start_date=datetime.today(),
-                                   network_configuration=netconf)
+        self.site = Site.objects.create(name="testSite",
+                                        institution_id="testinst",
+                                        start_date=datetime.today(),
+                                        network_configuration=netconf)
         self.vm = VirtualMachine.objects.create(
-            name="test_vm", primary=True, status="ready", site=site)
+            name="test_vm", primary=True, status="ready", token=uuid.uuid4(),
+            site=self.site)
+        self.vhost1 = self.vm.vhosts.create(name="vhost1")
+        self.vhost2 = self.vm.vhosts.create(name="vhost2")
+        self.dom1 = self.vhost1.domain_names.create(name="foo.example",
+                                                    status='accepted')
     def test_list(self):
         s = StringIO()
         Command().handle_noargs(list=True, outfile=s)
@@ -53,4 +60,9 @@ class TestsWithData(TestCase):
 
         self.assertEqual(len(r['mwsclients']), 1)
         self.assertTrue(r['mwsclients'][0] in r['_meta']['hostvars'])
-        
+    def test_vars(self):
+        s = StringIO()
+        Command().handle_noargs(list=True, outfile=s)
+        r = json.loads(s.getvalue())
+        v = r['_meta']['hostvars'][r['mwsclients'][0]]
+        self.assertEqual(v['mws_name'], self.site.name)

@@ -1,15 +1,18 @@
 from datetime import datetime
 import uuid
 from itertools import chain
+import json
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
 from django import forms
 import re
+import reversion
 from ucamlookup import get_institutions
 from ucamlookup.models import LookupGroup
 from mwsauth.utils import get_users_of_a_group
-from sitesmanagement.utils import is_camacuk
+from sitesmanagement.utils import is_camacuk, get_object_or_None
 
 
 class NetworkConfig(models.Model):
@@ -34,7 +37,7 @@ class NetworkConfig(models.Model):
     def get_free_config(cls):
         return cls.objects.filter(site=None).first()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.IPv4 + " - " + self.mws_domain
 
 
@@ -69,7 +72,7 @@ class Site(models.Model):
     # The network configuration for the VMs of this site
     network_configuration = models.OneToOneField(NetworkConfig, related_name='site')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def is_admin_suspended(self):
@@ -280,6 +283,7 @@ class VirtualMachine(models.Model):
         ('requested', 'Requested'),
         ('accepted', 'Accepted'),
         ('denied', 'Denied'),
+        ('installing', 'Installing OS'),
         ('ansible', 'Running Ansible'),
         ('ansible_queued', 'Ansible queued'),
         ('ready', 'Ready'),
@@ -288,6 +292,7 @@ class VirtualMachine(models.Model):
     name = models.CharField(max_length=250, blank=True, null=True)
     primary = models.BooleanField(default=True)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES)
+    token = models.CharField(max_length=50)
 
     site = models.ForeignKey(Site, related_name='virtual_machines', null=True)
 
@@ -371,7 +376,50 @@ class VirtualMachine(models.Model):
                     domains.append(domain)
         return sorted(set(domains))
 
-    def __unicode__(self):
+    @property
+    def all_domain_names(self):
+        domains = []
+        for vhost in self.vhosts.all():
+            for domain in vhost.domain_names.all():
+                domains.append(domain)
+        return domains
+
+    @property
+    def operating_system(self):
+        from apimws.models import AnsibleConfiguration
+        ansible_configuraton = get_object_or_None(AnsibleConfiguration, vm=self, key="os")
+        if ansible_configuraton:
+            return json.loads(ansible_configuraton.value)
+        else:
+            return None
+
+    def due_update(self):
+        operating_system_dict = self.operating_system
+        if operating_system_dict:
+            if settings.OS_VERSION[operating_system_dict.keys()[0]] > operating_system_dict.values()[0]:
+                return True
+            else:
+                return False
+        else:
+            return False # TODO also raise an exception?
+
+    @property
+    def os_type(self):
+        operating_system_dict = self.operating_system
+        if operating_system_dict:
+            return operating_system_dict.keys()[0]
+        else:
+            return ""
+
+    @property
+    def os_version(self):
+        operating_system_dict = self.operating_system
+        if operating_system_dict:
+            return operating_system_dict.values()[0]
+        else:
+            return ""
+
+    def __str__(self):
         if self.name is None:
             return "<Under request>"
         else:
@@ -389,7 +437,7 @@ class Vhost(models.Model):
     def sorted_domain_names(self):
         return sorted(set(self.domain_names.all()))
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -405,7 +453,7 @@ class DomainName(models.Model):
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='requested')
     vhost = models.ForeignKey(Vhost, related_name='domain_names')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -413,6 +461,9 @@ class UnixGroup(models.Model):
     name = models.CharField(max_length=16)  # TODO add validator to comply with Ubuntu guidelines of Unix group names
     vm = models.ForeignKey(VirtualMachine, related_name='unix_groups')
     users = models.ManyToManyField(User)
+
+    def __str__(self):
+        return self.name
 
 
 # FORMS
@@ -475,6 +526,12 @@ class UnixGroupForm(forms.ModelForm):
     class Meta:
         model = UnixGroup
         fields = ('name', )
+
+
+reversion.register(VirtualMachine, follow=["unix_groups", "ansible_configuration", "vhosts"])
+reversion.register(Vhost, follow=["domain_names", "vm"])
+reversion.register(DomainName, follow=["vhost"])
+reversion.register(UnixGroup, follow=["vm"])
 
 
 # DEMO

@@ -50,7 +50,8 @@ MIDDLEWARE_CLASSES = (
     'stronghold.middleware.LoginRequiredMiddleware',
     #TODO The CheckBannedUsers middleware check if users are banned before serving any page
     #'MWS.middleware.CheckBannedUsers'
-    'ucamwebauth.middleware.DefaultErrorBehaviour'
+    'ucamwebauth.middleware.DefaultErrorBehaviour',
+    'reversion.middleware.RevisionMiddleware',
 )
 
 AUTHENTICATION_BACKENDS = (
@@ -108,3 +109,5 @@ UCAMWEBAUTH_LOGOUT_REDIRECT = 'http://www.cam.ac.uk/'
 
 STRONGHOLD_PUBLIC_NAMED_URLS = ('raven_login', 'raven_return')
 #CELERY_ACCEPT_CONTENT = ['json'] # TODO
+
+OS_VERSION = {'ubuntu': 14.04}

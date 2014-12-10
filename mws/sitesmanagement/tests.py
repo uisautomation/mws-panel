@@ -1,10 +1,16 @@
 from datetime import datetime
-import time
+import tempfile
+import uuid
 import os
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
+from django.utils import unittest
+import subprocess
+import reversion
+from apimws.models import AnsibleConfiguration
+from apimws.views import post_installation
 from mwsauth.tests import do_test_login
 from models import NetworkConfig, Site, VirtualMachine, UnixGroup, Vhost, DomainName
 import views
@@ -79,8 +85,10 @@ class SiteManagementTests(TestCase):
 
         site.users.add(User.objects.get(username="test0001"))
         response = self.client.get(reverse(views.show, kwargs={'site_id': site.id}))
-        self.assertContains(response, "No Billing, please add one.")
+        self.assertContains(response, "No billing details are available, please add them.")
 
+    @unittest.skipUnless(hasattr(settings, 'PLATFORMS_API_USERNAME'),
+	"Platforms API login details not available.")
     def test_view_new(self):
         response = self.client.get(reverse(views.new))
         self.assertEqual(response.status_code, 302)  # Not logged in, redirected to login
@@ -128,10 +136,12 @@ class SiteManagementTests(TestCase):
         self.assertContains(response, "Your email &#39;%s&#39; is still unconfirmed, please check your email inbox and "
                                       "click on the link of the email we sent you." % test_site.email )
 
+        # Force post installation ACK
+        self.client.post(reverse(post_installation), {'vm': test_site.primary_vm.id,
+                                                      'token': test_site.primary_vm.token})
+
         # Disable site
         self.assertFalse(test_site.disabled)
-        while test_site.is_busy:
-            time.sleep(0.25)
         response = self.client.post(reverse(views.disable, kwargs={'site_id': test_site.id}))
         # TODO test that views are restricted
         self.assertTrue(Site.objects.get(pk=test_site.id).disabled)
@@ -142,9 +152,10 @@ class SiteManagementTests(TestCase):
 
         # Clone first VM into the secondary VM
         self.client.post(reverse(views.clone_vm_view, kwargs={'site_id': test_site.id}), {'primary_vm': 'true'})
+        secondary_vm = test_site.secondary_vm
+        secondary_vm.status = 'ready'
+        secondary_vm.save()
 
-        while test_site.secondary_vm.is_busy:
-            time.sleep(0.25)
         self.client.delete(reverse(views.delete_vm, kwargs={'vm_id': test_site.secondary_vm.id}))
 
         self.client.post(reverse(views.delete, kwargs={'site_id': test_site.id}))
@@ -172,7 +183,7 @@ class SiteManagementTests(TestCase):
                                                mws_domain="mws-12940.mws3.csx.cam.ac.uk")
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today(),
                                            network_configuration=netconf)
-        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", site=site)
+        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(), site=site)
         response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)  # The User is not in the list of auth users
 
@@ -232,7 +243,7 @@ class SiteManagementTests(TestCase):
         response = self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id}))
         self.assertContains(response, "Billing data")
         response = self.client.get(reverse(views.show, kwargs={'site_id': site.id}))
-        self.assertContains(response, "No Billing, please add one.")
+        self.assertContains(response, "No billing details are available, please add them.")
 
         suspension = site.suspend_now(input_reason="test suspension")
         response = self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id}))
@@ -287,7 +298,7 @@ class SiteManagementTests(TestCase):
                                                mws_domain="mws-12940.mws3.csx.cam.ac.uk")
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today(),
                                            network_configuration=netconf)
-        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", site=site)
+        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(), site=site)
         vhost = Vhost.objects.create(name="tests_vhost", vm=vm)
         dn = DomainName.objects.create(name="testtestest.mws3.csx.cam.ac.uk", status="accepted", vhost=vhost)
         unix_group = UnixGroup.objects.create(name="testUnixGroup", vm=vm)
@@ -359,8 +370,10 @@ class SiteManagementTests(TestCase):
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today(),
                                            network_configuration=netconf)
         site.users.add(User.objects.get(username='test0001'))
-        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="requested", site=site)
-        vm2 = VirtualMachine.objects.create(name="test_vm2", primary=False, status="requested", site=site)
+        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="requested", token=uuid.uuid4(),
+                                           site=site)
+        vm2 = VirtualMachine.objects.create(name="test_vm2", primary=False, status="requested", token=uuid.uuid4(),
+                                            site=site)
         vhost = Vhost.objects.create(name="tests_vhost", vm=vm)
         dn = DomainName.objects.create(name="testtestest.mws3.csx.cam.ac.uk", status="accepted", vhost=vhost)
         unix_group = UnixGroup.objects.create(name="testUnixGroup", vm=vm)
@@ -455,7 +468,7 @@ class SiteManagementTests(TestCase):
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today(),
                                       network_configuration=netconf)
         site.users.add(User.objects.get(username='test0001'))
-        VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", site=site)
+        VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(), site=site)
         return site
 
     def test_unix_groups(self):
@@ -552,3 +565,99 @@ class SiteManagementTests(TestCase):
                           'data-href="javascript:ajax_call(\'/delete_domain/2/\', \'DELETE\')" href="#"> <i '
                           'title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i></a></td></tr>',
                           response.content, count=1)
+
+    def test_system_packages(self):
+        do_test_login(self, user="test0001")
+        site = self.create_site()
+        response = self.client.post(reverse(views.system_packages, kwargs={'vm_id': site.primary_vm.id}),
+                         {'package_number': 1})
+        self.assertEqual(AnsibleConfiguration.objects.get(key="system_packages").value, "1")
+        self.assertContains(response, "Wordpress &lt;installed&gt;")
+        response = self.client.post(reverse(views.system_packages, kwargs={'vm_id': site.primary_vm.id}),
+                         {'package_number': 2})
+        self.assertEqual(AnsibleConfiguration.objects.get(key="system_packages").value, "1,2")
+        self.assertContains(response, "Wordpress &lt;installed&gt;")
+        self.assertContains(response, "Drupal &lt;installed&gt;")
+        self.client.post(reverse(views.system_packages, kwargs={'vm_id': site.primary_vm.id}), {'package_number': 1})
+        self.assertEqual(AnsibleConfiguration.objects.get(key="system_packages").value, "2")
+
+    def test_certificates(self):
+        do_test_login(self, user="test0001")
+        site = self.create_site()
+
+        self.client.post(reverse(views.add_vhost, kwargs={'vm_id': site.primary_vm.id}), {'name': 'testVhost'})
+        vhost = Vhost.objects.get(name='testVhost')
+        response = self.client.post(reverse(views.generate_csr, kwargs={'vhost_id': vhost.id}))
+        self.assertContains(response, "A CSR couldn't be generated because you don't have a master domain assigned to "
+                                      "this vhost.")
+        self.assertIsNone(vhost.csr)
+
+        self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}), {'name': 'randomdomain.co.uk'})
+        vhost = Vhost.objects.get(name='testVhost')
+        self.assertIsNone(vhost.csr)
+        self.assertIsNone(vhost.certificate)
+        self.assertIsNotNone(vhost.main_domain)
+        self.client.post(reverse(views.generate_csr, kwargs={'vhost_id': vhost.id}))
+        vhost = Vhost.objects.get(name='testVhost')
+        self.assertIsNotNone(vhost.csr)
+
+        privatekeyfile = tempfile.NamedTemporaryFile()
+        csrfile = tempfile.NamedTemporaryFile()
+        certificatefile = tempfile.NamedTemporaryFile()
+        subprocess.check_output(["openssl", "req", "-new", "-newkey", "rsa:2048", "-nodes", "-keyout",
+                                 privatekeyfile.name, "-subj", "/C=GB/CN=%s" % vhost.main_domain.name,
+                                 "-out", csrfile.name])
+        subprocess.check_output(["openssl", "x509", "-req", "-days", "365", "-in", csrfile.name, "-signkey",
+                                 privatekeyfile.name, "-out", certificatefile.name])
+
+        self.client.post(reverse(views.certificates, kwargs={'vhost_id': vhost.id}),
+                         {'key': privatekeyfile, 'cert': certificatefile})
+        vhost = Vhost.objects.get(name='testVhost')
+        self.assertIsNotNone(vhost.certificate)
+
+        certificatefile.seek(0)
+        self.assertEqual(vhost.certificate, certificatefile.read())
+
+        privatekeyfile.seek(0)
+        response = self.client.post(reverse(views.certificates, kwargs={'vhost_id': vhost.id}),
+                                    {'cert': privatekeyfile})
+        self.assertContains(response, "The certificate file is invalid")
+
+        certificatefile.seek(0)
+        response = self.client.post(reverse(views.certificates, kwargs={'vhost_id': vhost.id}),
+                                    {'key': certificatefile})
+        self.assertContains(response, "The key file is invalid")
+
+        privatekeyfile.close()
+        privatekeyfile = tempfile.NamedTemporaryFile()
+        subprocess.check_output(["openssl", "genrsa", "-out", privatekeyfile.name, "2048"])
+
+        certificatefile.seek(0)
+        response = self.client.post(reverse(views.certificates, kwargs={'vhost_id': vhost.id}),
+                                    {'key': privatekeyfile, 'cert': certificatefile})
+        self.assertContains(response, "The key doesn&#39;t match the certificate")
+
+        privatekeyfile.close()
+        csrfile.close()
+        certificatefile.close()
+
+    def test_backups(self):
+        do_test_login(self, user="test0001")
+        site = self.create_site()
+
+        self.client.post(reverse(views.add_vhost, kwargs={'vm_id': site.primary_vm.id}), {'name': 'testVhost'})
+        vhost = Vhost.objects.get(name='testVhost')
+        self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}), {'name': 'testDomain.cam.ac.uk'})
+
+        restore_date = datetime.now()
+
+        with reversion.create_revision():
+            domain = DomainName.objects.get(name='testDomain.cam.ac.uk')
+            domain.name = "error"
+            domain.status = 'accepted'
+            domain.save()
+
+        self.client.post(reverse(views.backups, kwargs={'vm_id': vhost.vm.id}), {'backupdate': restore_date})
+        domain = DomainName.objects.get(name='testDomain.cam.ac.uk')
+        self.assertEqual(domain.status, 'accepted')
+        self.assertEqual(domain.name, 'testDomain.cam.ac.uk')

@@ -45,12 +45,15 @@ urlpatterns = patterns('',
     url(r'^unix_groups/edit/(?P<ug_id>[0-9]+)/$', 'sitesmanagement.views.unix_group'),
     url(r'^unix_groups/delete/(?P<ug_id>[0-9]+)/$', 'sitesmanagement.views.delete_unix_group'),
     url(r'^settings/vm/(?P<vm_id>[0-9]+)/db_root_pass/$', 'sitesmanagement.views.change_db_root_password'),
+    url(r'^update_os/(?P<vm_id>[0-9]+)/$', 'sitesmanagement.views.update_os'),
+    url(r'^backups/(?P<vm_id>[0-9]+)/$', 'sitesmanagement.views.backups'),
 
     # apimws app
     url(r'^api/confirm_dns/(?P<dn_id>[0-9]+)/$', 'apimws.views.confirm_dns'),
     url(r'^api/finance/billing/(?P<year>20[0-9]{2})/$', 'apimws.views.billing_year'),
     url(r'^confirm_email/(?P<ec_id>[0-9]+)/(?P<token>(\w|\-)+)/$', 'apimws.views.confirm_email'),
     url(r'^api/dns/(?P<token>(\w|\-)+)/entries.json$', 'apimws.views.dns_entries'),
+    url(r'^api/post_installation/$', 'apimws.views.post_installation'),
 
     # settings site
     url(r'^settings/vm/(?P<vm_id>[0-9]+)/status/$', 'sitesmanagement.views.check_vm_status'),

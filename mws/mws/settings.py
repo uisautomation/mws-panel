@@ -1,5 +1,10 @@
 from common_settings import *
-from production_secrets import *
+
+# Tolerate the absence of secrets (but some parts of the system will break).
+try:
+    from production_secrets import *
+except ImportError:
+    pass
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '$a2byg9*bc5rcc_e5d5#3+mp^s=v0y_vz18ke-tzy_u!*&!txw'
@@ -12,6 +17,10 @@ TEMPLATE_DEBUG = True
 ALLOWED_HOSTS = []
 
 MAIN_DOMAIN = 'http://localhost:8000'
+
+INSTALLED_APPS = INSTALLED_APPS + (
+    'debug_toolbar',
+)
 
 # Database
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases

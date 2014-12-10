@@ -1,12 +1,13 @@
 import bisect
 import datetime
 import subprocess
-import OpenSSL.crypto
+import uuid
 from Crypto.Util import asn1
+import OpenSSL.crypto
+from django.utils import dateparse
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from django.db import transaction
-from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
+from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 import reversion
@@ -18,6 +19,7 @@ from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.utils import is_camacuk, get_object_or_None
 from .models import SiteForm, DomainNameFormNew, BillingForm, DomainName, NetworkConfig, EmailConfirmation, \
     VirtualMachine, Vhost, VhostForm, Site, UnixGroupForm, UnixGroup, SiteRequestDemo
+from django.conf import settings as django_settings
 
 
 @login_required
@@ -73,7 +75,7 @@ def new(request):
 
             SiteRequestDemo.objects.create(date_submitted=timezone.now(), site=site)
 
-            vm = VirtualMachine.objects.create(primary=True, status='requested', site=site)
+            vm = VirtualMachine.objects.create(primary=True, status='requested', site=site, token=uuid.uuid4())
             new_site_primary_vm(vm)
 
             if site.email:
@@ -211,18 +213,23 @@ def show(request, site_id):
     }
 
     warning_messages = []
+    primary_vm = site.primary_vm
 
     if (timezone.now() - site.site_request_demo.date_submitted).seconds > 5:
         site.site_request_demo.demo_time_passed()
 
-    if site.primary_vm is not None and site.primary_vm.status == 'ansible':
+    if primary_vm is not None and primary_vm.status == 'ansible':
         warning_messages.append("Your server is being configured.")
 
     if site.secondary_vm is not None and site.secondary_vm.status == 'ansible':
         warning_messages.append("Your test server is being configured.")
 
-    if site.primary_vm is not None:
-        for vhost in site.primary_vm.vhosts.all():
+    if primary_vm is not None:
+        if primary_vm.due_update():
+            warning_messages.append("Your server is due to an OS update. From %s %.2f to %s %.2f" %
+                                    (primary_vm.os_type, primary_vm.os_version, primary_vm.os_type,
+                                     django_settings.OS_VERSION[primary_vm.os_type]))
+        for vhost in primary_vm.vhosts.all():
             for domain_name in vhost.domain_names.all():
                 if domain_name.status == 'requested':
                     warning_messages.append("Your domain name %s has been requested and is under review." %
@@ -251,8 +258,6 @@ def show(request, site_id):
 
 
 @login_required
-@transaction.atomic()
-@reversion.create_revision()
 def billing_management(request, site_id):
     site = privileges_check(site_id, request.user)
 
@@ -451,9 +456,11 @@ def system_packages(request, vm_id):
                     ansible_configuraton.value = ",".join(str(x) for x in packages_installed)
                     ansible_configuraton.save()
             else:
-                AnsibleConfiguration.objects.create(vm=vm, key="system_packages",
-                                                    value=package_number)
+                ansible_configuraton = AnsibleConfiguration.objects.create(vm=vm, key="system_packages",
+                                                                           value=str(package_number))
             launch_ansible(vm)  # to install or delete new/old packages selected by the user
+            packages_installed = list(int(x) for x in ansible_configuraton.value.split(",")) if ansible_configuraton \
+                                                                                                is not None else []
 
     return render(request, 'mws/system_packages.html', {
         'breadcrumbs': breadcrumbs,
@@ -656,6 +663,25 @@ def reset_vm(request, vm_id):
 
 
 @login_required
+def update_os(request, vm_id):
+    vm = get_object_or_404(VirtualMachine, pk=vm_id)
+    site = privileges_check(vm.site.id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if not vm.is_ready: # TODO change the button format (disabled) if the vm is not ready
+        return redirect(reverse(show, kwargs={'site_id': site.id}))
+
+    # TODO 1) Warn about the secondary VM if exists
+    # TODO 2) Delete secondary VM if exists
+    # TODO 3) Create a new VM with the new OS and launch an ansible task to restore the state of the DB
+    # TODO 4) Put it as a secondary VM?
+
+    return HttpResponse('')
+
+
+@login_required
 def delete_vhost(request, vhost_id):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
     site = privileges_check(vhost.vm.site.id, request.user)
@@ -782,14 +808,16 @@ def certificates(request, vhost_id):
 
         if 'cert' in request.FILES:
             try:
-                cert = c.load_certificate(c.FILETYPE_PEM, request.FILES['cert'].file.read())
+                certificates_str = request.FILES['cert'].file.read()
+                cert = c.load_certificate(c.FILETYPE_PEM, certificates_str)
             except Exception as e:
                 error_message = "The certificate file is invalid"
                 # raise ValidationError(e)
 
         if 'key' in request.FILES and error_message is None:
             try:
-                priv = c.load_privatekey(c.FILETYPE_PEM, request.FILES['key'].file.read())
+                key_str = request.FILES['key'].file.read()
+                priv = c.load_privatekey(c.FILETYPE_PEM, key_str)
             except Exception as e:
                 error_message = "The key file is invalid"
                 # raise ValidationError(e)
@@ -817,8 +845,8 @@ def certificates(request, vhost_id):
                 error_message = "The key doesn't match the certificate"
                 # raise ValidationError(e)
 
-        if 'cert' in request.FILES:
-            vhost.certificate = cert
+        if 'cert' in request.FILES and not error_message:
+            vhost.certificate = certificates_str
             vhost.save()
 
     return render(request, 'mws/certificates.html', {
@@ -930,7 +958,7 @@ def change_db_root_password(request, vm_id):
 
     if request.method == 'POST':
         new_root_passwd = request.POST['new_root_passwd']
-        # do something
+        # TODO do something
         return HttpResponseRedirect(reverse(settings, kwargs={'vm_id': vm.id}))
 
     return render(request, 'mws/change_db_root_password.html', {
@@ -952,3 +980,58 @@ def visit_vhost(request, vhost_id):
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     return redirect("http://"+str(vhost.main_domain.name))
+
+
+@login_required
+def backups(request, vm_id):
+    vm = get_object_or_404(VirtualMachine, pk=vm_id)
+    site = privileges_check(vm.site.id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if vm.is_busy:
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
+    breadcrumbs = {
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
+        1: dict(name='Server settings' if vm.primary else 'Test server settings', url=reverse(settings,
+                                                                                              kwargs={'vm_id': vm.id})),
+        2: dict(name='Restore backup', url=reverse(backups, kwargs={'vm_id': vm.id})),
+    }
+
+    parameters = {
+        'breadcrumbs': breadcrumbs,
+        'vm': vm,
+        'site': site,
+        'fromdate': datetime.date.today()-datetime.timedelta(days=30),
+        'todate': datetime.date.today()-datetime.timedelta(days=1),
+    }
+
+    if request.method == 'POST':
+        try:
+            backup_date = dateparse.parse_datetime(request.POST['backupdate'])
+            if backup_date is None or backup_date > datetime.datetime.now() \
+                    or backup_date < (datetime.datetime.now()-datetime.timedelta(days=30)): # TODO or backup_date >= datetime.date.today() ????
+                raise ValueError
+            launch_ansible(vm) # TODO restore data, once successfully completed restore database data
+            version = reversion.get_for_date(vm, backup_date)
+            version.revision.revert(delete=True)
+            for domain in vm.all_domain_names:
+                if domain.status == "requested":
+                    last_version = reversion.get_for_object(domain)[0]
+                    if last_version.field_dict['id'] != domain.id:
+                        raise Exception # TODO change this to a custom exception
+                    domain.status = last_version.field_dict['status']
+                    domain.save()
+        except ValueError:
+            parameters['error_message'] = "Incorrect date"
+            return render(request, 'mws/backups.html', parameters)
+        except Exception as e:
+            parameters['error_message'] = str(e)
+            return render(request, 'mws/backups.html', parameters)
+
+        # TODO do something + check that dates are correct
+        return HttpResponseRedirect(reverse(show, kwargs={'site_id': site.id}))
+
+    return render(request, 'mws/backups.html', parameters)
