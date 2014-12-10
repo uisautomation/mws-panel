@@ -20,6 +20,5 @@ class Migration(migrations.Migration):
             model_name='ansibleconfiguration',
             name='vm',
             field=models.ForeignKey(related_name='ansible_configuration', default=1, to='sitesmanagement.VirtualMachine'),
-            preserve_default=False,
         ),
     ]

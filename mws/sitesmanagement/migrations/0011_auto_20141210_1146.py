@@ -15,12 +15,10 @@ class Migration(migrations.Migration):
             model_name='virtualmachine',
             name='token',
             field=models.CharField(default='', max_length=50),
-            preserve_default=False,
         ),
         migrations.AlterField(
             model_name='virtualmachine',
             name='status',
             field=models.CharField(max_length=50, choices=[(b'requested', b'Requested'), (b'accepted', b'Accepted'), (b'denied', b'Denied'), (b'installing', b'Installing OS'), (b'ansible', b'Running Ansible'), (b'ansible_queued', b'Ansible queued'), (b'ready', b'Ready')]),
-            preserve_default=True,
         ),
     ]
