@@ -7,10 +7,16 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('sitesmanagement', '0016_virtualmachine_token'),
+        ('sitesmanagement', '0010_auto_20141105_1511'),
     ]
 
     operations = [
+        migrations.AddField(
+            model_name='virtualmachine',
+            name='token',
+            field=models.CharField(default='', max_length=50),
+            preserve_default=False,
+        ),
         migrations.AlterField(
             model_name='virtualmachine',
             name='status',

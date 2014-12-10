@@ -7,6 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('sitesmanagement', '0011_auto_20141210_1146'),
         ('apimws', '0002_ansibleconfiguration_site'),
     ]
 
@@ -18,7 +19,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='ansibleconfiguration',
             name='vm',
-            field=models.ForeignKey(default=2, to='sitesmanagement.VirtualMachine'),
+            field=models.ForeignKey(related_name='ansible_configuration', default=1, to='sitesmanagement.VirtualMachine'),
             preserve_default=False,
         ),
     ]
