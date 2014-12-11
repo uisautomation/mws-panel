@@ -4,6 +4,7 @@ import subprocess
 import uuid
 from Crypto.Util import asn1
 import OpenSSL.crypto
+from django.core.files.temp import NamedTemporaryFile
 from django.utils import dateparse
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
@@ -878,11 +879,28 @@ def generate_csr(request, vhost_id):
                 'error_main_domain': True
             })
 
+        temp_conf_file = NamedTemporaryFile()
+        temp_conf_file.write("[req]\n")
+        temp_conf_file.write("prompt = no\n")
+        temp_conf_file.write("default_bits = 2048\n")
+        temp_conf_file.write("default_md = sha256\n")
+        temp_conf_file.write("distinguished_name = dn\n")
+        temp_conf_file.write("req_extensions = ext\n\n")
+        temp_conf_file.write("[dn]\n")
+        temp_conf_file.write("C = GB\n")
+        temp_conf_file.write("CN = %s\n\n" % vhost.main_domain.name)
+        temp_conf_file.write("[ext]\n")
+        temp_conf_file.write("subjectAltName = DNS:" + ", DNS:".join(vhost.domain_names.values_list('name', flat=True)))
+        temp_conf_file.flush()
+
         vhost.csr = subprocess.check_output(["openssl", "req", "-new", "-newkey", "rsa:2048", "-nodes", "-keyout",
-                                             "/dev/null", "-subj", "/C=GB/CN=%s" % vhost.main_domain.name])
+                                             "/dev/null", "-config", temp_conf_file.name])
         vhost.save()
-        # launch_ansible(vhost.vm) # with a task to create the CSR
-        # include all domain names in the common name field in the CSR
+
+        temp_conf_file.close()
+        # launch_ansible with a task to create the CSR
+        # put the main domain name as the common name
+        # include all domain names in the subject alternative name field in the extended configuration
         # country is always GB
         # all other parameters/fields are optional and won't appear in the certificate, just ignore them.
 
