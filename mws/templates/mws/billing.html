@@ -5,13 +5,18 @@
         <div class="campl-content-container">
             <h1>Billing data</h1>
 
-            <p>Please, upload your billing data using the following form, you will need to include the purchase order
-            number, the name of the group that raised the purchase order, and a copy (in PDF please) of the purchase
-            order.</p>
+            <p>Please, upload your billing data using the following form, you will need to include:</p>
+            <ul>
+                <li>the purchase order number,</li>
+                <li>the name of the group that raised the purchase order,</li>
+                <li>and a PDF copy of the purchase order.</li>
+            </ul>
 
-            <p>You have 30 days since the start of your MWS to include this billing data, otherwise this MWS will be
-                cancelled. This does not applies to other MWS servers where you have already upload the billing data.
+            <p>You have 30 days from the start of your MWS request date to include this billing data, otherwise this
+                MWS will be cancelled. This does not apply to other MWS servers where you have already uploaded the
+                billing data.
             </p>
+
             <form enctype="multipart/form-data" action={% url 'sitesmanagement.views.billing_management' site_id=site.id %} method="post">
                 <fieldset>
                     {% csrf_token %}

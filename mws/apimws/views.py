@@ -6,10 +6,9 @@ from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from stronghold.decorators import public
-from apimws.utils import launch_ansible_site
-from mwsauth.utils import get_or_create_group_by_groupid
+from apimws.utils import launch_ansible_site, resend_email_confirmation
+from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.models import DomainName, Site, EmailConfirmation, VirtualMachine
-from sitesmanagement.views import show
 from ucamlookup import user_in_groups
 
 
@@ -138,3 +137,18 @@ def post_installation(request):
             return HttpResponse()
 
     return HttpResponseForbidden()
+
+
+@login_required
+def resend_email_confirmation_view(request, site_id):
+    site = privileges_check(site_id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if request.method == 'POST':
+        resend_email_confirmation.delay(site)
+    else:
+        return HttpResponseForbidden()
+
+    return HttpResponse()

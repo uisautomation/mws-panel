@@ -4,12 +4,14 @@ import subprocess
 import uuid
 from Crypto.Util import asn1
 import OpenSSL.crypto
+from django.core.files.temp import NamedTemporaryFile
 from django.utils import dateparse
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
+from django.utils.html import format_html
 import reversion
 from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups, validate_crsids
 from apimws.models import AnsibleConfiguration
@@ -236,14 +238,21 @@ def show(request, site_id):
                                             domain_name.name)
 
     if not hasattr(site, 'billing'):
-        warning_messages.append("No billing details are available, please add them.")
+        warning_messages.append(format_html('No billing details are available, please <a href="%s" '
+                                            'style="text-decoration: underline;">add them</a>.' %
+                                            reverse(billing_management, kwargs={'site_id': site.id})))
 
     if site.email:
         try:
             site_email = EmailConfirmation.objects.get(email=site.email, site_id=site.id)
             if site_email.status == 'pending':
-                warning_messages.append("Your email '%s' is still unconfirmed, please check your email inbox and "
-                                        "click on the link of the email we sent you." % site.email)
+                from apimws.views import resend_email_confirmation_view
+                warning_messages.append(format_html('Your email %s is still unconfirmed, please check your email inbox '
+                                                    'and click on the link of the email we sent you. <a '
+                                                    'id="resend_email_link" data-href="%s" href="#" '
+                                                    'style="text-decoration: underline;">Resend confirmation '
+                                                    'email</a>' % (site.email, reverse(resend_email_confirmation_view,
+                                                                                       kwargs={'site_id': site.id}))))
         except EmailConfirmation.DoesNotExist:
             pass
 
@@ -429,10 +438,11 @@ def system_packages(request, vm_id):
     if vm.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
-    ansible_configuraton = get_object_or_None(AnsibleConfiguration, vm=vm, key="system_packages")
+    ansible_configuraton = get_object_or_None(AnsibleConfiguration, vm=vm, key="system_packages") or \
+                           AnsibleConfiguration.objects.create(vm=vm, key="system_packages", value="")
 
-    packages_installed = list(int(x) for x in ansible_configuraton.value.split(",")) if ansible_configuraton is not \
-                                                                                         None else []
+    packages_installed = list(int(x) for x in ansible_configuraton.value.split(",")) \
+        if ansible_configuraton.value != '' else []
 
     breadcrumbs = {
         0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
@@ -446,21 +456,16 @@ def system_packages(request, vm_id):
     if request.method == 'POST':
         package_number = int(request.POST['package_number'])
         if package_number in package_number_list:
-            if packages_installed:
-                if package_number in packages_installed:
-                    packages_installed.remove(package_number)
-                    ansible_configuraton.value = ",".join(str(x) for x in packages_installed)
-                    ansible_configuraton.save()
-                else:
-                    bisect.insort_left(packages_installed, package_number)
-                    ansible_configuraton.value = ",".join(str(x) for x in packages_installed)
-                    ansible_configuraton.save()
+            if package_number in packages_installed:
+                packages_installed.remove(package_number)
+                ansible_configuraton.value = ",".join(str(x) for x in packages_installed)
+                ansible_configuraton.save()
             else:
-                ansible_configuraton = AnsibleConfiguration.objects.create(vm=vm, key="system_packages",
-                                                                           value=str(package_number))
+                bisect.insort_left(packages_installed, package_number)
+                ansible_configuraton.value = ",".join(str(x) for x in packages_installed)
+                ansible_configuraton.save()
+
             launch_ansible(vm)  # to install or delete new/old packages selected by the user
-            packages_installed = list(int(x) for x in ansible_configuraton.value.split(",")) if ansible_configuraton \
-                                                                                                is not None else []
 
     return render(request, 'mws/system_packages.html', {
         'breadcrumbs': breadcrumbs,
@@ -883,11 +888,28 @@ def generate_csr(request, vhost_id):
                 'error_main_domain': True
             })
 
+        temp_conf_file = NamedTemporaryFile()
+        temp_conf_file.write("[req]\n")
+        temp_conf_file.write("prompt = no\n")
+        temp_conf_file.write("default_bits = 2048\n")
+        temp_conf_file.write("default_md = sha256\n")
+        temp_conf_file.write("distinguished_name = dn\n")
+        temp_conf_file.write("req_extensions = ext\n\n")
+        temp_conf_file.write("[dn]\n")
+        temp_conf_file.write("C = GB\n")
+        temp_conf_file.write("CN = %s\n\n" % vhost.main_domain.name)
+        temp_conf_file.write("[ext]\n")
+        temp_conf_file.write("subjectAltName = DNS:" + ", DNS:".join(vhost.domain_names.values_list('name', flat=True)))
+        temp_conf_file.flush()
+
         vhost.csr = subprocess.check_output(["openssl", "req", "-new", "-newkey", "rsa:2048", "-nodes", "-keyout",
-                                             "/dev/null", "-subj", "/C=GB/CN=%s" % vhost.main_domain.name])
+                                             "/dev/null", "-config", temp_conf_file.name])
         vhost.save()
-        # launch_ansible(vhost.vm) # with a task to create the CSR
-        # include all domain names in the common name field in the CSR
+
+        temp_conf_file.close()
+        # launch_ansible with a task to create the CSR
+        # put the main domain name as the common name
+        # include all domain names in the subject alternative name field in the extended configuration
         # country is always GB
         # all other parameters/fields are optional and won't appear in the certificate, just ignore them.
 

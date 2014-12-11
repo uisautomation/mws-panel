@@ -453,6 +453,10 @@ class DomainName(models.Model):
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='requested')
     vhost = models.ForeignKey(Vhost, related_name='domain_names')
 
+    @property
+    def is_external(self):
+        return not is_camacuk(self.name)
+
     def __str__(self):
         return self.name
 
@@ -517,7 +521,7 @@ class BillingForm(forms.ModelForm):
         fields = ('purchase_order_number', 'group', 'purchase_order')
         labels = {
             'purchase_order_number': 'Purchase order number (PO)',
-            'group': 'The group name that raised the purchase order',
+            'group': 'Name or Reference of the group that raised the purchase order',
             'purchase_order': 'A PDF file with the purchase order'
         }
 

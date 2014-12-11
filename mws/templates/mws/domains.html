@@ -11,6 +11,7 @@
                         <tr>
                             <th>Domain Name</th>
                             <th>Status</th>
+                            <th>Configuration</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -18,23 +19,32 @@
                     {% for domain in vhost.domain_names.all %}
                         <tr>
                             <td>
-                                {{ domain.name }}
+                                <p>{{ domain.name }}
                                 {% if domain == vhost.main_domain %}
                                     <br/>This is the current main domain
-                                {% endif %}
+                                {% endif %}</p>
                             </td>
                             <td>
-                                {{ domain.get_status_display }}
+                                <p>{{ domain.get_status_display }}</p>
                             </td>
-                            <td style="width: 135px;">
+                            <td>
+                                {% if domain.is_external %}
+                                    <p><a id="setup_instructions" style="cursor: pointer;">Set up instructions</a></p>
+                                {% else %}
+                                    <p>Managed domain name</p>
+                                {% endif %}
+                            </td>
+                            <td style="width: 155px; cursor: pointer">
+                                <p>
                                 {% if domain.status != 'to_be_deleted' %}
-                                <a href="#" onclick="javascript:ajax_call('{% url 'sitesmanagement.views.set_dn_as_main' domain_id=domain.id %}', 'POST')">
-                                    Set as Master
+                                <a onclick="javascript:ajax_call('{% url 'sitesmanagement.views.set_dn_as_main' domain_id=domain.id %}', 'POST')">
+                                    Set as main domain
                                 </a>
-                                <a class="delete_domain" data-href="javascript:ajax_call('{% url 'sitesmanagement.views.delete_dn' domain_id=domain.id %}', 'DELETE')" href="#">
+                                <a class="delete_domain" data-href="javascript:ajax_call('{% url 'sitesmanagement.views.delete_dn' domain_id=domain.id %}', 'DELETE')">
                                     <i title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i>
                                 </a>
                                 {% endif %}
+                                </p>
                             </td>
                         </tr>
                     {% endfor %}
@@ -74,6 +84,24 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="modal fade" id="instructions_modal" >
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title">Set up instructions</h4>
+                </div>
+                <div class="modal-body">
+                    <p>To configure your domain name, access to the control panel of your provider and create a CNAME record with the following content: {{ vhost.vm.site.network_configuration.mws_domain }}</p>
+                    <p>If your domain name is an bare domain, zone apex domain, or root domain, then instead create an A record with the following content: {{ vhost.vm.site.network_configuration.IPv4 }}</p>
+                    <p>In this latter case, you can also create an AAAA record with the following content for IPv6 compatibility: {{ vhost.vm.site.network_configuration.IPv6 }}</p>
+                </div>
+            </div>
+        </div>
     </div>
 {% endblock %}
 
@@ -119,6 +147,10 @@
         $('.delete_domain').click(function() {
             $("#delete_modal_button").attr("href", $( this ).attr('data-href'));
             $('#delete_modal').modal();
+        });
+
+        $('#setup_instructions').click(function() {
+            $('#instructions_modal').modal();
         });
     </script>
 {% endblock %}

@@ -57,10 +57,14 @@ class Command(NoArgsCommand):
                                 vh.domain_names.filter(status='accepted')]
             if vh.main_domain:
                 vhv['main_domain'] = vh.main_domain.name
+            if vh.certificate:
+                vhv['certificate'] = vh.certificate
+            vhv['tls_enabled'] = 'certificate' in vhv
             return vhv
         v['mws_vhosts'] = [ vhost_vars(vh) for vh in vm.vhosts.all()]
         v['mws_is_primary'] = vm.primary
         v['mws_ipv4'] = vm.ipv4
         v['mws_ipv6'] = vm.ipv6
-        v['mws_tls_enabled'] = False
+        v['mws_tls_enabled'] = any(['certificate' in vhv
+                                    for vhv in v['mws_vhosts']])
         return v
