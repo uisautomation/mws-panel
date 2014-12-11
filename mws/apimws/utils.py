@@ -36,6 +36,18 @@ def email_confirmation(site):
     send_mail(subject, message, from_email, recipient_list, fail_silently=False)
 
 
+@shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
+def resend_email_confirmation(site):
+    email_conf = EmailConfirmation.objects.get(site=site)
+    subject = "University of Cambridge Managed Web Service: Please confirm your email address"
+    message = "Please, confirm your email address by clicking in the following link: " \
+              "%s/confirm_email/%d/%s/" % (settings.MAIN_DOMAIN, email_conf.id, email_conf.token)
+    from_email = "mws3-support@cam.ac.uk"
+    recipient_list = (site.email, )
+    headers = {'Reply-To': from_email}
+    send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+
+
 class UnexpectedVMStatus(Exception):
     pass
 

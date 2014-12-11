@@ -8,9 +8,9 @@ from django.core.files.temp import NamedTemporaryFile
 from django.utils import dateparse
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from django.db import transaction
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
+from django.utils.html import format_html
 import reversion
 from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups, validate_crsids
 from apimws.models import AnsibleConfiguration
@@ -232,14 +232,18 @@ def show(request, site_id):
                                             domain_name.name)
 
     if not hasattr(site, 'billing'):
-        warning_messages.append("No billing details are available, please add them.")
+        warning_messages.append(format_html('No billing details are available, please <a href="%s" '
+                                            'style="text-decoration: underline;">add them</a>.' %
+                                            reverse(billing_management, kwargs={'site_id': site.id})))
 
     if site.email:
         try:
             site_email = EmailConfirmation.objects.get(email=site.email, site_id=site.id)
             if site_email.status == 'pending':
-                warning_messages.append("Your email '%s' is still unconfirmed, please check your email inbox and "
-                                        "click on the link of the email we sent you." % site.email)
+                from apimws.views import resend_email_confirmation_view
+                warning_messages.append(format_html('Your email %s is still unconfirmed, please check your email inbox and click on the link of the email we sent you. <a id="resend_email_link" data-href="%s" href="#" style="text-decoration: underline;">Resend confirmation email</a>' %
+                                        (site.email, reverse(resend_email_confirmation_view,
+                                                             kwargs={'site_id': site.id}))))
         except EmailConfirmation.DoesNotExist:
             pass
 
