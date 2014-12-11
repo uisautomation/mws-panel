@@ -439,6 +439,10 @@ class DomainName(models.Model):
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='requested')
     vhost = models.ForeignKey(Vhost, related_name='domain_names')
 
+    @property
+    def is_external(self):
+        return not is_camacuk(self.name)
+
     def __str__(self):
         return self.name
 
