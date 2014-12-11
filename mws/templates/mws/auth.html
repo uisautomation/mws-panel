@@ -4,14 +4,15 @@
         <div class="campl-content-container">
             <h1>Authorised users and groups</h1>
 
-            <p>You can authorise other users as administrators or ssh-only users. Administrators will access to all the
-                features of the control panel and can connect to the server via SSH. SSH-only users will only have
-                access to the server via SSH. They won't be able to access to the web panel.</p>
-            <p>You can search other users using the text field typing their name or CRSid. It will let you autocomplete
-            by selecting it from the drop list.</p>
+            <p>You can authorise other users as administrators or ssh-only users. Administrators will have access to all
+                thre features of the control panel and can connect to the server via SSH. SSH-only users will only have
+                access to the server via SSH. They won't be able to access the web panel.</p>
+            <p>You can search for other users using the text field below by typing their name or CRSid. It will let you
+                autocomplete by selecting their entry from the drop down list.</p>
             <p>You can also authorise users or administrators using
                 <a href="http://www.ucs.cam.ac.uk/lookup/">Lookup</a>
-                <a href="http://www.ucs.cam.ac.uk/lookup/groups">groups</a>.</p>
+                <a href="http://www.ucs.cam.ac.uk/lookup/groups">groups</a>.
+            </p>
 
             <form action={% url 'mwsauth.views.auth_change' site_id=site.id %} method="post">
                 <fieldset>

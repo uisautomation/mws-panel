@@ -9,7 +9,7 @@
                 <fieldset>
                     {% if site.primary_vm %}
                         <div>
-                            <p>Clone the production server into the test server</p>
+                            <h3>Clone the production server into the test server</h3>
 
                             {% if site.secondary_vm %}
                                 <p>
@@ -27,7 +27,7 @@
                     {% endif %}
                     {% if site.secondary_vm %}
                         <div>
-                            <p>Clone the test server into the production server</p>
+                            <h3>Clone the test server into the production server</h3>
 
                             {% if site.primary_vm %}
                                 <p>
