@@ -211,10 +211,10 @@
         {% endif %}
 
         {% if site.secondary_vm and not site.secondary_vm.is_busy %}
-            <div class="campl-column4">
+            <div class="campl-column4 campl-theme-3">
                 <div class="campl-content-container campl-side-padding">
                     <article class="node node-external-link view-mode-focus_on clearfix
-                                    campl-horizontal-teaser campl-teaser campl-focus-teaser campl-focus-teaser-red">
+                                    campl-horizontal-teaser campl-teaser campl-focus-teaser">
                         <div class="campl-focus-teaser-img">
                             <div class="campl-content-container campl-horizontal-teaser-img">
                                 <a href="{% url 'sitesmanagement.views.settings' vm_id=site.secondary_vm.id %}">
@@ -239,7 +239,7 @@
                                     </a>
                                 </h3>
                                 <a href="{% url 'sitesmanagement.views.settings' vm_id=site.secondary_vm.id %}"
-                                   class="ir campl-focus-link campl-focus-link-red">MWS test server settings</a>
+                                   class="ir campl-focus-link">MWS test server settings</a>
                             </div>
                         </div>
                     </article>
