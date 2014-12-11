@@ -241,9 +241,12 @@ def show(request, site_id):
             site_email = EmailConfirmation.objects.get(email=site.email, site_id=site.id)
             if site_email.status == 'pending':
                 from apimws.views import resend_email_confirmation_view
-                warning_messages.append(format_html('Your email %s is still unconfirmed, please check your email inbox and click on the link of the email we sent you. <a id="resend_email_link" data-href="%s" href="#" style="text-decoration: underline;">Resend confirmation email</a>' %
-                                        (site.email, reverse(resend_email_confirmation_view,
-                                                             kwargs={'site_id': site.id}))))
+                warning_messages.append(format_html('Your email %s is still unconfirmed, please check your email inbox '
+                                                    'and click on the link of the email we sent you. <a '
+                                                    'id="resend_email_link" data-href="%s" href="#" '
+                                                    'style="text-decoration: underline;">Resend confirmation '
+                                                    'email</a>' % (site.email, reverse(resend_email_confirmation_view,
+                                                                                       kwargs={'site_id': site.id}))))
         except EmailConfirmation.DoesNotExist:
             pass
 
@@ -429,10 +432,11 @@ def system_packages(request, vm_id):
     if vm.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
-    ansible_configuraton = get_object_or_None(AnsibleConfiguration, vm=vm, key="system_packages")
+    ansible_configuraton = get_object_or_None(AnsibleConfiguration, vm=vm, key="system_packages") or \
+                           AnsibleConfiguration.objects.create(vm=vm, key="system_packages", value="")
 
-    packages_installed = list(int(x) for x in ansible_configuraton.value.split(",")) if ansible_configuraton is not \
-                                                                                         None else []
+    packages_installed = list(int(x) for x in ansible_configuraton.value.split(",")) \
+        if ansible_configuraton.value != '' else []
 
     breadcrumbs = {
         0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
@@ -446,21 +450,16 @@ def system_packages(request, vm_id):
     if request.method == 'POST':
         package_number = int(request.POST['package_number'])
         if package_number in package_number_list:
-            if packages_installed:
-                if package_number in packages_installed:
-                    packages_installed.remove(package_number)
-                    ansible_configuraton.value = ",".join(str(x) for x in packages_installed)
-                    ansible_configuraton.save()
-                else:
-                    bisect.insort_left(packages_installed, package_number)
-                    ansible_configuraton.value = ",".join(str(x) for x in packages_installed)
-                    ansible_configuraton.save()
+            if package_number in packages_installed:
+                packages_installed.remove(package_number)
+                ansible_configuraton.value = ",".join(str(x) for x in packages_installed)
+                ansible_configuraton.save()
             else:
-                ansible_configuraton = AnsibleConfiguration.objects.create(vm=vm, key="system_packages",
-                                                                           value=str(package_number))
+                bisect.insort_left(packages_installed, package_number)
+                ansible_configuraton.value = ",".join(str(x) for x in packages_installed)
+                ansible_configuraton.save()
+
             launch_ansible(vm)  # to install or delete new/old packages selected by the user
-            packages_installed = list(int(x) for x in ansible_configuraton.value.split(",")) if ansible_configuraton \
-                                                                                                is not None else []
 
     return render(request, 'mws/system_packages.html', {
         'breadcrumbs': breadcrumbs,
