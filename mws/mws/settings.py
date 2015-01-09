@@ -16,6 +16,9 @@ TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
+ADMINS = (('Abraham', 'amc203@cam.ac.uk'), )
+SERVER_EMAIL = "mws3-support@cam.ac.uk"
+
 MAIN_DOMAIN = 'http://localhost:8000'
 
 INSTALLED_APPS = INSTALLED_APPS + (
