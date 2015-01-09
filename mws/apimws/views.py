@@ -1,6 +1,7 @@
 import csv
 from datetime import date
 import json
+import logging
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
@@ -10,6 +11,9 @@ from apimws.utils import launch_ansible_site, resend_email_confirmation
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.models import DomainName, Site, EmailConfirmation, VirtualMachine
 from ucamlookup import user_in_groups
+from sitesmanagement.views import show
+
+logger = logging.getLogger('mws')
 
 
 @login_required
@@ -69,6 +73,7 @@ def confirm_email(request, ec_id, token):
     if email_confirmation.token == token:
         email_confirmation.status = 'accepted'
         email_confirmation.save()
+        logger.info(str(request.user.username) + " confirmed email '" + str(email_confirmation.email) + "'")
         launch_ansible_site(email_confirmation.site)  # to update server email associated
         return redirect(show, site_id=email_confirmation.site.id)
     else:

@@ -56,7 +56,8 @@ class Command(NoArgsCommand):
                 if user.mws_user.ssh_public_key:
                     uv['ssh_key'] = user.mws_user.ssh_public_key
             return uv
-        v['mws_users'] = [ user_vars(u) for u in vm.site.list_of_all_type_of_active_users()]
+        v['mws_users'] = [ user_vars(u) for u in
+                           vm.site.list_of_all_type_of_active_users()]
         def vhost_vars(vh):
             vhv = { }
             vhv['name'] = vh.name
