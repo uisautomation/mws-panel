@@ -48,8 +48,16 @@ class Command(NoArgsCommand):
         v['ansible_ssh_host'] = vm.hostname
         v['mws_name'] = vm.site.name
         v['mws_webmaster_email'] = vm.site.email
-        v['mws_users'] = [u.username for u in chain(
-            vm.site.users.all(), vm.site.ssh_users.all())]
+        def user_vars(user):
+            uv = { }
+            uv['username'] = user.username
+            if hasattr(user, "mws_user"):
+                uv['uid'] = user.mws_user.uid
+                if user.mws_user.ssh_public_key:
+                    uv['ssh_key'] = user.mws_user.ssh_public_key
+            return uv
+        v['mws_users'] = [ user_vars(u) for u in
+                           vm.site.list_of_all_type_of_active_users()]
         def vhost_vars(vh):
             vhv = { }
             vhv['name'] = vh.name

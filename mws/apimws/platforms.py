@@ -101,4 +101,29 @@ def clone_vm_api_call(orignal_vm, destination_vm, delete_vm):
     if delete_vm:
         delete_vm.delete()
 
+    destination_vm.name = str(uuid.uuid4())
+    destination_vm.status = 'ready'
+    destination_vm.save()
+
+    # Copy Unix Groups
+    for unix_group in orignal_vm.unix_groups.all():
+        copy_users = unix_group.users.all()
+        unix_group.pk = None
+        unix_group.vm = destination_vm
+        unix_group.save()
+        unix_group.users = copy_users
+
+    # Copy Ansible Configuration
+    for ansible_conf in orignal_vm.ansible_configuration.all():
+        ansible_conf.pk = None
+        ansible_conf.vm = destination_vm
+        ansible_conf.save()
+
+    # Copy vhosts
+    # TODO copy Domain Names
+    for vhost in orignal_vm.vhosts.all():
+        vhost.pk = None
+        vhost.vm = destination_vm
+        vhost.save()
+
     return True

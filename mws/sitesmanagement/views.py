@@ -1,5 +1,6 @@
 import bisect
 import datetime
+import logging
 import subprocess
 import uuid
 from Crypto.Util import asn1
@@ -23,6 +24,7 @@ from .models import SiteForm, DomainNameFormNew, BillingForm, DomainName, Networ
     VirtualMachine, Vhost, VhostForm, Site, UnixGroupForm, UnixGroup, SiteRequestDemo
 from django.conf import settings as django_settings
 
+logger = logging.getLogger('mws')
 
 @login_required
 def index(request):
@@ -83,6 +85,7 @@ def new(request):
             if site.email:
                 email_confirmation(site)
 
+            logger.info(str(request.user.username) + " created a new site '" + str(site.name) + "'")
             return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
     else:
         site_form = SiteForm(prefix="siteform", user=request.user)
