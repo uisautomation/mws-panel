@@ -7,7 +7,7 @@
             {% if error_message %}<p style="color: red">{{ error_message }}</p>{% endif %}
             {% if ssh_public_key %}
                 <pre>{{ ssh_public_key }}</pre>
-                <p><a id="new_key" class="campl-btn campl-primary-cta campl-primary-blue">Upload a new certificate</a></p>
+                <p><a id="new_key" class="campl-btn campl-primary-cta campl-primary-blue">Upload a new SSH Public Key</a></p>
 
             {% endif %}
             <form {% if ssh_public_key %}style="display: none;"{% endif %} id="ssh_key_form"
@@ -17,7 +17,7 @@
                     {% if not ssh_public_key %}<p>If you upload your public ssh key, you will be able to access to all
                     the servers where you have been authorised through ssh using your private key</p>{% endif %}
                     <div id="user_form">
-                        Public ssh key: <input type="file" name="ssh_public_key"></p>
+                        Public SSH Key: <input type="file" name="ssh_public_key"></p>
                     </div>
                     <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
                 </fieldset>
