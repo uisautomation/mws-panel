@@ -102,7 +102,7 @@ def clone_vm_api_call(orignal_vm, destination_vm, delete_vm):
         delete_vm.delete()
 
     destination_vm.name = str(uuid.uuid4())
-    destination_vm.status = 'ready'
+    destination_vm.status = 'requested'
     destination_vm.save()
 
     # Copy Unix Groups
