@@ -81,12 +81,9 @@ def user_panel(request):
                     'error_message': error_message
                 })
 
-        if hasattr(request.user, 'mws_user'):
-            mws_user = request.user.mws_user
-            mws_user.ssh_public_key = ssh_public_key
-            mws_user.save()
-        else:
-            mws_user = MWSUser.objects.create(user=request.user, ssh_public_key=ssh_public_key)
+        mws_user, created = MWSUser.objects.get_or_create(user=request.user)
+        mws_user.ssh_public_key = ssh_public_key
+        mws_user.save()
 
         return redirect(index)
 
