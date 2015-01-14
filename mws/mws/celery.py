@@ -1,12 +1,9 @@
 from __future__ import absolute_import
 from celery.schedules import crontab
 from celery import Celery
-import os
 
-from django.conf import settings
-
-# set the default Django settings module for the 'celery' program.
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mws.settings')
+# to launch the celery worker use the following command line:
+# DJANGO_SETTINGS_MODULE='mws.(production_)settings' celery -A mws worker -l info
 
 app = Celery('mws')
 
