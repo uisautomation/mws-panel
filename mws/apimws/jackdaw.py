@@ -45,8 +45,7 @@ def reactivate_users(list_of_users_crsid_from_jackdaw):
 
 @shared_task()
 def jackdaw_api():
-    jackdaw_response = subprocess.check_output(["ssh", "root@boarstall", "ssh", "-xa", "mwsv3@jackdaw.csi.cam.ac.uk",
-                                                "test", "get_people"])
+    jackdaw_response = subprocess.check_output(["ssh", "-xa", "mwsv3@jackdaw.csi.cam.ac.uk", "test", "get_people"])
     jackdaw_response_parsed = jackdaw_response.splitlines()
     if jackdaw_response_parsed.pop(0) != "Database:jdawtest":
         return False # TODO Raise a custom exception
