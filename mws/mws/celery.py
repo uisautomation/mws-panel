@@ -3,7 +3,7 @@ from celery.schedules import crontab
 from celery import Celery
 
 # to launch the celery worker use the following command line:
-# DJANGO_SETTINGS_MODULE='mws.(production_)settings' celery -A mws worker -l info
+# DJANGO_SETTINGS_MODULE='mws.(production_)settings' celery -A mws worker -l info -B
 
 app = Celery('mws')
 
