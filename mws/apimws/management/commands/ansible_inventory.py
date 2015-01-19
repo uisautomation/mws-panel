@@ -51,7 +51,7 @@ class Command(NoArgsCommand):
         def user_vars(user):
             uv = { }
             uv['username'] = user.username
-            if hasattr(user, "mws_user"):
+            if hasattr(user, "mws_user") and user.mws_user.uid is not None:
                 uv['uid'] = user.mws_user.uid
                 if user.mws_user.ssh_public_key:
                     uv['ssh_key'] = user.mws_user.ssh_public_key
