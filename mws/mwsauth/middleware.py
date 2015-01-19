@@ -20,7 +20,7 @@ class CheckBannedUsers():
             if request.user.is_authenticated() and hasattr(request.user, 'suspendeduser') \
                     and (request.user.suspendeduser.suspended is True)\
                     and (resolve(request.path).url_name != 'logout')\
-                    or request.user.is_authenticated \
+                    or request.user.is_authenticated() \
                             and not user_in_groups(request.user, [get_or_create_group_by_groupid(101888),
                                                                   get_or_create_group_by_groupid(101128)]):
                 t = loader.get_template('403.html')
