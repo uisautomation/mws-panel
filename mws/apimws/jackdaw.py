@@ -30,18 +30,21 @@ def deactivate_users(jackdaw_users_crsids, list_of_mws_users):
     map(deactive_this_user, set(list_of_mws_users) - set(jackdaw_users_crsids))
 
 
-def reactivate_this_user(user_crsid, jackdaw_users):
+def reactivate_or_create_mws_user(user_crsid, jackdaw_users):
     updated = User.objects.filter(username=user_crsid).update(is_active=True)
     # if updated is 0 the user has not yet used the mws3 service
     # if updated is 1 then the user has used the service, was deactivated and now they has been reactivated
     # if updated is more than 2 an exception should be raise, it shouldn't be the case
     # Assumption that the uid is never going to change in jackdaw
-    MWSUser.objects.update_or_create(user_id=user_crsid, uid=jackdaw_users[user_crsid])
+    if jackdaw_users[user_crsid] < 1000:
+        MWSUser.objects.update_or_create(user_id=user_crsid, uid=66000+jackdaw_users[user_crsid])
+    else:
+        MWSUser.objects.update_or_create(user_id=user_crsid, uid=jackdaw_users[user_crsid])
     # TODO if we let users enter to MWS site if they are not in jackdaw change to get_or_create
 
 
 def reactivate_users(jackdaw_users_crsids, list_of_mws_users, jackdaw_users):
-    map(lambda x: reactivate_this_user(x, jackdaw_users), set(jackdaw_users_crsids) - set(list_of_mws_users))
+    map(lambda x: reactivate_or_create_mws_user(x, jackdaw_users), set(jackdaw_users_crsids) - set(list_of_mws_users))
 
 
 @shared_task()
