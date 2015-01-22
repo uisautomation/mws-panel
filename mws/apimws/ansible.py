@@ -23,8 +23,10 @@ def launch_ansible(vm):
 
 
 def launch_ansible_site(site):
-    # TODO launch ansible for the two VMs
-    pass
+    if site.primary_vm is not None:
+        launch_ansible(site.primary_vm)
+    if site.secondary_vm is not None:
+        launch_ansible(site.secondary_vm)
 
 
 @shared_task
