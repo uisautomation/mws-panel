@@ -7,7 +7,8 @@ from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from stronghold.decorators import public
-from apimws.utils import launch_ansible_site, resend_email_confirmation
+from apimws.ansible import launch_ansible_site
+from apimws.utils import resend_email_confirmation
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.models import DomainName, Site, EmailConfirmation, VirtualMachine
 from ucamlookup import user_in_groups

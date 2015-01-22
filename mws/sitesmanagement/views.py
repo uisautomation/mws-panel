@@ -14,9 +14,10 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.html import format_html
 import reversion
 from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups, validate_crsids
+from apimws.ansible import launch_ansible
 from apimws.models import AnsibleConfiguration
 from apimws.platforms import PlatformsAPINotWorkingException, new_site_primary_vm, clone_vm
-from apimws.utils import email_confirmation, ip_register_api_request, launch_ansible
+from apimws.utils import email_confirmation, ip_register_api_request
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.utils import is_camacuk, get_object_or_None
 from .models import SiteForm, DomainNameFormNew, BillingForm, DomainName, NetworkConfig, EmailConfirmation, \
