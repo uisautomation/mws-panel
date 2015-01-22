@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, redirect
 from ucamlookup import validate_crsids
-from apimws.utils import launch_ansible_site
+from apimws.ansible import launch_ansible_site
 from mwsauth.models import MWSUser
 from mwsauth.utils import privileges_check
 from sitesmanagement.views import show, index
