@@ -40,4 +40,4 @@ hAM+a6/30F5fdkWpE1smPyrfASyXRfWE4Ccn1RVgYX9u
 
 BROKER_URL = 'django://'
 INSTALLED_APPS = INSTALLED_APPS+('kombu.transport.django', ) # TODO Change this to rabbitmq?
-CELERY_IMPORTS = ('apimws.platforms', 'apimws.utils', 'apimws.jackdaw')
+CELERY_IMPORTS = ('apimws.platforms', 'apimws.utils', 'apimws.jackdaw', 'apimws.ansible')
