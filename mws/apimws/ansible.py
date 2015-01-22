@@ -1,4 +1,5 @@
 from celery import shared_task
+import subprocess
 
 
 class UnexpectedVMStatus(Exception):
@@ -28,7 +29,7 @@ def launch_ansible_site(site):
 
 @shared_task
 def launch_ansible_async(vm):
-    # TODO launch ansible task
+    ansible_response = subprocess.check_output(["userv" "mws-admin" "mws_ansible"])
     if vm.status == 'ansible_queued':
         vm.status = 'ansible'
         vm.save()
