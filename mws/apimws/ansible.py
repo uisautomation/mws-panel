@@ -6,8 +6,12 @@ class UnexpectedVMStatus(Exception):
     pass
 
 
+def refresh_object(obj):
+    """ Reload an object from the database """
+    return obj.__class__._default_manager.get(pk=obj.pk)
+
+
 def launch_ansible(vm):
-    # TODO if ansible is already running, then mark a flag that to reexecute ansible once finished
     if vm.status == 'ready':
         vm.status = 'ansible'
         vm.save()
@@ -15,11 +19,10 @@ def launch_ansible(vm):
     elif vm.status == 'ansible':
         vm.status = 'ansible_queued'
         vm.save()
-        launch_ansible_async.delay(vm)
     elif vm.status == 'ansible_queued':
         return
     else:
-        raise UnexpectedVMStatus()
+        raise UnexpectedVMStatus() # TODO pass the vm object?
 
 
 def launch_ansible_site(site):
@@ -31,11 +34,12 @@ def launch_ansible_site(site):
 
 @shared_task
 def launch_ansible_async(vm):
-    ansible_response = subprocess.check_output(["userv", "mws-admin", "mws_ansible"])
-    if vm.status == 'ansible_queued':
-        vm.status = 'ansible'
-        vm.save()
-        launch_ansible_async.delay(vm)
-    else:
-        vm.status = 'ready'
-        vm.save()
+    while vm.status != 'ready':
+        ansible_response = subprocess.check_output(["userv", "mws-admin", "mws_ansible"])
+        vm = refresh_object(vm)
+        if vm.status == 'ansible_queued':
+            vm.status = 'ansible'
+            vm.save()
+        else:
+            vm.status = 'ready'
+            vm.save()
