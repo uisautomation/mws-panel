@@ -456,6 +456,12 @@ class UnixGroup(models.Model):
         return self.name
 
 
+class SiteKeys(models.Model):
+    type = models.CharField(max_length=100)
+    public_key = models.TextField()
+    fingerprint = models.CharField(max_length=250, null=True)
+
+
 # FORMS
 
 class SiteForm(forms.ModelForm):
