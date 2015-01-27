@@ -40,6 +40,11 @@ class ServiceNetworkConfig(models.Model):
         return self.IPv4 + " - " + self.mws_domain
 
 
+class HostNetworkConfig(models.Model):
+    IPv6 = models.GenericIPAddressField(protocol='IPv6', unique=True)
+    hostname = models.CharField(max_length=250, unique=True)
+
+
 class Site(models.Model):
     # Name of the site
     name = models.CharField(max_length=100, unique=True)
@@ -68,7 +73,7 @@ class Site(models.Model):
     # Indicates if the site is disabled by the user
     disabled = models.BooleanField(default=False)
 
-    # The network configuration for the VMs of this site
+    # The network configuration for the service
     service_network_configuration = models.OneToOneField(ServiceNetworkConfig, related_name='site')
 
     def __str__(self):
@@ -294,6 +299,7 @@ class VirtualMachine(models.Model):
     token = models.CharField(max_length=50)
 
     site = models.ForeignKey(Site, related_name='virtual_machines', null=True)
+    host_network_configuration = models.OneToOneField(HostNetworkConfig, related_name="vm")
 
     def is_on(self):
         from apimws.platforms import get_vm_power_state
@@ -460,6 +466,7 @@ class SiteKeys(models.Model):
     type = models.CharField(max_length=100)
     public_key = models.TextField()
     fingerprint = models.CharField(max_length=250, null=True)
+    site = models.ForeignKey(Site, related_name="keys")
 
 
 # FORMS
