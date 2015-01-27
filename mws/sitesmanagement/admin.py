@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
 from reversion import VersionAdmin
-from .models import Site, Billing, DomainName, NetworkConfig, Suspension, VirtualMachine, EmailConfirmation, Vhost, \
+from .models import Site, Billing, DomainName, ServiceNetworkConfig, Suspension, VirtualMachine, EmailConfirmation, Vhost, \
     UnixGroup
 from ucamlookup import get_institutions, get_institution_name_by_id
 
@@ -83,7 +83,7 @@ admin.site.register(Site, SiteAdmin)
 admin.site.register(Billing, BillingAdmin)
 admin.site.register(Vhost, VhostAdmin)
 admin.site.register(DomainName, DomainNameAdmin)
-admin.site.register(NetworkConfig, NetworkConfigAdmin)
+admin.site.register(ServiceNetworkConfig, NetworkConfigAdmin)
 admin.site.register(Suspension, SuspensionAdmin)
 admin.site.register(VirtualMachine, VirtualMachineAdmin)
 admin.site.register(EmailConfirmation, EmailConfirmationAdmin)

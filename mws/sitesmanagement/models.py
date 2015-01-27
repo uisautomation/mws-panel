@@ -14,7 +14,7 @@ from mwsauth.utils import get_users_of_a_group
 from sitesmanagement.utils import is_camacuk, get_object_or_None
 
 
-class NetworkConfig(models.Model):
+class ServiceNetworkConfig(models.Model):
     """ The network configuration for the VMs of a site:
      Primary VM: IPv4, IPv6, and domain name
      Secondary VM: Private IPv4 and private domain name
@@ -69,7 +69,7 @@ class Site(models.Model):
     disabled = models.BooleanField(default=False)
 
     # The network configuration for the VMs of this site
-    network_configuration = models.OneToOneField(NetworkConfig, related_name='site')
+    service_network_configuration = models.OneToOneField(ServiceNetworkConfig, related_name='site')
 
     def __str__(self):
         return self.name
@@ -165,10 +165,10 @@ class Site(models.Model):
     @property
     def is_busy(self):
         if self.primary_vm:
-            if self.primary_vm.status != 'ready' and self.primary_vm.status != 'ansible':
+            if self.primary_vm.is_busy:
                 return True
         if self.secondary_vm:
-            if self.secondary_vm.status != 'ready' and self.secondary_vm.status != 'ansible':
+            if self.secondary_vm.is_busy:
                 return True
         if not self.primary_vm and not self.secondary_vm:
             return True
@@ -331,27 +331,27 @@ class VirtualMachine(models.Model):
     @property
     def ipv4(self):
         if self.primary:
-            return self.site.network_configuration.IPv4
+            return self.site.service_network_configuration.IPv4
         else:
-            return self.site.network_configuration.IPv4private
+            return self.site.service_network_configuration.IPv4private
 
     @property
     def sshfp(self):
-        return self.site.network_configuration.SSHFP
+        return self.site.service_network_configuration.SSHFP
 
     @property
     def ipv6(self):
         if self.primary:
-            return self.site.network_configuration.IPv6
+            return self.site.service_network_configuration.IPv6
         else:
             return None
 
     @property
     def hostname(self):
         if self.primary:
-            return self.site.network_configuration.mws_domain
+            return self.site.service_network_configuration.mws_domain
         else:
-            return self.site.network_configuration.mws_private_domain
+            return self.site.service_network_configuration.mws_private_domain
 
     @property
     def ip_register_domains(self):

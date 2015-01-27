@@ -5,7 +5,7 @@ import json
 from StringIO import StringIO
 from datetime import datetime
 from sitesmanagement.models import (
-    NetworkConfig, Site, VirtualMachine, UnixGroup, Vhost, DomainName)
+    ServiceNetworkConfig, Site, VirtualMachine, UnixGroup, Vhost, DomainName)
 
 
 from .commands.ansible_inventory import Command
@@ -31,7 +31,7 @@ class SimpleCommandTests(TestCase):
 
 class TestsWithData(TestCase):
     def setUp(self):
-        netconf = NetworkConfig.objects.create(
+        netconf = ServiceNetworkConfig.objects.create(
             IPv4='198.51.100.255',
             IPv6='2001:db8:212:8::8c:255',
             IPv4private='192.0.2.255',
@@ -40,7 +40,7 @@ class TestsWithData(TestCase):
         self.site = Site.objects.create(name="testSite",
                                         institution_id="testinst",
                                         start_date=datetime.today(),
-                                        network_configuration=netconf)
+                                        service_network_configuration=netconf)
         self.vm = VirtualMachine.objects.create(
             name="test_vm", primary=True, status="ready", token=uuid.uuid4(),
             site=self.site)

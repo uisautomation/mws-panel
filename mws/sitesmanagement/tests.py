@@ -1,6 +1,7 @@
 from datetime import datetime
 import tempfile
 import uuid
+import mock
 import os
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -12,7 +13,7 @@ import reversion
 from apimws.models import AnsibleConfiguration
 from apimws.views import post_installation
 from mwsauth.tests import do_test_login
-from models import NetworkConfig, Site, VirtualMachine, UnixGroup, Vhost, DomainName
+from models import ServiceNetworkConfig, Site, VirtualMachine, UnixGroup, Vhost, DomainName
 import views
 from utils import is_camacuk, get_object_or_None
 
@@ -42,7 +43,7 @@ class SiteManagementTests(TestCase):
                           "10px;\">At this moment we cannot process any new request for the Managed Web Service, please"
                           " try again later.</p>", response.content)
 
-        netconf = NetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
+        netconf = ServiceNetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
                                                IPv4private='172.28.18.255',
                                                mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
                                                mws_domain="mws-12940.mws3.csx.cam.ac.uk")
@@ -52,7 +53,7 @@ class SiteManagementTests(TestCase):
                           reverse(views.new), response.content)
 
         site = Site.objects.create(name="testSite", institution_id="testinst", start_date=datetime.today(),
-                                   network_configuration=netconf)
+                                   service_network_configuration=netconf)
 
         response = self.client.get(reverse(views.index))
         self.assertNotContains(response, "testSite")
@@ -73,22 +74,21 @@ class SiteManagementTests(TestCase):
         response = self.client.get(reverse(views.show, kwargs={'site_id': 1}))
         self.assertEqual(response.status_code, 404)  # The Site does not exist
 
-        netconf = NetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
+        netconf = ServiceNetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
                                                IPv4private='172.28.18.255',
                                                mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
                                                mws_domain="mws-12940.mws3.csx.cam.ac.uk")
 
         site = Site.objects.create(name="testSite", institution_id="testinst", start_date=datetime.today(),
-                                   network_configuration=netconf)
+                                   service_network_configuration=netconf)
         response = self.client.get(reverse(views.show, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)  # The User is not in the list of auth users
 
         site.users.add(User.objects.get(username="test0001"))
         response = self.client.get(reverse(views.show, kwargs={'site_id': site.id}))
-        self.assertContains(response, "No billing details are available, please add them.")
+        self.assertContains(response, "No billing details are available")
 
-    @unittest.skipUnless(hasattr(settings, 'PLATFORMS_API_USERNAME'),
-	"Platforms API login details not available.")
+    @unittest.skipUnless(hasattr(settings, 'PLATFORMS_API_USERNAME'), "Platforms API login details not available.")
     def test_view_new(self):
         response = self.client.get(reverse(views.new))
         self.assertEqual(response.status_code, 302)  # Not logged in, redirected to login
@@ -101,7 +101,7 @@ class SiteManagementTests(TestCase):
         self.assertEqual(response.status_code, 302)  # There aren't prealocated network configurations
         self.assertTrue(response.url.endswith(reverse(views.index)))
 
-        NetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255', IPv4private='172.28.18.255',
+        ServiceNetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255', IPv4private='172.28.18.255',
                                      mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
                                      mws_domain="mws-12940.mws3.csx.cam.ac.uk")
 
@@ -133,7 +133,7 @@ class SiteManagementTests(TestCase):
 
         response = self.client.get(response.url)
 
-        self.assertContains(response, "Your email &#39;%s&#39; is still unconfirmed, please check your email inbox and "
+        self.assertContains(response, "Your email \'%s\' is still unconfirmed, please check your email inbox and "
                                       "click on the link of the email we sent you." % test_site.email )
 
         # Force post installation ACK
@@ -177,12 +177,12 @@ class SiteManagementTests(TestCase):
         response = self.client.get(reverse(views.edit, kwargs={'site_id': 1}))
         self.assertEqual(response.status_code, 404)  # The Site does not exist
 
-        netconf = NetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
+        netconf = ServiceNetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
                                                IPv4private='172.28.18.255',
                                                mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
                                                mws_domain="mws-12940.mws3.csx.cam.ac.uk")
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today(),
-                                           network_configuration=netconf)
+                                           service_network_configuration=netconf)
         vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(), site=site)
         response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)  # The User is not in the list of auth users
@@ -216,7 +216,7 @@ class SiteManagementTests(TestCase):
         self.assertEqual(site_changed.email, 'email@change.test')
 
         response = self.client.get(response.url)
-        self.assertContains(response, "Your email &#39;%s&#39; is still unconfirmed, please check your email inbox and "
+        self.assertContains(response, "Your email \'%s\' is still unconfirmed, please check your email inbox and "
                                       "click on the link of the email we sent you." % site_changed.email )
 
     def test_view_billing(self):
@@ -230,12 +230,12 @@ class SiteManagementTests(TestCase):
         response = self.client.get(reverse(views.billing_management, kwargs={'site_id': 1}))
         self.assertEqual(response.status_code, 404)  # The Site does not exist
 
-        netconf = NetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
+        netconf = ServiceNetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
                                                IPv4private='172.28.18.255',
                                                mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
                                                mws_domain="mws-12940.mws3.csx.cam.ac.uk")
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today(),
-                                   network_configuration=netconf)
+                                   service_network_configuration=netconf)
         response = self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)  # The User is not in the list of auth users
 
@@ -243,7 +243,7 @@ class SiteManagementTests(TestCase):
         response = self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id}))
         self.assertContains(response, "Billing data")
         response = self.client.get(reverse(views.show, kwargs={'site_id': site.id}))
-        self.assertContains(response, "No billing details are available, please add them.")
+        self.assertContains(response, "No billing details are available")
 
         suspension = site.suspend_now(input_reason="test suspension")
         response = self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id}))
@@ -292,12 +292,12 @@ class SiteManagementTests(TestCase):
 
     def test_no_permission_views_tests(self):
         do_test_login(self, user="test0001")
-        netconf = NetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
+        netconf = ServiceNetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
                                                IPv4private='172.28.18.255',
                                                mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
                                                mws_domain="mws-12940.mws3.csx.cam.ac.uk")
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today(),
-                                           network_configuration=netconf)
+                                           service_network_configuration=netconf)
         vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(), site=site)
         vhost = Vhost.objects.create(name="tests_vhost", vm=vm)
         dn = DomainName.objects.create(name="testtestest.mws3.csx.cam.ac.uk", status="accepted", vhost=vhost)
@@ -363,12 +363,12 @@ class SiteManagementTests(TestCase):
 
     def test_vm_is_busy(self):
         do_test_login(self, user="test0001")
-        netconf = NetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
+        netconf = ServiceNetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
                                                IPv4private='172.28.18.255',
                                                mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
                                                mws_domain="mws-12940.mws3.csx.cam.ac.uk")
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today(),
-                                           network_configuration=netconf)
+                                           service_network_configuration=netconf)
         site.users.add(User.objects.get(username='test0001'))
         vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="requested", token=uuid.uuid4(),
                                            site=site)
@@ -461,12 +461,12 @@ class SiteManagementTests(TestCase):
         self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
 
     def create_site(self):
-        netconf = NetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
+        netconf = ServiceNetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
                                                IPv4private='172.28.18.255',
                                                mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
                                                mws_domain="mws-12940.mws3.csx.cam.ac.uk")
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today(),
-                                      network_configuration=netconf)
+                                      service_network_configuration=netconf)
         site.users.add(User.objects.get(username='test0001'))
         VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(), site=site)
         return site
@@ -474,8 +474,11 @@ class SiteManagementTests(TestCase):
     def test_unix_groups(self):
         do_test_login(self, user="test0001")
         site = self.create_site()
-        response = self.client.post(reverse(views.add_unix_group, kwargs={'vm_id': site.primary_vm.id}),
-                         {'unix_users': 'amc203,jw35', 'name': 'testUnixGroup'})
+        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            mock_subprocess.check_output.return_value.returncode = 0
+            response = self.client.post(reverse(views.add_unix_group, kwargs={'vm_id': site.primary_vm.id}),
+                             {'unix_users': 'amc203,jw35', 'name': 'testUnixGroup'})
+            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
         response = self.client.get(response.url)
         self.assertInHTML('<td>testUnixGroup</td>', response.content)
         self.assertInHTML('<td>amc203, jw35</td>', response.content)
@@ -489,15 +492,21 @@ class SiteManagementTests(TestCase):
         self.assertContains(response, 'crsid: "amc203"')
         self.assertContains(response, 'crsid: "jw35"')
 
-        response = self.client.post(reverse(views.unix_group, kwargs={'ug_id': unix_group.id}),
-                         {'unix_users': 'jw35', 'name': 'testUnixGroup2'})
+        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            mock_subprocess.check_output.return_value.returncode = 0
+            response = self.client.post(reverse(views.unix_group, kwargs={'ug_id': unix_group.id}),
+                             {'unix_users': 'jw35', 'name': 'testUnixGroup2'})
+            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
         response = self.client.get(response.url)
         self.assertInHTML('<td>testUnixGroup2</td>', response.content, count=1)
         self.assertInHTML('<td>testUnixGroup</td>', response.content, count=0)
         self.assertInHTML('<td>jw35</td>', response.content, count=1)
         self.assertInHTML('<td>amc203</td>', response.content, count=0)
 
-        response = self.client.delete(reverse(views.delete_unix_group, kwargs={'ug_id': unix_group.id}))
+        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            mock_subprocess.check_output.return_value.returncode = 0
+            response = self.client.delete(reverse(views.delete_unix_group, kwargs={'ug_id': unix_group.id}))
+            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
         response = self.client.get(response.url)
         self.assertInHTML('<td>testUnixGroup2</td>', response.content, count=0)
         self.assertInHTML('<td>jw35</td>', response.content, count=0)
@@ -505,94 +514,139 @@ class SiteManagementTests(TestCase):
     def test_vhosts_management(self):
         do_test_login(self, user="test0001")
         site = self.create_site()
-        response = self.client.post(reverse(views.add_vhost, kwargs={'vm_id': site.primary_vm.id}),
-                         {'name': 'testVhost'})
+        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            mock_subprocess.check_output.return_value.returncode = 0
+            response = self.client.post(reverse(views.add_vhost, kwargs={'vm_id': site.primary_vm.id}),
+                             {'name': 'testVhost'})
+            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
         response = self.client.get(response.url)  # TODO assert that url is vhost_management
         self.assertInHTML('<td>testVhost</td>', response.content)
         vhost = Vhost.objects.get(name='testVhost')
         self.assertSequenceEqual([vhost], site.primary_vm.vhosts.all())
 
-        response = self.client.delete(reverse(views.delete_vhost, kwargs={'vhost_id': vhost.id}))
+        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            mock_subprocess.check_output.return_value.returncode = 0
+            response = self.client.delete(reverse(views.delete_vhost, kwargs={'vhost_id': vhost.id}))
+            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
         response = self.client.get(response.url)  # TODO assert that url is vhost_management
         self.assertInHTML('<td>testVhost</td>', response.content, count=0)
 
     def test_domains_management(self):
         do_test_login(self, user="test0001")
         site = self.create_site()
-        response = self.client.post(reverse(views.add_vhost, kwargs={'vm_id': site.primary_vm.id}),
-                         {'name': 'testVhost'})
-        vhost = Vhost.objects.get(name='testVhost')
 
-        response = self.client.get(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}))  # TODO check it
-        response = self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}),
-                                    {'name': 'test.mws3.csx.cam.ac.uk'})
+        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            mock_subprocess.check_output.return_value.returncode = 0
+            response = self.client.post(reverse(views.add_vhost, kwargs={'vm_id': site.primary_vm.id}),
+                         {'name': 'testVhost'})
+
+            vhost = Vhost.objects.get(name='testVhost')
+
+            response = self.client.get(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}))  # TODO check it
+            response = self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}),
+                                        {'name': 'test.mws3.csx.cam.ac.uk'})
+            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
+
         response = self.client.get(response.url)  # TODO assert that url is domains_management
-        self.assertInHTML('<tbody><tr><td>test.mws3.csx.cam.ac.uk</td><td>Requested</td>'
-                          '<td style="width: 135px;"><a href="#" onclick="javascript:ajax_call'
-                          '(\'/set_dn_as_main/1/\', \'POST\')">Set as Master</a><a class="delete_domain" '
-                          'data-href="javascript:ajax_call(\'/delete_domain/1/\', \'DELETE\')" href="#"> <i '
-                          'title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i></a></td></tr></tbody>',
+        self.assertInHTML('<tbody><tr><td><p>test.mws3.csx.cam.ac.uk</p></td><td><p>Requested</p></td>'
+                          '<td><p>Managed domain name</p></td><td style="width: 155px; cursor: pointer"><p>'
+                          '<a onclick="javascript:ajax_call(\'/set_dn_as_main/1/\', \'POST\')">Set as main domain</a>'
+                          '<a class="delete_domain" data-href="javascript:ajax_call(\'/delete_domain/1/\', \'DELETE\')"'
+                          '> <i title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i></a></p></td>'
+                          '</tr></tbody>',
                           response.content, count=1)
         self.client.get(reverse(views.set_dn_as_main, kwargs={'domain_id': 1}))
-        self.assertInHTML('<tbody><tr><td>test.mws3.csx.cam.ac.uk</td><td>Requested</td>'
-                          '<td style="width: 135px;"><a href="#" onclick="javascript:ajax_call'
-                          '(\'/set_dn_as_main/1/\', \'POST\')">Set as Master</a><a class="delete_domain" '
-                          'data-href="javascript:ajax_call(\'/delete_domain/1/\', \'DELETE\')" href="#"> <i '
-                          'title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i></a></td></tr></tbody>',
+        self.assertInHTML('<tbody><tr><td><p>test.mws3.csx.cam.ac.uk</p></td><td><p>Requested</p></td>'
+                          '<td><p>Managed domain name</p></td>'
+                          '<td style="width: 155px; cursor: pointer"><p><a onclick="javascript:ajax_call'
+                          '(\'/set_dn_as_main/1/\', \'POST\')">Set as main domain</a><a class="delete_domain" '
+                          'data-href="javascript:ajax_call(\'/delete_domain/1/\', \'DELETE\')"> <i '
+                          'title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i></a></p></td></tr></tbody>',
                           response.content, count=1)
-        response = self.client.post(reverse(views.set_dn_as_main, kwargs={'domain_id': 1}))
+        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            mock_subprocess.check_output.return_value.returncode = 0
+            response = self.client.post(reverse(views.set_dn_as_main, kwargs={'domain_id': 1}))
+            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
         response = self.client.get(response.url)
-        self.assertInHTML('<tbody><tr><td>test.mws3.csx.cam.ac.uk<br>This is the current main domain</td>'
-                          '<td>Requested</td><td style="width: 135px;"><a href="#" onclick="javascript:ajax_call'
-                          '(\'/set_dn_as_main/1/\', \'POST\')">Set as Master</a><a class="delete_domain" '
-                          'data-href="javascript:ajax_call(\'/delete_domain/1/\', \'DELETE\')" href="#"> <i '
-                          'title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i></a></td></tr></tbody>',
+        self.assertInHTML('<tbody><tr><td><p>test.mws3.csx.cam.ac.uk<br>This is the current main domain</p></td>'
+                          '<td><p>Requested</p></td> <td><p>Managed domain name</p></td>'
+                          '<td style="width: 155px; cursor: pointer"><p><a onclick="javascript:ajax_call'
+                          '(\'/set_dn_as_main/1/\', \'POST\')">Set as main domain</a><a class="delete_domain" '
+                          'data-href="javascript:ajax_call(\'/delete_domain/1/\', \'DELETE\')"> <i '
+                          'title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i></a></p></td></tr></tbody>',
                           response.content, count=1)
-        response = self.client.delete(reverse(views.delete_dn, kwargs={'domain_id': 1}))
+        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            mock_subprocess.check_output.return_value.returncode = 0
+            response = self.client.delete(reverse(views.delete_dn, kwargs={'domain_id': 1}))
+            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
         response = self.client.get(response.url)
-        self.assertInHTML('<tbody><tr><td>test.mws3.csx.cam.ac.uk<br>This is the current main domain</td>'
-                          '<td>Requested</td><td style="width: 135px;"><a href="#" onclick="javascript:ajax_call'
-                          '(\'/set_dn_as_main/1/\', \'POST\')">Set as Master</a><a class="delete_domain" '
-                          'data-href="javascript:ajax_call(\'/delete_domain/1/\', \'DELETE\')" href="#"> <i '
-                          'title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i></a></td></tr></tbody>',
+        self.assertInHTML('<tbody><tr><td><p>test.mws3.csx.cam.ac.uk<br>This is the current main domain</p></td>'
+                          '<td><p>Requested</p></td><td><p>Managed domain name</p></td>'
+                          '<td style="width: 155px; cursor: pointer"><p><a onclick="javascript:ajax_call'
+                          '(\'/set_dn_as_main/1/\', \'POST\')">Set as main domain</a><a class="delete_domain" '
+                          'data-href="javascript:ajax_call(\'/delete_domain/1/\', \'DELETE\')"> <i '
+                          'title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i></a></p></td></tr></tbody>',
                           response.content, count=0)
-        response = self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}),
+        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            mock_subprocess.check_output.return_value.returncode = 0
+            response = self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}),
                                     {'name': 'externaldomain.com'})
+            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
         response = self.client.get(response.url)
-        self.assertInHTML('<tr><td>externaldomain.com</td><td>Accepted</td>'
-                          '<td style="width: 135px;"><a href="#" onclick="javascript:ajax_call'
-                          '(\'/set_dn_as_main/2/\', \'POST\')">Set as Master</a><a class="delete_domain" '
-                          'data-href="javascript:ajax_call(\'/delete_domain/2/\', \'DELETE\')" href="#"> <i '
-                          'title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i></a></td></tr>',
+        self.assertInHTML('<tr><td><p>externaldomain.com</p></td><td><p>Accepted</p></td>'
+                          '<td><p><a id="setup_instructions" style="cursor: pointer;">Set up instructions</a></p></td>'
+                          '<td style="width: 155px; cursor: pointer"><p><a onclick="javascript:ajax_call'
+                          '(\'/set_dn_as_main/2/\', \'POST\')">Set as main domain</a><a class="delete_domain" '
+                          'data-href="javascript:ajax_call(\'/delete_domain/2/\', \'DELETE\')"> <i '
+                          'title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i></a></p></td></tr>',
                           response.content, count=1)
 
     def test_system_packages(self):
         do_test_login(self, user="test0001")
         site = self.create_site()
-        response = self.client.post(reverse(views.system_packages, kwargs={'vm_id': site.primary_vm.id}),
+        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            mock_subprocess.check_output.return_value.returncode = 0
+            response = self.client.post(reverse(views.system_packages, kwargs={'vm_id': site.primary_vm.id}),
                          {'package_number': 1})
+            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
         self.assertEqual(AnsibleConfiguration.objects.get(key="system_packages").value, "1")
         self.assertContains(response, "Wordpress &lt;installed&gt;")
-        response = self.client.post(reverse(views.system_packages, kwargs={'vm_id': site.primary_vm.id}),
+
+        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            mock_subprocess.check_output.return_value.returncode = 0
+            response = self.client.post(reverse(views.system_packages, kwargs={'vm_id': site.primary_vm.id}),
                          {'package_number': 2})
+            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
         self.assertEqual(AnsibleConfiguration.objects.get(key="system_packages").value, "1,2")
         self.assertContains(response, "Wordpress &lt;installed&gt;")
         self.assertContains(response, "Drupal &lt;installed&gt;")
-        self.client.post(reverse(views.system_packages, kwargs={'vm_id': site.primary_vm.id}), {'package_number': 1})
+        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            mock_subprocess.check_output.return_value.returncode = 0
+            self.client.post(reverse(views.system_packages, kwargs={'vm_id': site.primary_vm.id}),
+                         {'package_number': 1})
+            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
         self.assertEqual(AnsibleConfiguration.objects.get(key="system_packages").value, "2")
 
     def test_certificates(self):
         do_test_login(self, user="test0001")
         site = self.create_site()
 
-        self.client.post(reverse(views.add_vhost, kwargs={'vm_id': site.primary_vm.id}), {'name': 'testVhost'})
+        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            mock_subprocess.check_output.return_value.returncode = 0
+            self.client.post(reverse(views.add_vhost, kwargs={'vm_id': site.primary_vm.id}), {'name': 'testVhost'})
+            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
+
         vhost = Vhost.objects.get(name='testVhost')
         response = self.client.post(reverse(views.generate_csr, kwargs={'vhost_id': vhost.id}))
         self.assertContains(response, "A CSR couldn't be generated because you don't have a master domain assigned to "
                                       "this vhost.")
         self.assertIsNone(vhost.csr)
 
-        self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}), {'name': 'randomdomain.co.uk'})
+        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            mock_subprocess.check_output.return_value.returncode = 0
+            self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}), {'name': 'randomdomain.co.uk'})
+            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
+
         vhost = Vhost.objects.get(name='testVhost')
         self.assertIsNone(vhost.csr)
         self.assertIsNone(vhost.certificate)
@@ -610,8 +664,12 @@ class SiteManagementTests(TestCase):
         subprocess.check_output(["openssl", "x509", "-req", "-days", "365", "-in", csrfile.name, "-signkey",
                                  privatekeyfile.name, "-out", certificatefile.name])
 
+        certificatefiledesc = open(certificatefile.name,'r')
+        privatekeyfiledesc = open(privatekeyfile.name,'r')
         self.client.post(reverse(views.certificates, kwargs={'vhost_id': vhost.id}),
                          {'key': privatekeyfile, 'cert': certificatefile})
+        certificatefiledesc.close()
+        privatekeyfiledesc.close()
         vhost = Vhost.objects.get(name='testVhost')
         self.assertIsNotNone(vhost.certificate)
 
@@ -645,9 +703,12 @@ class SiteManagementTests(TestCase):
         do_test_login(self, user="test0001")
         site = self.create_site()
 
-        self.client.post(reverse(views.add_vhost, kwargs={'vm_id': site.primary_vm.id}), {'name': 'testVhost'})
-        vhost = Vhost.objects.get(name='testVhost')
-        self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}), {'name': 'testDomain.cam.ac.uk'})
+        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            mock_subprocess.check_output.return_value.returncode = 0
+            self.client.post(reverse(views.add_vhost, kwargs={'vm_id': site.primary_vm.id}), {'name': 'testVhost'})
+            vhost = Vhost.objects.get(name='testVhost')
+            self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}), {'name': 'testDomain.cam.ac.uk'})
+            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
 
         restore_date = datetime.now()
 

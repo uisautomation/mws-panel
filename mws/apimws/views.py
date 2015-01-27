@@ -96,7 +96,7 @@ def dns_entries(request, token):
             for domain in primary_vm.ip_register_domains:
                 dns_entries.append({"domain": domain.name})
             json_object['mwsv3_sites'].append({
-                'hostname': primary_vm.site.network_configuration.mws_domain,
+                'hostname': primary_vm.site.service_network_configuration.mws_domain,
                 'aliases': dns_entries
             })
         if secondary_vm and secondary_vm.ip_register_domains:
@@ -104,7 +104,7 @@ def dns_entries(request, token):
             for domain in secondary_vm.ip_register_domains:
                 dns_entries.append({"domain": domain.name})
             json_object['mwsv3_sites'].append({
-                'hostname': secondary_vm.site.network_configuration.mws_domain,
+                'hostname': secondary_vm.site.service_network_configuration.mws_domain,
                 'aliases': dns_entries
             })
     aliases_to_be_deleted = []

@@ -10,7 +10,7 @@ from mwsauth import views
 from mwsauth.utils import get_or_create_group_by_groupid
 from ucamlookup import user_in_groups, get_or_create_user_by_crsid, validate_crsids
 from mwsauth.validators import validate_groupids
-from sitesmanagement.models import Site, Suspension, VirtualMachine, NetworkConfig
+from sitesmanagement.models import Site, Suspension, VirtualMachine, ServiceNetworkConfig
 from ucamlookup.models import LookupGroup
 
 
@@ -135,13 +135,13 @@ class AuthTestCases(TestCase):
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': 1}))
         self.assertEqual(response.status_code, 404)  # Site does not exists
 
-        netconf = NetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
+        netconf = ServiceNetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
                                                IPv4private='172.28.18.255',
                                                mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
                                                mws_domain="mws-12940.mws3.csx.cam.ac.uk")
         site_without_auth_users = Site.objects.create(name="test_site1", start_date=datetime.today(),
-                                                      network_configuration=netconf)
-        VirtualMachine.objects.create(primary=True, status='requested', token=uuid.uuid4(),
+                                                      service_network_configuration=netconf)
+        VirtualMachine.objects.create(primary=True, status='ready', token=uuid.uuid4(),
                                       site=site_without_auth_users)
 
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_without_auth_users.id}))
@@ -153,16 +153,16 @@ class AuthTestCases(TestCase):
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_with_auth_users.id}))
         self.assertContains(response, 'crsid: "amc203"', status_code=200)  # User is authorised
 
-        netconf2 = NetworkConfig.objects.create(IPv4='131.111.58.254', IPv6='2001:630:212:8::8c:254',
+        netconf2 = ServiceNetworkConfig.objects.create(IPv4='131.111.58.254', IPv6='2001:630:212:8::8c:254',
                                                 IPv4private='172.28.18.254',
                                                 mws_private_domain='mws-23169.mws3.csx.private.ca.ac.uk',
                                                 mws_domain="mws-39595.mws3.csx.cam.ac.uk")
 
         site_with_auth_groups = Site.objects.create(name="test_site2", start_date=datetime.today(),
-                                                    network_configuration=netconf2)
+                                                    service_network_configuration=netconf2)
         information_systems_group = get_or_create_group_by_groupid(101888)
         site_with_auth_groups.groups.add(information_systems_group)
-        VirtualMachine.objects.create(primary=True, status='requested', token=uuid.uuid4(), site=site_with_auth_groups)
+        VirtualMachine.objects.create(primary=True, status='ready', token=uuid.uuid4(), site=site_with_auth_groups)
 
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_with_auth_groups.id}))
         self.assertContains(response, "101888", status_code=200)  # User is in an authorised group

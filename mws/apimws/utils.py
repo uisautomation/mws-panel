@@ -12,8 +12,8 @@ def ip_register_api_request(domain_name):
 
     subject = "New request of a Domain Name for the MWS"
     message = "Domain Name requested: " + domain_name.name + "\n" \
-              "IPv4: " + domain_name.vhost.vm.site.network_configuration.IPv4 + "\n" \
-              "IPv6: " + domain_name.vhost.vm.site.network_configuration.IPv6 + "\n" \
+              "IPv4: " + domain_name.vhost.vm.site.service_network_configuration.IPv4 + "\n" \
+              "IPv6: " + domain_name.vhost.vm.site.service_network_configuration.IPv6 + "\n" \
               "Please, when ready click here: %s/api/confirm_dns/" % settings.MAIN_DOMAIN \
               + str(domain_name.id)
     from_email = "mws3-support@cam.ac.uk"

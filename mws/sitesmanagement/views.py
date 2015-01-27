@@ -20,7 +20,7 @@ from apimws.platforms import PlatformsAPINotWorkingException, new_site_primary_v
 from apimws.utils import email_confirmation, ip_register_api_request
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.utils import is_camacuk, get_object_or_None
-from .models import SiteForm, DomainNameFormNew, BillingForm, DomainName, NetworkConfig, EmailConfirmation, \
+from .models import SiteForm, DomainNameFormNew, BillingForm, DomainName, ServiceNetworkConfig, EmailConfirmation, \
     VirtualMachine, Vhost, VhostForm, Site, UnixGroupForm, UnixGroup
 from django.conf import settings as django_settings
 
@@ -51,13 +51,13 @@ def index(request):
         'sites_enabled': sorted(set(sites_enabled)),
         'sites_disabled': sorted(set(sites_disabled)),
         'sites_authorised': sorted(set(sites_authorised)),
-        'deactivate_new': NetworkConfig.num_pre_allocated() < 1
+        'deactivate_new': ServiceNetworkConfig.num_pre_allocated() < 1
     })
 
 
 @login_required
 def new(request):
-    if NetworkConfig.num_pre_allocated() < 1:
+    if ServiceNetworkConfig.num_pre_allocated() < 1:
         return HttpResponseRedirect(reverse('sitesmanagement.views.index'))
 
     breadcrumbs = {
@@ -71,7 +71,7 @@ def new(request):
 
             site = site_form.save(commit=False)
             site.start_date = datetime.date.today()
-            site.network_configuration = NetworkConfig.get_free_config()  # TODO raise an error if None
+            site.service_network_configuration = ServiceNetworkConfig.get_free_config()  # TODO raise an error if None
             site.save()
 
             # Save user that requested the site
@@ -245,7 +245,7 @@ def show(request, site_id):
             site_email = EmailConfirmation.objects.get(email=site.email, site_id=site.id)
             if site_email.status == 'pending':
                 from apimws.views import resend_email_confirmation_view
-                warning_messages.append(format_html('Your email %s is still unconfirmed, please check your email inbox '
+                warning_messages.append(format_html('Your email \'%s\' is still unconfirmed, please check your email inbox '
                                                     'and click on the link of the email we sent you. <a '
                                                     'id="resend_email_link" data-href="%s" href="#" '
                                                     'style="text-decoration: underline;">Resend confirmation '
@@ -1034,7 +1034,7 @@ def backups(request, vm_id):
             if backup_date is None or backup_date > datetime.datetime.now() \
                     or backup_date < (datetime.datetime.now()-datetime.timedelta(days=30)): # TODO or backup_date >= datetime.date.today() ????
                 raise ValueError
-            launch_ansible(vm) # TODO restore data, once successfully completed restore database data
+            # TODO restore data, once successfully completed restore database data
             version = reversion.get_for_date(vm, backup_date)
             version.revision.revert(delete=True)
             for domain in vm.all_domain_names:
