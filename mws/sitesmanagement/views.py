@@ -57,7 +57,7 @@ def index(request):
 
 @login_required
 def new(request):
-    if ServiceNetworkConfig.num_pre_allocated() < 1:
+    if ServiceNetworkConfig.num_pre_allocated() < 1 or HostNetworkConfig.num_pre_allocated() < 1: # TODO add prealocated HostNetworkConfigs
         return HttpResponseRedirect(reverse('sitesmanagement.views.index'))
 
     breadcrumbs = {
@@ -78,9 +78,7 @@ def new(request):
             site.users.add(request.user)
 
             vm = VirtualMachine.objects.create(primary=True, status='requested', site=site, token=uuid.uuid4(),
-                                               host_network_configuration=HostNetworkConfig.objects.create(
-                                                   IPv6=site.service_network_configuration.IPv6,
-                                                   hostname=site.service_network_configuration.mws_domain))
+                                               host_network_configuration=HostNetworkConfig.get_free_config())
             new_site_primary_vm.delay(vm)
 
             if site.email:

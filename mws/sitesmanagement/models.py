@@ -44,6 +44,17 @@ class HostNetworkConfig(models.Model):
     IPv6 = models.GenericIPAddressField(protocol='IPv6', unique=True)
     hostname = models.CharField(max_length=250, unique=True)
 
+    @classmethod
+    def num_pre_allocated(cls):
+        return cls.objects.filter(site=None).count()
+
+    @classmethod
+    def get_free_config(cls):
+        return cls.objects.filter(site=None).first()
+
+    def __str__(self):
+        return self.IPv6 + " - " + self.hostname
+
 
 class Site(models.Model):
     # Name of the site
