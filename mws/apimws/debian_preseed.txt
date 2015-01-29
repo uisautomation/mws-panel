@@ -1,0 +1,110 @@
+# Preseeding only locale sets language, country and locale.
+d-i debian-installer/locale string en_GB.UTF-8
+
+# Keyboard selection.
+# keymap is an alias for keyboard-configuration/xkb-keymap
+# ...but aliases can only be used on the command-line
+d-i keyboard-configuration/xkb-keymap select gb
+
+# netcfg will choose an interface that has link if possible. This makes it
+# skip displaying a list if there is more than one interface.
+d-i netcfg/choose_interface select auto
+
+
+#d-i netcfg/disable_autoconfig boolean true
+# Static network configuration.
+#
+# IPv4
+#d-i netcfg/get_ipaddress string 172.28.208.5
+#d-i netcfg/get_netmask string 255.255.255.0
+#d-i netcfg/get_gateway string 172.28.208.254
+#d-i netcfg/get_nameservers string 131.111.8.42 131.111.12.20
+#d-i netcfg/confirm_static boolean true
+
+#d-i netcfg/hostname string ephraim
+#d-i netcfg/get_domain string csi.private.cam.ac.uk
+#Don't ask for confirmation of hostname
+#doesn't seem to work
+#d-i netcfg/get_hostname seen true
+#d-i netcfg/hostname seen true
+
+#Set up the mirror
+d-i mirror/protocol string http
+d-i mirror/country string manual
+d-i mirror/http/hostname string www-uxsup.csx.cam.ac.uk 
+d-i mirror/http/directory string /pub/linux/debian
+d-i mirror/http/proxy string
+
+# Suite to install.
+d-i mirror/suite string wheezy
+# Suite to use for loading installer components (optional).
+d-i mirror/udeb/suite string wheezy
+
+# Set up the Unix Support repository.
+d-i apt-setup/local0/repository string http://bes.csi.cam.ac.uk/ubuntu hardy-uxsup uxsup
+d-i apt-setup/local0/comment string Unix Support repository.
+# Also add the source code repository.
+d-i apt-setup/local0/source boolean true
+# Specify the repository public key.  Cannot use https as installer does not
+# support it.
+d-i apt-setup/local0/key string http://bes.csi.cam.ac.uk/ubuntu/project/public.key
+
+# Must allow unknown (to Debian) keys or our key is rejected.
+d-i debian-installer/allow_unauthenticated string true
+
+#Root password
+#create with printf "password" | mkpasswd -s -m sha-512
+#possibly adding -R 500000 would be an improvement
+d-i passwd/root-password-crypted password $6$jnMlxbf.$Iqdcu7KEF4thHIsiy3ZNrtnG7UW2389rkkv/zWUJm8u3IiFaj2Xw2qwQP7/IqtjsNV8/.XB.ADTMZgCJq66/31
+
+#Skip creation of a normal user account.
+d-i passwd/make-user boolean false
+
+# Controls whether or not the hardware clock is set to UTC.
+d-i clock-setup/utc boolean true
+
+# You may set this to any valid setting for $TZ; see the contents of
+# /usr/share/zoneinfo/ for valid values.
+d-i time/zone string Europe/London
+
+# Controls whether to use NTP to set the clock during the install
+d-i clock-setup/ntp boolean true
+# NTP server to use.
+d-i clock-setup/ntp-server string ntp0.csx.cam.ac.uk ntp1.csx.cam.ac.uk ntp2.csx.cam.ac.uk
+
+#Specify which disk to use
+d-i partman-auto/disk string /dev/sda
+#Normal partitions, no lvm or encrypted lvm
+d-i partman-auto/method string regular
+
+#Everything in one partition
+d-i partman-auto/choose_recipe select atomic
+# This makes partman automatically partition without confirmation
+d-i partman-partitioning/confirm_write_new_label boolean true
+d-i partman/choose_partition select finish
+d-i partman/confirm boolean true
+d-i partman/confirm_nooverwrite boolean true
+
+tasksel tasksel/first multiselect standard
+# Individual additional packages to install
+d-i pkgsel/include string openssh-server emacs vim apache2 mysql-server php5-mysql php5 libapache2-mod-php5 php5-mcrypt curl
+#XXX fixme XXX we probably also want
+# bes-config,bes-update-check,open-vm-tools,dump,userv,ook-client-dump
+#and maybe mcv21?
+# Apply software updates as part of the installation
+d-i pkgsel/upgrade select full-upgrade
+
+# This one makes grub-installer install to the MBR if it also finds some other
+# OS, which is less safe as it might not be able to boot that other OS.
+d-i grub-installer/with_other_os boolean true
+
+# Avoid that last message about the install being complete.
+d-i finish-install/reboot_in_progress note
+
+# Post-install script; we may want to do wget && chmod && execute later..
+d-i preseed/late_command string \
+    mkdir /target/root/.ssh && \
+    echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC6H3DRdUPejq6JRLBFNG4S0y/vqrTVQZBQMLeMcMjCctgpdkXF54/6yzmVOtsqoaeCKQZhlFWbP1CnBVBAnU6nZU7zlh7flMT3RfxkCCOmE7Pg85EaY04R2rKymPsUGaN94J7mzNBN9NP+UuCtWfPHQ5jW/FJvfTDimcjAvuvnSIrlcetSlAam6lmbdj660TOeSoWJD0myWu9BaRGNrjpRellNuomk00YvHkSBYjo0zRY1FHg/x1wie/mNnVEW7AvELYhe/+u3PRYzKaZcQ07ETfCdtwBgWTI+GvNkAnYSFTUd0nvYdkhCmA81KpwKwlctm4BXgA7tMr2ZBLGpcg3R mcv21@pick' >/target/root/.ssh/authorized_keys && \
+    echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCerKj8UJ4F6njySBpvRJWnH2A5KQopP+DO8aiRGeQkRmCCorKdmX8q79anpWmQkuxdqEXlCOEezOToFC992akTolkjCT0VPYWd5ZuIvvzwwe66vmqMXN1m7wfFHgtLAqDkF+KK94mQnmAh8HGL5WL3BGl+w8VaXxnfIUYpuzYdf0CZ3mET1lYNAal9cU4R4D1FBflmxSIWJKwrMrfHiXo+YIwyQvH21ZNAeEvEV4E9EgwkF1HjkVs7KUCxwjya652xbJWxQMcxflK8T0TY9fq6GWbbWatWY6J40wN7dqp+WgWjGyOrqDc3AUeJ37/sSqmJ7B/SBemPNId27I3EbJ1V bjh21@wraith' >>/target/root/.ssh/authorized_keys && \
+    echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDY8qT0ucAal95O6XpDq7uhNT+Fal3q+DPB2wBiUXtSjgCuWZFYeoKkR7rq97MM/tCyaW4ItCfWH1QTLsx1FOOTyfMiM9vDqpFJuDVzI/5pwOJVZYu27zxeWc1Dqa+ReabwqizL2kCxtvCx9bwRbUTFnfhXxb9y4bEHmkBHfp59Z6zJHr5/OTDsBioFUQkcQucpJB+fD0QRxCqk5xDIaiFI/xEVr4WhRkj7CWX4IYAn/gvOgNTrcunseYeIKC7V/9SB5bbKfFMMiJz8PW3bOJp5kDPZ4RA+AiVHguQ2geniryfsxlM78AHkQJ5b7arx7KgAFWR+kh5+9c32NQbPpj/D amc203' >>/target/root/.ssh/authorized_keys && \
+    echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDAZURi9pqzIO/u92JSBdAKAfQAgEqCNBydHKvsMOQa9IdMxyjNP83ubO+KxQ7RLEF2BFUmCeFPG6tz+ZQY9tgaRIfiujCf8+rr2Seg5vDPlHOJFF0WZYEDUgf+KwrXfv8d3DfSgX77A/IGYNHfL6ASar64XbUBpXA/AuldEqDfRAYM+YyK7dD50kc7fH+sM2izeF6NmNQFvewkNqbov2j26knzcG4yBMRLrviUmniSwyfv/HIoj/nM/nV7TUgguCSgzvyU9C1dR+LRuc1YbcvxUkX7Ff9/cJ9TRsWaPERk+/hWQb0TiiWLLM7F5n6X6lyv+CVZtsz7N+PgVNa83tRDPog8lDc6jYkIFA2G7u6dZi/TbrAxL3CfkMqhl0AL5a56eELQLs/wIHBDqPfZzvUEXe07m/HrxN0lJCY9GiIHk/xKStL4XqMgCY/yu6gBGe4u0tM9xa/SNEbd0B+DHGzEabGpyRu6n9k9ULAfZMZoUnRswUZFpml2VICw5JaFzPuJI8Gh9RMDBBp4grAtGG2/a2pvNh8Lr5qCXlpbraCM/NboVLwJl+021V5Sgzh0BALssMcLzoJHcck0D7Paou2QatpIMVm/hWNiVJ5qoF1zjDdHRKAzMKP+hdiagrR1s+ns2FQ6tTW5bfyrUm3j5RoYh8TyXPh9G2t5+GhaPRxZtw== mws-admin superuser key' >>/target/root/.ssh/authorized_keys

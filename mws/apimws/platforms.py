@@ -91,7 +91,7 @@ def install_vm(vm):
     from apimws.models import AnsibleConfiguration
     AnsibleConfiguration.objects.create(vm=vm, key='os', value=json.dumps(settings.OS_VERSION))
 
-    f = open(os.path.join(settings.BASE_DIR, 'apimws/ubuntu_preseed.txt'), 'r')
+    f = open(os.path.join(settings.BASE_DIR, 'apimws/debian_preseed.txt'), 'r')
     profile = f.read()
     f.close()
 
