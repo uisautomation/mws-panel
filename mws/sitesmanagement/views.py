@@ -21,7 +21,7 @@ from apimws.utils import email_confirmation, ip_register_api_request
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.utils import is_camacuk, get_object_or_None
 from .models import SiteForm, DomainNameFormNew, BillingForm, DomainName, ServiceNetworkConfig, EmailConfirmation, \
-    VirtualMachine, Vhost, VhostForm, Site, UnixGroupForm, UnixGroup
+    VirtualMachine, Vhost, VhostForm, Site, UnixGroupForm, UnixGroup, HostNetworkConfig
 from django.conf import settings as django_settings
 
 logger = logging.getLogger('mws')
@@ -77,7 +77,10 @@ def new(request):
             # Save user that requested the site
             site.users.add(request.user)
 
-            vm = VirtualMachine.objects.create(primary=True, status='requested', site=site, token=uuid.uuid4())
+            vm = VirtualMachine.objects.create(primary=True, status='requested', site=site, token=uuid.uuid4(),
+                                               host_network_configuration=HostNetworkConfig.objects.create(
+                                                   IPv6=site.service_network_configuration.IPv6,
+                                                   hostname=site.service_network_configuration.mws_domain))
             new_site_primary_vm.delay(vm)
 
             if site.email:

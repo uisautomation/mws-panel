@@ -67,6 +67,10 @@ def new_site_primary_vm(vm):
         'hostname': vm.hostname,
     }
     headers = {'Content-type': 'application/json'}
+
+    if settings.OS_VERSION_VMAPI:
+        json_object['os'] = settings.OS_VERSION_VMAPI
+
     try:
         response = json.loads(requests.post("https://bes.csi.cam.ac.uk/mws-api/v1/vm.json",
                                             data=json.dumps(json_object), headers=headers).text)

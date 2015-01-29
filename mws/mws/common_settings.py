@@ -110,5 +110,6 @@ STRONGHOLD_PUBLIC_NAMED_URLS = ('raven_login', 'raven_return')
 #CELERY_ACCEPT_CONTENT = ['json'] # TODO
 
 OS_VERSION = {'ubuntu': 14.04}
+OS_VERSION_VMAPI = "Debian 7 x86_64 preseed"
 
 from logging_configuration import *
