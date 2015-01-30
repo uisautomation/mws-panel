@@ -4,6 +4,7 @@ import json
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.core.validators import validate_slug
 from django.db import models
 from django import forms
 import re
@@ -430,7 +431,7 @@ class VirtualMachine(models.Model):
 
 
 class Vhost(models.Model):
-    name = models.CharField(max_length=250)
+    name = models.CharField(max_length=150, validators=[validate_slug])
     # main domain name for this vhost
     main_domain = models.ForeignKey('DomainName', related_name='+', null=True, blank=True, on_delete=models.SET_NULL)
     vm = models.ForeignKey(VirtualMachine, related_name='vhosts')
