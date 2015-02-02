@@ -47,11 +47,11 @@ class HostNetworkConfig(models.Model):
 
     @classmethod
     def num_pre_allocated(cls):
-        return cls.objects.filter(site=None).count()
+        return cls.objects.filter(vm=None).count()
 
     @classmethod
     def get_free_config(cls):
-        return cls.objects.filter(site=None).first()
+        return cls.objects.filter(vm=None).first()
 
     def __str__(self):
         return self.IPv6 + " - " + self.hostname
