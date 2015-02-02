@@ -5,7 +5,7 @@ import json
 from StringIO import StringIO
 from datetime import datetime
 from sitesmanagement.models import (
-    ServiceNetworkConfig, Site, VirtualMachine, UnixGroup, Vhost, DomainName)
+    ServiceNetworkConfig, Site, VirtualMachine, UnixGroup, Vhost, DomainName, HostNetworkConfig)
 
 
 from .commands.ansible_inventory import Command
@@ -37,13 +37,16 @@ class TestsWithData(TestCase):
             IPv4private='192.0.2.255',
             mws_private_domain='mws-08246.mws3.private.example',
             mws_domain="mws-12940.mws3.example")
+        hostnetconf = HostNetworkConfig.objects.create(
+            IPv6='2001:db8:212:8::8c:254',
+            hostname="mws-client1.example")
         self.site = Site.objects.create(name="testSite",
                                         institution_id="testinst",
                                         start_date=datetime.today(),
                                         service_network_configuration=netconf)
         self.vm = VirtualMachine.objects.create(
             name="test_vm", primary=True, status="ready", token=uuid.uuid4(),
-            site=self.site)
+            site=self.site, host_network_configuration=hostnetconf)
         self.vhost1 = self.vm.vhosts.create(name="vhost1")
         self.vhost2 = self.vm.vhosts.create(name="vhost2")
         self.dom1 = self.vhost1.domain_names.create(name="foo.example",
