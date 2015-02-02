@@ -18,13 +18,6 @@ def add_name_to_user(instance, **kwargs):
         user.set_unusable_password()
 
 
-@receiver(post_save, sender=User)
-def create_mws_user(instance, created, **kwargs):
-    user = instance
-    if user is not None and created:
-        MWSUser.objects.create(user=user)
-
-
 def get_mws_public_key(self):
     if hasattr(self, 'mws_user'):
         return self.mws_user.ssh_public_key
