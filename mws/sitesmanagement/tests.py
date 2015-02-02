@@ -106,6 +106,11 @@ class SiteManagementTests(TestCase):
                                             mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
                                             mws_domain="mws-12940.mws3.csx.cam.ac.uk")
 
+        HostNetworkConfig.objects.create(IPv6='2001:630:212:8::8c:254', hostname='mws-client1')
+        HostNetworkConfig.objects.create(IPv6='2001:630:212:8::8c:253', hostname='mws-client2')
+        HostNetworkConfig.objects.create(IPv6='2001:630:212:8::8c:252', hostname='mws-client3')
+        HostNetworkConfig.objects.create(IPv6='2001:630:212:8::8c:251', hostname='mws-client4')
+
         response = self.client.get(reverse(views.new))
         self.assertContains(response, "Request new site")
 
