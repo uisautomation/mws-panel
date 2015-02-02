@@ -13,7 +13,7 @@ import reversion
 from apimws.models import AnsibleConfiguration
 from apimws.views import post_installation
 from mwsauth.tests import do_test_login
-from models import ServiceNetworkConfig, Site, VirtualMachine, UnixGroup, Vhost, DomainName
+from models import ServiceNetworkConfig, Site, VirtualMachine, UnixGroup, Vhost, DomainName, HostNetworkConfig
 import views
 from utils import is_camacuk, get_object_or_None
 
@@ -101,9 +101,10 @@ class SiteManagementTests(TestCase):
         self.assertEqual(response.status_code, 302)  # There aren't prealocated network configurations
         self.assertTrue(response.url.endswith(reverse(views.index)))
 
-        ServiceNetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255', IPv4private='172.28.18.255',
-                                     mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
-                                     mws_domain="mws-12940.mws3.csx.cam.ac.uk")
+        ServiceNetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
+                                            IPv4private='172.28.18.255',
+                                            mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
+                                            mws_domain="mws-12940.mws3.csx.cam.ac.uk")
 
         response = self.client.get(reverse(views.new))
         self.assertContains(response, "Request new site")
@@ -183,7 +184,9 @@ class SiteManagementTests(TestCase):
                                                mws_domain="mws-12940.mws3.csx.cam.ac.uk")
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today(),
                                            service_network_configuration=netconf)
-        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(), site=site)
+        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(), site=site,
+                                           host_network_configuration = HostNetworkConfig.objects.create(
+                                               IPv6=netconf.IPv6, hostname=netconf.mws_domain))
         response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)  # The User is not in the list of auth users
 
@@ -298,7 +301,9 @@ class SiteManagementTests(TestCase):
                                                mws_domain="mws-12940.mws3.csx.cam.ac.uk")
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today(),
                                            service_network_configuration=netconf)
-        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(), site=site)
+        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(), site=site,
+                                           host_network_configuration = HostNetworkConfig.objects.create(
+                                               IPv6=netconf.IPv6, hostname=netconf.mws_domain))
         vhost = Vhost.objects.create(name="tests_vhost", vm=vm)
         dn = DomainName.objects.create(name="testtestest.mws3.csx.cam.ac.uk", status="accepted", vhost=vhost)
         unix_group = UnixGroup.objects.create(name="testUnixGroup", vm=vm)
@@ -371,9 +376,11 @@ class SiteManagementTests(TestCase):
                                            service_network_configuration=netconf)
         site.users.add(User.objects.get(username='test0001'))
         vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="requested", token=uuid.uuid4(),
-                                           site=site)
+                                           site=site, host_network_configuration = HostNetworkConfig.objects.create(
+                                                IPv6=netconf.IPv6, hostname=netconf.mws_domain))
         vm2 = VirtualMachine.objects.create(name="test_vm2", primary=False, status="requested", token=uuid.uuid4(),
-                                            site=site)
+                                            site=site, host_network_configuration = HostNetworkConfig.objects.create(
+                                                IPv6='2001:630:212:8::8c:254', hostname=netconf.mws_private_domain))
         vhost = Vhost.objects.create(name="tests_vhost", vm=vm)
         dn = DomainName.objects.create(name="testtestest.mws3.csx.cam.ac.uk", status="accepted", vhost=vhost)
         unix_group = UnixGroup.objects.create(name="testUnixGroup", vm=vm)
@@ -468,7 +475,9 @@ class SiteManagementTests(TestCase):
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today(),
                                       service_network_configuration=netconf)
         site.users.add(User.objects.get(username='test0001'))
-        VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(), site=site)
+        VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(), site=site,
+                                      host_network_configuration = HostNetworkConfig.objects.create(
+                                          IPv6=netconf.IPv6, hostname=netconf.mws_domain))
         return site
 
     def test_unix_groups(self):
