@@ -8,17 +8,15 @@ from mwsauth.utils import get_or_create_group_by_groupid
 
 logger = logging.getLogger('mws')
 
-# TODO delete this function in production. This is only used to ban non-betatesters users from the app
+# TODO delete part of this function in production: No longer check the lookup group membership
 def check_permited_betatesters(request):
     ''' Check that the user is a memeber of InfoSys or Platforms lookup group.
     :param request: the http request
     :return: True if they are, False otherwise'''
-    if request.user.is_authenticated() and hasattr(request.user, 'suspendeduser') \
-                    and (request.user.suspendeduser.suspended is True)\
-                    and (resolve(request.path).url_name != 'logout')\
-                    or request.user.is_authenticated() \
-                            and not user_in_groups(request.user, [get_or_create_group_by_groupid(101888),
-                                                                  get_or_create_group_by_groupid(101128)]):
+    if hasattr(request.user, 'suspendeduser') and (request.user.suspendeduser.suspended is True) \
+            and (resolve(request.path).url_name != 'logout') or request.user.is_authenticated() \
+            and not user_in_groups(request.user, [get_or_create_group_by_groupid(101888),
+                                                  get_or_create_group_by_groupid(101128)]):
         return False
     else:
         return True
@@ -51,7 +49,8 @@ class CheckBannedUsers():
 
     def process_request(self, request):
         try:
-            if check_permited_betatesters(request) and user_in_jackdaw(request) and user_is_active(request):
+            if not request.user.is_authenticated() or (check_permited_betatesters(request) and user_in_jackdaw(request)
+                                                       and user_is_active(request)):
                 return None
             else:
                 t = loader.get_template('403.html')
