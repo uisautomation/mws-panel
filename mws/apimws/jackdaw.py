@@ -18,7 +18,7 @@ def extract_crsid_and_uuid(text_to_be_parsed):
 
 
 def deactive_this_user(user_crsid):
-    # TODO pass to ansible the uid of the user so it can delete this user
+    # TODO pass to ansible the uid of the user so it can delete this user?
     updated = User.objects.filter(username=user_crsid).update(is_active=False)
     # if updated is 0 the user had never used the mws3 service
     # if updated is 1 then the user used the service and has been deactivated
