@@ -492,6 +492,7 @@ class SiteManagementTests(TestCase):
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse(views.add_unix_group, kwargs={'vm_id': site.primary_vm.id}),
                              {'unix_users': 'amc203,jw35', 'name': 'testUnixGroup'})
+            self.assertEqual(response.status_code, 200)
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
         response = self.client.get(response.url)
         self.assertInHTML('<td>testUnixGroup</td>', response.content)
@@ -532,6 +533,7 @@ class SiteManagementTests(TestCase):
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse(views.add_vhost, kwargs={'vm_id': site.primary_vm.id}),
                              {'name': 'testVhost'})
+            self.assertEqual(response.status_code, 200)
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
         response = self.client.get(response.url)  # TODO assert that url is vhost_management
         self.assertInHTML('<td>testVhost</td>', response.content)
@@ -559,6 +561,7 @@ class SiteManagementTests(TestCase):
             response = self.client.get(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}))  # TODO check it
             response = self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}),
                                         {'name': 'test.mws3.csx.cam.ac.uk'})
+            self.assertEqual(response.status_code, 200)
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
 
         response = self.client.get(response.url)  # TODO assert that url is domains_management
@@ -622,6 +625,7 @@ class SiteManagementTests(TestCase):
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse(views.system_packages, kwargs={'vm_id': site.primary_vm.id}),
                          {'package_number': 1})
+            self.assertEqual(response.status_code, 200)
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
         self.assertEqual(AnsibleConfiguration.objects.get(key="system_packages").value, "1")
         self.assertContains(response, "Wordpress &lt;installed&gt;")
@@ -647,7 +651,8 @@ class SiteManagementTests(TestCase):
 
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
-            self.client.post(reverse(views.add_vhost, kwargs={'vm_id': site.primary_vm.id}), {'name': 'testVhost'})
+            response = self.client.post(reverse(views.add_vhost, kwargs={'vm_id': site.primary_vm.id}), {'name': 'testVhost'})
+            self.assertEqual(response.status_code, 200)
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
 
         vhost = Vhost.objects.get(name='testVhost')
@@ -659,6 +664,7 @@ class SiteManagementTests(TestCase):
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}), {'name': 'randomdomain.co.uk'})
+            self.assertEqual(response.status_code, 200)
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
 
         vhost = Vhost.objects.get(name='testVhost')
@@ -719,9 +725,11 @@ class SiteManagementTests(TestCase):
 
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
-            self.client.post(reverse(views.add_vhost, kwargs={'vm_id': site.primary_vm.id}), {'name': 'testVhost'})
+            response = self.client.post(reverse(views.add_vhost, kwargs={'vm_id': site.primary_vm.id}), {'name': 'testVhost'})
+            self.assertEqual(response.status_code, 200)
             vhost = Vhost.objects.get(name='testVhost')
-            self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}), {'name': 'testDomain.cam.ac.uk'})
+            response = self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}), {'name': 'testDomain.cam.ac.uk'})
+            self.assertEqual(response.status_code, 200)
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
 
         restore_date = datetime.now()
