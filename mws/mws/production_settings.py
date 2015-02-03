@@ -42,4 +42,8 @@ BROKER_URL = 'django://'
 INSTALLED_APPS = INSTALLED_APPS+('kombu.transport.django', ) # TODO Change this to rabbitmq?
 CELERY_IMPORTS = ('apimws.platforms', 'apimws.utils', 'apimws.jackdaw', 'apimws.ansible')
 
+MIDDLEWARE_CLASSES += (
+    'mwsauth.middleware.CheckBannedUsers',
+)
+
 from logging_configuration import *

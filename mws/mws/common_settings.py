@@ -48,7 +48,6 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # The following app force all views to have @login_required https://github.com/mgrouchy/django-stronghold/
     'stronghold.middleware.LoginRequiredMiddleware',
-    'mwsauth.middleware.CheckBannedUsers',
     'ucamwebauth.middleware.DefaultErrorBehaviour',
     'reversion.middleware.RevisionMiddleware',
 )
