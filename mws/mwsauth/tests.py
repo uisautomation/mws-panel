@@ -7,6 +7,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 from ucamwebauth.tests import create_wls_response
 from mwsauth import views
+from mwsauth.models import MWSUser
 from mwsauth.utils import get_or_create_group_by_groupid
 from ucamlookup import user_in_groups, get_or_create_user_by_crsid, validate_crsids
 from mwsauth.validators import validate_groupids
@@ -232,3 +233,17 @@ class AuthTestCases(TestCase):
         self.assertEqual(len(site_with_auth_groups.groups.all()), 0)
 
         site_with_auth_users.users.add(amc203_user)
+
+    def test_banned_users_middleware(self):
+        with self.settings(MIDDLEWARE_CLASSES=settings.MIDDLEWARE_CLASSES+('mwsauth.middleware.CheckBannedUsers',)):
+            do_test_login(self, user="amc203")
+            response = self.client.get(reverse(views.index))
+            self.assertEqual(response.status_code, 403)  # There is no corresponding mws_user
+
+            MWSUser.objects.create(uid="9999999", ssh_public_key="testestestestest", user_id="amc203")
+            response = self.client.get(reverse(views.index))
+            self.assertEqual(response.status_code, 200)  # There is a corresponding mws_user
+
+            User.objects.filter(username="amc203").update(is_active=False)
+            response = self.client.get(reverse(views.index))
+            self.assertEqual(response.status_code, 403)  # There user is not active
