@@ -26,6 +26,10 @@ from django.conf import settings as django_settings
 
 logger = logging.getLogger('mws')
 
+def can_create_new_site():
+    return (ServiceNetworkConfig.num_pre_allocated() >= 1 and
+            HostNetworkConfig.num_pre_allocated() >= 1)
+
 @login_required
 def index(request):
     try:
@@ -51,13 +55,13 @@ def index(request):
         'sites_enabled': sorted(set(sites_enabled)),
         'sites_disabled': sorted(set(sites_disabled)),
         'sites_authorised': sorted(set(sites_authorised)),
-        'deactivate_new': ServiceNetworkConfig.num_pre_allocated() < 1
+        'deactivate_new': not can_create_new_site()
     })
 
 
 @login_required
 def new(request):
-    if ServiceNetworkConfig.num_pre_allocated() < 1 or HostNetworkConfig.num_pre_allocated() < 1: # TODO add prealocated HostNetworkConfigs
+    if not can_create_new_site(): # TODO add prealocated HostNetworkConfigs
         return HttpResponseRedirect(reverse('sitesmanagement.views.index'))
 
     breadcrumbs = {
