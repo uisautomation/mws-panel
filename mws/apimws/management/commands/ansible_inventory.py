@@ -35,14 +35,12 @@ class Command(NoArgsCommand):
             json.dump(result, outfile)
             outfile.write("\n")
         else:
-            if not host.startswith(idprefix):
-                raise CommandError, "Host identifier not found"
-            host = host[len(idprefix):]
-            vm = VirtualMachine.objects.get(id=int(host))
+            vm = VirtualMachine.objects.get(
+                host_network_configuration__hostname=host)
             json.dump(self.hostvars(vm), outfile)
             outfile.write("\n")
     def hostid(self, vm):
-        return idprefix + str(vm.id)
+        return vm.host_network_configuration.hostname
     def hostvars(self, vm):
         v = { }
         v['ansible_ssh_host'] = vm.hostname
