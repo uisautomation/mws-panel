@@ -1,5 +1,6 @@
 # Setting to allow bjh21 to test mws
 from common_settings import *
+from bjh21_secrets import *
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '$a2byg9*bc5rcc_e5d5#3+mp^s=v0y_vz18ke-tzy_u!*&!txw'
@@ -11,7 +12,7 @@ TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
-MAIN_DOMAIN = 'http://localhost:8000'
+MAIN_DOMAIN = 'http://wraith.csi.cam.ac.uk:8000'
 
 # Database
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
@@ -22,9 +23,6 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
-
-EMAIL_HOST = 'localhost'
-EMAIL_PORT = 1025
 
 # ucamwebauth configuration
 UCAMWEBAUTH_LOGIN_URL = 'https://demo.raven.cam.ac.uk/auth/authenticate.html'
@@ -56,4 +54,4 @@ wOq24EIbX5LquL9w+uvnfXw=
 
 BROKER_URL = 'django://'
 INSTALLED_APPS = INSTALLED_APPS+('kombu.transport.django', )
-CELERY_IMPORTS = ('apimws.platforms', )
+CELERY_IMPORTS = ('apimws.platforms', 'apimws.utils', 'apimws.jackdaw')
