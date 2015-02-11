@@ -89,7 +89,8 @@ def new_site_primary_vm(vm):
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
 def install_vm(vm):
     from apimws.models import AnsibleConfiguration
-    AnsibleConfiguration.objects.create(vm=vm, key='os', value=json.dumps(settings.OS_VERSION))
+    AnsibleConfiguration.objects.update_or_create(vm=vm, key='os',
+        defaults={'value': json.dumps(settings.OS_VERSION)})
 
     f = open(os.path.join(settings.BASE_DIR, 'apimws/debian_preseed.txt'), 'r')
     profile = f.read()
