@@ -96,10 +96,18 @@ def install_vm(vm):
     f.close()
 
     from apimws.views import post_installation
-    profile += '\n' \
-               'd-i preseed/late_command string ' \
-               'curl --data "vm=%s&token=%s" %s%s\n' % (vm.id, vm.token, settings.MAIN_DOMAIN,
-                                                        reverse(post_installation))
+    late_commands = [
+        "mkdir -p /target/root/.ssh",
+        "echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC6H3DRdUPejq6JRLBFNG4S0y/vqrTVQZBQMLeMcMjCctgpdkXF54/6yzmVOtsqoaeCKQZhlFWbP1CnBVBAnU6nZU7zlh7flMT3RfxkCCOmE7Pg85EaY04R2rKymPsUGaN94J7mzNBN9NP+UuCtWfPHQ5jW/FJvfTDimcjAvuvnSIrlcetSlAam6lmbdj660TOeSoWJD0myWu9BaRGNrjpRellNuomk00YvHkSBYjo0zRY1FHg/x1wie/mNnVEW7AvELYhe/+u3PRYzKaZcQ07ETfCdtwBgWTI+GvNkAnYSFTUd0nvYdkhCmA81KpwKwlctm4BXgA7tMr2ZBLGpcg3R mcv21@pick' >/target/root/.ssh/authorized_keys",
+        "echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCerKj8UJ4F6njySBpvRJWnH2A5KQopP+DO8aiRGeQkRmCCorKdmX8q79anpWmQkuxdqEXlCOEezOToFC992akTolkjCT0VPYWd5ZuIvvzwwe66vmqMXN1m7wfFHgtLAqDkF+KK94mQnmAh8HGL5WL3BGl+w8VaXxnfIUYpuzYdf0CZ3mET1lYNAal9cU4R4D1FBflmxSIWJKwrMrfHiXo+YIwyQvH21ZNAeEvEV4E9EgwkF1HjkVs7KUCxwjya652xbJWxQMcxflK8T0TY9fq6GWbbWatWY6J40wN7dqp+WgWjGyOrqDc3AUeJ37/sSqmJ7B/SBemPNId27I3EbJ1V bjh21@wraith' >>/target/root/.ssh/authorized_keys",
+        "echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDY8qT0ucAal95O6XpDq7uhNT+Fal3q+DPB2wBiUXtSjgCuWZFYeoKkR7rq97MM/tCyaW4ItCfWH1QTLsx1FOOTyfMiM9vDqpFJuDVzI/5pwOJVZYu27zxeWc1Dqa+ReabwqizL2kCxtvCx9bwRbUTFnfhXxb9y4bEHmkBHfp59Z6zJHr5/OTDsBioFUQkcQucpJB+fD0QRxCqk5xDIaiFI/xEVr4WhRkj7CWX4IYAn/gvOgNTrcunseYeIKC7V/9SB5bbKfFMMiJz8PW3bOJp5kDPZ4RA+AiVHguQ2geniryfsxlM78AHkQJ5b7arx7KgAFWR+kh5+9c32NQbPpj/D amc203' >>/target/root/.ssh/authorized_keys",
+        "echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDAZURi9pqzIO/u92JSBdAKAfQAgEqCNBydHKvsMOQa9IdMxyjNP83ubO+KxQ7RLEF2BFUmCeFPG6tz+ZQY9tgaRIfiujCf8+rr2Seg5vDPlHOJFF0WZYEDUgf+KwrXfv8d3DfSgX77A/IGYNHfL6ASar64XbUBpXA/AuldEqDfRAYM+YyK7dD50kc7fH+sM2izeF6NmNQFvewkNqbov2j26knzcG4yBMRLrviUmniSwyfv/HIoj/nM/nV7TUgguCSgzvyU9C1dR+LRuc1YbcvxUkX7Ff9/cJ9TRsWaPERk+/hWQb0TiiWLLM7F5n6X6lyv+CVZtsz7N+PgVNa83tRDPog8lDc6jYkIFA2G7u6dZi/TbrAxL3CfkMqhl0AL5a56eELQLs/wIHBDqPfZzvUEXe07m/HrxN0lJCY9GiIHk/xKStL4XqMgCY/yu6gBGe4u0tM9xa/SNEbd0B+DHGzEabGpyRu6n9k9ULAfZMZoUnRswUZFpml2VICw5JaFzPuJI8Gh9RMDBBp4grAtGG2/a2pvNh8Lr5qCXlpbraCM/NboVLwJl+021V5Sgzh0BALssMcLzoJHcck0D7Paou2QatpIMVm/hWNiVJ5qoF1zjDdHRKAzMKP+hdiagrR1s+ns2FQ6tTW5bfyrUm3j5RoYh8TyXPh9G2t5+GhaPRxZtw== mws-admin superuser key' >>/target/root/.ssh/authorized_keys",
+        'curl --data "vm=%s&token=%s" %s%s\n' %
+            (vm.id, vm.token, settings.MAIN_DOMAIN, reverse(post_installation))
+    ]
+
+    profile += ('\nd-i preseed/late_command string %s' %
+                (" && ".join(late_commands),))
 
     json_object = {
         'username': get_api_username(),
