@@ -73,4 +73,6 @@ class Command(NoArgsCommand):
         v['mws_ipv6'] = vm.ipv6
         v['mws_tls_enabled'] = any(['certificate' in vhv
                                     for vhv in v['mws_vhosts']])
+        v['mws_os_type'] = vm.os_type
+        v['mws_os_version'] = vm.os_version
         return v
