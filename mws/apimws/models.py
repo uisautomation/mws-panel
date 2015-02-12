@@ -10,7 +10,8 @@ class AnsibleConfiguration(models.Model):
     vm = models.ForeignKey(VirtualMachine, related_name='ansible_configuration')
     key = models.CharField(max_length=250, db_index=True)
     value = models.TextField()
-
+    class Meta:
+        unique_together = ("vm", "key")
 
 @receiver(pre_delete, sender=VirtualMachine)
 def api_call_to_delete_vm(instance, **kwargs):
