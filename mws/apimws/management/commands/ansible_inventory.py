@@ -75,4 +75,14 @@ class Command(NoArgsCommand):
                                     for vhv in v['mws_vhosts']])
         v['mws_os_type'] = vm.os_type
         v['mws_os_version'] = vm.os_version
+
+        # Corosync needs a 32-bit node ID.  ID 0 is reserved, and
+        # according to corosync.conf(5), "Some openais clients require
+        # a signed 32 bit nodeid that is greater than zero".  For
+        # safety, we thus insist on something between 1 and 0x7fffffff
+        # inclusive.  For a reasonably-sized MWS, just using the
+        # primary key of the VirtualMachine should be fine.
+        v['mws_cluster_nodeid'] = vm.id
+        assert(1 <= v['mws_cluster_nodeid'] <= 0x7fffffff)
+
         return v
