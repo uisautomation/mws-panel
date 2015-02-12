@@ -108,5 +108,5 @@ UCAMWEBAUTH_LOGOUT_REDIRECT = 'http://www.cam.ac.uk/'
 STRONGHOLD_PUBLIC_NAMED_URLS = ('raven_login', 'raven_return')
 #CELERY_ACCEPT_CONTENT = ['json'] # TODO
 
-OS_VERSION = {'ubuntu': 14.04}
+OS_VERSION = {'debian': 7}
 OS_VERSION_VMAPI = "Debian 7 x86_64 preseed"
