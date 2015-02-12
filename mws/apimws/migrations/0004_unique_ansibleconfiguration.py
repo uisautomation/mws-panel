@@ -12,10 +12,8 @@ def squash_duplicates(apps, schema_editor):
     for vm, key in (
             AnsibleConfiguration.objects.all().values_list('vm', 'key')
             .distinct()):
-        print "vm=%s, key=%s" % (repr(vm), repr(key))
         for ac in (AnsibleConfiguration.objects.filter(vm=vm, key=key)
                    .order_by('-id')[1:]):
-            print "deleting %s" % (repr(ac),)
             ac.delete()
 
 def no_op(apps, schema_editor):
