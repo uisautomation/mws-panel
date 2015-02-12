@@ -85,4 +85,11 @@ class Command(NoArgsCommand):
         v['mws_cluster_nodeid'] = vm.id
         assert(1 <= v['mws_cluster_nodeid'] <= 0x7fffffff)
 
+        def member_vars(vm):
+            mv = { }
+            mv['ipv6'] = vm.ipv6
+            return mv
+        v['mws_cluster_members'] = [member_vars(vm)
+                                    for vm in vm.site.virtual_machines.all()]
+
         return v
