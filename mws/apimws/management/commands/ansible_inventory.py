@@ -6,7 +6,6 @@ from itertools import chain
 
 from sitesmanagement.models import VirtualMachine
 
-idprefix = "mwsclient-"
 group = "mwsclients"
 
 class Command(NoArgsCommand):
