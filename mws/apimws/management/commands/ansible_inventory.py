@@ -98,7 +98,5 @@ class Command(NoArgsCommand):
             mv = { }
             mv['ipv6'] = vm.ipv6
             return mv
-        v['mws_cluster_members'] = [member_vars(vm)
-                                    for vm in vm.site.virtual_machines.all()]
 
         return v
