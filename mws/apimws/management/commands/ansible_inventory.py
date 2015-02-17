@@ -94,9 +94,5 @@ class Command(NoArgsCommand):
         # mws_site_id is a convenient string identifying the site for use
         # in filenames etc.
         v['mws_site_id'] = v['mws_site_group']
-        def member_vars(vm):
-            mv = { }
-            mv['ipv6'] = vm.ipv6
-            return mv
 
         return v
