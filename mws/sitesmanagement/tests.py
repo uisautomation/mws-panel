@@ -47,6 +47,9 @@ class SiteManagementTests(TestCase):
                                                IPv4private='172.28.18.255',
                                                mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
                                                mws_domain="mws-12940.mws3.csx.cam.ac.uk")
+        self.assertInHTML("<p class=\"campl-notifications-icon campl-warning-icon\" style=\"float:none; margin-bottom: "
+                          "10px;\">At this moment we cannot process any new request for the Managed Web Service, please"
+                          " try again later.</p>", response.content)
         hnetconf = HostNetworkConfig.objects.create(
             IPv6='2001:db8:212:8::8d:255')
 
