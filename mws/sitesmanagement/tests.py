@@ -47,6 +47,8 @@ class SiteManagementTests(TestCase):
                                                IPv4private='172.28.18.255',
                                                mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
                                                mws_domain="mws-12940.mws3.csx.cam.ac.uk")
+        hnetconf = HostNetworkConfig.objects.create(
+            IPv6='2001:db8:212:8::8d:255')
 
         response = self.client.get(reverse(views.index))
         self.assertInHTML("<p><a href=\"%s\" class=\"campl-primary-cta\">Register new server</a></p>" %
