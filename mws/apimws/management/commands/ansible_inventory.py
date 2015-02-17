@@ -4,7 +4,7 @@ import sys
 import json
 from itertools import chain
 
-from sitesmanagement.models import VirtualMachine
+from sitesmanagement.models import VirtualMachine, Site
 
 group = "mwsclients"
 
@@ -28,6 +28,9 @@ class Command(NoArgsCommand):
                 status__in=('ansible', 'ready'))
             result = { '_meta': { 'hostvars': { } } }
             result[group] = [self.hostid(vm) for vm in vms]
+            for site in Site.objects.all():
+                result[self.sitegroup(site)] = [
+                    self.hostid(vm) for vm in vms.filter(site=site)]
             for vm in vms:
                 result['_meta']['hostvars'][self.hostid(vm)] = (
                     self.hostvars(vm))
@@ -38,6 +41,8 @@ class Command(NoArgsCommand):
                 host_network_configuration__hostname=host)
             json.dump(self.hostvars(vm), outfile)
             outfile.write("\n")
+    def sitegroup(self, site):
+        return "mwssite-%d" % (site.id,)
     def hostid(self, vm):
         return vm.host_network_configuration.hostname
     def hostvars(self, vm):
