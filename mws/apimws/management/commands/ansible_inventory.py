@@ -89,7 +89,11 @@ class Command(NoArgsCommand):
         v['mws_cluster_nodeid'] = vm.id
         assert(1 <= v['mws_cluster_nodeid'] <= 0x7fffffff)
 
+        # mws_site_group refers to the Ansible host group containing this host.
         v['mws_site_group'] = self.sitegroup(vm.site)
+        # mws_site_id is a convenient string identifying the site for use
+        # in filenames etc.
+        v['mws_site_id'] = v['mws_site_group']
         def member_vars(vm):
             mv = { }
             mv['ipv6'] = vm.ipv6
