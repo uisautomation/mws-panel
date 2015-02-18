@@ -33,6 +33,11 @@ def get_api_secret():
 def get_api_username():
     return settings.PLATFORMS_API_USERNAME
 
+def vm_api_request(**json_object):
+    headers = {'Content-type': 'application/json'}
+    vm_api_url = "https://bes.csi.cam.ac.uk/mws-api/v1/vm.json"
+    return json.loads(requests.post(vm_api_url,
+        data=json.dumps(json_object), headers=headers).text)
 
 def on_vm_api_failure(request, response):
         subject = "MWS3: Platform's VM API ERROR"
@@ -66,14 +71,12 @@ def new_site_primary_vm(vm):
         'ip': vm.ipv4,
         'hostname': vm.hostname,
     }
-    headers = {'Content-type': 'application/json'}
 
     if settings.OS_VERSION_VMAPI:
         json_object['os'] = settings.OS_VERSION_VMAPI
 
     try:
-        response = json.loads(requests.post("https://bes.csi.cam.ac.uk/mws-api/v1/vm.json",
-                                            data=json.dumps(json_object), headers=headers).text)
+        response = vm_api_requests(**json_object)
     except Exception as e:
         raise new_site_primary_vm.retry(exc=e)
 
@@ -117,10 +120,8 @@ def install_vm(vm):
         'vmid': vm.name,
         'profile': profile,
     }
-    headers = {'Content-type': 'application/json'}
     try:
-        response = json.loads(requests.post("https://bes.csi.cam.ac.uk/mws-api/v1/vm.json",
-                                            data=json.dumps(json_object), headers=headers).text)
+        response = vm_api_request(**json_object)
     except Exception as e:
         raise install_vm.retry(exc=e)
 
@@ -137,10 +138,8 @@ def get_vm_power_state(vm):
         'command': 'get power state',
         'vmid': vm.name
     }
-    headers = {'Content-type': 'application/json'}
     try:
-        response = json.loads(requests.post("https://bes.csi.cam.ac.uk/mws-api/v1/vm.json",
-                                            data=json.dumps(json_object), headers=headers).text)
+        response = vm_api_request(**json_object)
     except Exception as e:
         raise PlatformsAPINotWorkingException(e.message)
 
@@ -167,10 +166,8 @@ def change_vm_power_state(vm, on):
         'vmid': vm.name
     }
 
-    headers = {'Content-type': 'application/json'}
     try:
-        response = json.loads(requests.post("https://bes.csi.cam.ac.uk/mws-api/v1/vm.json",
-                                            data=json.dumps(json_object), headers=headers).text)
+        response = vm_api_request(**json_object)
     except Exception as e:
         raise change_vm_power_state.retry(exc=e)
 
@@ -189,10 +186,8 @@ def reset_vm(vm):
         'vmid': vm.name
     }
 
-    headers = {'Content-type': 'application/json'}
-    r = requests.post("https://bes.csi.cam.ac.uk/mws-api/v1/vm.json", data=json.dumps(json_object), headers=headers)
     try:
-        response = json.loads(r.text)
+        response = vm_api_request(**json_object)
     except Exception as e:
         raise reset_vm.retry(exc=e) # TODO are we sure we want to do that?
 
@@ -213,10 +208,8 @@ def destroy_vm(vm):
         'vmid': vm.name
     }
 
-    headers = {'Content-type': 'application/json'}
-    r = requests.post("https://bes.csi.cam.ac.uk/mws-api/v1/vm.json", data=json.dumps(json_object), headers=headers)
     try:
-        response = json.loads(r.text)
+        response = vm_api_request(**json_object)
     except Exception as e:
         raise destroy_vm.retry(exc=e)
 
@@ -261,10 +254,8 @@ def clone_vm_api_call(orignal_vm, destination_vm, delete_vm):
         'ip': destination_vm.ipv4,
         'hostname': destination_vm.hostname,
     }
-    headers = {'Content-type': 'application/json'}
     try:
-        response = json.loads(requests.post("https://bes.csi.cam.ac.uk/mws-api/v1/vm.json",
-                                            data=json.dumps(json_object), headers=headers).text)
+        response = vm_api_request(**json_object)
     except Exception as e:
         raise clone_vm_api_call.retry(exc=e)
 
