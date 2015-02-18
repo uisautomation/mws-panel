@@ -33,13 +33,18 @@ def get_api_secret():
 def get_api_username():
     return settings.PLATFORMS_API_USERNAME
 
+class PlatformsAPIFailure(Exception):
+    pass
+
 def vm_api_request(**json_object):
     headers = {'Content-type': 'application/json'}
     json_object['username'] = get_api_username()
     json_object['secret'] = get_api_secret()
     vm_api_url = "https://bes.csi.cam.ac.uk/mws-api/v1/vm.json"
-    return json.loads(requests.post(vm_api_url,
+    response = json.loads(requests.post(vm_api_url,
         data=json.dumps(json_object), headers=headers).text)
+    if response['result'] != 'Success':
+        raise PlatformsAPIFailure(json_object, response)
 
 def on_vm_api_failure(request, response):
         subject = "MWS3: Platform's VM API ERROR"
@@ -77,16 +82,15 @@ def new_site_primary_vm(vm):
 
     try:
         response = vm_api_requests(**json_object)
+    except PlatformsAPIFailure as e:
+        return on_vm_api_failure(*e.args)
     except Exception as e:
         raise new_site_primary_vm.retry(exc=e)
 
-    if response['result'] == 'Success':
-        vm.name = response['vmid']
-        vm.status = 'installing'
-        vm.save()
-        return install_vm(vm)
-    else:
-        return on_vm_api_failure(json.dumps(json_object), response)
+    vm.name = response['vmid']
+    vm.status = 'installing'
+    vm.save()
+    return install_vm(vm)
 
 
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
@@ -120,13 +124,12 @@ def install_vm(vm):
     }
     try:
         response = vm_api_request(**json_object)
+    except PlatformsAPIFailure as e:
+        return on_vm_api_failure(*e.args)
     except Exception as e:
         raise install_vm.retry(exc=e)
 
-    if response['result'] == 'Success':
-        return True
-    else:
-        return on_vm_api_failure(json.dumps(json_object), response)
+    return True
 
 
 def get_vm_power_state(vm):
@@ -136,16 +139,15 @@ def get_vm_power_state(vm):
     }
     try:
         response = vm_api_request(**json_object)
+    except PlatformsAPIFailure as e:
+        return # TODO raise error
     except Exception as e:
         raise PlatformsAPINotWorkingException(e.message)
 
-    if response['result'] == 'Success':
-        if response['powerState'] == 'poweredOff':
-            return "Off"
-        elif response['powerState'] == 'poweredOn':
-            return "On"
-        else:
-            pass  # TODO raise error
+    if response['powerState'] == 'poweredOff':
+        return "Off"
+    elif response['powerState'] == 'poweredOn':
+        return "On"
     else:
         pass  # TODO raise error
 
@@ -162,13 +164,12 @@ def change_vm_power_state(vm, on):
 
     try:
         response = vm_api_request(**json_object)
+    except PlatformsAPIFailure as e:
+        return on_vm_api_failure(*e.args)
     except Exception as e:
         raise change_vm_power_state.retry(exc=e)
 
-    if response['result'] == 'Success':
-        return True
-    else:
-        return on_vm_api_failure(json.dumps(json_object), response)
+    return True
 
 
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
@@ -180,13 +181,12 @@ def reset_vm(vm):
 
     try:
         response = vm_api_request(**json_object)
+    except PlatformsAPIFailure as e:
+        return on_vm_api_failure(*e.args)
     except Exception as e:
         raise reset_vm.retry(exc=e) # TODO are we sure we want to do that?
 
-    if response['result'] == 'Success':
-        return True
-    else:
-        return on_vm_api_failure(json.dumps(json_object), response)
+    return True
 
 
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
@@ -200,13 +200,12 @@ def destroy_vm(vm):
 
     try:
         response = vm_api_request(**json_object)
+    except PlatformsAPIFailure as e:
+        return on_vm_api_failure(*e.args)
     except Exception as e:
         raise destroy_vm.retry(exc=e)
 
-    if response['result'] == 'Success':
-        return True
-    else:
-        return on_vm_api_failure(json.dumps(json_object), response)
+    return True
 
 
 def clone_vm(site, primary_vm):
@@ -244,35 +243,34 @@ def clone_vm_api_call(orignal_vm, destination_vm, delete_vm):
     }
     try:
         response = vm_api_request(**json_object)
+    except PlatformsAPIFailure as e:
+        return on_vm_api_failure(*e.args)
     except Exception as e:
         raise clone_vm_api_call.retry(exc=e)
 
-    if response['result'] == 'Success':
-        destination_vm.name = response['vmid']
-        destination_vm.status = 'ready'
-        destination_vm.save()
+    destination_vm.name = response['vmid']
+    destination_vm.status = 'ready'
+    destination_vm.save()
 
-        # Copy Unix Groups
-        for unix_group in orignal_vm.unix_groups.all():
-            copy_users = unix_group.users.all()
-            unix_group.pk = None
-            unix_group.vm = destination_vm
-            unix_group.save()
-            unix_group.users = copy_users
+    # Copy Unix Groups
+    for unix_group in orignal_vm.unix_groups.all():
+        copy_users = unix_group.users.all()
+        unix_group.pk = None
+        unix_group.vm = destination_vm
+        unix_group.save()
+        unix_group.users = copy_users
 
-        # Copy Ansible Configuration
-        for ansible_conf in orignal_vm.ansible_configuration.all():
-            ansible_conf.pk = None
-            ansible_conf.vm = destination_vm
-            ansible_conf.save()
+    # Copy Ansible Configuration
+    for ansible_conf in orignal_vm.ansible_configuration.all():
+        ansible_conf.pk = None
+        ansible_conf.vm = destination_vm
+        ansible_conf.save()
 
-        # Copy vhosts
-        # TODO copy Domain Names
-        for vhost in orignal_vm.vhosts.all():
-            vhost.pk = None
-            vhost.vm = destination_vm
-            vhost.save()
+    # Copy vhosts
+    # TODO copy Domain Names
+    for vhost in orignal_vm.vhosts.all():
+        vhost.pk = None
+        vhost.vm = destination_vm
+        vhost.save()
 
-        return True
-    else:
-        return on_vm_api_failure(json.dumps(json_object), response)
+    return True
