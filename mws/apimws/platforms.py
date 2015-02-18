@@ -71,17 +71,13 @@ class TaskWithFailure(Task):
 
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
 def new_site_primary_vm(vm):
-    json_object = {
-        'command': 'create',
-        'ip': vm.ipv4,
-        'hostname': vm.hostname,
-    }
-
+    json_object = { }
     if settings.OS_VERSION_VMAPI:
         json_object['os'] = settings.OS_VERSION_VMAPI
 
     try:
-        response = vm_api_requests(**json_object)
+        response = vm_api_requests(command='create', ip=vm.ipv4,
+                                   hostname=vm.hostname, **json_object)
     except PlatformsAPIFailure as e:
         return on_vm_api_failure(*e.args)
     except Exception as e:
@@ -117,13 +113,9 @@ def install_vm(vm):
     profile += ('\nd-i preseed/late_command string %s' %
                 (" && ".join(late_commands),))
 
-    json_object = {
-        'command': 'install',
-        'vmid': vm.name,
-        'profile': profile,
-    }
     try:
-        response = vm_api_request(**json_object)
+        response = vm_api_request(command='install', vmid=vm.name,
+                                  profile=profile)
     except PlatformsAPIFailure as e:
         return on_vm_api_failure(*e.args)
     except Exception as e:
@@ -133,12 +125,8 @@ def install_vm(vm):
 
 
 def get_vm_power_state(vm):
-    json_object = {
-        'command': 'get power state',
-        'vmid': vm.name
-    }
     try:
-        response = vm_api_request(**json_object)
+        response = vm_api_request(command='get power state', vmid=vm.name)
     except PlatformsAPIFailure as e:
         return # TODO raise error
     except Exception as e:
@@ -156,14 +144,8 @@ def get_vm_power_state(vm):
 def change_vm_power_state(vm, on):
     if on != 'on' and on != 'off':
         raise PlatformsAPIInputException("passed wrong parameter power %s" % on)
-
-    json_object = {
-        'command': 'power '+on,
-        'vmid': vm.name
-    }
-
     try:
-        response = vm_api_request(**json_object)
+        response = vm_api_request(command='power ' + on, vmid=vm.name)
     except PlatformsAPIFailure as e:
         return on_vm_api_failure(*e.args)
     except Exception as e:
@@ -174,13 +156,8 @@ def change_vm_power_state(vm, on):
 
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
 def reset_vm(vm):
-    json_object = {
-        'command': 'reset',
-        'vmid': vm.name
-    }
-
     try:
-        response = vm_api_request(**json_object)
+        response = vm_api_request(command='reset', vmid=vm.name)
     except PlatformsAPIFailure as e:
         return on_vm_api_failure(*e.args)
     except Exception as e:
@@ -192,14 +169,8 @@ def reset_vm(vm):
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
 def destroy_vm(vm):
     change_vm_power_state(vm, "off")
-
-    json_object = {
-        'command': 'destroy',
-        'vmid': vm.name
-    }
-
     try:
-        response = vm_api_request(**json_object)
+        response = vm_api_request(command='destroy', vmid=vm.name)
     except PlatformsAPIFailure as e:
         return on_vm_api_failure(*e.args)
     except Exception as e:
@@ -234,15 +205,10 @@ def clone_vm(site, primary_vm):
 def clone_vm_api_call(orignal_vm, destination_vm, delete_vm):
     if delete_vm:
         delete_vm.delete()
-
-    json_object = {
-        'command': 'clone',
-        'vmid': orignal_vm.name,
-        'ip': destination_vm.ipv4,
-        'hostname': destination_vm.hostname,
-    }
     try:
-        response = vm_api_request(**json_object)
+        response = vm_api_request(command='clone', vmid=original_vm.name,
+                                  ip=destination_vm.ipv4,
+                                  hostname=destination_vm.hostname)
     except PlatformsAPIFailure as e:
         return on_vm_api_failure(*e.args)
     except Exception as e:
