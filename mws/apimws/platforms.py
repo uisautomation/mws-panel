@@ -35,6 +35,8 @@ def get_api_username():
 
 def vm_api_request(**json_object):
     headers = {'Content-type': 'application/json'}
+    json_object['username'] = get_api_username()
+    json_object['secret'] = get_api_secret()
     vm_api_url = "https://bes.csi.cam.ac.uk/mws-api/v1/vm.json"
     return json.loads(requests.post(vm_api_url,
         data=json.dumps(json_object), headers=headers).text)
@@ -65,8 +67,6 @@ class TaskWithFailure(Task):
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
 def new_site_primary_vm(vm):
     json_object = {
-        'username': get_api_username(),
-        'secret': get_api_secret(),
         'command': 'create',
         'ip': vm.ipv4,
         'hostname': vm.hostname,
@@ -114,8 +114,6 @@ def install_vm(vm):
                 (" && ".join(late_commands),))
 
     json_object = {
-        'username': get_api_username(),
-        'secret': get_api_secret(),
         'command': 'install',
         'vmid': vm.name,
         'profile': profile,
@@ -133,8 +131,6 @@ def install_vm(vm):
 
 def get_vm_power_state(vm):
     json_object = {
-        'username': get_api_username(),
-        'secret': get_api_secret(),
         'command': 'get power state',
         'vmid': vm.name
     }
@@ -160,8 +156,6 @@ def change_vm_power_state(vm, on):
         raise PlatformsAPIInputException("passed wrong parameter power %s" % on)
 
     json_object = {
-        'username': get_api_username(),
-        'secret': get_api_secret(),
         'command': 'power '+on,
         'vmid': vm.name
     }
@@ -180,8 +174,6 @@ def change_vm_power_state(vm, on):
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
 def reset_vm(vm):
     json_object = {
-        'username': get_api_username(),
-        'secret': get_api_secret(),
         'command': 'reset',
         'vmid': vm.name
     }
@@ -202,8 +194,6 @@ def destroy_vm(vm):
     change_vm_power_state(vm, "off")
 
     json_object = {
-        'username': get_api_username(),
-        'secret': get_api_secret(),
         'command': 'destroy',
         'vmid': vm.name
     }
@@ -247,8 +237,6 @@ def clone_vm_api_call(orignal_vm, destination_vm, delete_vm):
         delete_vm.delete()
 
     json_object = {
-        'username': get_api_username(),
-        'secret': get_api_secret(),
         'command': 'clone',
         'vmid': orignal_vm.name,
         'ip': destination_vm.ipv4,
