@@ -902,7 +902,9 @@ def generate_csr(request, vhost_id):
         temp_conf_file.write("C = GB\n")
         temp_conf_file.write("CN = %s\n\n" % vhost.main_domain.name)
         temp_conf_file.write("[ext]\n")
-        temp_conf_file.write("subjectAltName = DNS:" + ", DNS:".join(vhost.domain_names.values_list('name', flat=True)))
+        temp_conf_file.write("subjectAltName = DNS:" +
+                             ", DNS:".join(set(vhost.domain_names.values_list('name', flat=True)) -
+                                           set(vhost.main_domain.name)))
         temp_conf_file.flush()
 
         vhost.csr = subprocess.check_output(["openssl", "req", "-new", "-newkey", "rsa:2048", "-nodes", "-keyout",
