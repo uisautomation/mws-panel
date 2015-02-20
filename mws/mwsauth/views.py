@@ -81,11 +81,17 @@ def user_panel(request):
                     'error_message': error_message
                 })
 
-        mws_user, created = MWSUser.objects.get_or_create(user=request.user)
-        mws_user.ssh_public_key = ssh_public_key
-        mws_user.save()
-
-        return redirect(index)
+            mws_user, created = MWSUser.objects.get_or_create(user=request.user)  # TODO should we create mws_user here?
+            mws_user.ssh_public_key = ssh_public_key
+            mws_user.save()
+        else:
+            error_message = "SSH key not present"
+            return render(request, 'user/panel.html', {
+                'breadcrumbs': breadcrumbs,
+                'ssh_public_key': request.user.mws_user.ssh_public_key
+                if hasattr(request.user, 'mws_user') else None,
+                'error_message': error_message
+            })
 
     return render(request, 'user/panel.html', {
         'breadcrumbs': breadcrumbs,
