@@ -1,3 +1,7 @@
+a:hover {
+    cursor: pointer;
+}
+
 #id_description {
     min-width: 300px;
     height: 110px;
