@@ -80,3 +80,4 @@ JENKINS_TASKS = (
     'django_jenkins.tasks.run_sloccount'
 )
 
+PEP8_RCFILE = os.path.join(BASE_DIR, 'jenkins/pep8')
