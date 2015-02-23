@@ -72,10 +72,11 @@ INSTALLED_APPS = INSTALLED_APPS+('kombu.transport.django', )
 CELERY_IMPORTS = ('apimws.platforms', 'apimws.utils', 'apimws.jackdaw')
 
 JENKINS_TASKS = (
+    'django_jenkins.tasks.run_pylint',
+    'django_jenkins.tasks.run_csslint',
     'django_jenkins.tasks.run_pep8',
     'django_jenkins.tasks.run_pyflakes',
-    'django_jenkins.tasks.run_jslint',
-    'django_jenkins.tasks.run_csslint',
+    'django_jenkins.tasks.run_flake8',
     'django_jenkins.tasks.run_sloccount'
 )
 
