@@ -21,6 +21,10 @@ SERVER_EMAIL = "mws3-support@cam.ac.uk"
 
 MAIN_DOMAIN = 'http://localhost:8000'
 
+INSTALLED_APPS = INSTALLED_APPS + (
+    'django_jenkins',
+)
+
 # Database
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 
@@ -66,3 +70,12 @@ wOq24EIbX5LquL9w+uvnfXw=
 BROKER_URL = 'django://'
 INSTALLED_APPS = INSTALLED_APPS+('kombu.transport.django', )
 CELERY_IMPORTS = ('apimws.platforms', 'apimws.utils', 'apimws.jackdaw')
+
+JENKINS_TASKS = (
+    'django_jenkins.tasks.run_pep8',
+    'django_jenkins.tasks.run_pyflakes',
+    'django_jenkins.tasks.run_jslint',
+    'django_jenkins.tasks.run_csslint',
+    'django_jenkins.tasks.run_sloccount'
+)
+
