@@ -7,7 +7,15 @@ from django.conf import settings
 
 class Migration(migrations.Migration):
 
-    replaces = [(b'sitesmanagement', '0001_initial'), (b'sitesmanagement', '0002_billing'), (b'sitesmanagement', '0003_domainname'), (b'sitesmanagement', '0004_networkconfig'), (b'sitesmanagement', '0005_suspension'), (b'sitesmanagement', '0006_virtualmachine'), (b'sitesmanagement', '0007_auto_20140619_1402'), (b'sitesmanagement', '0008_auto_20140619_1507'), (b'sitesmanagement', '0009_auto_20140623_1539'), (b'sitesmanagement', '0010_auto_20140624_0919'), (b'sitesmanagement', '0011_auto_20140624_1544'), (b'sitesmanagement', '0012_auto_20140625_1257'), (b'sitesmanagement', '0013_auto_20140627_1325'), (b'sitesmanagement', '0014_site_main_domain'), (b'sitesmanagement', '0015_auto_20140718_1409'), (b'sitesmanagement', '0016_auto_20140718_1629'), (b'sitesmanagement', '0017_auto_20140731_1549')]
+    replaces = [(b'sitesmanagement', '0001_initial'), (b'sitesmanagement', '0002_billing'),
+                (b'sitesmanagement', '0003_domainname'), (b'sitesmanagement', '0004_networkconfig'),
+                (b'sitesmanagement', '0005_suspension'), (b'sitesmanagement', '0006_virtualmachine'),
+                (b'sitesmanagement', '0007_auto_20140619_1402'), (b'sitesmanagement', '0008_auto_20140619_1507'),
+                (b'sitesmanagement', '0009_auto_20140623_1539'), (b'sitesmanagement', '0010_auto_20140624_0919'),
+                (b'sitesmanagement', '0011_auto_20140624_1544'), (b'sitesmanagement', '0012_auto_20140625_1257'),
+                (b'sitesmanagement', '0013_auto_20140627_1325'), (b'sitesmanagement', '0014_site_main_domain'),
+                (b'sitesmanagement', '0015_auto_20140718_1409'), (b'sitesmanagement', '0016_auto_20140718_1629'),
+                (b'sitesmanagement', '0017_auto_20140731_1549')]
 
     dependencies = [
         ('auth', '0001_initial'),
@@ -90,7 +98,10 @@ class Migration(migrations.Migration):
                 ('primary', models.BooleanField(default=True)),
                 ('network_configuration', models.OneToOneField(to='sitesmanagement.NetworkConfig', to_field='id')),
                 ('site', models.ForeignKey(to='sitesmanagement.Site', to_field='id')),
-                ('status', models.CharField(default='ready', max_length=50, choices=[(b'requested', b'Requested'), (b'accepted', b'Accepted'), (b'denied', b'Denied'), (b'ready', b'Ready')])),
+                ('status', models.CharField(default='ready', max_length=50, choices=[(b'requested', b'Requested'),
+                                                                                     (b'accepted', b'Accepted'),
+                                                                                     (b'denied', b'Denied'),
+                                                                                     (b'ready', b'Ready')])),
             ],
             options={
             },
@@ -109,7 +120,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='domainname',
             name='status',
-            field=models.CharField(default=b'requested', max_length=50, choices=[(b'requested', b'Requested'), (b'accepted', b'Accepted'), (b'denied', b'Denied')]),
+            field=models.CharField(default=b'requested', max_length=50, choices=[(b'requested', b'Requested'),
+                                                                                 (b'accepted', b'Accepted'),
+                                                                                 (b'denied', b'Denied')]),
             preserve_default=True,
         ),
         migrations.AlterField(
@@ -140,7 +153,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('email', models.EmailField(max_length=75, null=True, blank=True)),
                 ('token', models.CharField(max_length=50)),
-                ('status', models.CharField(max_length=50, choices=[(b'pending', b'Pending'), (b'accepted', b'Accepted')])),
+                ('status', models.CharField(max_length=50, choices=[(b'pending', b'Pending'),
+                                                                    (b'accepted', b'Accepted')])),
                 ('site', models.ForeignKey(to='sitesmanagement.Site', unique=True)),
             ],
             options={

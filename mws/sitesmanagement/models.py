@@ -405,7 +405,7 @@ class VirtualMachine(models.Model):
             else:
                 return False
         else:
-            return False # TODO also raise an exception?
+            return False  # TODO also raise an exception?
 
     @property
     def os_type(self):
@@ -515,8 +515,8 @@ class VhostForm(forms.ModelForm):
 
 
 class DomainNameFormNew(forms.ModelForm):
-    #name = forms.CharField(max_length=250, required=True, label="Domain name",
-    #                       validators=[DomainName.full_domain_validator])
+    # name = forms.CharField(max_length=250, required=True, label="Domain name",
+    #                        validators=[DomainName.full_domain_validator])
 
     class Meta:
         model = DomainName

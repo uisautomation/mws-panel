@@ -16,7 +16,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='vhost',
             name='name',
-            field=models.CharField(max_length=150, validators=[django.core.validators.RegexValidator(re.compile('^[-a-zA-Z0-9_]+$'), "Enter a valid 'slug' consisting of letters, numbers, underscores or hyphens.", 'invalid')]),
+            field=models.CharField(max_length=150, validators=[django.core.validators.RegexValidator(
+                re.compile('^[-a-zA-Z0-9_]+$'), "Enter a valid 'slug' consisting of letters, numbers, "
+                                                "underscores or hyphens.", 'invalid')]),
             preserve_default=True,
         ),
     ]

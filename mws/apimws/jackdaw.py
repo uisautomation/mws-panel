@@ -12,7 +12,7 @@ def extract_crsid_and_uuid(text_to_be_parsed):
     crsid = text_parsed[0].lower().lower()
     if text_parsed[2] == '':
         logger.warning("The user " + str(crsid) + " does not have UID in the Jackdaw feed")
-        return (crsid, None) # TODO temporal workaround for jackdaw users without uid
+        return (crsid, None)  # TODO temporal workaround for jackdaw users without uid
     uid = int(text_parsed[2])
     return (crsid, uid)
 

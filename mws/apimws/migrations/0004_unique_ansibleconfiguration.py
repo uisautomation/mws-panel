@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import models, migrations
 
+
 def squash_duplicates(apps, schema_editor):
     """
     Delete all but the newest value of each AnsibleConfiguration variable.
@@ -16,13 +17,15 @@ def squash_duplicates(apps, schema_editor):
                    .order_by('-id')[1:]):
             ac.delete()
 
+
 def no_op(apps, schema_editor):
     """
     Backward migrations are a no-op: we can't create the lost duplicates,
     and they're probably useless anyway.
     """
     pass
-        
+
+
 class Migration(migrations.Migration):
 
     dependencies = [

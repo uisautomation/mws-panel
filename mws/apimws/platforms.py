@@ -50,8 +50,8 @@ def vm_api_request(**json_object):
 
 def on_vm_api_failure(request, response):
         subject = "MWS3: Platform's VM API ERROR"
-        message = "An error was returned when sending a request to Platform's VM API.\n\n The request was: \n %s \n\n " \
-                  "The answer was: \n %s" % (request, response)
+        message = "An error was returned when sending a request to Platform's VM API.\n\n The request was: \n %s \n" \
+                  "\n The answer was: \n %s" % (request, response)
         from_email = settings.EMAIL_MWS3_SUPPORT
         recipient_list = (settings.EMAIL_MWS3_SUPPORT, )
         send_mail(subject, message, from_email, recipient_list, fail_silently=False)
@@ -217,7 +217,7 @@ def clone_vm(site, primary_vm):
 
     destination_vm = VirtualMachine.objects.create(primary=(not primary_vm),
                                                    status='requested', token=uuid.uuid4(), site=site,
-                                                   host_network_configuration = HostNetworkConfig.get_free_config())
+                                                   host_network_configuration=HostNetworkConfig.get_free_config())
     clone_vm_api_call.delay(original_vm, destination_vm, delete_vm)
 
 

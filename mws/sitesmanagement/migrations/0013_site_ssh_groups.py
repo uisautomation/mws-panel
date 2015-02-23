@@ -15,7 +15,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='site',
             name='ssh_groups',
-            field=models.ManyToManyField(related_name=b'sites_auth_as_user', null=True, to='ucamlookup.LookupGroup', blank=True),
+            field=models.ManyToManyField(related_name=b'sites_auth_as_user', null=True, to='ucamlookup.LookupGroup',
+                                         blank=True),
             preserve_default=True,
         ),
     ]
