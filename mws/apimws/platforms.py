@@ -76,7 +76,7 @@ def new_site_primary_vm(vm):
         json_object['os'] = settings.OS_VERSION_VMAPI
 
     try:
-        response = vm_api_requests(command='create', ip=vm.ipv4,
+        response = vm_api_request(command='create', ip=vm.ipv4,
                                    hostname=vm.hostname, **json_object)
     except PlatformsAPIFailure as e:
         return on_vm_api_failure(*e.args)
@@ -202,7 +202,7 @@ def clone_vm(site, primary_vm):
 
 
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
-def clone_vm_api_call(orignal_vm, destination_vm, delete_vm):
+def clone_vm_api_call(original_vm, destination_vm, delete_vm):
     if delete_vm:
         delete_vm.delete()
     try:
@@ -219,7 +219,7 @@ def clone_vm_api_call(orignal_vm, destination_vm, delete_vm):
     destination_vm.save()
 
     # Copy Unix Groups
-    for unix_group in orignal_vm.unix_groups.all():
+    for unix_group in original_vm.unix_groups.all():
         copy_users = unix_group.users.all()
         unix_group.pk = None
         unix_group.vm = destination_vm
@@ -227,14 +227,14 @@ def clone_vm_api_call(orignal_vm, destination_vm, delete_vm):
         unix_group.users = copy_users
 
     # Copy Ansible Configuration
-    for ansible_conf in orignal_vm.ansible_configuration.all():
+    for ansible_conf in original_vm.ansible_configuration.all():
         ansible_conf.pk = None
         ansible_conf.vm = destination_vm
         ansible_conf.save()
 
     # Copy vhosts
     # TODO copy Domain Names
-    for vhost in orignal_vm.vhosts.all():
+    for vhost in original_vm.vhosts.all():
         vhost.pk = None
         vhost.vm = destination_vm
         vhost.save()
