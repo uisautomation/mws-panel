@@ -120,9 +120,9 @@ def dns_entries(request, token):
     r = requests.post("somewhere/vm.json", data=json.dumps(json_object), headers=headers)
     response = json.loads(r.text)
     if response['success']:
-        return True # Success
+        return True  # Success
     else:
-        return False # TODO Read errors
+        return False  # TODO Read errors
 
     # TODO check aliases_deleted
 

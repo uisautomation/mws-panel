@@ -22,7 +22,7 @@ def launch_ansible(vm):
     elif vm.status == 'ansible_queued':
         return
     else:
-        raise UnexpectedVMStatus() # TODO pass the vm object?
+        raise UnexpectedVMStatus()  # TODO pass the vm object?
 
 
 def launch_ansible_site(site):

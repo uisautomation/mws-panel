@@ -8,6 +8,7 @@ from mwsauth.utils import get_or_create_group_by_groupid
 
 logger = logging.getLogger('mws')
 
+
 # TODO delete part of this function in production: No longer check the lookup group membership
 def check_permited_betatesters(request):
     ''' Check that the user is a memeber of InfoSys or Platforms lookup group.

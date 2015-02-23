@@ -61,7 +61,7 @@ def index(request):
 
 @login_required
 def new(request):
-    if not can_create_new_site(): # TODO add prealocated HostNetworkConfigs
+    if not can_create_new_site():  # TODO add prealocated HostNetworkConfigs
         return HttpResponseRedirect(reverse('sitesmanagement.views.index'))
 
     breadcrumbs = {
@@ -196,7 +196,7 @@ def enable(request, site_id):
     site = get_object_or_404(Site, pk=site_id)
 
     try:
-        if (not site in request.user.sites.all() and not user_in_groups(request.user, site.groups.all())) \
+        if (site not in request.user.sites.all() and not user_in_groups(request.user, site.groups.all())) \
                 or site.is_admin_suspended() or site.is_canceled():
             return HttpResponseForbidden()
     except Exception:
@@ -250,8 +250,8 @@ def show(request, site_id):
             site_email = EmailConfirmation.objects.get(email=site.email, site_id=site.id)
             if site_email.status == 'pending':
                 from apimws.views import resend_email_confirmation_view
-                warning_messages.append(format_html('Your email \'%s\' is still unconfirmed, please check your email inbox '
-                                                    'and click on the link of the email we sent you. <a '
+                warning_messages.append(format_html('Your email \'%s\' is still unconfirmed, please check your email '
+                                                    'inbox and click on the link of the email we sent you. <a '
                                                     'id="resend_email_link" data-href="%s" href="#" '
                                                     'style="text-decoration: underline;">Resend confirmation '
                                                     'email</a>' % (site.email, reverse(resend_email_confirmation_view,
@@ -421,13 +421,13 @@ def check_vm_status(request, vm_id):
 
     if vm.is_busy:
         return JsonResponse({'error': 'VMNotReady'})
-        #return JsonResponse({'error': 'VMNotReady'}, status_code=403) # TODO status_code in JsonResponse doesn't work
+        # return JsonResponse({'error': 'VMNotReady'}, status_code=403) # TODO status_code in JsonResponse doesn't work
 
     try:
         return JsonResponse({'vm_is_on': vm.is_on()})
     except PlatformsAPINotWorkingException:
         return JsonResponse({'error': 'PlatformsAPINotWorking'})
-        #return JsonResponse({'error': 'PlatformsAPINotWorking'}, status_code=500) # TODO status_code doesn't work
+        # return JsonResponse({'error': 'PlatformsAPINotWorking'}, status_code=500) # TODO status_code doesn't work
 
 
 @login_required
@@ -454,7 +454,7 @@ def system_packages(request, vm_id):
         2: dict(name='System packages', url=reverse(system_packages, kwargs={'vm_id': vm.id}))
     }
 
-    package_number_list = [1,2,3,4] # TODO extract this to settings
+    package_number_list = [1, 2, 3, 4]  # TODO extract this to settings
 
     if request.method == 'POST':
         package_number = int(request.POST['package_number'])
@@ -678,7 +678,7 @@ def update_os(request, vm_id):
     if site is None:
         return HttpResponseForbidden()
 
-    if not vm.is_ready: # TODO change the button format (disabled) if the vm is not ready
+    if not vm.is_ready:  # TODO change the button format (disabled) if the vm is not ready
         return redirect(reverse(show, kwargs={'site_id': site.id}))
 
     # TODO 1) Warn about the secondary VM if exists
@@ -724,7 +724,7 @@ def domains_management(request, vhost_id):
         1: dict(name='Server settings' if vhost.vm.primary else 'Test server settings',
                 url=reverse(settings, kwargs={'vm_id': vhost.vm.id})),
         2: dict(name='Web sites management: %s' % vhost.name, url=reverse(vhosts_management,
-                                                                       kwargs={'vm_id': vhost.vm.id})),
+                                                                          kwargs={'vm_id': vhost.vm.id})),
         3: dict(name='Domain Names management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id}))
     }
 
@@ -754,8 +754,7 @@ def add_domain(request, vhost_id, socket_error=None):
             domain_requested = domain_form.save(commit=False)
             if domain_requested.name != '':  # TODO do it after saving a domain request
                 if is_camacuk(domain_requested.name):
-                    new_domain = DomainName.objects.create(name=domain_requested.name, status='requested',
-                                                                 vhost=vhost)
+                    new_domain = DomainName.objects.create(name=domain_requested.name, status='requested', vhost=vhost)
                     ip_register_api_request.delay(new_domain)
                 else:
                     new_domain = DomainName.objects.create(name=domain_requested.name, status='accepted', vhost=vhost)
@@ -770,7 +769,7 @@ def add_domain(request, vhost_id, socket_error=None):
                 1: dict(name='Server settings' if vhost.vm.primary else 'Test server settings',
                         url=reverse(settings, kwargs={'vm_id': vhost.vm.id})),
                 2: dict(name='Web sites management: %s' % vhost.name, url=reverse(vhosts_management,
-                                                                               kwargs={'vm_id': vhost.vm.id})),
+                                                                                  kwargs={'vm_id': vhost.vm.id})),
                 3: dict(name='Domain Names management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id}))
             }
 
@@ -805,14 +804,14 @@ def certificates(request, vhost_id):
         1: dict(name='Server settings' if vhost.vm.primary else 'Test server settings',
                 url=reverse(settings, kwargs={'vm_id': vhost.vm.id})),
         2: dict(name='Web sites management: %s' % vhost.name, url=reverse(vhosts_management,
-                                                                       kwargs={'vm_id': vhost.vm.id})),
+                                                                          kwargs={'vm_id': vhost.vm.id})),
         3: dict(name='TLS/SSL Certificate', url=reverse(certificates, kwargs={'vhost_id': vhost.id})),
     }
 
     error_message = None
 
     if request.method == 'POST':
-        c=OpenSSL.crypto
+        c = OpenSSL.crypto
 
         if 'cert' in request.FILES:
             try:
@@ -877,7 +876,7 @@ def generate_csr(request, vhost_id):
                 0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show,
                                                                                          kwargs={'site_id': site.id})),
                 1: dict(name='Server settings' if vhost.vm.primary else 'Test server settings',
-                         url=reverse(settings, kwargs={'vm_id': vhost.vm.id})),
+                        url=reverse(settings, kwargs={'vm_id': vhost.vm.id})),
                 2: dict(name='Vhosts Management: %s' % vhost.name, url=reverse(vhosts_management,
                                                                                kwargs={'vm_id': vhost.vm.id})),
                 3: dict(name='TLS/SSL Certificates', url=reverse(certificates, kwargs={'vhost_id': vhost.id})),
@@ -985,7 +984,7 @@ def change_db_root_password(request, vm_id):
 
     if request.method == 'POST':
         new_root_passwd = request.POST['new_root_passwd']
-        # TODO do something
+        # TODO implement
         return HttpResponseRedirect(reverse(settings, kwargs={'vm_id': vm.id}))
 
     return render(request, 'mws/change_db_root_password.html', {
@@ -1039,7 +1038,8 @@ def backups(request, vm_id):
         try:
             backup_date = dateparse.parse_datetime(request.POST['backupdate'])
             if backup_date is None or backup_date > datetime.datetime.now() \
-                    or backup_date < (datetime.datetime.now()-datetime.timedelta(days=30)): # TODO or backup_date >= datetime.date.today() ????
+                    or backup_date < (datetime.datetime.now()-datetime.timedelta(days=30)):
+                    # TODO or backup_date >= datetime.date.today() ????
                 raise ValueError
             # TODO restore data, once successfully completed restore database data
             version = reversion.get_for_date(vm, backup_date)
@@ -1048,7 +1048,7 @@ def backups(request, vm_id):
                 if domain.status == "requested":
                     last_version = reversion.get_for_object(domain)[0]
                     if last_version.field_dict['id'] != domain.id:
-                        raise Exception # TODO change this to a custom exception
+                        raise Exception  # TODO change this to a custom exception
                     domain.status = last_version.field_dict['status']
                     domain.save()
         except ValueError:

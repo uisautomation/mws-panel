@@ -10,15 +10,19 @@ from sitesmanagement.models import (
 
 from .commands.ansible_inventory import Command
 
+
 class SimpleCommandTests(TestCase):
+
     def test_options(self):
         with self.assertRaises(CommandError):
             Command().handle_noargs(list=None, host=None)
         with self.assertRaises(CommandError):
             Command().handle_noargs(list=True, host="foo")
+
     def test_args(self):
         with self.assertRaises(CommandError):
             Command().handle("foo", list=True)
+
     def test_list_minimal(self):
         s = StringIO()
         Command().handle_noargs(list=True, outfile=s)
@@ -29,7 +33,9 @@ class SimpleCommandTests(TestCase):
         self.assertTrue('mwsclients' in r)
         self.assertTrue(isinstance(r['mwsclients'], list))
 
+
 class TestsWithData(TestCase):
+
     def setUp(self):
         netconf = ServiceNetworkConfig.objects.create(
             IPv4='198.51.100.255',
@@ -51,6 +57,7 @@ class TestsWithData(TestCase):
         self.vhost2 = self.vm.vhosts.create(name="vhost2")
         self.dom1 = self.vhost1.domain_names.create(name="foo.example",
                                                     status='accepted')
+
     def test_list(self):
         s = StringIO()
         Command().handle_noargs(list=True, outfile=s)
@@ -63,6 +70,7 @@ class TestsWithData(TestCase):
 
         self.assertEqual(len(r['mwsclients']), 1)
         self.assertTrue(r['mwsclients'][0] in r['_meta']['hostvars'])
+
     def test_vars(self):
         s = StringIO()
         Command().handle_noargs(list=True, outfile=s)

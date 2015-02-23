@@ -137,9 +137,9 @@ class AuthTestCases(TestCase):
         self.assertEqual(response.status_code, 404)  # Site does not exists
 
         netconf = ServiceNetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
-                                               IPv4private='172.28.18.255',
-                                               mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
-                                               mws_domain="mws-12940.mws3.csx.cam.ac.uk")
+                                                      IPv4private='172.28.18.255',
+                                                      mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
+                                                      mws_domain="mws-12940.mws3.csx.cam.ac.uk")
         site_without_auth_users = Site.objects.create(name="test_site1", start_date=datetime.today(),
                                                       service_network_configuration=netconf)
         VirtualMachine.objects.create(primary=True, status='ready', token=uuid.uuid4(),
@@ -156,9 +156,9 @@ class AuthTestCases(TestCase):
         self.assertContains(response, 'crsid: "amc203"', status_code=200)  # User is authorised
 
         netconf2 = ServiceNetworkConfig.objects.create(IPv4='131.111.58.254', IPv6='2001:630:212:8::8c:254',
-                                                IPv4private='172.28.18.254',
-                                                mws_private_domain='mws-23169.mws3.csx.private.ca.ac.uk',
-                                                mws_domain="mws-39595.mws3.csx.cam.ac.uk")
+                                                       IPv4private='172.28.18.254',
+                                                       mws_private_domain='mws-23169.mws3.csx.private.ca.ac.uk',
+                                                       mws_domain="mws-39595.mws3.csx.cam.ac.uk")
 
         site_with_auth_groups = Site.objects.create(name="test_site2", start_date=datetime.today(),
                                                     service_network_configuration=netconf2)

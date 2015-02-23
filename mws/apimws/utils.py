@@ -7,7 +7,7 @@ from sitesmanagement.models import EmailConfirmation
 import uuid
 
 
-@shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
+@shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
 def ip_register_api_request(domain_name):
 
     subject = "New request of a Domain Name for the MWS"
@@ -21,7 +21,7 @@ def ip_register_api_request(domain_name):
     send_mail(subject, message, from_email, recipient_list, fail_silently=False)
 
 
-@shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
+@shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
 def email_confirmation(site):
     previous = EmailConfirmation.objects.filter(site=site)
     if previous:
@@ -36,7 +36,7 @@ def email_confirmation(site):
     send_mail(subject, message, from_email, recipient_list, fail_silently=False)
 
 
-@shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288) # Retry each 5 minutes for 24 hours
+@shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
 def resend_email_confirmation(site):
     email_conf = EmailConfirmation.objects.get(site=site)
     subject = "University of Cambridge Managed Web Service: Please confirm your email address"
