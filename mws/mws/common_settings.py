@@ -19,6 +19,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 # Application definition
 
+PROJECT_APPS = (
+    'sitesmanagement',
+    'apimws',
+    'mwsauth',
+)
+
 INSTALLED_APPS = (
     # Customization for the grappelli admin system
     'grappelli',
@@ -34,10 +40,7 @@ INSTALLED_APPS = (
     'ucamwebauth',
     'ucamprojectlight',
     'ucamlookup',
-    'sitesmanagement',
-    'apimws',
-    'mwsauth',
-)
+) + PROJECT_APPS
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
