@@ -16,3 +16,4 @@ coverage
 pylint
 pep8>=1.3
 pyflakes
+pylint-django

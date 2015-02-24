@@ -1,7 +1,6 @@
 from datetime import datetime
 import tempfile
 import uuid
-from django.http import HttpResponseRedirect
 import mock
 import os
 from django.conf import settings
@@ -14,9 +13,9 @@ import reversion
 from apimws.models import AnsibleConfiguration
 from apimws.views import post_installation
 from mwsauth.tests import do_test_login
-from models import ServiceNetworkConfig, Site, VirtualMachine, UnixGroup, Vhost, DomainName, HostNetworkConfig
-import views
-from utils import is_camacuk, get_object_or_None
+from sitesmanagement.models import ServiceNetworkConfig, Site, VirtualMachine, UnixGroup, Vhost, DomainName, HostNetworkConfig
+import sitesmanagement.views as views
+from sitesmanagement.utils import is_camacuk, get_object_or_None
 
 
 @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
@@ -34,7 +33,6 @@ class SiteManagementTests(TestCase):
     def test_view_index(self):
         response = self.client.get(reverse(views.index))
         self.assertEqual(response.status_code, 302)  # Not logged in, redirected to login
-        self.assertEqual(response.__class__, HttpResponseRedirect)
         self.assertTrue(response.url.endswith(
             '%s?next=%s' % (reverse('raven_login'), reverse(views.index))))
 
