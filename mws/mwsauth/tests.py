@@ -143,8 +143,8 @@ class AuthTestCases(TestCase):
         site_without_auth_users = Site.objects.create(name="test_site1", start_date=datetime.today(),
                                                       service_network_configuration=netconf)
         VirtualMachine.objects.create(primary=True, status='ready', token=uuid.uuid4(),
-                                      site=site_without_auth_users, host_network_configuration =
-            HostNetworkConfig.objects.create(IPv6=netconf.IPv6, hostname=netconf.mws_domain))
+                                      site=site_without_auth_users, host_network_configuration=HostNetworkConfig.
+                                      objects.create(IPv6=netconf.IPv6, hostname=netconf.mws_domain))
 
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_without_auth_users.id}))
         self.assertEqual(response.status_code, 403)  # User is not authorised
@@ -165,8 +165,8 @@ class AuthTestCases(TestCase):
         information_systems_group = get_or_create_group_by_groupid(101888)
         site_with_auth_groups.groups.add(information_systems_group)
         VirtualMachine.objects.create(primary=True, status='ready', token=uuid.uuid4(), site=site_with_auth_groups,
-                                      host_network_configuration = HostNetworkConfig.objects.create(
-                                          IPv6=netconf2.IPv6, hostname=netconf2.mws_domain))
+                                      host_network_configuration=HostNetworkConfig.objects.
+                                      create(IPv6=netconf2.IPv6, hostname=netconf2.mws_domain))
 
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_with_auth_groups.id}))
         self.assertContains(response, "101888", status_code=200)  # User is in an authorised group

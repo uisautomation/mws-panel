@@ -14,7 +14,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='networkconfig',
             name='type',
-            field=models.CharField(default='public', max_length=10, choices=[(b'public', b'Public'), (b'private', b'Private')]),
+            field=models.CharField(default='public', max_length=10, choices=[(b'public', b'Public'),
+                                                                             (b'private', b'Private')]),
             preserve_default=False,
         ),
         migrations.AlterField(

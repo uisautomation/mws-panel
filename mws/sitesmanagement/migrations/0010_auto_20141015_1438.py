@@ -31,6 +31,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='vhost',
             name='main_domain',
-            field=models.ForeignKey(related_name=b'+', on_delete=django.db.models.deletion.SET_NULL, blank=True, to='sitesmanagement.DomainName', null=True),
+            field=models.ForeignKey(related_name=b'+', on_delete=django.db.models.deletion.SET_NULL, blank=True,
+                                    to='sitesmanagement.DomainName', null=True),
         ),
     ]

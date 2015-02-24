@@ -50,8 +50,8 @@ class CheckBannedUsers():
 
     def process_request(self, request):
         try:
-            if not request.user.is_authenticated() or (check_permited_betatesters(request) and
-                                                           user_in_jackdaw(request) and user_is_active(request)):
+            if not request.user.is_authenticated() or \
+                    (check_permited_betatesters(request) and user_in_jackdaw(request) and user_is_active(request)):
                 return None
             else:
                 t = loader.get_template('403.html')

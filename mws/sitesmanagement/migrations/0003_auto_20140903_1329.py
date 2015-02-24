@@ -18,7 +18,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('name', models.CharField(max_length=250)),
-                ('main_domain', models.ForeignKey(related_name=b'+', blank=True, to='sitesmanagement.DomainName', null=True)),
+                ('main_domain', models.ForeignKey(related_name=b'+', blank=True, to='sitesmanagement.DomainName',
+                                                  null=True)),
                 ('site', models.ForeignKey(related_name=b'vhosts', to='sitesmanagement.Site')),
             ],
             options={
@@ -47,7 +48,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='domainname',
             name='name',
-            field=models.CharField(unique=True, max_length=250, validators=[sitesmanagement.models.full_domain_validator]),
+            field=models.CharField(unique=True, max_length=250,
+                                   validators=[sitesmanagement.models.full_domain_validator]),
         ),
         migrations.AlterField(
             model_name='emailconfirmation',
