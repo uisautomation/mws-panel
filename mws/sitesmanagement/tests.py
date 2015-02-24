@@ -1,6 +1,7 @@
 from datetime import datetime
 import tempfile
 import uuid
+from django.http import HttpResponseRedirect
 import mock
 import os
 from django.conf import settings
@@ -33,6 +34,7 @@ class SiteManagementTests(TestCase):
     def test_view_index(self):
         response = self.client.get(reverse(views.index))
         self.assertEqual(response.status_code, 302)  # Not logged in, redirected to login
+        self.assertEqual(response.__class__, HttpResponseRedirect)
         self.assertTrue(response.url.endswith(
             '%s?next=%s' % (reverse('raven_login'), reverse(views.index))))
 
