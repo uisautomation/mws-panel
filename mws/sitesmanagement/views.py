@@ -444,8 +444,8 @@ def system_packages(request, vm_id):
     if vm.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
-    ansible_configuraton = get_object_or_None(AnsibleConfiguration, vm=vm, key="system_packages") or \
-                           AnsibleConfiguration.objects.create(vm=vm, key="system_packages", value="")
+    ansible_configuraton = get_object_or_None(AnsibleConfiguration, vm=vm, key="system_packages") \
+                           or AnsibleConfiguration.objects.create(vm=vm, key="system_packages", value="")
 
     packages_installed = list(int(x) for x in ansible_configuraton.value.split(",")) \
         if ansible_configuraton.value != '' else []
