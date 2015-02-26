@@ -51,8 +51,9 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # The following app force all views to have @login_required https://github.com/mgrouchy/django-stronghold/
     'stronghold.middleware.LoginRequiredMiddleware',
+    #'mwsauth.middleware.CheckBannedUsers',
     'ucamwebauth.middleware.DefaultErrorBehaviour',
-    'reversion.middleware.RevisionMiddleware',
+    'reversion.middleware.RevisionMiddleware', # TODO: This middleware has a bug that crashes when trying to clone a VM from test to production
 )
 
 AUTHENTICATION_BACKENDS = (
@@ -111,5 +112,5 @@ UCAMWEBAUTH_LOGOUT_REDIRECT = 'http://www.cam.ac.uk/'
 STRONGHOLD_PUBLIC_NAMED_URLS = ('raven_login', 'raven_return')
 #CELERY_ACCEPT_CONTENT = ['json'] # TODO
 
-OS_VERSION = {'debian': 7}
-OS_VERSION_VMAPI = "Debian 7 x86_64 preseed"
+OS_VERSION = {'debian': 8}
+OS_VERSION_VMAPI = "Debian 8RC1 x86_64 preseed"

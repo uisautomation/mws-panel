@@ -1,0 +1,2 @@
+#!/bin/bash -e
+ssh -4x root@test.dev.mws3.csx.cam.ac.uk "cd /var/www/mws/mws && python manage.py ansible_inventory --list --settings=mws.production_settings $@"
