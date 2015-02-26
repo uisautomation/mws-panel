@@ -48,20 +48,20 @@ def vm_api_request(**json_object):
     json_object['secret'] = get_api_secret()
     vm_api_url = "https://bes.csi.cam.ac.uk/mws-api/v1/vm.json"
     response = json.loads(requests.post(vm_api_url, data=json.dumps(json_object), headers=headers).text)
-    logger.info("VM API request: %s\nVM API response: %s" % (json_object, response))
+    logger.info("VM API request: %s\nVM API response: %s", json_object, response)
     if response['result'] != 'Success':
         raise PlatformsAPIFailure(json_object, response)
     return response
 
 
 def on_vm_api_failure(request, response):
-        subject = "MWS3: Platform's VM API ERROR"
-        message = "An error was returned when sending a request to Platform's VM API.\n\n The request was: \n %s \n" \
-                  "\n The answer was: \n %s" % (request, response)
-        from_email = settings.EMAIL_MWS3_SUPPORT
-        recipient_list = (settings.EMAIL_MWS3_SUPPORT, )
-        send_mail(subject, message, from_email, recipient_list, fail_silently=False)
-        return False  # TODO raise exception? and log it in the logger
+    ''' This function logs the error in the logger. The logger can be configured to send an email.
+    :param request: the VM API request
+    :param response: the VM API response
+    :return: False
+    '''
+    logger.error("VM API request: %s\nVM API response: %s", request, response)
+    return False  # TODO raise exception?
 
 
 class TaskWithFailure(Task):
