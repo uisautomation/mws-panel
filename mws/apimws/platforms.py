@@ -46,7 +46,6 @@ def vm_api_request(**json_object):
     response = json.loads(requests.post(vm_api_url, data=json.dumps(json_object), headers=headers).text)
     if response['result'] != 'Success':
         raise PlatformsAPIFailure(json_object, response)
-    return response
 
 
 def on_vm_api_failure(request, response):
