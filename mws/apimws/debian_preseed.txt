@@ -36,9 +36,9 @@ d-i mirror/http/directory string /pub/linux/debian
 d-i mirror/http/proxy string
 
 # Suite to install.
-d-i mirror/suite string wheezy
+d-i mirror/suite string jessie
 # Suite to use for loading installer components (optional).
-d-i mirror/udeb/suite string wheezy
+d-i mirror/udeb/suite string jessie
 
 # Set up the Unix Support repository.
 d-i apt-setup/local0/repository string http://bes.csi.cam.ac.uk/ubuntu hardy-uxsup uxsup
