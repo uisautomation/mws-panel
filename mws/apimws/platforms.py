@@ -3,7 +3,6 @@ import logging
 import uuid
 from celery import shared_task, Task
 import json
-from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 import os
 import random
@@ -68,14 +67,9 @@ class TaskWithFailure(Task):
     abstract = True
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):
-        subject = "MWS3: Platform's VM API ERROR"
-        message = "An error happened when trying to communicate with Platform's VM API.\n The task id is " \
-                  "%s. \n\n The parameters passed to the task were: %s \n\n " \
-                  "The traceback is: \n %s" % (task_id, args, einfo)
-        from_email = settings.EMAIL_MWS3_SUPPORT
-        recipient_list = (settings.EMAIL_MWS3_SUPPORT, )
-        send_mail(subject, message, from_email, recipient_list, fail_silently=False)
-        # TODO raise exception? and log it in the logger
+        logger.error("An error happened when trying to communicate with Platform's VM API.\n The task id is %s. \n\n "
+                     "The parameters passed to the task were: %s \n\n The traceback is: \n %s", task_id, args, einfo)
+        # TODO raise exception?
 
 
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
