@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+import logging
 import uuid
 from celery import shared_task, Task
 import json
@@ -12,6 +13,9 @@ from django.conf import settings
 import requests
 import platform
 from sitesmanagement.models import VirtualMachine, HostNetworkConfig
+
+
+logger = logging.getLogger('mws')
 
 
 class PlatformsAPINotWorkingException(Exception):
@@ -44,6 +48,7 @@ def vm_api_request(**json_object):
     json_object['secret'] = get_api_secret()
     vm_api_url = "https://bes.csi.cam.ac.uk/mws-api/v1/vm.json"
     response = json.loads(requests.post(vm_api_url, data=json.dumps(json_object), headers=headers).text)
+    logger.info("VM API request: %s\nVM API response: %s" % (json_object, response))
     if response['result'] != 'Success':
         raise PlatformsAPIFailure(json_object, response)
     return response
