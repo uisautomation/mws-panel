@@ -16,7 +16,7 @@ import reversion
 from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups, validate_crsids
 from apimws.ansible import launch_ansible
 from apimws.models import AnsibleConfiguration
-from apimws.platforms import PlatformsAPINotWorkingException, new_site_primary_vm, clone_vm
+from apimws.platforms import PlatformsAPINotWorkingException, new_site_primary_vm, clone_vm, PlatformsAPIFailure
 from apimws.utils import email_confirmation, ip_register_api_request
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.utils import is_camacuk, get_object_or_None
@@ -431,6 +431,10 @@ def check_vm_status(request, vm_id):
     except PlatformsAPINotWorkingException:
         return JsonResponse({'error': 'PlatformsAPINotWorking'})
         # return JsonResponse({'error': 'PlatformsAPINotWorking'}, status_code=500) # TODO status_code doesn't work
+    except PlatformsAPIFailure:
+        return JsonResponse({'error': 'PlatformsAPIFailure'})
+    except Exception:
+        return JsonResponse({'error': 'Exception'})
 
 
 @login_required

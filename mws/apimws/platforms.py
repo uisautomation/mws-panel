@@ -14,7 +14,7 @@ import platform
 from sitesmanagement.models import VirtualMachine, HostNetworkConfig
 
 
-logger = logging.getLogger('mws')
+LOGGER = logging.getLogger('mws')
 
 
 class PlatformsAPINotWorkingException(Exception):
@@ -47,7 +47,7 @@ def vm_api_request(**json_object):
     json_object['secret'] = get_api_secret()
     vm_api_url = "https://bes.csi.cam.ac.uk/mws-api/v1/vm.json"
     response = json.loads(requests.post(vm_api_url, data=json.dumps(json_object), headers=headers).text)
-    logger.info("VM API request: %s\nVM API response: %s", json_object, response)
+    LOGGER.info("VM API request: %s\nVM API response: %s", json_object, response)
     if response['result'] != 'Success':
         raise PlatformsAPIFailure(json_object, response)
     return response
@@ -59,7 +59,7 @@ def on_vm_api_failure(request, response):
     :param response: the VM API response
     :return: False
     '''
-    logger.error("VM API request: %s\nVM API response: %s", request, response)
+    LOGGER.error("VM API request: %s\nVM API response: %s", request, response)
     return False  # TODO raise exception?
 
 
@@ -67,7 +67,7 @@ class TaskWithFailure(Task):
     abstract = True
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):
-        logger.error("An error happened when trying to communicate with Platform's VM API.\n The task id is %s. \n\n "
+        LOGGER.error("An error happened when trying to communicate with Platform's VM API.\n The task id is %s. \n\n "
                      "The parameters passed to the task were: %s \n\n The traceback is: \n %s", task_id, args, einfo)
         # TODO raise exception?
 
@@ -147,8 +147,8 @@ def install_vm(vm):
 def get_vm_power_state(vm):
     try:
         response = vm_api_request(command='get power state', vmid=vm.name)
-    except PlatformsAPIFailure as e:
-        return  # TODO raise error
+    except PlatformsAPIFailure:
+        raise
     except Exception as e:
         raise PlatformsAPINotWorkingException(e.message)
 
@@ -157,7 +157,7 @@ def get_vm_power_state(vm):
     elif response['powerState'] == 'poweredOn':
         return "On"
     else:
-        pass  # TODO raise error
+        raise PlatformsAPIFailure(None, response)
 
 
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
