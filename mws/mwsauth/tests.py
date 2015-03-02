@@ -11,7 +11,7 @@ from mwsauth.models import MWSUser
 from mwsauth.utils import get_or_create_group_by_groupid
 from ucamlookup import user_in_groups, get_or_create_user_by_crsid, validate_crsids
 from mwsauth.validators import validate_groupids
-from sitesmanagement.models import Site, Suspension, VirtualMachine, ServiceNetworkConfig, HostNetworkConfig
+from sitesmanagement.models import Site, Suspension, VirtualMachine, ServiceNetworkConfig, NetworkConfig
 from ucamlookup.models import LookupGroup
 
 
@@ -143,7 +143,7 @@ class AuthTestCases(TestCase):
         site_without_auth_users = Site.objects.create(name="test_site1", start_date=datetime.today(),
                                                       service_network_configuration=netconf)
         VirtualMachine.objects.create(primary=True, status='ready', token=uuid.uuid4(),
-                                      site=site_without_auth_users, network_configuration=HostNetworkConfig.
+                                      site=site_without_auth_users, network_configuration=NetworkConfig.
                                       objects.create(IPv6=netconf.IPv6, name=netconf.mws_domain))
 
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_without_auth_users.id}))
@@ -165,7 +165,7 @@ class AuthTestCases(TestCase):
         information_systems_group = get_or_create_group_by_groupid(101888)
         site_with_auth_groups.groups.add(information_systems_group)
         VirtualMachine.objects.create(primary=True, status='ready', token=uuid.uuid4(), site=site_with_auth_groups,
-                                      network_configuration=HostNetworkConfig.objects.
+                                      network_configuration=NetworkConfig.objects.
                                       create(IPv6=netconf2.IPv6, name=netconf2.mws_domain))
 
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_with_auth_groups.id}))

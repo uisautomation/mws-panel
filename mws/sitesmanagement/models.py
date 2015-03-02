@@ -41,7 +41,7 @@ class ServiceNetworkConfig(models.Model):
         return self.IPv4 + " - " + self.mws_domain
 
 
-class HostNetworkConfig(models.Model):
+class NetworkConfig(models.Model):
     NETWORK_CONFIGURATION_TYPES = (
         ('service', 'Service'),
         ('host', 'Host'),
@@ -320,7 +320,7 @@ class VirtualMachine(models.Model):
     token = models.CharField(max_length=50)
 
     site = models.ForeignKey(Site, related_name='virtual_machines', null=True)
-    network_configuration = models.OneToOneField(HostNetworkConfig, related_name="vm")
+    network_configuration = models.OneToOneField(NetworkConfig, related_name="vm")
 
     def is_on(self):
         from apimws.platforms import get_vm_power_state

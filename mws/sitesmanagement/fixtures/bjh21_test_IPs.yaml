@@ -14,32 +14,32 @@
     mws_domain: mws-71485.mws3.csx.cam.ac.uk, mws_private_domain: mws-72892.mws3.csx.private.cam.ac.uk}
   model: sitesmanagement.ServiceNetworkConfig
 - fields: {IPv6: "2001:630:212:8::8c:2410", name: mwshost-2410}
-  model: sitesmanagement.HostNetworkConfig
+  model: sitesmanagement.NetworkConfig
 - fields: {IPv6: "2001:630:212:8::8c:2411", name: mwshost-2411}
-  model: sitesmanagement.HostNetworkConfig
+  model: sitesmanagement.NetworkConfig
 - fields: {IPv6: "2001:630:212:8::8c:2412", name: mwshost-2412}
-  model: sitesmanagement.HostNetworkConfig
+  model: sitesmanagement.NetworkConfig
 - fields: {IPv6: "2001:630:212:8::8c:2420", name: mwshost-2420}
-  model: sitesmanagement.HostNetworkConfig
+  model: sitesmanagement.NetworkConfig
 - fields: {IPv6: "2001:630:212:8::8c:2421", name: mwshost-2421}
-  model: sitesmanagement.HostNetworkConfig
+  model: sitesmanagement.NetworkConfig
 - fields: {IPv6: "2001:630:212:8::8c:2422", name: mwshost-2422}
-  model: sitesmanagement.HostNetworkConfig
+  model: sitesmanagement.NetworkConfig
 - fields: {IPv6: "2001:630:212:8::8c:2430", name: mwshost-2430}
-  model: sitesmanagement.HostNetworkConfig
+  model: sitesmanagement.NetworkConfig
 - fields: {IPv6: "2001:630:212:8::8c:2431", name: mwshost-2431}
-  model: sitesmanagement.HostNetworkConfig
+  model: sitesmanagement.NetworkConfig
 - fields: {IPv6: "2001:630:212:8::8c:2432", name: mwshost-2432}
-  model: sitesmanagement.HostNetworkConfig
+  model: sitesmanagement.NetworkConfig
 - fields: {IPv6: "2001:630:212:8::8c:2440", name: mwshost-2440}
-  model: sitesmanagement.HostNetworkConfig
+  model: sitesmanagement.NetworkConfig
 - fields: {IPv6: "2001:630:212:8::8c:2441", name: mwshost-2441}
-  model: sitesmanagement.HostNetworkConfig
+  model: sitesmanagement.NetworkConfig
 - fields: {IPv6: "2001:630:212:8::8c:2442", name: mwshost-2442}
-  model: sitesmanagement.HostNetworkConfig
+  model: sitesmanagement.NetworkConfig
 - fields: {IPv6: "2001:630:212:8::8c:2450", name: mwshost-2450}
-  model: sitesmanagement.HostNetworkConfig
+  model: sitesmanagement.NetworkConfig
 - fields: {IPv6: "2001:630:212:8::8c:2451", name: mwshost-2451}
-  model: sitesmanagement.HostNetworkConfig
+  model: sitesmanagement.NetworkConfig
 - fields: {IPv6: "2001:630:212:8::8c:2452", name: mwshost-2452}
-  model: sitesmanagement.HostNetworkConfig
+  model: sitesmanagement.NetworkConfig

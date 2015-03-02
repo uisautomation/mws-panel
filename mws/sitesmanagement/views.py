@@ -21,7 +21,7 @@ from apimws.utils import email_confirmation, ip_register_api_request
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.utils import is_camacuk, get_object_or_None
 from .models import SiteForm, DomainNameFormNew, BillingForm, DomainName, ServiceNetworkConfig, EmailConfirmation, \
-    VirtualMachine, Vhost, VhostForm, Site, UnixGroupForm, UnixGroup, HostNetworkConfig
+    VirtualMachine, Vhost, VhostForm, Site, UnixGroupForm, UnixGroup, NetworkConfig
 from django.conf import settings as django_settings
 
 
@@ -30,7 +30,7 @@ logger = logging.getLogger('mws')
 
 def can_create_new_site():
     return (ServiceNetworkConfig.num_pre_allocated() >= 1 and
-            HostNetworkConfig.num_pre_allocated() >= 1)
+            NetworkConfig.num_pre_allocated() >= 1)
 
 
 @login_required
@@ -85,7 +85,7 @@ def new(request):
             site.users.add(request.user)
 
             vm = VirtualMachine.objects.create(primary=True, status='requested', site=site, token=uuid.uuid4(),
-                                               network_configuration=HostNetworkConfig.get_free_config())
+                                               network_configuration=NetworkConfig.get_free_config())
             new_site_primary_vm.delay(vm)
 
             if site.email:
