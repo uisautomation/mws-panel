@@ -52,7 +52,7 @@ class TestsWithData(TestCase):
                                         service_network_configuration=netconf)
         self.vm = VirtualMachine.objects.create(
             name="test_vm", primary=True, status="ready", token=uuid.uuid4(),
-            site=self.site, host_network_configuration=hostnetconf)
+            site=self.site, network_configuration=hostnetconf)
         self.vhost1 = self.vm.vhosts.create(name="vhost1")
         self.vhost2 = self.vm.vhosts.create(name="vhost2")
         self.dom1 = self.vhost1.domain_names.create(name="foo.example",

@@ -195,7 +195,7 @@ class SiteManagementTests(TestCase):
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today(),
                                    service_network_configuration=netconf)
         VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(), site=site,
-                                      host_network_configuration=HostNetworkConfig.objects.
+                                      network_configuration=HostNetworkConfig.objects.
                                       create(IPv6=netconf.IPv6, hostname=netconf.mws_domain))
         response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)  # The User is not in the list of auth users
@@ -312,7 +312,7 @@ class SiteManagementTests(TestCase):
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today(),
                                    service_network_configuration=netconf)
         vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(), site=site,
-                                           host_network_configuration=HostNetworkConfig.objects.
+                                           network_configuration=HostNetworkConfig.objects.
                                            create(IPv6=netconf.IPv6, hostname=netconf.mws_domain))
         vhost = Vhost.objects.create(name="tests_vhost", vm=vm)
         dn = DomainName.objects.create(name="testtestest.mws3.csx.cam.ac.uk", status="accepted", vhost=vhost)
@@ -386,10 +386,10 @@ class SiteManagementTests(TestCase):
                                    service_network_configuration=netconf)
         site.users.add(User.objects.get(username='test0001'))
         vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="requested", token=uuid.uuid4(),
-                                           site=site, host_network_configuration=HostNetworkConfig.objects.
+                                           site=site, network_configuration=HostNetworkConfig.objects.
                                            create(IPv6=netconf.IPv6, hostname=netconf.mws_domain))
         vm2 = VirtualMachine.objects.create(name="test_vm2", primary=False, status="requested", token=uuid.uuid4(),
-                                            site=site, host_network_configuration=HostNetworkConfig.objects.
+                                            site=site, network_configuration=HostNetworkConfig.objects.
                                             create(IPv6='2001:630:212:8::8c:254', hostname=netconf.mws_private_domain))
         vhost = Vhost.objects.create(name="tests_vhost", vm=vm)
         dn = DomainName.objects.create(name="testtestest.mws3.csx.cam.ac.uk", status="accepted", vhost=vhost)
@@ -486,7 +486,7 @@ class SiteManagementTests(TestCase):
                                    service_network_configuration=netconf)
         site.users.add(User.objects.get(username='test0001'))
         VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(), site=site,
-                                      host_network_configuration=HostNetworkConfig.objects.
+                                      network_configuration=HostNetworkConfig.objects.
                                       create(IPv6=netconf.IPv6, hostname=netconf.mws_domain))
         return site
 

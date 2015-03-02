@@ -143,7 +143,7 @@ class AuthTestCases(TestCase):
         site_without_auth_users = Site.objects.create(name="test_site1", start_date=datetime.today(),
                                                       service_network_configuration=netconf)
         VirtualMachine.objects.create(primary=True, status='ready', token=uuid.uuid4(),
-                                      site=site_without_auth_users, host_network_configuration=HostNetworkConfig.
+                                      site=site_without_auth_users, network_configuration=HostNetworkConfig.
                                       objects.create(IPv6=netconf.IPv6, hostname=netconf.mws_domain))
 
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_without_auth_users.id}))
@@ -165,7 +165,7 @@ class AuthTestCases(TestCase):
         information_systems_group = get_or_create_group_by_groupid(101888)
         site_with_auth_groups.groups.add(information_systems_group)
         VirtualMachine.objects.create(primary=True, status='ready', token=uuid.uuid4(), site=site_with_auth_groups,
-                                      host_network_configuration=HostNetworkConfig.objects.
+                                      network_configuration=HostNetworkConfig.objects.
                                       create(IPv6=netconf2.IPv6, hostname=netconf2.mws_domain))
 
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_with_auth_groups.id}))

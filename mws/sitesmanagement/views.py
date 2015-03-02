@@ -85,7 +85,7 @@ def new(request):
             site.users.add(request.user)
 
             vm = VirtualMachine.objects.create(primary=True, status='requested', site=site, token=uuid.uuid4(),
-                                               host_network_configuration=HostNetworkConfig.get_free_config())
+                                               network_configuration=HostNetworkConfig.get_free_config())
             new_site_primary_vm.delay(vm)
 
             if site.email:

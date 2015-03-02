@@ -217,7 +217,7 @@ def clone_vm(site, primary_vm):
 
     destination_vm = VirtualMachine.objects.create(primary=(not primary_vm),
                                                    status='requested', token=uuid.uuid4(), site=site,
-                                                   host_network_configuration=HostNetworkConfig.get_free_config())
+                                                   network_configuration=HostNetworkConfig.get_free_config())
     clone_vm_api_call.delay(original_vm, destination_vm, delete_vm)
 
 
