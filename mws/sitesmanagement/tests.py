@@ -111,10 +111,10 @@ class SiteManagementTests(TestCase):
                                             mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
                                             mws_domain="mws-12940.mws3.csx.cam.ac.uk")
 
-        HostNetworkConfig.objects.create(IPv6='2001:630:212:8::8c:254', hostname='mws-client1')
-        HostNetworkConfig.objects.create(IPv6='2001:630:212:8::8c:253', hostname='mws-client2')
-        HostNetworkConfig.objects.create(IPv6='2001:630:212:8::8c:252', hostname='mws-client3')
-        HostNetworkConfig.objects.create(IPv6='2001:630:212:8::8c:251', hostname='mws-client4')
+        HostNetworkConfig.objects.create(IPv6='2001:630:212:8::8c:254', name='mws-client1')
+        HostNetworkConfig.objects.create(IPv6='2001:630:212:8::8c:253', name='mws-client2')
+        HostNetworkConfig.objects.create(IPv6='2001:630:212:8::8c:252', name='mws-client3')
+        HostNetworkConfig.objects.create(IPv6='2001:630:212:8::8c:251', name='mws-client4')
 
         response = self.client.get(reverse(views.new))
         self.assertContains(response, "Request new site")
@@ -196,7 +196,7 @@ class SiteManagementTests(TestCase):
                                    service_network_configuration=netconf)
         VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(), site=site,
                                       network_configuration=HostNetworkConfig.objects.
-                                      create(IPv6=netconf.IPv6, hostname=netconf.mws_domain))
+                                      create(IPv6=netconf.IPv6, name=netconf.mws_domain))
         response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)  # The User is not in the list of auth users
 
@@ -313,7 +313,7 @@ class SiteManagementTests(TestCase):
                                    service_network_configuration=netconf)
         vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(), site=site,
                                            network_configuration=HostNetworkConfig.objects.
-                                           create(IPv6=netconf.IPv6, hostname=netconf.mws_domain))
+                                           create(IPv6=netconf.IPv6, name=netconf.mws_domain))
         vhost = Vhost.objects.create(name="tests_vhost", vm=vm)
         dn = DomainName.objects.create(name="testtestest.mws3.csx.cam.ac.uk", status="accepted", vhost=vhost)
         unix_group = UnixGroup.objects.create(name="testUnixGroup", vm=vm)
@@ -387,10 +387,10 @@ class SiteManagementTests(TestCase):
         site.users.add(User.objects.get(username='test0001'))
         vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="requested", token=uuid.uuid4(),
                                            site=site, network_configuration=HostNetworkConfig.objects.
-                                           create(IPv6=netconf.IPv6, hostname=netconf.mws_domain))
+                                           create(IPv6=netconf.IPv6, name=netconf.mws_domain))
         vm2 = VirtualMachine.objects.create(name="test_vm2", primary=False, status="requested", token=uuid.uuid4(),
                                             site=site, network_configuration=HostNetworkConfig.objects.
-                                            create(IPv6='2001:630:212:8::8c:254', hostname=netconf.mws_private_domain))
+                                            create(IPv6='2001:630:212:8::8c:254', name=netconf.mws_private_domain))
         vhost = Vhost.objects.create(name="tests_vhost", vm=vm)
         dn = DomainName.objects.create(name="testtestest.mws3.csx.cam.ac.uk", status="accepted", vhost=vhost)
         unix_group = UnixGroup.objects.create(name="testUnixGroup", vm=vm)
@@ -487,7 +487,7 @@ class SiteManagementTests(TestCase):
         site.users.add(User.objects.get(username='test0001'))
         VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(), site=site,
                                       network_configuration=HostNetworkConfig.objects.
-                                      create(IPv6=netconf.IPv6, hostname=netconf.mws_domain))
+                                      create(IPv6=netconf.IPv6, name=netconf.mws_domain))
         return site
 
     def test_unix_groups(self):

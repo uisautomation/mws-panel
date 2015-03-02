@@ -39,7 +39,7 @@ class Command(NoArgsCommand):
             outfile.write("\n")
         else:
             vm = VirtualMachine.objects.get(
-                network_configuration__hostname=host)
+                network_configuration__name=host)
             json.dump(self.hostvars(vm), outfile)
             outfile.write("\n")
 
@@ -47,7 +47,7 @@ class Command(NoArgsCommand):
         return "mwssite-%d" % (site.id,)
 
     def hostid(self, vm):
-        return vm.network_configuration.hostname
+        return vm.network_configuration.name
 
     def hostvars(self, vm):
         v = {}

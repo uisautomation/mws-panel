@@ -45,7 +45,7 @@ class TestsWithData(TestCase):
             mws_domain="mws-12940.mws3.example")
         hostnetconf = HostNetworkConfig.objects.create(
             IPv6='2001:db8:212:8::8c:254',
-            hostname="mws-client1.example")
+            name="mws-client1.example")
         self.site = Site.objects.create(name="testSite",
                                         institution_id="testinst",
                                         start_date=datetime.today(),

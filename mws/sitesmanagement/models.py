@@ -42,8 +42,17 @@ class ServiceNetworkConfig(models.Model):
 
 
 class HostNetworkConfig(models.Model):
-    IPv6 = models.GenericIPAddressField(protocol='IPv6', unique=True)
-    hostname = models.CharField(max_length=250, unique=True)
+    NETWORK_CONFIGURATION_TYPES = (
+        ('service', 'Service'),
+        ('host', 'Host'),
+    )
+
+    IPv4 = models.GenericIPAddressField(protocol='IPv4', unique=True, null=True, blank=True)
+    IPv4_netmask = models.GenericIPAddressField(protocol='IPv4', null=True, blank=True)
+    IPv4_gateway = models.GenericIPAddressField(protocol='IPv4', null=True, blank=True)
+    IPv6 = models.GenericIPAddressField(protocol='IPv6', unique=True, null=True, blank=True)
+    name = models.CharField(max_length=250, unique=True)
+    type = models.CharField(max_length=50, choices=NETWORK_CONFIGURATION_TYPES)
 
     @classmethod
     def num_pre_allocated(cls):
