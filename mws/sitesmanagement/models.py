@@ -43,8 +43,11 @@ class ServiceNetworkConfig(models.Model):
 
 class NetworkConfig(models.Model):
     NETWORK_CONFIGURATION_TYPES = (
-        ('service', 'Service'),
-        ('host', 'Host'),
+        ('ipv4pub', 'Public IPv4 Only'),
+        ('ipv4priv', 'Private IPv4 Only'),
+        ('ipvxpub', 'Public IPv4 and IPv6'),
+        ('ipvxpriv', 'Private IPv4 and IPv6'),
+        ('ipv6', 'IPv6 Only'),
     )
 
     IPv4 = models.GenericIPAddressField(protocol='IPv4', unique=True, null=True, blank=True)
@@ -300,6 +303,20 @@ def full_domain_validator(hostname):
                                   "representation." % {'label': label})
 
 
+class Service(models.Model):
+    SERVICE_TYPES = (
+        ('production', 'Production'),
+        ('test', 'Test'),
+    )
+    # The network configuration for the service
+    network_configuration = models.OneToOneField(NetworkConfig)
+    site = models.ForeignKey(Site)
+    type = models.CharField(max_length=50, choices=SERVICE_TYPES)
+
+    class Meta:
+        unique_together = (("site", "type"),)
+
+
 class VirtualMachine(models.Model):
     """ A virtual machine is associated to a site and has a network configuration. Its attributes include
         a name and a boolean to indicate if it's the primary or secondary VM of a Site.
@@ -321,6 +338,7 @@ class VirtualMachine(models.Model):
 
     site = models.ForeignKey(Site, related_name='virtual_machines', null=True)
     network_configuration = models.OneToOneField(NetworkConfig, related_name="vm")
+    service = models.ForeignKey(Service, null=True)
 
     def is_on(self):
         from apimws.platforms import get_vm_power_state
