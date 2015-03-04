@@ -12,7 +12,7 @@ import reversion
 from ucamlookup import get_institutions
 from ucamlookup.models import LookupGroup
 from mwsauth.utils import get_users_of_a_group
-from sitesmanagement.utils import is_camacuk, get_object_or_None
+from sitesmanagement.utils import is_camacuk, get_object_or_None, deprecated
 
 
 class ServiceNetworkConfig(models.Model):
@@ -125,10 +125,12 @@ class Site(models.Model):
             return self.virtual_machines.get(primary=primary)
 
     @property
+    @deprecated
     def primary_vm(self):
         return self.vm(primary=True)
 
     @property
+    @deprecated
     def secondary_vm(self):
         return self.vm(primary=False)
 
