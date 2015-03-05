@@ -15,32 +15,6 @@ from mwsauth.utils import get_users_of_a_group
 from sitesmanagement.utils import is_camacuk, get_object_or_None, deprecated
 
 
-class ServiceNetworkConfig(models.Model):
-    """ The network configuration for the VMs of a site:
-     Primary VM: IPv4, IPv6, and domain name
-     Secondary VM: Private IPv4 and private domain name
-    """
-
-    IPv4 = models.GenericIPAddressField(protocol='IPv4', unique=True)
-    IPv6 = models.GenericIPAddressField(protocol='IPv6', unique=True)
-    SSHFP = models.CharField(max_length=250, null=True, blank=True)
-    mws_domain = models.CharField(max_length=250, unique=True)
-
-    IPv4private = models.GenericIPAddressField(protocol='IPv4', unique=True)
-    mws_private_domain = models.CharField(max_length=250, unique=True)
-
-    @classmethod
-    def num_pre_allocated(cls):
-        return cls.objects.filter(site=None).count()
-
-    @classmethod
-    def get_free_config(cls):
-        return cls.objects.filter(site=None).first()
-
-    def __str__(self):
-        return self.IPv4 + " - " + self.mws_domain
-
-
 class NetworkConfig(models.Model):
     NETWORK_CONFIGURATION_TYPES = (
         ('ipv4pub', 'Public IPv4 Only'),
@@ -101,12 +75,12 @@ class Site(models.Model):
     # Indicates if the site is disabled by the user
     disabled = models.BooleanField(default=False)
 
-    # The network configuration for the service
-    service_network_configuration = models.OneToOneField(ServiceNetworkConfig, related_name='site', null=True,
-                                                         blank=True)
-
     def __str__(self):
         return self.name
+
+    # @property
+    # def virtual_machines(self):
+    #     return VirtualMachine.objects.filter(service__site_id=self.id)
 
     def is_admin_suspended(self):
         for susp in self.suspensions.all():
@@ -123,19 +97,17 @@ class Site(models.Model):
     def suspend_now(self, input_reason):
         return Suspension.objects.create(reason=input_reason, start_date=datetime.today(), site=self)
 
-    def vm(self, primary):
-        if self.virtual_machines.filter(primary=primary).count() is 0:
-            return None
-        else:
-            return self.virtual_machines.get(primary=primary)
+    @property
+    def vms(self):
+        return VirtualMachine.objects.filter(service__site=self)
 
     @property
     def production_vms(self):
-        return VirtualMachine.objects.filter(service__type='production', service__site=self)
+        return self.vms.filter(service__type='production')
 
     @property
     def test_vms(self):
-        return VirtualMachine.objects.filter(service__type='test', service__site=self)
+        return self.vms.filter(service__type='test')
 
     @property
     def production_service(self):
@@ -148,20 +120,12 @@ class Site(models.Model):
     @property
     @deprecated
     def primary_vm(self):
-        old_api = self.vm(True)
-        if old_api is None:
-            return VirtualMachine.objects.filter(service__type='production', service__site=self).first()
-        else:
-            return old_api
+        return self.vms.filter(service__type='production').first()
 
     @property
     @deprecated
     def secondary_vm(self):
-        old_api = self.vm(False)
-        if old_api is None:
-            return VirtualMachine.objects.filter(service__type='test', service__site=self).first()
-        else:
-            return old_api
+        return self.vms.filter(service__type='test').first()
 
     @property
     def domain_names(self):
@@ -367,9 +331,15 @@ class VirtualMachine(models.Model):
     status = models.CharField(max_length=50, choices=STATUS_CHOICES)
     token = models.CharField(max_length=50)
 
-    site = models.ForeignKey(Site, related_name='virtual_machines', null=True)
     network_configuration = models.OneToOneField(NetworkConfig, related_name="vm")
-    service = models.ForeignKey(Service, null=True, related_name='virtual_machines')
+    service = models.ForeignKey(Service, related_name='virtual_machines')
+
+    @property
+    def site(self):
+        if self.service and self.service.site:
+            return self.service.site
+        else:
+            return None
 
     def is_on(self):
         from apimws.platforms import get_vm_power_state
@@ -408,28 +378,15 @@ class VirtualMachine(models.Model):
 
     @property
     def ipv4(self):
-        if self.primary:
-            return self.site.service_network_configuration.IPv4
-        else:
-            return self.site.service_network_configuration.IPv4private
-
-    @property
-    def sshfp(self):
-        return self.site.service_network_configuration.SSHFP
+        return self.service.network_configuration.IPv4  # TODO this needs to be self.network_configuration.IPv4
 
     @property
     def ipv6(self):
-        if self.primary:
-            return self.site.service_network_configuration.IPv6
-        else:
-            return None
+        return self.service.network_configuration.IPv6  # TODO this needs to be self.network_configuration.name
 
     @property
     def hostname(self):
-        if self.primary:
-            return self.site.service_network_configuration.mws_domain
-        else:
-            return self.site.service_network_configuration.mws_private_domain
+        return self.service.network_configuration.name  # TODO this needs to be self.network_configuration.name
 
     @property
     def ip_register_domains(self):

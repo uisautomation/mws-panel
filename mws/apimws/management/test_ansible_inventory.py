@@ -4,8 +4,7 @@ from django.core.management.base import CommandError
 import json
 from StringIO import StringIO
 from datetime import datetime
-from sitesmanagement.models import (
-    ServiceNetworkConfig, Site, VirtualMachine, UnixGroup, Vhost, DomainName, NetworkConfig)
+from sitesmanagement.models import (Site, VirtualMachine, UnixGroup, Vhost, DomainName, NetworkConfig, Service)
 
 
 from .commands.ansible_inventory import Command
@@ -37,26 +36,20 @@ class SimpleCommandTests(TestCase):
 class TestsWithData(TestCase):
 
     def setUp(self):
-        netconf = ServiceNetworkConfig.objects.create(
-            IPv4='198.51.100.255',
-            IPv6='2001:db8:212:8::8c:255',
-            IPv4private='192.0.2.255',
-            mws_private_domain='mws-08246.mws3.private.example',
-            mws_domain="mws-12940.mws3.example")
-        hostnetconf = NetworkConfig.objects.create(
-            IPv6='2001:db8:212:8::8c:254',
-            name="mws-client1.example")
-        self.site = Site.objects.create(name="testSite",
-                                        institution_id="testinst",
-                                        start_date=datetime.today(),
-                                        service_network_configuration=netconf)
+        NetworkConfig.objects.create(IPv4='198.51.100.255', IPv6='2001:db8:212:8::8c:255', type='ipvxpub',
+                                     name="mws-12940.mws3.example")
+        NetworkConfig.objects.create(IPv4='192.0.2.255', type='ipv4priv',
+                                     name='mws-08246.mws3.private.example')
+        NetworkConfig.objects.create(IPv6='2001:db8:212:8::8c:254', name='mws-client1.example', type='ipv6')
+        self.site = Site.objects.create(name="testSite", institution_id="testinst", start_date=datetime.today())
+        self.service = Service.objects.create(type="production", site=self.site,
+                                              network_configuration=NetworkConfig.get_free_prod_service_config())
         self.vm = VirtualMachine.objects.create(
-            name="test_vm", primary=True, status="ready", token=uuid.uuid4(),
-            site=self.site, network_configuration=hostnetconf)
+            name="test_vm", primary=True, status="ready", token=uuid.uuid4(), service=self.service,
+            network_configuration=NetworkConfig.get_free_host_config())
         self.vhost1 = self.vm.vhosts.create(name="vhost1")
         self.vhost2 = self.vm.vhosts.create(name="vhost2")
-        self.dom1 = self.vhost1.domain_names.create(name="foo.example",
-                                                    status='accepted')
+        self.dom1 = self.vhost1.domain_names.create(name="foo.example", status='accepted')
 
     def test_list(self):
         s = StringIO()

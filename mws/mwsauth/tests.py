@@ -11,7 +11,7 @@ from mwsauth.models import MWSUser
 from mwsauth.utils import get_or_create_group_by_groupid
 from ucamlookup import user_in_groups, get_or_create_user_by_crsid, validate_crsids
 from mwsauth.validators import validate_groupids
-from sitesmanagement.models import Site, Suspension, VirtualMachine, ServiceNetworkConfig, NetworkConfig
+from sitesmanagement.models import Site, Suspension, VirtualMachine, NetworkConfig, Service
 from ucamlookup.models import LookupGroup
 
 
@@ -136,41 +136,28 @@ class AuthTestCases(TestCase):
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': 1}))
         self.assertEqual(response.status_code, 404)  # Site does not exists
 
-        netconf = ServiceNetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
-                                                      IPv4private='172.28.18.255',
-                                                      mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
-                                                      mws_domain="mws-12940.mws3.csx.cam.ac.uk")
-        site_without_auth_users = Site.objects.create(name="test_site1", start_date=datetime.today(),
-                                                      service_network_configuration=netconf)
-        VirtualMachine.objects.create(primary=True, status='ready', token=uuid.uuid4(),
-                                      site=site_without_auth_users, network_configuration=NetworkConfig.
-                                      objects.create(IPv6=netconf.IPv6, name=netconf.mws_domain))
+        NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
+                                     name="mws-66424.mws3.csx.cam.ac.uk")
+        NetworkConfig.objects.create(IPv4='172.28.18.253', type='ipv4priv',
+                                     name='mws-46250.mws3.csx.private.cam.ac.uk')
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff4', name='mws-client1', type='ipv6')
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff3', name='mws-client2', type='ipv6')
+
+        site_without_auth_users = Site.objects.create(name="test_site1", start_date=datetime.today())
+        service_a = Service.objects.create(type='production', network_configuration=NetworkConfig.
+                                           get_free_prod_service_config(), site=site_without_auth_users)
+        VirtualMachine.objects.create(status='ready', token=uuid.uuid4(), service=service_a,
+                                      network_configuration=NetworkConfig.get_free_host_config())
 
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_without_auth_users.id}))
         self.assertEqual(response.status_code, 403)  # User is not authorised
 
         site_without_auth_users.users.add(amc203_user)
+        information_systems_group = get_or_create_group_by_groupid(101888)
         site_with_auth_users = site_without_auth_users
 
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_with_auth_users.id}))
         self.assertContains(response, 'crsid: "amc203"', status_code=200)  # User is authorised
-
-        netconf2 = ServiceNetworkConfig.objects.create(IPv4='131.111.58.254', IPv6='2001:630:212:8::8c:254',
-                                                       IPv4private='172.28.18.254',
-                                                       mws_private_domain='mws-23169.mws3.csx.private.ca.ac.uk',
-                                                       mws_domain="mws-39595.mws3.csx.cam.ac.uk")
-
-        site_with_auth_groups = Site.objects.create(name="test_site2", start_date=datetime.today(),
-                                                    service_network_configuration=netconf2)
-        information_systems_group = get_or_create_group_by_groupid(101888)
-        site_with_auth_groups.groups.add(information_systems_group)
-        VirtualMachine.objects.create(primary=True, status='ready', token=uuid.uuid4(), site=site_with_auth_groups,
-                                      network_configuration=NetworkConfig.objects.
-                                      create(IPv6=netconf2.IPv6, name=netconf2.mws_domain))
-
-        response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_with_auth_groups.id}))
-        self.assertContains(response, "101888", status_code=200)  # User is in an authorised group
-        self.assertNotContains(response, 'crsid: "amc203"', status_code=200)
 
         suspension = Suspension.objects.create(reason="test_suspension", site=site_with_auth_users,
                                                start_date=datetime.today())
@@ -205,6 +192,29 @@ class AuthTestCases(TestCase):
         self.assertEqual(len(site_with_auth_users.users.all()), 0)
         self.assertEqual(len(site_with_auth_users.groups.all()), 0)
 
+    def test_group_auth_change(self):
+        do_test_login(self, user="amc203")
+        amc203_user = User.objects.get(username="amc203")
+
+        NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
+                                     name="mws-66424.mws3.csx.cam.ac.uk")
+        NetworkConfig.objects.create(IPv4='172.28.18.253', type='ipv4priv',
+                                     name='mws-46250.mws3.csx.private.cam.ac.uk')
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff4', name='mws-client1', type='ipv6')
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff3', name='mws-client2', type='ipv6')
+
+        site_with_auth_groups = Site.objects.create(name="test_site2", start_date=datetime.today())
+        service_a = Service.objects.create(type='production', network_configuration=NetworkConfig.
+                                           get_free_prod_service_config(), site=site_with_auth_groups)
+        VirtualMachine.objects.create(status='ready', token=uuid.uuid4(), service=service_a,
+                                      network_configuration=NetworkConfig.get_free_host_config())
+        information_systems_group = get_or_create_group_by_groupid(101888)
+        site_with_auth_groups.groups.add(information_systems_group)
+
+        response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_with_auth_groups.id}))
+        self.assertContains(response, "101888", status_code=200)  # User is in an authorised group
+        self.assertNotContains(response, 'crsid: "amc203"', status_code=200)
+
         self.assertEqual(len(site_with_auth_groups.users.all()), 0)
         self.assertEqual(len(site_with_auth_groups.groups.all()), 1)
         self.assertEqual(site_with_auth_groups.groups.first(), information_systems_group)
@@ -231,8 +241,6 @@ class AuthTestCases(TestCase):
         self.assertEqual(self.client.get(response.url).status_code, 403)  # User is no longer authorised
         self.assertEqual(len(site_with_auth_groups.users.all()), 0)
         self.assertEqual(len(site_with_auth_groups.groups.all()), 0)
-
-        site_with_auth_users.users.add(amc203_user)
 
     def test_banned_users_middleware(self):
         with self.settings(MIDDLEWARE_CLASSES=settings.MIDDLEWARE_CLASSES+('mwsauth.middleware.CheckBannedUsers',)):

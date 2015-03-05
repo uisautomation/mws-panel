@@ -21,7 +21,7 @@ from apimws.platforms import PlatformsAPINotWorkingException, new_site_primary_v
 from apimws.utils import email_confirmation, ip_register_api_request
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.utils import is_camacuk, get_object_or_None
-from .models import SiteForm, DomainNameFormNew, BillingForm, DomainName, ServiceNetworkConfig, EmailConfirmation, \
+from .models import SiteForm, DomainNameFormNew, BillingForm, DomainName, EmailConfirmation, \
     VirtualMachine, Vhost, VhostForm, Site, UnixGroupForm, UnixGroup, NetworkConfig, Service
 from django.conf import settings as django_settings
 

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
 from reversion import VersionAdmin
-from .models import Site, Billing, DomainName, ServiceNetworkConfig, Suspension, VirtualMachine, EmailConfirmation, \
+from .models import Site, Billing, DomainName, Suspension, VirtualMachine, EmailConfirmation, \
     Vhost, UnixGroup, NetworkConfig, SiteKeys, Service
 from ucamlookup import get_institutions, get_institution_name_by_id
 
@@ -48,11 +48,11 @@ class SuspensionAdmin(ModelAdmin):
 
 
 class NetworkConfigAdmin(ModelAdmin):
-    list_display = ('IPv4', 'IPv6', 'mws_domain', 'site', 'IPv4private', 'mws_private_domain')
+    list_display = ('IPv4', 'IPv6', 'name', 'service')
     # list_filter = ('used', )
 
     def used(self, obj):
-        if obj.site:
+        if obj.service:
             return True
         else:
             return False
@@ -83,11 +83,10 @@ admin.site.register(Site, SiteAdmin)
 admin.site.register(Billing, BillingAdmin)
 admin.site.register(Vhost, VhostAdmin)
 admin.site.register(DomainName, DomainNameAdmin)
-admin.site.register(ServiceNetworkConfig, NetworkConfigAdmin)
 admin.site.register(Suspension, SuspensionAdmin)
 admin.site.register(VirtualMachine, VirtualMachineAdmin)
 admin.site.register(EmailConfirmation, EmailConfirmationAdmin)
 admin.site.register(UnixGroup, VersionAdmin)
-admin.site.register(NetworkConfig, VersionAdmin)
+admin.site.register(NetworkConfig, NetworkConfigAdmin)
 admin.site.register(Service, VersionAdmin)
 admin.site.register(SiteKeys, VersionAdmin)
