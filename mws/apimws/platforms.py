@@ -11,7 +11,7 @@ import crypt
 from django.conf import settings
 import requests
 import platform
-from sitesmanagement.models import VirtualMachine, NetworkConfig
+from sitesmanagement.models import VirtualMachine, NetworkConfig, Service
 
 
 LOGGER = logging.getLogger('mws')
@@ -60,7 +60,7 @@ def on_vm_api_failure(request, response):
     :return: False
     '''
     LOGGER.error("VM API request: %s\nVM API response: %s", request, response)
-    return False  # TODO raise exception?
+    raise PlatformsAPIFailure(request, response)
 
 
 class TaskWithFailure(Task):
@@ -73,21 +73,25 @@ class TaskWithFailure(Task):
 
 
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
-def new_site_primary_vm(vm):
+def new_site_primary_vm(service, host_network_configuration):
     json_object = {}
     if settings.OS_VERSION_VMAPI:
         json_object['os'] = settings.OS_VERSION_VMAPI
 
     try:
-        response = vm_api_request(command='create', ip=vm.ipv4, hostname=vm.hostname, **json_object)
+        response = vm_api_request(command='create', ip=service.network_configuration.IPv4,
+                                  hostname=service.network_configuration.name, **json_object)
+        # TODO this is temporal until we support service network configuration, then we will use
+        # host_network_configuration.ipv6 as a parameter for ip in vm_api_request and host_network_configuration.name
+        # for the parameter hostname in vm_api_request
     except PlatformsAPIFailure as e:
         return on_vm_api_failure(*e.args)
     except Exception as e:
         raise new_site_primary_vm.retry(exc=e)
 
-    vm.name = response['vmid']
-    vm.status = 'installing'
-    vm.save()
+    vm = VirtualMachine.objects.create(status='installing', service=service, token=uuid.uuid4(),
+                                       name=response['vmid'], network_configuration=host_network_configuration)
+
     return install_vm(vm)
 
 
@@ -188,7 +192,8 @@ def reset_vm(vm):
 
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
 def destroy_vm(vm):
-    change_vm_power_state(vm, "off")
+    if vm.is_on():
+        change_vm_power_state(vm, "off")
     try:
         vm_api_request(command='destroy', vmid=vm.name)
     except PlatformsAPIFailure as e:
@@ -200,35 +205,46 @@ def destroy_vm(vm):
 
 
 def clone_vm(site, primary_vm):
-    delete_vm = None
-
     if primary_vm:
-        original_vm = site.primary_vm
-        if site.secondary_vm:
-            delete_vm = site.secondary_vm
+        original_service = site.production_service
+        delete_service = site.test_service
     else:
-        original_vm = site.secondary_vm
-        if site.primary_vm:
-            delete_vm = site.primary_vm
+        original_service = site.test_serivce
+        delete_service = site.production_service
 
-    if delete_vm:
-        delete_vm.site = None
-        delete_vm.save()
+    if not delete_service:
+        raise Exception("A site has no production or test service")  # TODO create custom exception
 
-    destination_vm = VirtualMachine.objects.create(primary=(not primary_vm),
-                                                   status='requested', token=uuid.uuid4(), site=site,
-                                                   network_configuration=NetworkConfig.get_free_config())
-    clone_vm_api_call.delay(original_vm, destination_vm, delete_vm)
+    delete_service.site = None
+    service_netconf = delete_service.network_configuration
+    delete_service.network_configuration = None
+    delete_service.save()
+
+    destination_service = Service.objects.create(site=site, type=delete_service.type,
+                                                 network_configuration=service_netconf)
+
+    clone_vm_api_call.delay(original_service, destination_service, delete_service)
 
 
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
-def clone_vm_api_call(original_vm, destination_vm, delete_vm):
-    if delete_vm:
-        delete_vm.delete()
+def clone_vm_api_call(original_service, destination_service, delete_service):
+    # TODO restore this service in case the clonning does not work? then do not delete the VMs
+    # Now it is not possible but when IPv6 PXE works it will be
+    for vm in delete_service.virtual_machines.all():
+        vm.delete()
+
+    destination_vm = VirtualMachine.objects.create(status='requested', token=uuid.uuid4(), service=destination_service,
+                                                   network_configuration=NetworkConfig.get_free_host_config())
+
+    original_vm = original_service.virtual_machines.first()
+
     try:
         response = vm_api_request(command='clone', vmid=original_vm.name,
-                                  ip=destination_vm.ipv4,
-                                  hostname=destination_vm.hostname)
+                                  ip=destination_service.network_configuration.IPv4,
+                                  hostname=destination_service.network_configuration.name)
+        # TODO this is temporal until we support service network configuration, then we will use
+        # host_network_configuration.ipv6 as a parameter for ip in vm_api_request and host_network_configuration.name
+        # for the parameter hostname in vm_api_request
     except PlatformsAPIFailure as e:
         return on_vm_api_failure(*e.args)
     except Exception as e:

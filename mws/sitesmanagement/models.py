@@ -58,12 +58,16 @@ class NetworkConfig(models.Model):
     type = models.CharField(max_length=50, choices=NETWORK_CONFIGURATION_TYPES)
 
     @classmethod
-    def num_pre_allocated(cls):
-        return cls.objects.filter(service=None).count()
+    def get_free_prod_service_config(cls):
+        return cls.objects.filter(service=None, type='ipvxpub').first()
 
     @classmethod
-    def get_free_config(cls):
-        return cls.objects.filter(service=None).first()
+    def get_free_test_service_config(cls):
+        return cls.objects.filter(service=None, type='ipv4priv').first()
+
+    @classmethod
+    def get_free_host_config(cls):
+        return cls.objects.filter(vm=None, type='ipv6').first()
 
     def __str__(self):
         return self.name
@@ -98,7 +102,8 @@ class Site(models.Model):
     disabled = models.BooleanField(default=False)
 
     # The network configuration for the service
-    service_network_configuration = models.OneToOneField(ServiceNetworkConfig, related_name='site')
+    service_network_configuration = models.OneToOneField(ServiceNetworkConfig, related_name='site', null=True,
+                                                         blank=True)
 
     def __str__(self):
         return self.name
@@ -125,14 +130,38 @@ class Site(models.Model):
             return self.virtual_machines.get(primary=primary)
 
     @property
+    def production_vms(self):
+        return VirtualMachine.objects.filter(service__type='production', service__site=self)
+
+    @property
+    def test_vms(self):
+        return VirtualMachine.objects.filter(service__type='test', service__site=self)
+
+    @property
+    def production_service(self):
+        return Service.objects.filter(type='production', site=self).first()
+
+    @property
+    def test_service(self):
+        return Service.objects.filter(type='test', site=self).first()
+
+    @property
     @deprecated
     def primary_vm(self):
-        return self.vm(primary=True)
+        old_api = self.vm(True)
+        if old_api is None:
+            return VirtualMachine.objects.filter(service__type='production', service__site=self).first()
+        else:
+            return old_api
 
     @property
     @deprecated
     def secondary_vm(self):
-        return self.vm(primary=False)
+        old_api = self.vm(False)
+        if old_api is None:
+            return VirtualMachine.objects.filter(service__type='test', service__site=self).first()
+        else:
+            return old_api
 
     @property
     def domain_names(self):
@@ -195,25 +224,25 @@ class Site(models.Model):
 
     @property
     def is_busy(self):
-        if self.primary_vm:
-            if self.primary_vm.is_busy:
+        for vm in self.production_vms:
+            if vm.is_busy:
                 return True
-        if self.secondary_vm:
-            if self.secondary_vm.is_busy:
+        for vm in self.test_vms:
+            if vm.is_busy:
                 return True
-        if not self.primary_vm and not self.secondary_vm:
+        if not self.production_vms and not self.test_vms:
             return True
         return False
 
     @property
     def is_ready(self):
-        if self.primary_vm:
-            if self.primary_vm.status != 'ready':
+        for vm in self.production_vms:
+            if vm.status != 'ready':
                 return False
-        if self.secondary_vm:
-            if self.secondary_vm.status != 'ready':
+        for vm in self.test_vms:
+            if vm.status != 'ready':
                 return False
-        if not self.primary_vm and not self.secondary_vm:
+        if not self.production_vms and not self.test_vms:
             return False
         return True
 
@@ -311,8 +340,8 @@ class Service(models.Model):
         ('test', 'Test'),
     )
     # The network configuration for the service
-    network_configuration = models.OneToOneField(NetworkConfig)
-    site = models.ForeignKey(Site)
+    network_configuration = models.OneToOneField(NetworkConfig, null=True, blank=True)
+    site = models.ForeignKey(Site, null=True, blank=True)
     type = models.CharField(max_length=50, choices=SERVICE_TYPES)
 
     class Meta:
@@ -340,7 +369,7 @@ class VirtualMachine(models.Model):
 
     site = models.ForeignKey(Site, related_name='virtual_machines', null=True)
     network_configuration = models.OneToOneField(NetworkConfig, related_name="vm")
-    service = models.ForeignKey(Service, null=True)
+    service = models.ForeignKey(Service, null=True, related_name='virtual_machines')
 
     def is_on(self):
         from apimws.platforms import get_vm_power_state
@@ -365,11 +394,13 @@ class VirtualMachine(models.Model):
 
     def power_on(self):
         from apimws.platforms import change_vm_power_state
-        change_vm_power_state(self, 'on')
+        if not self.is_on():
+            change_vm_power_state(self, 'on')
 
     def power_off(self):
         from apimws.platforms import change_vm_power_state
-        change_vm_power_state(self, 'off')
+        if self.is_on():
+            change_vm_power_state(self, 'off')
 
     def do_reset(self):
         from apimws.platforms import reset_vm

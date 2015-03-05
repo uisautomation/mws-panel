@@ -13,14 +13,35 @@ import reversion
 from apimws.models import AnsibleConfiguration
 from apimws.views import post_installation
 from mwsauth.tests import do_test_login
-from sitesmanagement.models import ServiceNetworkConfig, Site, VirtualMachine, UnixGroup, Vhost, DomainName, \
-    NetworkConfig
+from sitesmanagement.models import Site, VirtualMachine, UnixGroup, Vhost, DomainName, \
+    NetworkConfig, Service
 import sitesmanagement.views as views
 from sitesmanagement.utils import is_camacuk, get_object_or_None
 
 
 @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
 class SiteManagementTests(TestCase):
+
+    def create_site(self):
+        NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
+                                     name="mws-66424.mws3.csx.cam.ac.uk")
+
+        NetworkConfig.objects.create(IPv4='172.28.18.253', type='ipv4priv',
+                                     name='mws-46250.mws3.csx.private.cam.ac.uk')
+
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff4', name='mws-client1', type='ipv6')
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff3', name='mws-client2', type='ipv6')
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff2', name='mws-client3', type='ipv6')
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff1', name='mws-client4', type='ipv6')
+
+        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
+        site.users.add(User.objects.get(username='test0001'))
+        service = Service.objects.create(site=site, type='production',
+                                         network_configuration=NetworkConfig.get_free_prod_service_config())
+        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(),
+                                           service=service, network_configuration=NetworkConfig.get_free_host_config())
+
+        return site
 
     def test_is_camacuk_helper(self):
         self.assertTrue(is_camacuk("www.cam.ac.uk"))
@@ -44,21 +65,19 @@ class SiteManagementTests(TestCase):
                           "10px;\">At this moment we cannot process any new request for the Managed Web Service, please"
                           " try again later.</p>", response.content)
 
-        netconf = ServiceNetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
-                                                      IPv4private='172.28.18.255',
-                                                      mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
-                                                      mws_domain="mws-12940.mws3.csx.cam.ac.uk")
-        self.assertInHTML("<p class=\"campl-notifications-icon campl-warning-icon\" style=\"float:none; margin-bottom: "
-                          "10px;\">At this moment we cannot process any new request for the Managed Web Service, please"
-                          " try again later.</p>", response.content)
-        NetworkConfig.objects.create(IPv6='2001:db8:212:8::8d:255')
+        NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
+                                     name="mws-66424.mws3.csx.cam.ac.uk")
+
+        NetworkConfig.objects.create(IPv4='172.28.18.253', type='ipv4priv',
+                                     name='mws-46250.mws3.csx.private.cam.ac.uk')
+
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff4', name='mws-client1', type='ipv6')
 
         response = self.client.get(reverse(views.index))
         self.assertInHTML("<p><a href=\"%s\" class=\"campl-primary-cta\">Register new server</a></p>" %
                           reverse(views.new), response.content)
 
-        site = Site.objects.create(name="testSite", institution_id="testinst", start_date=datetime.today(),
-                                   service_network_configuration=netconf)
+        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
 
         response = self.client.get(reverse(views.index))
         self.assertNotContains(response, "testSite")
@@ -79,13 +98,16 @@ class SiteManagementTests(TestCase):
         response = self.client.get(reverse(views.show, kwargs={'site_id': 1}))
         self.assertEqual(response.status_code, 404)  # The Site does not exist
 
-        netconf = ServiceNetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
-                                                      IPv4private='172.28.18.255',
-                                                      mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
-                                                      mws_domain="mws-12940.mws3.csx.cam.ac.uk")
+        NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
+                                     name="mws-66424.mws3.csx.cam.ac.uk")
 
-        site = Site.objects.create(name="testSite", institution_id="testinst", start_date=datetime.today(),
-                                   service_network_configuration=netconf)
+        NetworkConfig.objects.create(IPv4='172.28.18.253', type='ipv4priv',
+                                     name='mws-46250.mws3.csx.private.cam.ac.uk')
+
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff4', name='mws-client1', type='ipv6')
+
+        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
+
         response = self.client.get(reverse(views.show, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)  # The User is not in the list of auth users
 
@@ -106,15 +128,16 @@ class SiteManagementTests(TestCase):
         self.assertEqual(response.status_code, 302)  # There aren't prealocated network configurations
         self.assertTrue(response.url.endswith(reverse(views.index)))
 
-        ServiceNetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
-                                            IPv4private='172.28.18.255',
-                                            mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
-                                            mws_domain="mws-12940.mws3.csx.cam.ac.uk")
+        NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
+                                     name="mws-66424.mws3.csx.cam.ac.uk")
 
-        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:254', name='mws-client1')
-        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:253', name='mws-client2')
-        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:252', name='mws-client3')
-        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:251', name='mws-client4')
+        NetworkConfig.objects.create(IPv4='172.28.18.253', type='ipv4priv',
+                                     name='mws-46250.mws3.csx.private.cam.ac.uk')
+
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff4', name='mws-client1', type='ipv6')
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff3', name='mws-client2', type='ipv6')
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff2', name='mws-client3', type='ipv6')
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff1', name='mws-client4', type='ipv6')
 
         response = self.client.get(reverse(views.new))
         self.assertContains(response, "Request new site")
@@ -147,9 +170,11 @@ class SiteManagementTests(TestCase):
         self.assertContains(response, "Your email \'%s\' is still unconfirmed, please check your email inbox and "
                                       "click on the link of the email we sent you." % test_site.email)
 
+        self.assertEqual(len(test_site.production_vms), 1)
+
         # Force post installation ACK
-        self.client.post(reverse(post_installation), {'vm': test_site.primary_vm.id,
-                                                      'token': test_site.primary_vm.token})
+        self.client.post(reverse(post_installation), {'vm': test_site.production_vms[0].id,
+                                                      'token': test_site.production_vms[0].token})
 
         # Disable site
         self.assertFalse(test_site.disabled)
@@ -161,11 +186,12 @@ class SiteManagementTests(TestCase):
         # TODO test that views are no longer restricted
         self.assertFalse(Site.objects.get(pk=test_site.id).disabled)
 
+        self.assertEqual(len(test_site.test_vms), 0)
+
         # Clone first VM into the secondary VM
         self.client.post(reverse(views.clone_vm_view, kwargs={'site_id': test_site.id}), {'primary_vm': 'true'})
-        secondary_vm = test_site.secondary_vm
-        secondary_vm.status = 'ready'
-        secondary_vm.save()
+
+        self.assertEqual(len(test_site.test_vms), 1)
 
         self.client.delete(reverse(views.delete_vm, kwargs={'vm_id': test_site.secondary_vm.id}))
 
@@ -188,15 +214,23 @@ class SiteManagementTests(TestCase):
         response = self.client.get(reverse(views.edit, kwargs={'site_id': 1}))
         self.assertEqual(response.status_code, 404)  # The Site does not exist
 
-        netconf = ServiceNetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
-                                                      IPv4private='172.28.18.255',
-                                                      mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
-                                                      mws_domain="mws-12940.mws3.csx.cam.ac.uk")
-        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today(),
-                                   service_network_configuration=netconf)
-        VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(), site=site,
-                                      network_configuration=NetworkConfig.objects.
-                                      create(IPv6=netconf.IPv6, name=netconf.mws_domain))
+        NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
+                                     name="mws-66424.mws3.csx.cam.ac.uk")
+
+        NetworkConfig.objects.create(IPv4='172.28.18.253', type='ipv4priv',
+                                     name='mws-46250.mws3.csx.private.cam.ac.uk')
+
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff4', name='mws-client1', type='ipv6')
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff3', name='mws-client2', type='ipv6')
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff2', name='mws-client3', type='ipv6')
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff1', name='mws-client4', type='ipv6')
+
+        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
+        service = Service.objects.create(site=site, type='production',
+                                         network_configuration=NetworkConfig.get_free_prod_service_config())
+        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(),
+                                           service=service, network_configuration=NetworkConfig.get_free_host_config())
+
         response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)  # The User is not in the list of auth users
 
@@ -243,12 +277,23 @@ class SiteManagementTests(TestCase):
         response = self.client.get(reverse(views.billing_management, kwargs={'site_id': 1}))
         self.assertEqual(response.status_code, 404)  # The Site does not exist
 
-        netconf = ServiceNetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
-                                                      IPv4private='172.28.18.255',
-                                                      mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
-                                                      mws_domain="mws-12940.mws3.csx.cam.ac.uk")
-        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today(),
-                                   service_network_configuration=netconf)
+        NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
+                                     name="mws-66424.mws3.csx.cam.ac.uk")
+
+        NetworkConfig.objects.create(IPv4='172.28.18.253', type='ipv4priv',
+                                     name='mws-46250.mws3.csx.private.cam.ac.uk')
+
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff4', name='mws-client1', type='ipv6')
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff3', name='mws-client2', type='ipv6')
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff2', name='mws-client3', type='ipv6')
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff1', name='mws-client4', type='ipv6')
+
+        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
+        service = Service.objects.create(site=site, type='production',
+                                         network_configuration=NetworkConfig.get_free_prod_service_config())
+        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(),
+                                           service=service, network_configuration=NetworkConfig.get_free_host_config())
+
         response = self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)  # The User is not in the list of auth users
 
@@ -303,17 +348,35 @@ class SiteManagementTests(TestCase):
         self.assertNotContains(response, "No Billing, please add one.")
         site_changed.billing.purchase_order.delete()
 
-    def test_no_permission_views_tests(self):
+
+@override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
+class SiteManagement2Tests(TestCase):
+    def setUp(self):
         do_test_login(self, user="test0001")
-        netconf = ServiceNetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
-                                                      IPv4private='172.28.18.255',
-                                                      mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
-                                                      mws_domain="mws-12940.mws3.csx.cam.ac.uk")
-        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today(),
-                                   service_network_configuration=netconf)
-        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(), site=site,
-                                           network_configuration=NetworkConfig.objects.
-                                           create(IPv6=netconf.IPv6, name=netconf.mws_domain))
+        NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
+                                     name="mws-66424.mws3.csx.cam.ac.uk")
+        NetworkConfig.objects.create(IPv4='172.28.18.253', type='ipv4priv',
+                                     name='mws-46250.mws3.csx.private.cam.ac.uk')
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff4', name='mws-client1', type='ipv6')
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff3', name='mws-client2', type='ipv6')
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff2', name='mws-client3', type='ipv6')
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff1', name='mws-client4', type='ipv6')
+
+    def create_site(self):
+        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
+        site.users.add(User.objects.get(username='test0001'))
+        service = Service.objects.create(site=site, type='production',
+                                         network_configuration=NetworkConfig.get_free_prod_service_config())
+        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(),
+                                           service=service, network_configuration=NetworkConfig.get_free_host_config())
+        return site
+
+    def test_no_permission_views_tests(self):
+        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
+        service = Service.objects.create(site=site, type='production',
+                                         network_configuration=NetworkConfig.get_free_prod_service_config())
+        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(),
+                                           service=service, network_configuration=NetworkConfig.get_free_host_config())
         vhost = Vhost.objects.create(name="tests_vhost", vm=vm)
         dn = DomainName.objects.create(name="testtestest.mws3.csx.cam.ac.uk", status="accepted", vhost=vhost)
         unix_group = UnixGroup.objects.create(name="testUnixGroup", vm=vm)
@@ -377,20 +440,14 @@ class SiteManagementTests(TestCase):
         self.assertEqual(response.status_code, 403)
 
     def test_vm_is_busy(self):
-        do_test_login(self, user="test0001")
-        netconf = ServiceNetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
-                                                      IPv4private='172.28.18.255',
-                                                      mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
-                                                      mws_domain="mws-12940.mws3.csx.cam.ac.uk")
-        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today(),
-                                   service_network_configuration=netconf)
+        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
         site.users.add(User.objects.get(username='test0001'))
+        service = Service.objects.create(site=site, type='production',
+                                         network_configuration=NetworkConfig.get_free_prod_service_config())
         vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="requested", token=uuid.uuid4(),
-                                           site=site, network_configuration=NetworkConfig.objects.
-                                           create(IPv6=netconf.IPv6, name=netconf.mws_domain))
+                                           service=service, network_configuration=NetworkConfig.get_free_host_config())
         vm2 = VirtualMachine.objects.create(name="test_vm2", primary=False, status="requested", token=uuid.uuid4(),
-                                            site=site, network_configuration=NetworkConfig.objects.
-                                            create(IPv6='2001:630:212:8::8c:254', name=netconf.mws_private_domain))
+                                           service=service, network_configuration=NetworkConfig.get_free_host_config())
         vhost = Vhost.objects.create(name="tests_vhost", vm=vm)
         dn = DomainName.objects.create(name="testtestest.mws3.csx.cam.ac.uk", status="accepted", vhost=vhost)
         unix_group = UnixGroup.objects.create(name="testUnixGroup", vm=vm)
@@ -477,21 +534,7 @@ class SiteManagementTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
 
-    def create_site(self):
-        netconf = ServiceNetworkConfig.objects.create(IPv4='131.111.58.255', IPv6='2001:630:212:8::8c:255',
-                                                      IPv4private='172.28.18.255',
-                                                      mws_private_domain='mws-08246.mws3.csx.private.ca.ac.uk',
-                                                      mws_domain="mws-12940.mws3.csx.cam.ac.uk")
-        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today(),
-                                   service_network_configuration=netconf)
-        site.users.add(User.objects.get(username='test0001'))
-        VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(), site=site,
-                                      network_configuration=NetworkConfig.objects.
-                                      create(IPv6=netconf.IPv6, name=netconf.mws_domain))
-        return site
-
     def test_unix_groups(self):
-        do_test_login(self, user="test0001")
         site = self.create_site()
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
@@ -532,7 +575,6 @@ class SiteManagementTests(TestCase):
         self.assertInHTML('<td>jw35</td>', response.content, count=0)
 
     def test_vhosts_management(self):
-        do_test_login(self, user="test0001")
         site = self.create_site()
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
@@ -553,7 +595,6 @@ class SiteManagementTests(TestCase):
         self.assertInHTML('<td>testVhost</td>', response.content, count=0)
 
     def test_domains_management(self):
-        do_test_login(self, user="test0001")
         site = self.create_site()
 
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
@@ -623,7 +664,6 @@ class SiteManagementTests(TestCase):
                           response.content, count=1)
 
     def test_system_packages(self):
-        do_test_login(self, user="test0001")
         site = self.create_site()
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
@@ -650,7 +690,6 @@ class SiteManagementTests(TestCase):
         self.assertEqual(AnsibleConfiguration.objects.get(key="system_packages").value, "2")
 
     def test_certificates(self):
-        do_test_login(self, user="test0001")
         site = self.create_site()
 
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
@@ -725,7 +764,6 @@ class SiteManagementTests(TestCase):
         certificatefile.close()
 
     def test_backups(self):
-        do_test_login(self, user="test0001")
         site = self.create_site()
 
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:

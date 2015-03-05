@@ -5,6 +5,7 @@ import subprocess
 import uuid
 from Crypto.Util import asn1
 import OpenSSL.crypto
+from django.core.exceptions import ValidationError
 from django.core.files.temp import NamedTemporaryFile
 from django.utils import dateparse
 from django.contrib.auth.decorators import login_required
@@ -21,7 +22,7 @@ from apimws.utils import email_confirmation, ip_register_api_request
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.utils import is_camacuk, get_object_or_None
 from .models import SiteForm, DomainNameFormNew, BillingForm, DomainName, ServiceNetworkConfig, EmailConfirmation, \
-    VirtualMachine, Vhost, VhostForm, Site, UnixGroupForm, UnixGroup, NetworkConfig
+    VirtualMachine, Vhost, VhostForm, Site, UnixGroupForm, UnixGroup, NetworkConfig, Service
 from django.conf import settings as django_settings
 
 
@@ -29,8 +30,9 @@ logger = logging.getLogger('mws')
 
 
 def can_create_new_site():
-    return (ServiceNetworkConfig.num_pre_allocated() >= 1 and
-            NetworkConfig.num_pre_allocated() >= 1)
+    return (NetworkConfig.objects.filter(service=None, type='ipvxpub').count() >= 1 and
+            NetworkConfig.objects.filter(service=None, type='ipv4priv').count() >= 1 and
+            NetworkConfig.objects.filter(vm=None, type='ipv6').count())
 
 
 @login_required
@@ -78,15 +80,25 @@ def new(request):
 
             site = site_form.save(commit=False)
             site.start_date = datetime.date.today()
-            site.service_network_configuration = ServiceNetworkConfig.get_free_config()  # TODO raise an error if None
+            prod_service_network_configuration = NetworkConfig.get_free_prod_service_config()
+            test_service_network_configuration = NetworkConfig.get_free_test_service_config()
+            host_network_configuration = NetworkConfig.get_free_host_config()
+            if not prod_service_network_configuration or not test_service_network_configuration \
+                    or not host_network_configuration:
+                raise ValidationError('A MWS site cannot be created at this moment')
+
             site.save()
 
             # Save user that requested the site
             site.users.add(request.user)
 
-            vm = VirtualMachine.objects.create(primary=True, status='requested', site=site, token=uuid.uuid4(),
-                                               network_configuration=NetworkConfig.get_free_config())
-            new_site_primary_vm.delay(vm)
+            prod_service = Service.objects.create(site=site, type='production',
+                                                  network_configuration=prod_service_network_configuration)
+
+            test_service = Service.objects.create(site=site, type='test',
+                                                  network_configuration=test_service_network_configuration)
+
+            new_site_primary_vm.delay(prod_service, host_network_configuration)
 
             if site.email:
                 email_confirmation.delay(site)
@@ -345,7 +357,7 @@ def privacy(request):
 @login_required
 def vhosts_management(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.site.id, request.user)
+    site = privileges_check(vm.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
@@ -371,7 +383,7 @@ def vhosts_management(request, vm_id):
 @login_required
 def add_vhost(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.site.id, request.user)
+    site = privileges_check(vm.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
@@ -393,7 +405,7 @@ def add_vhost(request, vm_id):
 @login_required
 def settings(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.site.id, request.user)
+    site = privileges_check(vm.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
@@ -417,7 +429,7 @@ def settings(request, vm_id):
 @login_required
 def check_vm_status(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.site.id, request.user)
+    site = privileges_check(vm.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
@@ -440,7 +452,7 @@ def check_vm_status(request, vm_id):
 @login_required
 def system_packages(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.site.id, request.user)
+    site = privileges_check(vm.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
@@ -488,7 +500,7 @@ def system_packages(request, vm_id):
 @login_required
 def unix_groups(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.site.id, request.user)
+    site = privileges_check(vm.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
@@ -513,7 +525,7 @@ def unix_groups(request, vm_id):
 @login_required
 def add_unix_group(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.site.id, request.user)
+    site = privileges_check(vm.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
@@ -562,7 +574,7 @@ def add_unix_group(request, vm_id):
 @login_required
 def delete_vm(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.site.id, request.user)
+    site = privileges_check(vm.service.site.id, request.user)
 
     if site is None or vm.primary:
         return HttpResponseForbidden()
@@ -580,7 +592,7 @@ def delete_vm(request, vm_id):
 @login_required
 def unix_group(request, ug_id):
     unix_group_i = get_object_or_404(UnixGroup, pk=ug_id)
-    site = privileges_check(unix_group_i.vm.site.id, request.user)
+    site = privileges_check(unix_group_i.vm.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
@@ -628,7 +640,7 @@ def unix_group(request, ug_id):
 @login_required
 def delete_unix_group(request, ug_id):
     unix_group = get_object_or_404(UnixGroup, pk=ug_id)
-    site = privileges_check(unix_group.vm.site.id, request.user)
+    site = privileges_check(unix_group.vm.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
@@ -647,7 +659,7 @@ def delete_unix_group(request, ug_id):
 @login_required
 def power_vm(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.site.id, request.user)
+    site = privileges_check(vm.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
@@ -663,7 +675,7 @@ def power_vm(request, vm_id):
 @login_required
 def reset_vm(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.site.id, request.user)
+    site = privileges_check(vm.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
@@ -680,7 +692,7 @@ def reset_vm(request, vm_id):
 @login_required
 def update_os(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.site.id, request.user)
+    site = privileges_check(vm.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
@@ -699,7 +711,7 @@ def update_os(request, vm_id):
 @login_required
 def delete_vhost(request, vhost_id):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
-    site = privileges_check(vhost.vm.site.id, request.user)
+    site = privileges_check(vhost.vm.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
@@ -718,7 +730,7 @@ def delete_vhost(request, vhost_id):
 @login_required
 def domains_management(request, vhost_id):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
-    site = privileges_check(vhost.vm.site.id, request.user)
+    site = privileges_check(vhost.vm.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
@@ -747,7 +759,7 @@ def domains_management(request, vhost_id):
 @login_required
 def add_domain(request, vhost_id, socket_error=None):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
-    site = privileges_check(vhost.vm.site.id, request.user)
+    site = privileges_check(vhost.vm.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
@@ -795,7 +807,7 @@ def add_domain(request, vhost_id, socket_error=None):
 @login_required
 def certificates(request, vhost_id):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
-    site = privileges_check(vhost.vm.site.id, request.user)
+    site = privileges_check(vhost.vm.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
@@ -875,7 +887,7 @@ def certificates(request, vhost_id):
 @login_required
 def generate_csr(request, vhost_id):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
-    site = privileges_check(vhost.vm.site.id, request.user)
+    site = privileges_check(vhost.vm.service.site.id, request.user)
 
     if request.method == 'POST':
         if vhost.main_domain is None:
@@ -931,7 +943,7 @@ def generate_csr(request, vhost_id):
 def set_dn_as_main(request, domain_id):
     domain = get_object_or_404(DomainName, pk=domain_id)
     vhost = domain.vhost
-    site = privileges_check(vhost.vm.site.id, request.user)
+    site = privileges_check(vhost.vm.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
@@ -951,7 +963,7 @@ def set_dn_as_main(request, domain_id):
 def delete_dn(request, domain_id):
     domain = get_object_or_404(DomainName, pk=domain_id)
     vhost = domain.vhost
-    site = privileges_check(vhost.vm.site.id, request.user)
+    site = privileges_check(vhost.vm.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
@@ -974,7 +986,7 @@ def delete_dn(request, domain_id):
 @login_required
 def change_db_root_password(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.site.id, request.user)
+    site = privileges_check(vm.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
@@ -1004,7 +1016,7 @@ def change_db_root_password(request, vm_id):
 @login_required
 def visit_vhost(request, vhost_id):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
-    site = privileges_check(vhost.vm.site.id, request.user)
+    site = privileges_check(vhost.vm.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
@@ -1018,7 +1030,7 @@ def visit_vhost(request, vhost_id):
 @login_required
 def backups(request, vm_id):
     vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.site.id, request.user)
+    site = privileges_check(vm.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
