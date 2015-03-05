@@ -38,8 +38,8 @@ class SiteManagementTests(TestCase):
         site.users.add(User.objects.get(username='test0001'))
         service = Service.objects.create(site=site, type='production',
                                          network_configuration=NetworkConfig.get_free_prod_service_config())
-        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(),
-                                           service=service, network_configuration=NetworkConfig.get_free_host_config())
+        VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(),
+                                      service=service, network_configuration=NetworkConfig.get_free_host_config())
 
         return site
 
@@ -228,8 +228,8 @@ class SiteManagementTests(TestCase):
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
         service = Service.objects.create(site=site, type='production',
                                          network_configuration=NetworkConfig.get_free_prod_service_config())
-        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(),
-                                           service=service, network_configuration=NetworkConfig.get_free_host_config())
+        VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(),
+                                      service=service, network_configuration=NetworkConfig.get_free_host_config())
 
         response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)  # The User is not in the list of auth users
@@ -291,8 +291,8 @@ class SiteManagementTests(TestCase):
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
         service = Service.objects.create(site=site, type='production',
                                          network_configuration=NetworkConfig.get_free_prod_service_config())
-        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(),
-                                           service=service, network_configuration=NetworkConfig.get_free_host_config())
+        VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(),
+                                      service=service, network_configuration=NetworkConfig.get_free_host_config())
 
         response = self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)  # The User is not in the list of auth users
@@ -367,8 +367,8 @@ class SiteManagement2Tests(TestCase):
         site.users.add(User.objects.get(username='test0001'))
         service = Service.objects.create(site=site, type='production',
                                          network_configuration=NetworkConfig.get_free_prod_service_config())
-        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(),
-                                           service=service, network_configuration=NetworkConfig.get_free_host_config())
+        VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(),
+                                      service=service, network_configuration=NetworkConfig.get_free_host_config())
         return site
 
     def test_no_permission_views_tests(self):
@@ -446,8 +446,9 @@ class SiteManagement2Tests(TestCase):
                                          network_configuration=NetworkConfig.get_free_prod_service_config())
         vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="requested", token=uuid.uuid4(),
                                            service=service, network_configuration=NetworkConfig.get_free_host_config())
-        vm2 = VirtualMachine.objects.create(name="test_vm2", primary=False, status="requested", token=uuid.uuid4(),
-                                           service=service, network_configuration=NetworkConfig.get_free_host_config())
+        vm2 = VirtualMachine.objects.create(name="test_vm2", primary=False, status="requested", token=uuid.
+                                            uuid4(), service=service, network_configuration=NetworkConfig.
+                                            get_free_host_config())
         vhost = Vhost.objects.create(name="tests_vhost", vm=vm)
         dn = DomainName.objects.create(name="testtestest.mws3.csx.cam.ac.uk", status="accepted", vhost=vhost)
         unix_group = UnixGroup.objects.create(name="testUnixGroup", vm=vm)

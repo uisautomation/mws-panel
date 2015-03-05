@@ -2,7 +2,6 @@ import bisect
 import datetime
 import logging
 import subprocess
-import uuid
 from Crypto.Util import asn1
 import OpenSSL.crypto
 from django.core.exceptions import ValidationError
