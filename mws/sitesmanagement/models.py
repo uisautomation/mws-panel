@@ -43,7 +43,7 @@ class NetworkConfig(models.Model):
     def get_free_host_config(cls):
         return cls.objects.filter(vm=None, type='ipv6').first()
 
-    def __str__(self):
+    def __unicode__(self):
         return self.name
 
 
@@ -75,7 +75,7 @@ class Site(models.Model):
     # Indicates if the site is disabled by the user
     disabled = models.BooleanField(default=False)
 
-    def __str__(self):
+    def __unicode__(self):
         return self.name
 
     # @property
@@ -440,7 +440,7 @@ class VirtualMachine(models.Model):
         else:
             return ""
 
-    def __str__(self):
+    def __unicode__(self):
         if self.name is None:
             return "<Under request>"
         else:
@@ -458,7 +458,7 @@ class Vhost(models.Model):
     def sorted_domain_names(self):
         return sorted(set(self.domain_names.all()))
 
-    def __str__(self):
+    def __unicode__(self):
         return self.name
 
 
@@ -478,7 +478,7 @@ class DomainName(models.Model):
     def is_external(self):
         return not is_camacuk(self.name)
 
-    def __str__(self):
+    def __unicode__(self):
         return self.name
 
 
@@ -487,7 +487,7 @@ class UnixGroup(models.Model):
     vm = models.ForeignKey(VirtualMachine, related_name='unix_groups')
     users = models.ManyToManyField(User)
 
-    def __str__(self):
+    def __unicode__(self):
         return self.name
 
 
