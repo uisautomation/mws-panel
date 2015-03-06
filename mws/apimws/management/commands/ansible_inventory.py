@@ -54,7 +54,9 @@ class Command(NoArgsCommand):
 
     def hostvars(self, vm):
         v = {}
-        v['ansible_ssh_host'] = vm.hostname
+        v['ansible_ssh_host'] = (vm.network_configuration.name or
+                                 vm.network_configuration.IPv4 or
+                                 vm.network_configuration.IPv6)
         v['mws_name'] = vm.site.name
         v['mws_webmaster_email'] = vm.site.email
 

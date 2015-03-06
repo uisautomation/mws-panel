@@ -69,6 +69,13 @@ class TestsWithData(TestCase):
         Command().handle_noargs(list=True, outfile=s)
         r = json.loads(s.getvalue())
         v = r['_meta']['hostvars'][r['mwsclients'][0]]
+        # Make sure that SSH target is some kind of a name for the host.
+        self.assertNotEqual(v['ansible_ssh_host'], None)
+        self.assertIn(v['ansible_ssh_host'], (
+            self.vm.network_configuration.IPv4,
+            self.vm.network_configuration.IPv6,
+            self.vm.network_configuration.name))
+        
         self.assertEqual(v['mws_name'], self.site.name)
         self.assertEqual(v['mws_service_ipv4'],
                          self.service.network_configuration.IPv4)
