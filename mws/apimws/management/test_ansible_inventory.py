@@ -70,3 +70,7 @@ class TestsWithData(TestCase):
         r = json.loads(s.getvalue())
         v = r['_meta']['hostvars'][r['mwsclients'][0]]
         self.assertEqual(v['mws_name'], self.site.name)
+        self.assertEqual(v['mws_service_ipv4'], '198.51.100.255')
+        self.assertEqual(v['mws_service_ipv6'], '2001:db8:212:8::8c:255')
+        self.assertEqual(v['mws_ipv4'], None)
+        self.assertEqual(v['mws_ipv6'], '2001:db8:212:8::8c:254')
