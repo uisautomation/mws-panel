@@ -157,56 +157,52 @@ class Site(models.Model):
     def cancel(self):
         self.end_date = datetime.today()
         self.save()
-        if self.primary_vm:
+        if self.production_vms:
             self.primary_vm.power_off()
-        if self.secondary_vm:
+        if self.test_vms:
             self.secondary_vm.power_off()
 
     def delete_vms(self):
-        if self.primary_vm:
+        if self.production_vms:
             self.primary_vm.delete()
-        if self.secondary_vm:
+        if self.test_vms:
             self.secondary_vm.delete()
 
     def disable(self):
         self.disabled = True
         self.save()
-        if self.primary_vm:
+        if self.production_vms:
             self.primary_vm.power_off()
-        if self.secondary_vm:
+        if self.test_vms:
             self.secondary_vm.power_off()
         return True
 
     def enable(self):
         self.disabled = False
         self.save()
-        if self.primary_vm:
+        if self.production_vms:
             self.primary_vm.power_on()
-        if self.secondary_vm:
+        if self.test_vms:
             self.secondary_vm.power_on()
         return True
 
     @property
     def is_busy(self):
-        for vm in self.production_vms:
-            if vm.is_busy:
-                return True
-        for vm in self.test_vms:
-            if vm.is_busy:
-                return True
-        if not self.production_vms and not self.test_vms:
+        if self.production_service and self.production_service.is_busy:
+            return True
+        if self.test_service and self.test_service.is_busy:
+            return True
+        if not self.production_service and not self.test_service:
             return True
         return False
 
     @property
     def is_ready(self):
-        for vm in self.production_vms:
-            if vm.status != 'ready':
-                return False
-        for vm in self.test_vms:
-            if vm.status != 'ready':
-                return False
-        if not self.production_vms and not self.test_vms:
+        if self.production_service and not self.production_service.is_ready:
+            return False
+        if self.test_service and not self.test_service.is_ready:
+            return False
+        if not self.production_service and not self.test_service:
             return False
         return True
 
@@ -303,19 +299,6 @@ class Service(models.Model):
         ('production', 'Production'),
         ('test', 'Test'),
     )
-    # The network configuration for the service
-    network_configuration = models.OneToOneField(NetworkConfig, null=True, blank=True)
-    site = models.ForeignKey(Site, null=True, blank=True)
-    type = models.CharField(max_length=50, choices=SERVICE_TYPES)
-
-    class Meta:
-        unique_together = (("site", "type"),)
-
-
-class VirtualMachine(models.Model):
-    """ A virtual machine is associated to a site and has a network configuration. Its attributes include
-        a name and a boolean to indicate if it's the primary or secondary VM of a Site.
-    """
     STATUS_CHOICES = (
         ('requested', 'Requested'),
         ('accepted', 'Accepted'),
@@ -325,68 +308,63 @@ class VirtualMachine(models.Model):
         ('ansible_queued', 'Ansible queued'),
         ('ready', 'Ready'),
     )
-
-    name = models.CharField(max_length=250, blank=True, null=True)
-    primary = models.BooleanField(default=True)
+    # The network configuration for the service
+    network_configuration = models.OneToOneField(NetworkConfig, null=True, blank=True)
+    site = models.ForeignKey(Site, null=True, blank=True)
+    type = models.CharField(max_length=50, choices=SERVICE_TYPES)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES)
-    token = models.CharField(max_length=50)
-
-    network_configuration = models.OneToOneField(NetworkConfig, related_name="vm")
-    service = models.ForeignKey(Service, related_name='virtual_machines')
 
     @property
-    def site(self):
-        if self.service and self.service.site:
-            return self.service.site
+    def operating_system(self):
+        from apimws.models import AnsibleConfiguration
+        ansible_configuraton = get_object_or_None(AnsibleConfiguration, service=self, key="os")
+        if ansible_configuraton:
+            return json.loads(ansible_configuraton.value)
         else:
             return None
 
-    def is_on(self):
-        from apimws.platforms import get_vm_power_state
-        if get_vm_power_state(self) == "On":
-            return True
+    def due_update(self):
+        operating_system_dict = self.operating_system
+        if operating_system_dict:
+            if settings.OS_VERSION[operating_system_dict.keys()[0]] > operating_system_dict.values()[0]:
+                return True
+            else:
+                return False
         else:
-            return False
+            return False  # TODO also raise an exception?
 
     @property
     def is_busy(self):
-        if self.status != 'ready' and self.status != 'ansible' and self.status != 'ansible_queued':
+        if self.virtual_machines.count() > 0 \
+                and self.status != 'ready' \
+                and self.status != 'ansible' \
+                and self.status != 'ansible_queued':
             return True
         else:
             return False
 
     @property
     def is_ready(self):
-        if self.status == 'ready':
+        if self.status is None or self.status == '' or self.status == 'ready':
             return True
         else:
             return False
 
-    def power_on(self):
-        from apimws.platforms import change_vm_power_state
-        if not self.is_on():
-            change_vm_power_state(self, 'on')
-
-    def power_off(self):
-        from apimws.platforms import change_vm_power_state
-        if self.is_on():
-            change_vm_power_state(self, 'off')
-
-    def do_reset(self):
-        from apimws.platforms import reset_vm
-        return reset_vm.delay(self)
+    @property
+    def primary(self):
+        return self.type == 'production'
 
     @property
     def ipv4(self):
-        return self.service.network_configuration.IPv4  # TODO this needs to be self.network_configuration.IPv4
+        return self.network_configuration.IPv4
 
     @property
     def ipv6(self):
-        return self.service.network_configuration.IPv6  # TODO this needs to be self.network_configuration.name
+        return self.network_configuration.IPv6
 
     @property
     def hostname(self):
-        return self.service.network_configuration.name  # TODO this needs to be self.network_configuration.name
+        return self.network_configuration.name
 
     @property
     def ip_register_domains(self):
@@ -406,25 +384,6 @@ class VirtualMachine(models.Model):
         return domains
 
     @property
-    def operating_system(self):
-        from apimws.models import AnsibleConfiguration
-        ansible_configuraton = get_object_or_None(AnsibleConfiguration, vm=self, key="os")
-        if ansible_configuraton:
-            return json.loads(ansible_configuraton.value)
-        else:
-            return None
-
-    def due_update(self):
-        operating_system_dict = self.operating_system
-        if operating_system_dict:
-            if settings.OS_VERSION[operating_system_dict.keys()[0]] > operating_system_dict.values()[0]:
-                return True
-            else:
-                return False
-        else:
-            return False  # TODO also raise an exception?
-
-    @property
     def os_type(self):
         operating_system_dict = self.operating_system
         if operating_system_dict:
@@ -440,6 +399,94 @@ class VirtualMachine(models.Model):
         else:
             return ""
 
+    def is_on(self):
+        return self.virtual_machines.first().is_on()
+
+    def do_reset(self):
+        return self.virtual_machines.first().do_reset()
+
+    def power_on(self):
+        return self.virtual_machines.first().power_on()
+
+    def power_off(self):
+        return self.virtual_machines.first().power_off()
+
+    class Meta:
+        unique_together = (("site", "type"),)
+
+    def __unicode__(self):
+        if self.network_configuration is None:
+            return "Non active service"
+        else:
+            return self.network_configuration.name
+
+
+class VirtualMachine(models.Model):
+    """ A virtual machine is associated to a site and has a network configuration. Its attributes include
+        a name and a boolean to indicate if it's the primary or secondary VM of a Site.
+    """
+
+    name = models.CharField(max_length=250, blank=True, null=True)
+    token = models.CharField(max_length=50)
+
+    network_configuration = models.OneToOneField(NetworkConfig, related_name="vm")
+    service = models.ForeignKey(Service, related_name='virtual_machines')
+
+    @property
+    def site(self):
+        if self.service and self.service.site:
+            return self.service.site
+        else:
+            return None
+
+    def is_on(self):
+        from apimws.platforms import get_vm_power_state
+        if get_vm_power_state(self) == "On":
+            return True
+        else:
+            return False
+
+    def power_on(self):
+        from apimws.platforms import change_vm_power_state
+        if not self.is_on():
+            change_vm_power_state(self, 'on')
+
+    def power_off(self):
+        from apimws.platforms import change_vm_power_state
+        if self.is_on():
+            change_vm_power_state(self, 'off')
+
+    def do_reset(self):
+        from apimws.platforms import reset_vm
+        return reset_vm.delay(self)
+
+    @property
+    def os_type(self):
+        if self.service:
+            return self.service.os_type
+
+    @property
+    def os_version(self):
+        if self.service:
+            return self.service.os_version
+
+    @property
+    def primary(self):
+        if self.service:
+            return self.service.primary
+
+    @property
+    def ipv4(self):
+        return self.service.network_configuration.IPv4  # TODO this needs to be self.network_configuration.IPv4
+
+    @property
+    def ipv6(self):
+        return self.service.network_configuration.IPv6  # TODO this needs to be self.network_configuration.name
+
+    @property
+    def hostname(self):
+        return self.service.network_configuration.name  # TODO this needs to be self.network_configuration.name
+
     def __unicode__(self):
         if self.name is None:
             return "<Under request>"
@@ -451,7 +498,7 @@ class Vhost(models.Model):
     name = models.CharField(max_length=150, validators=[validate_slug])
     # main domain name for this vhost
     main_domain = models.ForeignKey('DomainName', related_name='+', null=True, blank=True, on_delete=models.SET_NULL)
-    vm = models.ForeignKey(VirtualMachine, related_name='vhosts')
+    service = models.ForeignKey(Service, related_name='vhosts')
     csr = models.TextField(null=True)
     certificate = models.TextField(null=True)
 
@@ -483,8 +530,8 @@ class DomainName(models.Model):
 
 
 class UnixGroup(models.Model):
-    name = models.CharField(max_length=16)  # TODO add validator to comply with Ubuntu guidelines of Unix group names
-    vm = models.ForeignKey(VirtualMachine, related_name='unix_groups')
+    name = models.CharField(max_length=16)  # TODO add validator to comply with Debian guidelines of Unix group names
+    service = models.ForeignKey(Service, related_name='unix_groups')
     users = models.ManyToManyField(User)
 
     def __unicode__(self):
@@ -560,7 +607,8 @@ class UnixGroupForm(forms.ModelForm):
         fields = ('name', )
 
 
-reversion.register(VirtualMachine, follow=["unix_groups", "ansible_configuration", "vhosts"])
-reversion.register(Vhost, follow=["domain_names", "vm"])
+reversion.register(Service, follow=["unix_groups", "ansible_configuration", "vhosts", "virtual_machines"])
+reversion.register(VirtualMachine, follow=["service"])
+reversion.register(Vhost, follow=["domain_names", "service"])
 reversion.register(DomainName, follow=["vhost"])
-reversion.register(UnixGroup, follow=["vm"])
+reversion.register(UnixGroup, follow=["service"])

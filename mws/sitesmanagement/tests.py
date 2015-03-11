@@ -36,9 +36,9 @@ class SiteManagementTests(TestCase):
 
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
         site.users.add(User.objects.get(username='test0001'))
-        service = Service.objects.create(site=site, type='production',
+        service = Service.objects.create(site=site, type='production', status="ready",
                                          network_configuration=NetworkConfig.get_free_prod_service_config())
-        VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(),
+        VirtualMachine.objects.create(name="test_vm", token=uuid.uuid4(),
                                       service=service, network_configuration=NetworkConfig.get_free_host_config())
 
         return site
@@ -193,7 +193,7 @@ class SiteManagementTests(TestCase):
 
         self.assertEqual(len(test_site.test_vms), 1)
 
-        self.client.delete(reverse(views.delete_vm, kwargs={'vm_id': test_site.secondary_vm.id}))
+        self.client.delete(reverse(views.delete_vm, kwargs={'service_id': test_site.secondary_vm.service.id}))
 
         self.client.post(reverse(views.delete, kwargs={'site_id': test_site.id}))
         self.assertIsNone(Site.objects.get(pk=test_site.id).end_date)
@@ -226,9 +226,9 @@ class SiteManagementTests(TestCase):
         NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff1', name='mws-client4', type='ipv6')
 
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
-        service = Service.objects.create(site=site, type='production',
+        service = Service.objects.create(site=site, type='production', status="ready",
                                          network_configuration=NetworkConfig.get_free_prod_service_config())
-        VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(),
+        VirtualMachine.objects.create(name="test_vm", token=uuid.uuid4(),
                                       service=service, network_configuration=NetworkConfig.get_free_host_config())
 
         response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
@@ -289,9 +289,9 @@ class SiteManagementTests(TestCase):
         NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff1', name='mws-client4', type='ipv6')
 
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
-        service = Service.objects.create(site=site, type='production',
+        service = Service.objects.create(site=site, type='production', status="ready",
                                          network_configuration=NetworkConfig.get_free_prod_service_config())
-        VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(),
+        VirtualMachine.objects.create(name="test_vm", token=uuid.uuid4(),
                                       service=service, network_configuration=NetworkConfig.get_free_host_config())
 
         response = self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id}))
@@ -365,28 +365,28 @@ class SiteManagement2Tests(TestCase):
     def create_site(self):
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
         site.users.add(User.objects.get(username='test0001'))
-        service = Service.objects.create(site=site, type='production',
+        service = Service.objects.create(site=site, type='production', status="ready",
                                          network_configuration=NetworkConfig.get_free_prod_service_config())
-        VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(),
+        VirtualMachine.objects.create(name="test_vm", token=uuid.uuid4(),
                                       service=service, network_configuration=NetworkConfig.get_free_host_config())
         return site
 
     def test_no_permission_views_tests(self):
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
-        service = Service.objects.create(site=site, type='production',
+        service = Service.objects.create(site=site, type='production', status="ready",
                                          network_configuration=NetworkConfig.get_free_prod_service_config())
-        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="ready", token=uuid.uuid4(),
+        vm = VirtualMachine.objects.create(name="test_vm", token=uuid.uuid4(),
                                            service=service, network_configuration=NetworkConfig.get_free_host_config())
-        vhost = Vhost.objects.create(name="tests_vhost", vm=vm)
+        vhost = Vhost.objects.create(name="tests_vhost", service=service)
         dn = DomainName.objects.create(name="testtestest.mws3.csx.cam.ac.uk", status="accepted", vhost=vhost)
-        unix_group = UnixGroup.objects.create(name="testUnixGroup", vm=vm)
+        unix_group = UnixGroup.objects.create(name="testUnixGroup", service=service)
 
         # TODO test index empty
         response = self.client.get(reverse(views.show, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)
         response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.settings, kwargs={'vm_id': vm.id}))
+        response = self.client.get(reverse(views.settings, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 403)
         response = self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)
@@ -396,31 +396,31 @@ class SiteManagement2Tests(TestCase):
         self.assertEqual(response.status_code, 403)
         response = self.client.get(reverse(views.enable, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.vhosts_management, kwargs={'vm_id': vm.id}))
+        response = self.client.get(reverse(views.vhosts_management, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.add_vhost, kwargs={'vm_id': vm.id}))
+        response = self.client.get(reverse(views.add_vhost, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.system_packages, kwargs={'vm_id': vm.id}))
+        response = self.client.get(reverse(views.system_packages, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 403)
         response = self.client.get(reverse(views.clone_vm_view, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)
         response = self.client.get(reverse('mwsauth.views.auth_change', kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.delete_vm, kwargs={'vm_id': vm.id}))
+        response = self.client.get(reverse(views.delete_vm, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.power_vm, kwargs={'vm_id': vm.id}))
+        response = self.client.get(reverse(views.power_vm, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.reset_vm, kwargs={'vm_id': vm.id}))
+        response = self.client.get(reverse(views.reset_vm, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.unix_groups, kwargs={'vm_id': vm.id}))
+        response = self.client.get(reverse(views.unix_groups, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.unix_groups, kwargs={'vm_id': vm.id}))
+        response = self.client.get(reverse(views.unix_groups, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.add_unix_group, kwargs={'vm_id': vm.id}))
+        response = self.client.get(reverse(views.add_unix_group, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.check_vm_status, kwargs={'vm_id': vm.id}))
+        response = self.client.get(reverse(views.check_vm_status, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.vhosts_management, kwargs={'vm_id': vm.id}))
+        response = self.client.get(reverse(views.vhosts_management, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 403)
         response = self.client.get(reverse(views.domains_management, kwargs={'vhost_id': vhost.id}))
         self.assertEqual(response.status_code, 403)
@@ -442,22 +442,24 @@ class SiteManagement2Tests(TestCase):
     def test_vm_is_busy(self):
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
         site.users.add(User.objects.get(username='test0001'))
-        service = Service.objects.create(site=site, type='production',
+        service = Service.objects.create(site=site, type='production', status="requested",
                                          network_configuration=NetworkConfig.get_free_prod_service_config())
-        vm = VirtualMachine.objects.create(name="test_vm", primary=True, status="requested", token=uuid.uuid4(),
+        vm = VirtualMachine.objects.create(name="test_vm", token=uuid.uuid4(),
                                            service=service, network_configuration=NetworkConfig.get_free_host_config())
-        vm2 = VirtualMachine.objects.create(name="test_vm2", primary=False, status="requested", token=uuid.
-                                            uuid4(), service=service, network_configuration=NetworkConfig.
+        service2 = Service.objects.create(site=site, type='test', status="requested",
+                                         network_configuration=NetworkConfig.get_free_prod_service_config())
+        vm2 = VirtualMachine.objects.create(name="test_vm2", token=uuid.
+                                            uuid4(), service=service2, network_configuration=NetworkConfig.
                                             get_free_host_config())
-        vhost = Vhost.objects.create(name="tests_vhost", vm=vm)
+        vhost = Vhost.objects.create(name="tests_vhost", service=service)
         dn = DomainName.objects.create(name="testtestest.mws3.csx.cam.ac.uk", status="accepted", vhost=vhost)
-        unix_group = UnixGroup.objects.create(name="testUnixGroup", vm=vm)
+        unix_group = UnixGroup.objects.create(name="testUnixGroup", service=service)
 
         # TODO test index not empty
         response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
-        response = self.client.get(reverse(views.settings, kwargs={'vm_id': vm.id}))
+        response = self.client.get(reverse(views.settings, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
         response = self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id}))
@@ -471,13 +473,13 @@ class SiteManagement2Tests(TestCase):
         response = self.client.get(reverse(views.enable, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith('%s' % (reverse(views.index))))
-        response = self.client.get(reverse(views.vhosts_management, kwargs={'vm_id': vm.id}))
+        response = self.client.get(reverse(views.vhosts_management, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
-        response = self.client.get(reverse(views.add_vhost, kwargs={'vm_id': vm.id}))
+        response = self.client.get(reverse(views.add_vhost, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
-        response = self.client.get(reverse(views.system_packages, kwargs={'vm_id': vm.id}))
+        response = self.client.get(reverse(views.system_packages, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
         response = self.client.get(reverse(views.clone_vm_view, kwargs={'site_id': site.id}))
@@ -485,29 +487,29 @@ class SiteManagement2Tests(TestCase):
         self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
         response = self.client.get(reverse('mwsauth.views.auth_change', kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 200)
-        response = self.client.get(reverse(views.delete_vm, kwargs={'vm_id': vm.id}))
+        response = self.client.get(reverse(views.delete_vm, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 403)  # Primary VM cannot be deleted
-        response = self.client.get(reverse(views.delete_vm, kwargs={'vm_id': vm2.id}))
+        response = self.client.get(reverse(views.delete_vm, kwargs={'service_id': service2.id}))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
-        response = self.client.get(reverse(views.power_vm, kwargs={'vm_id': vm.id}))
+        response = self.client.get(reverse(views.power_vm, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
-        response = self.client.get(reverse(views.reset_vm, kwargs={'vm_id': vm.id}))
+        response = self.client.get(reverse(views.reset_vm, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
-        response = self.client.get(reverse(views.unix_groups, kwargs={'vm_id': vm.id}))
+        response = self.client.get(reverse(views.unix_groups, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
-        response = self.client.get(reverse(views.unix_groups, kwargs={'vm_id': vm.id}))
+        response = self.client.get(reverse(views.unix_groups, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
-        response = self.client.get(reverse(views.add_unix_group, kwargs={'vm_id': vm.id}))
+        response = self.client.get(reverse(views.add_unix_group, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
-        response = self.client.get(reverse(views.check_vm_status, kwargs={'vm_id': vm.id}))
+        response = self.client.get(reverse(views.check_vm_status, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 200)  # The error is shown in JSON format
-        response = self.client.get(reverse(views.vhosts_management, kwargs={'vm_id': vm.id}))
+        response = self.client.get(reverse(views.vhosts_management, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
         response = self.client.get(reverse(views.domains_management, kwargs={'vhost_id': vhost.id}))
@@ -539,7 +541,8 @@ class SiteManagement2Tests(TestCase):
         site = self.create_site()
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
-            response = self.client.post(reverse(views.add_unix_group, kwargs={'vm_id': site.primary_vm.id}),
+            response = self.client.post(reverse(views.add_unix_group,
+                                                kwargs={'service_id': site.production_service.id}),
                                         {'unix_users': 'amc203,jw35', 'name': 'testUnixGroup'})
             self.assertIn(response.status_code, [200, 302])
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
@@ -579,14 +582,14 @@ class SiteManagement2Tests(TestCase):
         site = self.create_site()
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
-            response = self.client.post(reverse(views.add_vhost, kwargs={'vm_id': site.primary_vm.id}),
+            response = self.client.post(reverse(views.add_vhost, kwargs={'service_id': site.production_service.id}),
                                         {'name': 'testVhost'})
             self.assertIn(response.status_code, [200, 302])
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
         response = self.client.get(response.url)  # TODO assert that url is vhost_management
         self.assertInHTML('<td>testVhost</td>', response.content)
         vhost = Vhost.objects.get(name='testVhost')
-        self.assertSequenceEqual([vhost], site.primary_vm.vhosts.all())
+        self.assertSequenceEqual([vhost], site.production_service.vhosts.all())
 
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
@@ -600,7 +603,8 @@ class SiteManagement2Tests(TestCase):
 
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
-            self.client.post(reverse(views.add_vhost, kwargs={'vm_id': site.primary_vm.id}), {'name': 'testVhost'})
+            self.client.post(reverse(views.add_vhost, kwargs={'service_id': site.production_service.id}),
+                             {'name': 'testVhost'})
 
             vhost = Vhost.objects.get(name='testVhost')
 
@@ -668,7 +672,8 @@ class SiteManagement2Tests(TestCase):
         site = self.create_site()
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
-            response = self.client.post(reverse(views.system_packages, kwargs={'vm_id': site.primary_vm.id}),
+            response = self.client.post(reverse(views.system_packages,
+                                                kwargs={'service_id': site.production_service.id}),
                                         {'package_number': 1})
             self.assertEqual(response.status_code, 200)
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
@@ -677,7 +682,8 @@ class SiteManagement2Tests(TestCase):
 
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
-            response = self.client.post(reverse(views.system_packages, kwargs={'vm_id': site.primary_vm.id}),
+            response = self.client.post(reverse(views.system_packages,
+                                                kwargs={'service_id': site.production_service.id}),
                                         {'package_number': 2})
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
         self.assertEqual(AnsibleConfiguration.objects.get(key="system_packages").value, "1,2")
@@ -685,7 +691,7 @@ class SiteManagement2Tests(TestCase):
         self.assertContains(response, "Drupal &lt;installed&gt;")
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
-            self.client.post(reverse(views.system_packages, kwargs={'vm_id': site.primary_vm.id}),
+            self.client.post(reverse(views.system_packages, kwargs={'service_id': site.production_service.id}),
                              {'package_number': 1})
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
         self.assertEqual(AnsibleConfiguration.objects.get(key="system_packages").value, "2")
@@ -695,7 +701,7 @@ class SiteManagement2Tests(TestCase):
 
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
-            response = self.client.post(reverse(views.add_vhost, kwargs={'vm_id': site.primary_vm.id}),
+            response = self.client.post(reverse(views.add_vhost, kwargs={'service_id': site.production_service.id}),
                                         {'name': 'testVhost'})
             self.assertIn(response.status_code, [200, 302])
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
@@ -769,7 +775,7 @@ class SiteManagement2Tests(TestCase):
 
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
-            response = self.client.post(reverse(views.add_vhost, kwargs={'vm_id': site.primary_vm.id}),
+            response = self.client.post(reverse(views.add_vhost, kwargs={'service_id': site.production_service.id}),
                                         {'name': 'testVhost'})
             self.assertIn(response.status_code, [200, 302])
             vhost = Vhost.objects.get(name='testVhost')
@@ -786,7 +792,7 @@ class SiteManagement2Tests(TestCase):
             domain.status = 'accepted'
             domain.save()
 
-        self.client.post(reverse(views.backups, kwargs={'vm_id': vhost.vm.id}), {'backupdate': restore_date})
+        self.client.post(reverse(views.backups, kwargs={'service_id': vhost.service.id}), {'backupdate': restore_date})
         domain = DomainName.objects.get(name='testDomain.cam.ac.uk')
         self.assertEqual(domain.status, 'accepted')
         self.assertEqual(domain.name, 'testDomain.cam.ac.uk')

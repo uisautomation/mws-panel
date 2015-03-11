@@ -139,8 +139,9 @@ def post_installation(request):
         vm = VirtualMachine.objects.get(id=vm_id)
 
         if vm.token == token:
-            vm.status = 'ready'
-            vm.save()
+            service = vm.service
+            service.status = 'ready'
+            service.save()
             return HttpResponse()
 
     return HttpResponseForbidden()

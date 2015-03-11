@@ -4,7 +4,7 @@
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
             <h1>Restore backups</h1>
-            <form action="{% url 'sitesmanagement.views.backups' vm_id=vm.id %}" method="post">
+            <form action="{% url 'sitesmanagement.views.backups' service_id=service.id %}" method="post">
                 {% if error_message %}<p style="color: red">{{ error_message }}</p>{% endif %}
                 <fieldset>
                     {% csrf_token %}

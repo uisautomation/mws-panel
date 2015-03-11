@@ -3,8 +3,8 @@
 {% block page_content %}
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
-            <h1>Add a Unix Group to your "{{ vm.site.name }}" {% if vm.primary %}production{% else %}test{% endif %} server</h1>
-            <form action={% url 'sitesmanagement.views.add_unix_group' vm_id=vm.id %} method="post">
+            <h1>Add a Unix Group to your "{{ service.site.name }}" {% if service.primary %}production{% else %}test{% endif %} server</h1>
+            <form action={% url 'sitesmanagement.views.add_unix_group' service_id=service.id %} method="post">
                 <fieldset>
                     {% csrf_token %}
                     <div id="unix_group_form">

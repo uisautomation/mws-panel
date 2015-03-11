@@ -5,9 +5,9 @@
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
 
-            <h1>Unix Group of your "{{ vm.site.name }}" {% if vm.primary %}production{% else %}test{% endif %} server</h1>
+            <h1>Unix Group of your "{{ service.site.name }}" {% if service.primary %}production{% else %}test{% endif %} server</h1>
 
-            {% if vm.unix_groups.all %}
+            {% if service.unix_groups.all %}
                 <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
                     <thead>
                         <tr>
@@ -17,7 +17,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                    {% for unix_group in vm.unix_groups.all %}
+                    {% for unix_group in service.unix_groups.all %}
                         <tr>
                             <td>
                                 {{ unix_group.name }}
@@ -41,7 +41,7 @@
                 <p style="margin-top: 20px; margin-bottom: 20px">The server doesn't have Unix Groups configured</p>
             {% endif %}
 
-        <p><a href="{% url 'sitesmanagement.views.add_unix_group' vm_id=vm.id %}" class="campl-primary-cta">Add a new Unix Group</a></p>
+        <p><a href="{% url 'sitesmanagement.views.add_unix_group' service_id=service.id %}" class="campl-primary-cta">Add a new Unix Group</a></p>
 
         </div>
     </div>

@@ -4,9 +4,9 @@
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
 
-            <h1>Web sites for the MWS "{{ vm.site.name }}"</h1>
+            <h1>Web sites for the MWS "{{ service.site.name }}"</h1>
 
-            {% if vm.vhosts.all %}
+            {% if service.vhosts.all %}
                 <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
                     <thead>
                         <tr>
@@ -16,7 +16,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                    {% for vhost in vm.vhosts.all %}
+                    {% for vhost in service.vhosts.all %}
                         <tr>
                             <td>
                                 {{ vhost.name }}
@@ -55,7 +55,7 @@
             <p><a id="add_vhost_button" href="#" class="campl-primary-cta">Add a new Web site</a></p>
 
             <div id="add_vhost_div" style="display: none; margin-top: 20px">
-                <form action={% url 'sitesmanagement.views.add_vhost' vm_id=vm.id %} method="post">{% csrf_token %}
+                <form action={% url 'sitesmanagement.views.add_vhost' service_id=service.id %} method="post">{% csrf_token %}
                     <fieldset>
                         <div id="vhost_form">
                             {{ vhost_form.as_p }}

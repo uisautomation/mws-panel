@@ -42,13 +42,13 @@ class TestsWithData(TestCase):
                                      name='mws-08246.mws3.private.example')
         NetworkConfig.objects.create(IPv6='2001:db8:212:8::8c:254', name='mws-client1.example', type='ipv6')
         self.site = Site.objects.create(name="testSite", institution_id="testinst", start_date=datetime.today())
-        self.service = Service.objects.create(type="production", site=self.site,
+        self.service = Service.objects.create(type="production", site=self.site, status="ready",
                                               network_configuration=NetworkConfig.get_free_prod_service_config())
         self.vm = VirtualMachine.objects.create(
-            name="test_vm", primary=True, status="ready", token=uuid.uuid4(), service=self.service,
+            name="test_vm", token=uuid.uuid4(), service=self.service,
             network_configuration=NetworkConfig.get_free_host_config())
-        self.vhost1 = self.vm.vhosts.create(name="vhost1")
-        self.vhost2 = self.vm.vhosts.create(name="vhost2")
+        self.vhost1 = self.service.vhosts.create(name="vhost1")
+        self.vhost2 = self.service.vhosts.create(name="vhost2")
         self.dom1 = self.vhost1.domain_names.create(name="foo.example", status='accepted')
 
     def test_list(self):

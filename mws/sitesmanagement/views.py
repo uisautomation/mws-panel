@@ -20,8 +20,8 @@ from apimws.platforms import PlatformsAPINotWorkingException, new_site_primary_v
 from apimws.utils import email_confirmation, ip_register_api_request
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.utils import is_camacuk, get_object_or_None
-from .models import SiteForm, DomainNameFormNew, BillingForm, DomainName, EmailConfirmation, \
-    VirtualMachine, Vhost, VhostForm, Site, UnixGroupForm, UnixGroup, NetworkConfig, Service
+from .models import SiteForm, DomainNameFormNew, BillingForm, DomainName, EmailConfirmation, Vhost, VhostForm, \
+    Site, UnixGroupForm, UnixGroup, NetworkConfig, Service
 from django.conf import settings as django_settings
 
 
@@ -235,20 +235,21 @@ def show(request, site_id):
     }
 
     warning_messages = []
-    primary_vm = site.primary_vm
+    production_service = site.production_service
 
-    if primary_vm is not None and primary_vm.status == 'ansible':
+    if production_service is not None and production_service.status == 'ansible':
         warning_messages.append("Your server is being configured.")
 
     if site.secondary_vm is not None and site.secondary_vm.status == 'ansible':
         warning_messages.append("Your test server is being configured.")
 
-    if primary_vm is not None:
-        if primary_vm.due_update():
+    if production_service is not None:
+        if production_service.due_update():
             warning_messages.append("Your server is due to an OS update. From %s %.2f to %s %.2f" %
-                                    (primary_vm.os_type, primary_vm.os_version, primary_vm.os_type,
-                                     django_settings.OS_VERSION[primary_vm.os_type]))
-        for vhost in primary_vm.vhosts.all():
+                                    (production_service.os_type, production_service.os_version,
+                                     production_service.os_type,
+                                     django_settings.OS_VERSION[production_service.os_type]))
+        for vhost in production_service.vhosts.all():
             for domain_name in vhost.domain_names.all():
                 if domain_name.status == 'requested':
                     warning_messages.append("Your domain name %s has been requested and is under review." %
@@ -273,7 +274,7 @@ def show(request, site_id):
         except EmailConfirmation.DoesNotExist:
             pass
 
-    if site.primary_vm is None or site.primary_vm.status == 'requested':
+    if production_service is None or production_service.status == 'requested':
         warning_messages.append("Your request in the Managed Web Service is being processed")
 
     return render(request, 'mws/show.html', {
@@ -354,91 +355,91 @@ def privacy(request):
 
 
 @login_required
-def vhosts_management(request, vm_id):
-    vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.service.site.id, request.user)
+def vhosts_management(request, service_id):
+    service = get_object_or_404(Service, pk=service_id)
+    site = privileges_check(service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
 
-    if vm.is_busy:
+    if service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
         0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Server settings' if vm.primary else 'Test server settings', url=reverse(settings,
-                                                                                              kwargs={'vm_id': vm.id})),
-        2: dict(name='Web sites management', url=reverse(vhosts_management, kwargs={'vm_id': vm.id}))
+        1: dict(name='Server settings' if service.primary else 'Test server settings',
+                url=reverse(settings, kwargs={'service_id': service.id})),
+        2: dict(name='Web sites management', url=reverse(vhosts_management, kwargs={'service_id': service.id}))
     }
 
     return render(request, 'mws/vhosts.html', {
         'breadcrumbs': breadcrumbs,
-        'vm': vm,
+        'service': service,
         'site': site,
         'vhost_form': VhostForm()
     })
 
 
 @login_required
-def add_vhost(request, vm_id):
-    vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.service.site.id, request.user)
+def add_vhost(request, service_id):
+    service = get_object_or_404(Service, pk=service_id)
+    site = privileges_check(service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
 
-    if vm.is_busy:
+    if service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     if request.method == 'POST':
         vhost_form = VhostForm(request.POST)
         if vhost_form.is_valid():
             vhost = vhost_form.save(commit=False)
-            vhost.vm = vm
+            vhost.service = service
             vhost.save()
-            launch_ansible(vm)  # to create a new vhost configuration file
+            launch_ansible(service)  # to create a new vhost configuration file
 
-    return redirect(reverse('sitesmanagement.views.vhosts_management', kwargs={'vm_id': vm.id}))
+    return redirect(reverse('sitesmanagement.views.vhosts_management', kwargs={'service_id': service.id}))
 
 
 @login_required
-def settings(request, vm_id):
-    vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.service.site.id, request.user)
+def settings(request, service_id):
+    service = get_object_or_404(Service, pk=service_id)
+    site = privileges_check(service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
 
-    if vm.is_busy:
+    if service.is_busy:
         return redirect(reverse(show, kwargs={'site_id': site.id}))
 
     breadcrumbs = {
         0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Server settings' if vm.primary else 'Test server settings', url=reverse(settings,
-                                                                                              kwargs={'vm_id': vm.id}))
+        1: dict(name='Server settings' if service.primary else 'Test server settings',
+                url=reverse(settings, kwargs={'service_id': service.id}))
     }
 
     return render(request, 'mws/settings.html', {
         'breadcrumbs': breadcrumbs,
         'site': site,
-        'vm': vm,
+        'service': service,
     })
 
 
 @login_required
-def check_vm_status(request, vm_id):
-    vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.service.site.id, request.user)
+def check_vm_status(request, service_id):
+    service = get_object_or_404(Service, pk=service_id)
+    site = privileges_check(service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
 
-    if vm.is_busy:
+    if service.is_busy:
         return JsonResponse({'error': 'VMNotReady'})
         # return JsonResponse({'error': 'VMNotReady'}, status_code=403) # TODO status_code in JsonResponse doesn't work
 
     try:
-        return JsonResponse({'vm_is_on': vm.is_on()})
+        return JsonResponse({'service_is_on': service.is_on()})
     except PlatformsAPINotWorkingException:
         return JsonResponse({'error': 'PlatformsAPINotWorking'})
         # return JsonResponse({'error': 'PlatformsAPINotWorking'}, status_code=500) # TODO status_code doesn't work
@@ -449,27 +450,27 @@ def check_vm_status(request, vm_id):
 
 
 @login_required
-def system_packages(request, vm_id):
-    vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.service.site.id, request.user)
+def system_packages(request, service_id):
+    service = get_object_or_404(Service, pk=service_id)
+    site = privileges_check(service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
 
-    if vm.is_busy:
+    if service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
-    ansible_configuraton = get_object_or_None(AnsibleConfiguration, vm=vm, key="system_packages") \
-                           or AnsibleConfiguration.objects.create(vm=vm, key="system_packages", value="")
+    ansible_configuraton = get_object_or_None(AnsibleConfiguration, service=service, key="system_packages") \
+                           or AnsibleConfiguration.objects.create(service=service, key="system_packages", value="")
 
     packages_installed = list(int(x) for x in ansible_configuraton.value.split(",")) \
         if ansible_configuraton.value != '' else []
 
     breadcrumbs = {
         0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Server settings' if vm.primary else 'Test server settings', url=reverse(settings,
-                                                                                              kwargs={'vm_id': vm.id})),
-        2: dict(name='System packages', url=reverse(system_packages, kwargs={'vm_id': vm.id}))
+        1: dict(name='Server settings' if service.primary else 'Test server settings',
+                url=reverse(settings, kwargs={'service_id': service.id})),
+        2: dict(name='System packages', url=reverse(system_packages, kwargs={'service_id': service.id}))
     }
 
     package_number_list = [1, 2, 3, 4]  # TODO extract this to settings
@@ -486,58 +487,58 @@ def system_packages(request, vm_id):
                 ansible_configuraton.value = ",".join(str(x) for x in packages_installed)
                 ansible_configuraton.save()
 
-            launch_ansible(vm)  # to install or delete new/old packages selected by the user
+            launch_ansible(service)  # to install or delete new/old packages selected by the user
 
     return render(request, 'mws/system_packages.html', {
         'breadcrumbs': breadcrumbs,
         'packages_installed': packages_installed,
         'site': site,
-        'vm': vm
+        'service': service
     })
 
 
 @login_required
-def unix_groups(request, vm_id):
-    vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.service.site.id, request.user)
+def unix_groups(request, service_id):
+    service = get_object_or_404(Service, pk=service_id)
+    site = privileges_check(service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
 
-    if vm.is_busy:
+    if service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
         0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Server settings' if vm.primary else 'Test server settings', url=reverse(settings,
-                                                                                              kwargs={'vm_id': vm.id})),
-        2: dict(name='Manage Unix Groups', url=reverse(unix_groups, kwargs={'vm_id': vm.id}))
+        1: dict(name='Server settings' if service.primary else 'Test server settings',
+                url=reverse(settings, kwargs={'service_id': service.id})),
+        2: dict(name='Manage Unix Groups', url=reverse(unix_groups, kwargs={'service_id': service.id}))
     }
 
     return render(request, 'mws/unix_groups.html', {
         'breadcrumbs': breadcrumbs,
         'site': site,
-        'vm': vm
+        'service': service
     })
 
 
 @login_required
-def add_unix_group(request, vm_id):
-    vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.service.site.id, request.user)
+def add_unix_group(request, service_id):
+    service = get_object_or_404(Service, pk=service_id)
+    site = privileges_check(service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
 
-    if vm.is_busy:
+    if service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
         0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Server settings' if vm.primary else 'Test server settings', url=reverse(settings,
-                                                                                              kwargs={'vm_id': vm.id})),
-        2: dict(name='Manage Unix Groups', url=reverse(unix_groups, kwargs={'vm_id': vm.id})),
-        3: dict(name='Add a new Unix Group', url=reverse(add_unix_group, kwargs={'vm_id': vm.id}))
+        1: dict(name='Server settings' if service.primary else 'Test server settings',
+                url=reverse(settings, kwargs={'service_id': service.id})),
+        2: dict(name='Manage Unix Groups', url=reverse(unix_groups, kwargs={'service_id': service.id})),
+        3: dict(name='Add a new Unix Group', url=reverse(add_unix_group, kwargs={'service_id': service.id}))
     }
 
     lookup_lists = {
@@ -549,40 +550,40 @@ def add_unix_group(request, vm_id):
         if unix_group_form.is_valid():
 
             unix_group = unix_group_form.save(commit=False)
-            unix_group.vm = vm
+            unix_group.service = service
             unix_group.save()
 
             unix_users = validate_crsids(request.POST.get('unix_users'))
             # TODO If there are no users in the list return an Exception?
             unix_group.users.add(*unix_users)
 
-            launch_ansible(vm)  # to apply these changes to the vm
-            return HttpResponseRedirect(reverse(unix_groups, kwargs={'vm_id': vm.id}))
+            launch_ansible(service)  # to apply these changes to the vm
+            return HttpResponseRedirect(reverse(unix_groups, kwargs={'service_id': service.id}))
     else:
         unix_group_form = UnixGroupForm()
 
     return render(request, 'mws/add_unix_group.html', {
         'breadcrumbs': breadcrumbs,
         'site': site,
-        'vm': vm,
+        'service': service,
         'lookup_lists': lookup_lists,  # TODO to be removed once django-ucam-lookup is modified
         'unix_group_form': unix_group_form
     })
 
 
 @login_required
-def delete_vm(request, vm_id):
-    vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.service.site.id, request.user)
+def delete_vm(request, service_id):
+    service = get_object_or_404(Service, pk=service_id)
+    site = privileges_check(service.site.id, request.user)
 
-    if site is None or vm.primary:
+    if site is None or service.primary:
         return HttpResponseForbidden()
 
-    if vm.is_busy:
+    if service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     if request.method == 'DELETE':
-        vm.delete()
+        service.delete()
         return redirect(show, site_id=site.id)
 
     return HttpResponseForbidden()
@@ -591,19 +592,19 @@ def delete_vm(request, vm_id):
 @login_required
 def unix_group(request, ug_id):
     unix_group_i = get_object_or_404(UnixGroup, pk=ug_id)
-    site = privileges_check(unix_group_i.vm.service.site.id, request.user)
+    site = privileges_check(unix_group_i.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
 
-    if unix_group_i.vm.is_busy:
+    if unix_group_i.service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
         0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Server settings' if unix_group_i.vm.primary else 'Test server settings',
-                url=reverse(settings, kwargs={'vm_id': unix_group_i.vm.id})),
-        2: dict(name='Manage Unix Groups', url=reverse(unix_groups, kwargs={'vm_id': unix_group_i.vm.id})),
+        1: dict(name='Server settings' if unix_group_i.service.primary else 'Test server settings',
+                url=reverse(settings, kwargs={'service_id': unix_group_i.service.id})),
+        2: dict(name='Manage Unix Groups', url=reverse(unix_groups, kwargs={'service_id': unix_group_i.service.id})),
         3: dict(name='Edit Unix Group', url=reverse('sitesmanagement.views.unix_group',
                                                     kwargs={'ug_id': unix_group_i.id}))
     }
@@ -622,8 +623,8 @@ def unix_group(request, ug_id):
             unix_group_i.users.clear()
             unix_group_i.users.add(*unix_users)
 
-            launch_ansible(unix_group_i.vm)  # to apply these changes to the vm
-            return HttpResponseRedirect(reverse(unix_groups, kwargs={'vm_id': unix_group_i.vm.id}))
+            launch_ansible(unix_group_i.service)  # to apply these changes to the service
+            return HttpResponseRedirect(reverse(unix_groups, kwargs={'service_id': unix_group_i.service.id}))
     else:
         unix_group_form = UnixGroupForm(instance=unix_group_i)
 
@@ -631,7 +632,7 @@ def unix_group(request, ug_id):
         'breadcrumbs': breadcrumbs,
         'lookup_lists': lookup_lists,
         'site': site,
-        'vm': unix_group_i.vm,
+        'service': unix_group_i.service,
         'unix_group_form': unix_group_form
     })
 
@@ -639,64 +640,64 @@ def unix_group(request, ug_id):
 @login_required
 def delete_unix_group(request, ug_id):
     unix_group = get_object_or_404(UnixGroup, pk=ug_id)
-    site = privileges_check(unix_group.vm.service.site.id, request.user)
+    site = privileges_check(unix_group.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
 
-    if unix_group.vm.is_busy:
+    if unix_group.service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     if request.method == 'DELETE':
         unix_group.delete()
-        launch_ansible(unix_group.vm)
-        return redirect(unix_groups, vm_id=unix_group.vm.id)
+        launch_ansible(unix_group.service)
+        return redirect(unix_groups, service_id=unix_group.service.id)
 
     return HttpResponseForbidden()
 
 
 @login_required
-def power_vm(request, vm_id):
-    vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.service.site.id, request.user)
+def power_vm(request, service_id):
+    service = get_object_or_404(Service, pk=service_id)
+    site = privileges_check(service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
 
-    if not vm.is_ready:
+    if not service.is_ready:
         return redirect(reverse(show, kwargs={'site_id': site.id}))
 
-    vm.power_on()
+    service.power_on()
 
-    return redirect(settings, vm_id=vm.id)
+    return redirect(settings, service_id=service.id)
 
 
 @login_required
-def reset_vm(request, vm_id):
-    vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.service.site.id, request.user)
+def reset_vm(request, service_id):
+    service = get_object_or_404(Service, pk=service_id)
+    site = privileges_check(service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
 
-    if not vm.is_ready:
+    if not service.is_ready:
         return redirect(reverse(show, kwargs={'site_id': site.id}))
 
-    if vm.do_reset() is False:
+    if service.do_reset() is False:
         pass  # TODO add error messages in session if it is False
 
-    return redirect(settings, vm_id=vm.id)
+    return redirect(settings, service_id=service.id)
 
 
 @login_required
-def update_os(request, vm_id):
-    vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.service.site.id, request.user)
+def update_os(request, service_id):
+    service = get_object_or_404(Service, pk=service_id)
+    site = privileges_check(service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
 
-    if not vm.is_ready:  # TODO change the button format (disabled) if the vm is not ready
+    if not service.is_ready:  # TODO change the button format (disabled) if the vm is not ready
         return redirect(reverse(show, kwargs={'site_id': site.id}))
 
     # TODO 1) Warn about the secondary VM if exists
@@ -710,17 +711,17 @@ def update_os(request, vm_id):
 @login_required
 def delete_vhost(request, vhost_id):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
-    site = privileges_check(vhost.vm.service.site.id, request.user)
+    site = privileges_check(vhost.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
 
-    if vhost.vm.is_busy:
+    if vhost.service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     if request.method == 'DELETE':
         vhost.delete()
-        launch_ansible(vhost.vm)
+        launch_ansible(vhost.service)
         return redirect(show, site_id=site.id)
 
     return HttpResponseForbidden()
@@ -729,20 +730,20 @@ def delete_vhost(request, vhost_id):
 @login_required
 def domains_management(request, vhost_id):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
-    site = privileges_check(vhost.vm.service.site.id, request.user)
+    site = privileges_check(vhost.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
 
-    if vhost.vm.is_busy:
+    if vhost.service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
         0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Server settings' if vhost.vm.primary else 'Test server settings',
-                url=reverse(settings, kwargs={'vm_id': vhost.vm.id})),
+        1: dict(name='Server settings' if vhost.service.primary else 'Test server settings',
+                url=reverse(settings, kwargs={'service_id': vhost.service.id})),
         2: dict(name='Web sites management: %s' % vhost.name, url=reverse(vhosts_management,
-                                                                          kwargs={'vm_id': vhost.vm.id})),
+                                                                          kwargs={'service_id': vhost.service.id})),
         3: dict(name='Domain Names management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id}))
     }
 
@@ -750,7 +751,7 @@ def domains_management(request, vhost_id):
         'breadcrumbs': breadcrumbs,
         'vhost': vhost,
         'site': site,
-        'vm': vhost.vm,
+        'service': vhost.service,
         'domain_form': DomainNameFormNew()
     })
 
@@ -758,12 +759,12 @@ def domains_management(request, vhost_id):
 @login_required
 def add_domain(request, vhost_id, socket_error=None):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
-    site = privileges_check(vhost.vm.service.site.id, request.user)
+    site = privileges_check(vhost.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
 
-    if vhost.vm.is_busy:
+    if vhost.service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     if request.method == 'POST':
@@ -779,15 +780,15 @@ def add_domain(request, vhost_id, socket_error=None):
                     if vhost.main_domain is None:
                         vhost.main_domain = new_domain
                         vhost.save()
-                launch_ansible(vhost.vm)  # to add the new domain name to the vhost apache configuration
+                launch_ansible(vhost.service)  # to add the new domain name to the vhost apache configuration
         else:
             breadcrumbs = {
                 0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show,
                                                                                          kwargs={'site_id': site.id})),
-                1: dict(name='Server settings' if vhost.vm.primary else 'Test server settings',
-                        url=reverse(settings, kwargs={'vm_id': vhost.vm.id})),
-                2: dict(name='Web sites management: %s' % vhost.name, url=reverse(vhosts_management,
-                                                                                  kwargs={'vm_id': vhost.vm.id})),
+                1: dict(name='Server settings' if vhost.service.primary else 'Test server settings',
+                        url=reverse(settings, kwargs={'service_id': vhost.service.id})),
+                2: dict(name='Web sites management: %s' % vhost.name,
+                        url=reverse(vhosts_management, kwargs={'service_id': vhost.service.id})),
                 3: dict(name='Domain Names management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id}))
             }
 
@@ -795,7 +796,7 @@ def add_domain(request, vhost_id, socket_error=None):
                 'breadcrumbs': breadcrumbs,
                 'vhost': vhost,
                 'site': site,
-                'vm': vhost.vm,
+                'service': vhost.service,
                 'domain_form': domain_form,
                 'error': True
             })
@@ -806,23 +807,23 @@ def add_domain(request, vhost_id, socket_error=None):
 @login_required
 def certificates(request, vhost_id):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
-    site = privileges_check(vhost.vm.service.site.id, request.user)
+    site = privileges_check(vhost.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
 
-    if vhost.vm.is_busy:
+    if vhost.service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     if not vhost.domain_names.all():
-        return redirect(reverse(vhosts_management, kwargs={'vm_id': vhost.vm.id}))
+        return redirect(reverse(vhosts_management, kwargs={'service_id': vhost.service.id}))
 
     breadcrumbs = {
         0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Server settings' if vhost.vm.primary else 'Test server settings',
-                url=reverse(settings, kwargs={'vm_id': vhost.vm.id})),
-        2: dict(name='Web sites management: %s' % vhost.name, url=reverse(vhosts_management,
-                                                                          kwargs={'vm_id': vhost.vm.id})),
+        1: dict(name='Server settings' if vhost.service.primary else 'Test server settings',
+                url=reverse(settings, kwargs={'service_id': vhost.service.id})),
+        2: dict(name='Web sites management: %s' % vhost.name,
+                url=reverse(vhosts_management, kwargs={'service_id': vhost.service.id})),
         3: dict(name='TLS/SSL Certificate', url=reverse(certificates, kwargs={'vhost_id': vhost.id})),
     }
 
@@ -877,7 +878,7 @@ def certificates(request, vhost_id):
     return render(request, 'mws/certificates.html', {
         'breadcrumbs': breadcrumbs,
         'vhost': vhost,
-        'vm': vhost.vm,
+        'service': vhost.service,
         'site': site,
         'error_message': error_message
     })
@@ -886,24 +887,24 @@ def certificates(request, vhost_id):
 @login_required
 def generate_csr(request, vhost_id):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
-    site = privileges_check(vhost.vm.service.site.id, request.user)
+    site = privileges_check(vhost.service.site.id, request.user)
 
     if request.method == 'POST':
         if vhost.main_domain is None:
             breadcrumbs = {
                 0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show,
                                                                                          kwargs={'site_id': site.id})),
-                1: dict(name='Server settings' if vhost.vm.primary else 'Test server settings',
-                        url=reverse(settings, kwargs={'vm_id': vhost.vm.id})),
-                2: dict(name='Vhosts Management: %s' % vhost.name, url=reverse(vhosts_management,
-                                                                               kwargs={'vm_id': vhost.vm.id})),
+                1: dict(name='Server settings' if vhost.service.primary else 'Test server settings',
+                        url=reverse(settings, kwargs={'service_id': vhost.service.id})),
+                2: dict(name='Vhosts Management: %s' % vhost.name,
+                        url=reverse(vhosts_management, kwargs={'service_id': vhost.service.id})),
                 3: dict(name='TLS/SSL Certificates', url=reverse(certificates, kwargs={'vhost_id': vhost.id})),
             }
 
             return render(request, 'mws/certificates.html', {
                 'breadcrumbs': breadcrumbs,
                 'vhost': vhost,
-                'vm': vhost.vm,
+                'service': vhost.service,
                 'site': site,
                 'error_main_domain': True
             })
@@ -942,18 +943,18 @@ def generate_csr(request, vhost_id):
 def set_dn_as_main(request, domain_id):
     domain = get_object_or_404(DomainName, pk=domain_id)
     vhost = domain.vhost
-    site = privileges_check(vhost.vm.service.site.id, request.user)
+    site = privileges_check(vhost.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
 
-    if vhost.vm.is_busy:
+    if vhost.service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     if request.method == 'POST':
         vhost.main_domain = domain
         vhost.save()
-        launch_ansible(vhost.vm)  # to update the vhost main domain name in the apache configuration
+        launch_ansible(vhost.service)  # to update the vhost main domain name in the apache configuration
 
     return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management', kwargs={'vhost_id': vhost.id}))
 
@@ -962,12 +963,12 @@ def set_dn_as_main(request, domain_id):
 def delete_dn(request, domain_id):
     domain = get_object_or_404(DomainName, pk=domain_id)
     vhost = domain.vhost
-    site = privileges_check(vhost.vm.service.site.id, request.user)
+    site = privileges_check(vhost.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
 
-    if vhost.vm.is_busy:
+    if vhost.service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     if request.method == 'DELETE':
@@ -976,38 +977,38 @@ def delete_dn(request, domain_id):
             domain.save()
         else:
             domain.delete()
-        launch_ansible(vhost.vm)
+        launch_ansible(vhost.service)
         return HttpResponseRedirect(reverse('sitesmanagement.views.domains_management', kwargs={'vhost_id': vhost.id}))
 
     return HttpResponseForbidden()
 
 
 @login_required
-def change_db_root_password(request, vm_id):
-    vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.service.site.id, request.user)
+def change_db_root_password(request, service_id):
+    service = get_object_or_404(Service, pk=service_id)
+    site = privileges_check(service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
 
-    if vm.is_busy:
+    if service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
         0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Server settings' if vm.primary else 'Test server settings', url=reverse(settings,
-                                                                                              kwargs={'vm_id': vm.id})),
-        2: dict(name='Change db root pass', url=reverse(change_db_root_password, kwargs={'vm_id': vm.id})),
+        1: dict(name='Server settings' if service.primary else 'Test server settings', url=reverse(settings,
+                                                                                              kwargs={'service_id': service.id})),
+        2: dict(name='Change db root pass', url=reverse(change_db_root_password, kwargs={'service_id': service.id})),
     }
 
     if request.method == 'POST':
         new_root_passwd = request.POST['new_root_passwd']
         # TODO implement
-        return HttpResponseRedirect(reverse(settings, kwargs={'vm_id': vm.id}))
+        return HttpResponseRedirect(reverse(settings, kwargs={'service_id': service.id}))
 
     return render(request, 'mws/change_db_root_password.html', {
         'breadcrumbs': breadcrumbs,
-        'vm': vm,
+        'service': service,
         'site': site,
     })
 
@@ -1015,38 +1016,38 @@ def change_db_root_password(request, vm_id):
 @login_required
 def visit_vhost(request, vhost_id):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
-    site = privileges_check(vhost.vm.service.site.id, request.user)
+    site = privileges_check(vhost.service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
 
-    if vhost.vm.is_busy:
+    if vhost.service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     return redirect("http://"+str(vhost.main_domain.name))
 
 
 @login_required
-def backups(request, vm_id):
-    vm = get_object_or_404(VirtualMachine, pk=vm_id)
-    site = privileges_check(vm.service.site.id, request.user)
+def backups(request, service_id):
+    service = get_object_or_404(Service, pk=service_id)
+    site = privileges_check(service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
 
-    if vm.is_busy:
+    if service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
         0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Server settings' if vm.primary else 'Test server settings', url=reverse(settings,
-                                                                                              kwargs={'vm_id': vm.id})),
-        2: dict(name='Restore backup', url=reverse(backups, kwargs={'vm_id': vm.id})),
+        1: dict(name='Server settings' if service.primary else 'Test server settings',
+                url=reverse(settings, kwargs={'service_id': service.id})),
+        2: dict(name='Restore backup', url=reverse(backups, kwargs={'service_id': service.id})),
     }
 
     parameters = {
         'breadcrumbs': breadcrumbs,
-        'vm': vm,
+        'service': service,
         'site': site,
         'fromdate': datetime.date.today()-datetime.timedelta(days=30),
         'todate': datetime.date.today()-datetime.timedelta(days=1),
@@ -1060,9 +1061,9 @@ def backups(request, vm_id):
                     # TODO or backup_date >= datetime.date.today() ????
                 raise ValueError
             # TODO restore data, once successfully completed restore database data
-            version = reversion.get_for_date(vm, backup_date)
+            version = reversion.get_for_date(service, backup_date)
             version.revision.revert(delete=True)
-            for domain in vm.all_domain_names:
+            for domain in service.all_domain_names:
                 if domain.status == "requested":
                     last_version = reversion.get_for_object(domain)[0]
                     if last_version.field_dict['id'] != domain.id:

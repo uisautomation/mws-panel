@@ -68,11 +68,11 @@ class BillingAdmin(VersionAdmin):
 
 
 class VhostAdmin(VersionAdmin):
-    list_display = ('name', 'vm', )
+    list_display = ('name', 'service', )
 
 
 class VirtualMachineAdmin(VersionAdmin):
-    list_display = ('name', 'site', 'primary', 'status')
+    list_display = ('name', 'site')
 
 
 class EmailConfirmationAdmin(ModelAdmin):

@@ -26,7 +26,7 @@ class Command(NoArgsCommand):
         outfile = outfile or sys.stdout
         if list:
             vms = VirtualMachine.objects.filter(
-                status__in=('ansible', 'ready'))
+                service__status__in=('ansible', 'ready'))
             result = {'_meta': {'hostvars': {}}}
             result[group] = [self.hostid(vm) for vm in vms]
             for site in Site.objects.all():
@@ -77,7 +77,7 @@ class Command(NoArgsCommand):
                 vhv['certificate'] = vh.certificate
             vhv['tls_enabled'] = 'certificate' in vhv
             return vhv
-        v['mws_vhosts'] = [vhost_vars(vh) for vh in vm.vhosts.all()]
+        v['mws_vhosts'] = [vhost_vars(vh) for vh in vm.service.vhosts.all()]
         v['mws_is_primary'] = vm.primary
         v['mws_ipv4'] = vm.ipv4
         v['mws_ipv6'] = vm.ipv6

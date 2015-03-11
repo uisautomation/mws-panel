@@ -15,7 +15,7 @@
         </div>
     </div>
 
-    <form id="package_number_form" action={% url 'sitesmanagement.views.system_packages' vm_id=vm.id %} method="post">
+    <form id="package_number_form" action={% url 'sitesmanagement.views.system_packages' service_id=service.id %} method="post">
         {% csrf_token %}
         <input type="hidden" name="package_number" id="package_number">
     </form>

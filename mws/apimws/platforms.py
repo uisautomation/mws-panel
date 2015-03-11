@@ -89,8 +89,10 @@ def new_site_primary_vm(service, host_network_configuration):
     except Exception as e:
         raise new_site_primary_vm.retry(exc=e)
 
-    vm = VirtualMachine.objects.create(status='installing', service=service, token=uuid.uuid4(),
-                                       name=response['vmid'], network_configuration=host_network_configuration)
+    vm = VirtualMachine.objects.create(service=service, token=uuid.uuid4(), name=response['vmid'],
+                                       network_configuration=host_network_configuration)
+    service.status = 'installing'
+    service.save()
 
     return install_vm(vm)
 
@@ -98,7 +100,8 @@ def new_site_primary_vm(service, host_network_configuration):
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
 def install_vm(vm):
     from apimws.models import AnsibleConfiguration
-    AnsibleConfiguration.objects.update_or_create(vm=vm, key='os', defaults={'value': json.dumps(settings.OS_VERSION)})
+    AnsibleConfiguration.objects.update_or_create(service=vm.service, key='os',
+                                                  defaults={'value': json.dumps(settings.OS_VERSION)})
 
     f = open(os.path.join(settings.BASE_DIR, 'apimws/debian_preseed.txt'), 'r')
     profile = f.read()
@@ -233,8 +236,10 @@ def clone_vm_api_call(original_service, destination_service, delete_service):
     for vm in delete_service.virtual_machines.all():
         vm.delete()
 
-    destination_vm = VirtualMachine.objects.create(status='requested', token=uuid.uuid4(), service=destination_service,
+    destination_vm = VirtualMachine.objects.create(token=uuid.uuid4(), service=destination_service,
                                                    network_configuration=NetworkConfig.get_free_host_config())
+    destination_service.status = 'requested'
+    destination_service.save()
 
     original_vm = original_service.virtual_machines.first()
 
@@ -251,28 +256,30 @@ def clone_vm_api_call(original_service, destination_service, delete_service):
         raise clone_vm_api_call.retry(exc=e)
 
     destination_vm.name = response['vmid']
-    destination_vm.status = 'ready'
     destination_vm.save()
 
+    destination_service.status = 'ready'
+    destination_service.save()
+
     # Copy Unix Groups
-    for unix_group in original_vm.unix_groups.all():
+    for unix_group in original_vm.service.unix_groups.all():
         copy_users = unix_group.users.all()
         unix_group.pk = None
-        unix_group.vm = destination_vm
+        unix_group.service = destination_service
         unix_group.save()
         unix_group.users = copy_users
 
     # Copy Ansible Configuration
-    for ansible_conf in original_vm.ansible_configuration.all():
+    for ansible_conf in original_vm.service.ansible_configuration.all():
         ansible_conf.pk = None
-        ansible_conf.vm = destination_vm
+        ansible_conf.service = destination_service
         ansible_conf.save()
 
     # Copy vhosts
     # TODO copy Domain Names
-    for vhost in original_vm.vhosts.all():
+    for vhost in original_vm.service.vhosts.all():
         vhost.pk = None
-        vhost.vm = destination_vm
+        vhost.service = destination_service
         vhost.save()
 
     return True

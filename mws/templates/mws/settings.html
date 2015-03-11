@@ -5,7 +5,7 @@
         <div class="view-header">
             <div class="campl-content-container">
                 <div class="campl-heading-container">
-                    <h1 id="page-title">{% if vm.primary %}Server{% else %}Test server{% endif %} settings</h1>
+                    <h1 id="page-title">{% if service.primary %}Server{% else %}Test server{% endif %} settings</h1>
                 </div>
             </div>
         </div>
@@ -17,7 +17,7 @@
                                     campl-horizontal-teaser campl-teaser campl-focus-teaser">
                         <div class="campl-focus-teaser-img">
                             <div class="campl-content-container campl-horizontal-teaser-img">
-                                <a href="{% url 'sitesmanagement.views.vhosts_management' vm_id=vm.id %}">
+                                <a href="{% url 'sitesmanagement.views.vhosts_management' service_id=service.id %}">
                                     <div class="field field-name-field-external-url-image field-type-image
                                                 field-label-hidden">
                                         <div class="field-items">
@@ -34,11 +34,11 @@
                         <div class="campl-focus-teaser-txt">
                             <div class="campl-content-container campl-horizontal-teaser-txt">
                                 <h3 class="campl-teaser-title">
-                                    <a href="{% url 'sitesmanagement.views.vhosts_management' vm_id=vm.id %}">
+                                    <a href="{% url 'sitesmanagement.views.vhosts_management' service_id=service.id %}">
                                         Web sites
                                     </a>
                                 </h3>
-                                <a href="{% url 'sitesmanagement.views.vhosts_management' vm_id=vm.id %}"
+                                <a href="{% url 'sitesmanagement.views.vhosts_management' service_id=service.id %}"
                                    class="ir campl-focus-link">Web sites</a>
                             </div>
                         </div>
@@ -52,7 +52,7 @@
                                     campl-horizontal-teaser campl-teaser campl-focus-teaser">
                         <div class="campl-focus-teaser-img">
                             <div class="campl-content-container campl-horizontal-teaser-img">
-                                <a href="{% url 'sitesmanagement.views.system_packages' vm_id=vm.id %}">
+                                <a href="{% url 'sitesmanagement.views.system_packages' service_id=service.id %}">
                                     <div class="field field-name-field-external-url-image field-type-image
                                                 field-label-hidden">
                                         <div class="field-items">
@@ -69,11 +69,11 @@
                         <div class="campl-focus-teaser-txt">
                             <div class="campl-content-container campl-horizontal-teaser-txt">
                                 <h3 class="campl-teaser-title">
-                                    <a href="{% url 'sitesmanagement.views.system_packages' vm_id=vm.id %}">
+                                    <a href="{% url 'sitesmanagement.views.system_packages' service_id=service.id %}">
                                         System packages
                                     </a>
                                 </h3>
-                                <a href="{% url 'sitesmanagement.views.system_packages' vm_id=vm.id %}"
+                                <a href="{% url 'sitesmanagement.views.system_packages' service_id=service.id %}"
                                    class="ir campl-focus-link">System packages</a>
                             </div>
                         </div>
@@ -87,7 +87,7 @@
                                     campl-horizontal-teaser campl-teaser campl-focus-teaser">
                         <div class="campl-focus-teaser-img">
                             <div class="campl-content-container campl-horizontal-teaser-img">
-                                <a href="{% url 'sitesmanagement.views.unix_groups' vm_id=vm.id %}">
+                                <a href="{% url 'sitesmanagement.views.unix_groups' service_id=service.id %}">
                                     <div class="field field-name-field-external-url-image field-type-image
                                                 field-label-hidden">
                                         <div class="field-items">
@@ -104,11 +104,11 @@
                         <div class="campl-focus-teaser-txt">
                             <div class="campl-content-container campl-horizontal-teaser-txt">
                                 <h3 class="campl-teaser-title">
-                                    <a href="{% url 'sitesmanagement.views.unix_groups' vm_id=vm.id %}">
+                                    <a href="{% url 'sitesmanagement.views.unix_groups' service_id=service.id %}">
                                         Unix Groups
                                     </a>
                                 </h3>
-                                <a href="{% url 'sitesmanagement.views.unix_groups' vm_id=vm.id %}"
+                                <a href="{% url 'sitesmanagement.views.unix_groups' service_id=service.id %}"
                                    class="ir campl-focus-link">Unix Groups</a>
                             </div>
                         </div>
@@ -122,7 +122,7 @@
                                     campl-horizontal-teaser campl-teaser campl-focus-teaser">
                         <div class="campl-focus-teaser-img">
                             <div class="campl-content-container campl-horizontal-teaser-img">
-                                <a href="{% url 'sitesmanagement.views.change_db_root_password' vm_id=vm.id %}">
+                                <a href="{% url 'sitesmanagement.views.change_db_root_password' service_id=service.id %}">
                                     <div class="field field-name-field-external-url-image field-type-image
                                                 field-label-hidden">
                                         <div class="field-items">
@@ -139,11 +139,11 @@
                         <div class="campl-focus-teaser-txt">
                             <div class="campl-content-container campl-horizontal-teaser-txt">
                                 <h3 class="campl-teaser-title">
-                                    <a href="{% url 'sitesmanagement.views.change_db_root_password' vm_id=vm.id %}">
+                                    <a href="{% url 'sitesmanagement.views.change_db_root_password' service_id=service.id %}">
                                         Change database root password
                                     </a>
                                 </h3>
-                                <a href="{% url 'sitesmanagement.views.change_db_root_password' vm_id=vm.id %}"
+                                <a href="{% url 'sitesmanagement.views.change_db_root_password' service_id=service.id %}"
                                    class="ir campl-focus-link">Change database root password</a>
                             </div>
                         </div>
@@ -152,7 +152,7 @@
             </div>
         </div>
 
-        {% if vm.is_ready %}
+        {% if service.is_ready %}
             <div class="campl-column6">
                 <div class="campl-content-container campl-side-padding">
                     <article class="node node-external-link view-mode-focus_on clearfix
@@ -163,7 +163,7 @@
                                             field-label-hidden">
                                     <div class="field-items">
                                         <div id="vm_status_message" class="field-item even" style="color: #ffffff">
-                                            Checking the status of the {% if not vm.primary %}test {% endif %} server
+                                            Checking the status of the {% if not service.primary %}test {% endif %} server
                                         </div>
                                     </div>
                                 </div>
@@ -197,14 +197,14 @@
             </div>
         {% endif %}
 
-        {% if vm.primary %}
+        {% if service.primary %}
             <div class="campl-column3">
                 <div class="campl-content-container campl-side-padding">
                     <article class="node node-external-link view-mode-focus_on clearfix
                                     campl-horizontal-teaser campl-teaser campl-focus-teaser">
                         <div class="campl-focus-teaser-img">
                             <div class="campl-content-container campl-horizontal-teaser-img">
-                                <a href="{% url 'sitesmanagement.views.backups' vm_id=vm.id %}">
+                                <a href="{% url 'sitesmanagement.views.backups' service_id=service.id %}">
                                     <div class="field field-name-field-external-url-image field-type-image
                                                 field-label-hidden">
                                         <div class="field-items">
@@ -221,25 +221,25 @@
                         <div class="campl-focus-teaser-txt">
                             <div class="campl-content-container campl-horizontal-teaser-txt">
                                 <h3 class="campl-teaser-title">
-                                    <a href="{% url 'sitesmanagement.views.backups' vm_id=vm.id %}">
+                                    <a href="{% url 'sitesmanagement.views.backups' service_id=service.id %}">
                                         Restore backup
                                     </a>
                                 </h3>
-                                <a href="{% url 'sitesmanagement.views.backups' vm_id=vm.id %}"
+                                <a href="{% url 'sitesmanagement.views.backups' service_id=service.id %}"
                                    class="ir campl-focus-link">Restore backup</a>
                             </div>
                         </div>
                     </article>
                 </div>
             </div>
-            {% if vm.due_update %}
+            {% if service.due_update %}
             <div class="campl-column3">
                 <div class="campl-content-container campl-side-padding">
                     <article class="node node-external-link view-mode-focus_on clearfix
                                     campl-horizontal-teaser campl-teaser campl-focus-teaser campl-focus-teaser-red">
                         <div class="campl-focus-teaser-img">
                             <div class="campl-content-container campl-horizontal-teaser-img">
-                                <a class="update_os_vm" data-href="javascript:update_os_vm('{% url 'sitesmanagement.views.update_os' vm_id=vm.id %}')" href="#">
+                                <a class="update_os_vm" data-href="javascript:update_os_vm('{% url 'sitesmanagement.views.update_os' service_id=service.id %}')" href="#">
                                     <div class="field field-name-field-external-url-image field-type-image
                                                 field-label-hidden">
                                         <div class="field-items">
@@ -254,12 +254,12 @@
                         <div class="campl-focus-teaser-txt">
                             <div class="campl-content-container campl-horizontal-teaser-txt">
                                 <h3 class="campl-teaser-title">
-                                    <a class="update_os_vm" data-href="javascript:update_os_vm('{% url 'sitesmanagement.views.update_os' vm_id=vm.id %}')" href="#">
-                                        Update {{ vm.os_type }}
+                                    <a class="update_os_vm" data-href="javascript:update_os_vm('{% url 'sitesmanagement.views.update_os' service_id=service.id %}')" href="#">
+                                        Update {{ service.os_type }}
                                     </a>
                                 </h3>
-                                <a class="update_os_vm ir campl-focus-link campl-focus-link-red" data-href="javascript:update_os_vm('{% url 'sitesmanagement.views.update_os' vm_id=vm.id %}')" href="#">
-                                    Update {{ vm.os_type }}
+                                <a class="update_os_vm ir campl-focus-link campl-focus-link-red" data-href="javascript:update_os_vm('{% url 'sitesmanagement.views.update_os' service_id=service.id %}')" href="#">
+                                    Update {{ service.os_type }}
                                 </a>
                             </div>
                         </div>
@@ -274,7 +274,7 @@
                                 campl-horizontal-teaser campl-teaser campl-focus-teaser campl-focus-teaser-red">
                     <div class="campl-focus-teaser-img">
                         <div class="campl-content-container campl-horizontal-teaser-img">
-                            <a class="delete_vm" data-href="javascript:delete_vm('{% url 'sitesmanagement.views.delete_vm' vm_id=vm.id %}')" href="#">
+                            <a class="delete_vm" data-href="javascript:delete_vm('{% url 'sitesmanagement.views.delete_vm' service_id=service.id %}')" href="#">
                                 <div class="field field-name-field-external-url-image field-type-image
                                             field-label-hidden">
                                     <div class="field-items">
@@ -289,11 +289,11 @@
                     <div class="campl-focus-teaser-txt">
                         <div class="campl-content-container campl-horizontal-teaser-txt">
                             <h3 class="campl-teaser-title">
-                                <a class="delete_vm" data-href="javascript:delete_vm('{% url 'sitesmanagement.views.delete_vm' vm_id=vm.id %}')" href="#">
+                                <a class="delete_vm" data-href="javascript:delete_vm('{% url 'sitesmanagement.views.delete_vm' service_id=service.id %}')" href="#">
                                     Delete the test server
                                 </a>
                             </h3>
-                            <a class="delete_vm ir campl-focus-link campl-focus-link-red" data-href="javascript:delete_vm('{% url 'sitesmanagement.views.delete_vm' vm_id=vm.id %}')" href="#">
+                            <a class="delete_vm ir campl-focus-link campl-focus-link-red" data-href="javascript:delete_vm('{% url 'sitesmanagement.views.delete_vm' service_id=service.id %}')" href="#">
                                 Delete the test server
                             </a>
                         </div>
@@ -305,7 +305,7 @@
 
     </div>
 
-    {% if not vm.primary %}
+    {% if not service.primary %}
     <!-- Modal delete -->
     <div class="modal fade" id="delete_modal" tabindex="-1" role="dialog" aria-labelledby="delete_modal_label" aria-hidden="true">
       <div class="modal-dialog modal-sm">
@@ -322,7 +322,7 @@
     </div>
     {% endif %}
 
-    {% if vm.primary and vm.due_update %}
+    {% if service.primary and service.due_update %}
     <!-- Modal update os -->
     <div class="modal fade" id="update_os_modal" tabindex="-1" role="dialog" aria-labelledby="update_os_modal_label" aria-hidden="true">
       <div class="modal-dialog modal-sm">
@@ -345,22 +345,22 @@
 {% block campl_foot_js %}
     <script>
         $(document).ready(
-            $.ajax({url: "{% url 'sitesmanagement.views.check_vm_status' vm_id=vm.id %}",
+            $.ajax({url: "{% url 'sitesmanagement.views.check_vm_status' service_id=service.id %}",
                 success:function(result){
-                    if (result['vm_is_on'] === undefined) {
+                    if (result['service_is_on'] === undefined) {
                         $("#vm_status_message").html("We are currently experimenting a problem. ");
                         $("#vm_status_message_link").html("Please try again later.");
                     } else {
-                        if (result['vm_is_on'] == true) {
-                            $("#vm_status_message").html("The {% if not vm.primary %}test {% endif %} server is currently ON");
-                            $("#vm_status_message_link").attr("href", "{% url 'sitesmanagement.views.reset_vm' vm_id=vm.id %}");
+                        if (result['service_is_on'] == true) {
+                            $("#vm_status_message").html("The {% if not service.primary %}test {% endif %} server is currently ON");
+                            $("#vm_status_message_link").attr("href", "{% url 'sitesmanagement.views.reset_vm' service_id=service.id %}");
                             $("#vm_status_message_link").html("If it does not respond you can do a hard reset by clicking here");
-                            $("#vm_status_link").attr("href", "{% url 'sitesmanagement.views.reset_vm' vm_id=vm.id %}");
+                            $("#vm_status_link").attr("href", "{% url 'sitesmanagement.views.reset_vm' service_id=service.id %}");
                         } else if (result['vm_is_on'] == false) {
-                            $("#vm_status_message").html("The {% if not vm.primary %}test {% endif %} server is currently OFF");
-                            $("#vm_status_message_link").attr("href", "{% url 'sitesmanagement.views.power_vm' vm_id=vm.id %}");
+                            $("#vm_status_message").html("The {% if not service.primary %}test {% endif %} server is currently OFF");
+                            $("#vm_status_message_link").attr("href", "{% url 'sitesmanagement.views.power_vm' service_id=service.id %}");
                             $("#vm_status_message_link").html("Power it on");
-                            $("#vm_status_link").attr("href", "{% url 'sitesmanagement.views.power_vm' vm_id=vm.id %}");
+                            $("#vm_status_link").attr("href", "{% url 'sitesmanagement.views.power_vm' service_id=service.id %}");
                         } else {
                             $("#vm_status_message").html("We are currently experimenting a problem.");
                             $("#vm_status_message_link").html("Please try again later.");
@@ -386,7 +386,7 @@
             return cookieValue;
         }
 
-        {% if not vm.primary %}
+        {% if not service.primary %}
         function delete_vm(url) {
             $.ajax({
                 url: url,
@@ -407,7 +407,7 @@
         });
         {% endif %}
 
-        {% if vm.primary and vm.due_update %}
+        {% if service.primary and service.due_update %}
         function update_os_vm(url) {
             $.ajax({
                 url: url,

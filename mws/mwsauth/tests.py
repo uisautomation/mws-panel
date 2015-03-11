@@ -145,8 +145,8 @@ class AuthTestCases(TestCase):
 
         site_without_auth_users = Site.objects.create(name="test_site1", start_date=datetime.today())
         service_a = Service.objects.create(type='production', network_configuration=NetworkConfig.
-                                           get_free_prod_service_config(), site=site_without_auth_users)
-        VirtualMachine.objects.create(status='ready', token=uuid.uuid4(), service=service_a,
+                                           get_free_prod_service_config(), site=site_without_auth_users, status='ready')
+        VirtualMachine.objects.create(token=uuid.uuid4(), service=service_a,
                                       network_configuration=NetworkConfig.get_free_host_config())
 
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_without_auth_users.id}))
@@ -205,8 +205,9 @@ class AuthTestCases(TestCase):
 
         site_with_auth_groups = Site.objects.create(name="test_site2", start_date=datetime.today())
         service_a = Service.objects.create(type='production', network_configuration=NetworkConfig.
-                                           get_free_prod_service_config(), site=site_with_auth_groups)
-        VirtualMachine.objects.create(status='ready', token=uuid.uuid4(), service=service_a,
+                                           get_free_prod_service_config(), site=site_with_auth_groups,
+                                           status='ready')
+        VirtualMachine.objects.create(token=uuid.uuid4(), service=service_a,
                                       network_configuration=NetworkConfig.get_free_host_config())
         information_systems_group = get_or_create_group_by_groupid(101888)
         site_with_auth_groups.groups.add(information_systems_group)
