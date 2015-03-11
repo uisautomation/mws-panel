@@ -4,9 +4,7 @@ from django.core.management.base import CommandError
 import json
 from StringIO import StringIO
 from datetime import datetime
-from sitesmanagement.models import (Site, VirtualMachine, UnixGroup, Vhost, DomainName, NetworkConfig, Service)
-
-
+from sitesmanagement.models import (Site, VirtualMachine, NetworkConfig, Service)
 from .commands.ansible_inventory import Command
 
 

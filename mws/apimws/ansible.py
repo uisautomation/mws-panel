@@ -37,7 +37,7 @@ def launch_ansible_site(site):
 def launch_ansible_async(service):
     while service.status != 'ready':
         ansible_response = subprocess.check_output(["userv", "mws-admin", "mws_ansible"])
-        service =  refresh_object(service)
+        service = refresh_object(service)
         if service.status == 'ansible_queued':
             service.status = 'ansible'
             service.save()

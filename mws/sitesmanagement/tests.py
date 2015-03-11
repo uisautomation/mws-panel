@@ -13,8 +13,7 @@ import reversion
 from apimws.models import AnsibleConfiguration
 from apimws.views import post_installation
 from mwsauth.tests import do_test_login
-from sitesmanagement.models import Site, VirtualMachine, UnixGroup, Vhost, DomainName, \
-    NetworkConfig, Service
+from sitesmanagement.models import Site, VirtualMachine, UnixGroup, Vhost, DomainName, NetworkConfig, Service
 import sitesmanagement.views as views
 from sitesmanagement.utils import is_camacuk, get_object_or_None
 
@@ -447,7 +446,7 @@ class SiteManagement2Tests(TestCase):
         vm = VirtualMachine.objects.create(name="test_vm", token=uuid.uuid4(),
                                            service=service, network_configuration=NetworkConfig.get_free_host_config())
         service2 = Service.objects.create(site=site, type='test', status="requested",
-                                         network_configuration=NetworkConfig.get_free_prod_service_config())
+                                          network_configuration=NetworkConfig.get_free_prod_service_config())
         vm2 = VirtualMachine.objects.create(name="test_vm2", token=uuid.
                                             uuid4(), service=service2, network_configuration=NetworkConfig.
                                             get_free_host_config())

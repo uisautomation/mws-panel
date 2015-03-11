@@ -996,8 +996,8 @@ def change_db_root_password(request, service_id):
 
     breadcrumbs = {
         0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
-        1: dict(name='Server settings' if service.primary else 'Test server settings', url=reverse(settings,
-                                                                                              kwargs={'service_id': service.id})),
+        1: dict(name='Server settings' if service.primary else 'Test server settings',
+                url=reverse(settings, kwargs={'service_id': service.id})),
         2: dict(name='Change db root pass', url=reverse(change_db_root_password, kwargs={'service_id': service.id})),
     }
 
