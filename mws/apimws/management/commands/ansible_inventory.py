@@ -46,12 +46,17 @@ class Command(NoArgsCommand):
     def sitegroup(self, site):
         return "mwssite-%d" % (site.id,)
 
+    def servicegroup(self, service):
+        return "mwsservice-%d" % (service.id,)
+
     def hostid(self, vm):
         return vm.network_configuration.name
 
     def hostvars(self, vm):
         v = {}
-        v['ansible_ssh_host'] = vm.hostname
+        v['ansible_ssh_host'] = (vm.network_configuration.name or
+                                 vm.network_configuration.IPv4 or
+                                 vm.network_configuration.IPv6)
         v['mws_name'] = vm.site.name
         v['mws_webmaster_email'] = vm.site.email
 
@@ -79,8 +84,10 @@ class Command(NoArgsCommand):
             return vhv
         v['mws_vhosts'] = [vhost_vars(vh) for vh in vm.service.vhosts.all()]
         v['mws_is_primary'] = vm.primary
-        v['mws_ipv4'] = vm.ipv4
-        v['mws_ipv6'] = vm.ipv6
+        v['mws_ipv4'] = vm.network_configuration.IPv4
+        v['mws_ipv4_netmask'] = vm.network_configuration.IPv4_netmask
+        v['mws_ipv4_gateway'] = vm.network_configuration.IPv4_gateway
+        v['mws_ipv6'] = vm.network_configuration.IPv6
         v['mws_tls_enabled'] = any(['certificate' in vhv
                                     for vhv in v['mws_vhosts']])
         v['mws_os_type'] = vm.os_type
@@ -95,10 +102,20 @@ class Command(NoArgsCommand):
         v['mws_cluster_nodeid'] = vm.id
         assert(1 <= v['mws_cluster_nodeid'] <= 0x7fffffff)
 
-        # mws_site_group refers to the Ansible host group containing this host.
+        # mws_site_group refers to the Ansible host group representing
+        # this host's site.
         v['mws_site_group'] = self.sitegroup(vm.site)
         # mws_site_id is a convenient string identifying the site for use
         # in filenames etc.
         v['mws_site_id'] = v['mws_site_group']
 
+        # mws_service_group refers to the Ansible host group representing
+        # this host's service.
+        v['mws_service_group'] = self.servicegroup(vm.service)
+        v['mws_service_ipv4'] = vm.service.network_configuration.IPv4
+        v['mws_service_ipv4_netmask'] = (
+            vm.service.network_configuration.IPv4_netmask)
+        v['mws_service_ipv4_gateway'] = (
+            vm.service.network_configuration.IPv4_gateway)
+        v['mws_service_ipv6'] = vm.service.network_configuration.IPv6
         return v
