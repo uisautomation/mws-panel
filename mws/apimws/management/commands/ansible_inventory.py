@@ -26,7 +26,7 @@ class Command(NoArgsCommand):
         outfile = outfile or sys.stdout
         if list:
             vms = VirtualMachine.objects.filter(
-                service__status__in=('ansible', 'ready'))
+                service__status__in=('ansible', 'ansible_queued', 'ready'))
             result = {'_meta': {'hostvars': {}}}
             result[group] = [self.hostid(vm) for vm in vms]
             for site in Site.objects.all():
