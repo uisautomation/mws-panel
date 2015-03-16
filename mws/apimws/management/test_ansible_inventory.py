@@ -62,6 +62,15 @@ class TestsWithData(TestCase):
         self.assertEqual(len(r['mwsclients']), 1)
         self.assertTrue(r['mwsclients'][0] in r['_meta']['hostvars'])
 
+    def test_status(self):
+        # Make sure that unusual statuses have the right consequences
+        s = StringIO()
+        self.service.status = "ansible_queued"
+        self.service.save()
+        Command().handle_noargs(list=True, outfile=s)
+        r = json.loads(s.getvalue())
+        self.assertEqual(len(r['mwsclients']), 1)
+
     def test_vars(self):
         s = StringIO()
         Command().handle_noargs(list=True, outfile=s)
