@@ -355,6 +355,10 @@ class Service(models.Model):
         return self.type == 'production'
 
     @property
+    def active(self):
+        return (self.virtual_machines.count() > 0)
+
+    @property
     def ipv4(self):
         return self.network_configuration.IPv4
 

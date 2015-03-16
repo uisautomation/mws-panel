@@ -209,7 +209,7 @@
 
         {% endif %}
 
-        {% if site.test_service and not site.test_service.is_busy %}
+        {% if site.test_service and site.test_service.active and not site.test_service.is_busy %}
             <div class="campl-column4 campl-theme-3">
                 <div class="campl-content-container campl-side-padding">
                     <article class="node node-external-link view-mode-focus_on clearfix

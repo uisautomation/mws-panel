@@ -27,9 +27,9 @@ def launch_ansible(service):
 
 
 def launch_ansible_site(site):
-    if site.production_service is not None:
+    if site.production_service.active:
         launch_ansible(site.production_service)
-    if site.test_service is not None:
+    if site.test_service.active:
         launch_ansible(site.test_service)
 
 

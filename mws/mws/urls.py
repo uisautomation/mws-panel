@@ -61,6 +61,7 @@ urlpatterns = patterns('',
 
     # mwsauth app
     url(r'^auth/(?P<site_id>[0-9]+)/$', 'mwsauth.views.auth_change'),
+    url(r'^auth/(?P<site_id>[0-9]+)/force_update/$', 'mwsauth.views.force_update'),
 
     # user panel
     url(r'^user_panel/$', 'mwsauth.views.user_panel'),

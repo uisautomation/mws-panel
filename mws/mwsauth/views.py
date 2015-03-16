@@ -58,6 +58,20 @@ def auth_change(request, site_id):
 
 
 @login_required
+def force_update(request, site_id):
+    site = privileges_check(site_id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if request.method == 'POST':
+        launch_ansible_site(site)  # to refresh lookup lists
+        # TODO add message to the user
+
+    return redirect(show, site_id=site.id)
+
+
+@login_required
 def user_panel(request):
     breadcrumbs = {
         0: dict(name='User panel', url=reverse(user_panel))

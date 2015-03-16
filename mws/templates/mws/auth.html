@@ -14,7 +14,7 @@
                 <a href="http://www.ucs.cam.ac.uk/lookup/groups">groups</a>.
             </p>
 
-            <form action={% url 'mwsauth.views.auth_change' site_id=site.id %} method="post">
+            <form action={% url 'mwsauth.views.auth_change' site_id=site.id %} method="post" style="float: left; width: 65%;">
                 <fieldset>
                     {% csrf_token %}
                     <p>
@@ -36,6 +36,16 @@
                     <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
                 </fieldset>
             </form>
+            <div style="background-color: #999999; float: left; width: 25%; padding: 20px 5% 10px 5%;">
+                <p>The list of users authorised using Lookup groups are refreshed every 24 hours. If you want to refresh
+                it now, you can use the following button.</p>
+                <form action={% url 'mwsauth.views.force_update' site_id=site.id %} method="post">
+                    <fieldset>
+                        {% csrf_token %}
+                        <p><input type="submit" value="Force update" class="campl-btn campl-primary-cta"/></p>
+                    </fieldset>
+                </form>
+            </div>
         </div>
     </div>
 {% endblock %}

@@ -7,13 +7,12 @@ a:hover {
     height: 110px;
 }
 
-.select2-input {
-    min-width: 75px;
+.select2-container {
+    width: 75%;
+    max-width: 500px;
 }
 
-.select2-container {
-    min-width: 300px;
-}
+input,textarea { width: auto !important; }
 
 ul.errorlist {
     display: inline-block;
