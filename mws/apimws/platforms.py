@@ -1,9 +1,11 @@
 from __future__ import absolute_import
 import logging
+import re
 import uuid
 from celery import shared_task, Task
 import json
 from django.core.urlresolvers import reverse
+from django.template.loader import render_to_string
 import os
 import random
 import string
@@ -103,9 +105,13 @@ def install_vm(vm):
     AnsibleConfiguration.objects.update_or_create(service=vm.service, key='os',
                                                   defaults={'value': json.dumps(settings.OS_VERSION)})
 
-    f = open(os.path.join(settings.BASE_DIR, 'apimws/debian_preseed.txt'), 'r')
-    profile = f.read()
-    f.close()
+    profile = render_to_string('api/debian_preseed.txt',
+                               {'IPv4': vm.service.network_configuration.IPv4,
+                                'netmask': '255.255.254.0',
+                                'gateway': '131.111.59.254',
+                                'hostname': re.split('.mws3.csx.cam.ac.uk',
+                                                     vm.service.network_configuration.name)[0]})
+                                # TODO change it to use variables
 
     from apimws.views import post_installation
     late_commands = [
