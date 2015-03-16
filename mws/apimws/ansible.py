@@ -27,9 +27,9 @@ def launch_ansible(service):
 
 
 def launch_ansible_site(site):
-    if site.production_service.active:
+    if site.production_service and site.production_service.active:
         launch_ansible(site.production_service)
-    if site.test_service.active:
+    if site.test_service and site.test_service.active:
         launch_ansible(site.test_service)
 
 
