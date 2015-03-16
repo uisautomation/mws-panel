@@ -660,8 +660,8 @@ class SiteManagement2Tests(TestCase):
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
         response = self.client.get(response.url)
         self.assertInHTML('<tr><td><p>externaldomain.com</p></td><td><p>Accepted</p></td>'
-                          '<td><p><a id="setup_instructions" style="cursor: pointer;">Set up instructions</a></p></td>'
-                          '<td style="width: 155px; cursor: pointer"><p><a onclick="javascript:ajax_call'
+                          '<td><p><a class="setup_instructions" style="cursor: pointer;">Set up instructions</a></p>'
+                          '</td><td style="width: 155px; cursor: pointer"><p><a onclick="javascript:ajax_call'
                           '(\'/set_dn_as_main/2/\', \'POST\')">Set as main domain</a><a class="delete_domain" '
                           'data-href="javascript:ajax_call(\'/delete_domain/2/\', \'DELETE\')"> <i '
                           'title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i></a></p></td></tr>',
