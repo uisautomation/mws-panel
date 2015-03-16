@@ -29,7 +29,7 @@
                             </td>
                             <td>
                                 {% if domain.is_external %}
-                                    <p><a id="setup_instructions" style="cursor: pointer;">Set up instructions</a></p>
+                                    <p><a class="setup_instructions" style="cursor: pointer;">Set up instructions</a></p>
                                 {% else %}
                                     <p>Managed domain name</p>
                                 {% endif %}
@@ -96,9 +96,9 @@
                     <h4 class="modal-title">Set up instructions</h4>
                 </div>
                 <div class="modal-body">
-                    <p>To configure your domain name, access to the control panel of your provider and create a CNAME record with the following content: {{ vhost.vm.site.service_network_configuration.mws_domain }}</p>
-                    <p>If your domain name is an bare domain, zone apex domain, or root domain, then instead create an A record with the following content: {{ vhost.vm.site.service_network_configuration.IPv4 }}</p>
-                    <p>In this latter case, you can also create an AAAA record with the following content for IPv6 compatibility: {{ vhost.vm.site.service_network_configuration.IPv6 }}</p>
+                    <p>To configure your domain name, access to the control panel of your provider and create a CNAME record with the following content: {{ vhost.service.network_configuration.mws_domain }}</p>
+                    <p>If your domain name is an bare domain, zone apex domain, or root domain, then instead create an A record with the following content: {{ vhost.service.network_configuration.IPv4 }}</p>
+                    <p>In this latter case, you can also create an AAAA record with the following content for IPv6 compatibility: {{ vhost.service.network_configuration.IPv6 }}</p>
                 </div>
             </div>
         </div>
@@ -149,7 +149,7 @@
             $('#delete_modal').modal();
         });
 
-        $('#setup_instructions').click(function() {
+        $('.setup_instructions').click(function() {
             $('#instructions_modal').modal();
         });
     </script>

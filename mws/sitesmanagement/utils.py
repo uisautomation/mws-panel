@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.shortcuts import _get_queryset
 import warnings
 
@@ -11,7 +12,10 @@ def get_object_or_None(klass, *args, **kwargs):
 
 
 def is_camacuk(domain_name):
-    return domain_name.endswith("cam.ac.uk")
+    if getattr(settings, 'DEMO', False):
+        return False
+    else:
+        return domain_name.endswith("cam.ac.uk")
 
 
 def deprecated(func):
