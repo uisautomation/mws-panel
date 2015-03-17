@@ -37,7 +37,7 @@
                                     campl-horizontal-teaser campl-teaser campl-focus-teaser">
                         <div class="campl-focus-teaser-img">
                             <div class="campl-content-container campl-horizontal-teaser-img">
-                                <a href="{% url 'sitesmanagement.views.settings' service_id=site.production_service.id %}">
+                                <a href="{% url 'sitesmanagement.views.service_settings' service_id=site.production_service.id %}">
                                     <div class="field field-name-field-external-url-image field-type-image
                                                 field-label-hidden">
                                         <div class="field-items">
@@ -54,11 +54,11 @@
                         <div class="campl-focus-teaser-txt">
                             <div class="campl-content-container campl-horizontal-teaser-txt">
                                 <h3 class="campl-teaser-title">
-                                    <a href="{% url 'sitesmanagement.views.settings' service_id=site.production_service.id %}">
+                                    <a href="{% url 'sitesmanagement.views.service_settings' service_id=site.production_service.id %}">
                                         MWS server settings
                                     </a>
                                 </h3>
-                                <a href="{% url 'sitesmanagement.views.settings' service_id=site.production_service.id %}"
+                                <a href="{% url 'sitesmanagement.views.service_settings' service_id=site.production_service.id %}"
                                    class="ir campl-focus-link">MWS server settings</a>
                             </div>
                         </div>
@@ -216,7 +216,7 @@
                                     campl-horizontal-teaser campl-teaser campl-focus-teaser">
                         <div class="campl-focus-teaser-img">
                             <div class="campl-content-container campl-horizontal-teaser-img">
-                                <a href="{% url 'sitesmanagement.views.settings' service_id=site.test_service.id %}">
+                                <a href="{% url 'sitesmanagement.views.service_settings' service_id=site.test_service.id %}">
                                     <div class="field field-name-field-external-url-image field-type-image
                                                 field-label-hidden">
                                         <div class="field-items">
@@ -233,11 +233,11 @@
                         <div class="campl-focus-teaser-txt">
                             <div class="campl-content-container campl-horizontal-teaser-txt">
                                 <h3 class="campl-teaser-title">
-                                    <a href="{% url 'sitesmanagement.views.settings' service_id=site.test_service.id %}">
+                                    <a href="{% url 'sitesmanagement.views.service_settings' service_id=site.test_service.id %}">
                                         MWS test server settings
                                     </a>
                                 </h3>
-                                <a href="{% url 'sitesmanagement.views.settings' service_id=site.test_service.id %}"
+                                <a href="{% url 'sitesmanagement.views.service_settings' service_id=site.test_service.id %}"
                                    class="ir campl-focus-link">MWS test server settings</a>
                             </div>
                         </div>

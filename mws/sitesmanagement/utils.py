@@ -29,3 +29,10 @@ def deprecated(func):
     new_func.__doc__ = func.__doc__
     new_func.__dict__.update(func.__dict__)
     return new_func
+
+
+def can_create_new_site():
+    from sitesmanagement.models import NetworkConfig
+    return (NetworkConfig.objects.filter(service=None, type='ipvxpub').count() >= 1 and
+            NetworkConfig.objects.filter(service=None, type='ipv4priv').count() >= 1 and
+            NetworkConfig.objects.filter(vm=None, type='ipv6').count())
