@@ -1,3 +1,5 @@
+"""Views(Controllers) for managing Vhosts"""
+
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseForbidden, HttpResponseRedirect
@@ -9,13 +11,15 @@ from sitesmanagement.models import Service, VhostForm, Vhost
 
 @login_required
 def vhosts_management(request, service_id):
+    """View(Controller) to show the current list of vhosts for a service. For each vhost you can go to manage
+    tls key/certificates, and domain names for this vhost, or add a new vhost"""
     service = get_object_or_404(Service, pk=service_id)
     site = privileges_check(service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
 
-    if service.is_busy:
+    if not service or not service.active or service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
@@ -36,13 +40,14 @@ def vhosts_management(request, service_id):
 
 @login_required
 def add_vhost(request, service_id):
+    """View(Controller) to add a new vhost to the service. It shows a form with the Vhost required fields."""
     service = get_object_or_404(Service, pk=service_id)
     site = privileges_check(service.site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
 
-    if service.is_busy:
+    if not service or not service.active or service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     if request.method == 'POST':
@@ -58,13 +63,15 @@ def add_vhost(request, service_id):
 
 @login_required
 def visit_vhost(request, vhost_id):
+    """View(Controller) to redirect the user to the URL of the vhost selected."""
     vhost = get_object_or_404(Vhost, pk=vhost_id)
     site = privileges_check(vhost.service.site.id, request.user)
+    service = vhost.service
 
     if site is None:
         return HttpResponseForbidden()
 
-    if vhost.service.is_busy:
+    if not service or not service.active or service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     return redirect("http://"+str(vhost.main_domain.name))
@@ -72,13 +79,15 @@ def visit_vhost(request, vhost_id):
 
 @login_required
 def delete_vhost(request, vhost_id):
+    """View(Controller) to delete the vhost selected."""
     vhost = get_object_or_404(Vhost, pk=vhost_id)
     site = privileges_check(vhost.service.site.id, request.user)
+    service = vhost.service
 
     if site is None:
         return HttpResponseForbidden()
 
-    if vhost.service.is_busy:
+    if not service or not service.active or service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     if request.method == 'DELETE':

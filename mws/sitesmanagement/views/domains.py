@@ -1,3 +1,5 @@
+"""Views(Controllers) for managing Domain Names"""
+
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseForbidden, HttpResponseRedirect
@@ -11,13 +13,16 @@ from sitesmanagement.utils import is_camacuk
 
 @login_required
 def domains_management(request, vhost_id):
+    """View(Controller) to show the list of domains names associated a the selected vhost. The template/view associated
+     allows the user to add or delete domain names and to select a domain name as the main domain name for the vhost"""
     vhost = get_object_or_404(Vhost, pk=vhost_id)
     site = privileges_check(vhost.service.site.id, request.user)
+    service = vhost.service
 
     if site is None:
         return HttpResponseForbidden()
 
-    if vhost.service.is_busy:
+    if not service or not service.active or service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
@@ -41,13 +46,15 @@ def domains_management(request, vhost_id):
 
 @login_required
 def add_domain(request, vhost_id, socket_error=None):
+    """View(Controller) to add a domain name to the vhost selected. """
     vhost = get_object_or_404(Vhost, pk=vhost_id)
     site = privileges_check(vhost.service.site.id, request.user)
+    service = vhost.service
 
     if site is None:
         return HttpResponseForbidden()
 
-    if vhost.service.is_busy:
+    if not service or not service.active or service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     if request.method == 'POST':
@@ -91,14 +98,16 @@ def add_domain(request, vhost_id, socket_error=None):
 
 @login_required
 def set_dn_as_main(request, domain_id):
+    """View(Controller) to set the domain name selected as the main domain of the vhost"""
     domain = get_object_or_404(DomainName, pk=domain_id)
     vhost = domain.vhost
     site = privileges_check(vhost.service.site.id, request.user)
+    service = vhost.service
 
     if site is None:
         return HttpResponseForbidden()
 
-    if vhost.service.is_busy:
+    if not service or not service.active or service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     if request.method == 'POST':
@@ -111,14 +120,16 @@ def set_dn_as_main(request, domain_id):
 
 @login_required
 def delete_dn(request, domain_id):
+    """View(Controller) to delete the domain name selected."""
     domain = get_object_or_404(DomainName, pk=domain_id)
     vhost = domain.vhost
     site = privileges_check(vhost.service.site.id, request.user)
+    service = vhost.service
 
     if site is None:
         return HttpResponseForbidden()
 
-    if vhost.service.is_busy:
+    if not service or not service.active or service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     if request.method == 'DELETE':

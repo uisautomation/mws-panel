@@ -19,9 +19,6 @@ from sitesmanagement.utils import get_object_or_None
 from sitesmanagement.models import BillingForm, Vhost, Service
 
 
-logger = logging.getLogger('mws')
-
-
 @login_required
 def billing_management(request, site_id):
     site = privileges_check(site_id, request.user)
@@ -127,7 +124,7 @@ def check_vm_status(request, service_id):
     if site is None:
         return HttpResponseForbidden()
 
-    if service.is_busy:
+    if not service or not service.active or service.is_busy:
         return JsonResponse({'error': 'VMNotReady'})
         # return JsonResponse({'error': 'VMNotReady'}, status_code=403) # TODO status_code in JsonResponse doesn't work
 
@@ -150,7 +147,7 @@ def system_packages(request, service_id):
     if site is None:
         return HttpResponseForbidden()
 
-    if service.is_busy:
+    if not service or not service.active or service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     ansible_configuraton = get_object_or_None(AnsibleConfiguration, service=service, key="system_packages") \
@@ -199,7 +196,7 @@ def delete_vm(request, service_id):
     if site is None or service.primary:
         return HttpResponseForbidden()
 
-    if service.is_busy:
+    if not service or not service.active or service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     if request.method == 'DELETE':
@@ -217,7 +214,7 @@ def power_vm(request, service_id):
     if site is None:
         return HttpResponseForbidden()
 
-    if not service.is_ready:
+    if not service or not service.active or service.is_busy:
         return redirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     service.power_on()
@@ -233,7 +230,7 @@ def reset_vm(request, service_id):
     if site is None:
         return HttpResponseForbidden()
 
-    if not service.is_ready:
+    if not service or not service.active or service.is_busy:
         return redirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     if service.do_reset() is False:
@@ -250,7 +247,8 @@ def update_os(request, service_id):
     if site is None:
         return HttpResponseForbidden()
 
-    if not service.is_ready:  # TODO change the button format (disabled) if the vm is not ready
+    if not service or not service.active or service.is_busy:
+    # TODO change the button format (disabled) if the vm is not ready
         return redirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     # TODO 1) Warn about the secondary VM if exists
@@ -265,11 +263,12 @@ def update_os(request, service_id):
 def certificates(request, vhost_id):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
     site = privileges_check(vhost.service.site.id, request.user)
+    service = vhost.service
 
     if site is None:
         return HttpResponseForbidden()
 
-    if vhost.service.is_busy:
+    if not service or not service.active or service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     if not vhost.domain_names.all():
@@ -406,7 +405,7 @@ def change_db_root_password(request, service_id):
     if site is None:
         return HttpResponseForbidden()
 
-    if service.is_busy:
+    if not service or not service.active or service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
@@ -437,7 +436,7 @@ def backups(request, service_id):
     if site is None:
         return HttpResponseForbidden()
 
-    if service.is_busy:
+    if not service or not service.active or service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {

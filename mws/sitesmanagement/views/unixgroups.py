@@ -1,3 +1,5 @@
+"""Views(Controllers) for managing Unix Groups"""
+
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseForbidden, HttpResponseRedirect
@@ -16,7 +18,7 @@ def unix_groups(request, service_id):
     if site is None:
         return HttpResponseForbidden()
 
-    if service.is_busy:
+    if not service or not service.active or service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
@@ -42,7 +44,7 @@ def add_unix_group(request, service_id):
     if site is None:
         return HttpResponseForbidden()
 
-    if service.is_busy:
+    if not service or not service.active or service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
@@ -88,11 +90,12 @@ def add_unix_group(request, service_id):
 def unix_group(request, ug_id):
     unix_group_i = get_object_or_404(UnixGroup, pk=ug_id)
     site = privileges_check(unix_group_i.service.site.id, request.user)
+    service = unix_group_i.service
 
     if site is None:
         return HttpResponseForbidden()
 
-    if unix_group_i.service.is_busy:
+    if not service or not service.active or service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     breadcrumbs = {
@@ -137,11 +140,12 @@ def unix_group(request, ug_id):
 def delete_unix_group(request, ug_id):
     unix_group = get_object_or_404(UnixGroup, pk=ug_id)
     site = privileges_check(unix_group.service.site.id, request.user)
+    service = unix_group.service
 
     if site is None:
         return HttpResponseForbidden()
 
-    if unix_group.service.is_busy:
+    if not service or not service.active or service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     if request.method == 'DELETE':

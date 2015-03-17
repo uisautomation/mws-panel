@@ -1,3 +1,5 @@
+"""Views(Controllers) for managing Sites"""
+
 import datetime
 import logging
 from django.contrib.auth.decorators import login_required
@@ -15,7 +17,7 @@ from django.conf import settings as django_settings
 from sitesmanagement.utils import can_create_new_site
 
 
-logger = logging.getLogger('mws')
+LOGGER = logging.getLogger('mws')
 
 
 @login_required
@@ -86,7 +88,7 @@ def new(request):
             if site.email:
                 email_confirmation.delay(site)
 
-            logger.info(str(request.user.username) + " created a new site '" + str(site.name) + "'")
+            LOGGER.info(str(request.user.username) + " created a new site '" + str(site.name) + "'")
             return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
     else:
         site_form = SiteForm(prefix="siteform", user=request.user)
