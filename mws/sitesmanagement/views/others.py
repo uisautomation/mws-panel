@@ -1,9 +1,11 @@
+"""Views(Controllers) for other purposes not in other files"""
+
 import bisect
 import datetime
-import logging
 import subprocess
 from Crypto.Util import asn1
 import OpenSSL.crypto
+from django.conf import settings
 from django.core.files.temp import NamedTemporaryFile
 from django.utils import dateparse
 from django.contrib.auth.decorators import login_required
@@ -113,6 +115,7 @@ def service_settings(request, service_id):
         'breadcrumbs': breadcrumbs,
         'site': site,
         'service': service,
+        'DEMO': getattr(settings, 'DEMO', False)
     })
 
 
@@ -141,6 +144,8 @@ def check_vm_status(request, service_id):
 
 @login_required
 def system_packages(request, service_id):
+    if getattr(settings, 'DEMO', False):
+        return HttpResponseForbidden()
     service = get_object_or_404(Service, pk=service_id)
     site = privileges_check(service.site.id, request.user)
 
@@ -241,6 +246,8 @@ def reset_vm(request, service_id):
 
 @login_required
 def update_os(request, service_id):
+    if getattr(settings, 'DEMO', False):
+        return HttpResponseForbidden()
     service = get_object_or_404(Service, pk=service_id)
     site = privileges_check(service.site.id, request.user)
 
@@ -399,6 +406,8 @@ def generate_csr(request, vhost_id):
 
 @login_required
 def change_db_root_password(request, service_id):
+    if getattr(settings, 'DEMO', False):
+        return HttpResponseForbidden()
     service = get_object_or_404(Service, pk=service_id)
     site = privileges_check(service.site.id, request.user)
 
@@ -430,6 +439,8 @@ def change_db_root_password(request, service_id):
 
 @login_required
 def backups(request, service_id):
+    if getattr(settings, 'DEMO', False):
+        return HttpResponseForbidden()
     service = get_object_or_404(Service, pk=service_id)
     site = privileges_check(service.site.id, request.user)
 

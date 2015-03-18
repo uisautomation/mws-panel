@@ -22,6 +22,9 @@ LOGGER = logging.getLogger('mws')
 
 @login_required
 def index(request):
+    """View(Controller) of the index page that shows the list of sites where the user is authorised. These sites are
+    separated in sites where the user is authorised as the admin and sites where the user is authorised as a simple
+    user (only SSH access)"""
     try:
         groups_id = get_group_ids_of_a_user_in_lookup(request.user)
     except IbisException:
@@ -51,6 +54,8 @@ def index(request):
 
 @login_required
 def new(request):
+    """View(Controller) with a form to request a new MWS site. The controller checks that there are free network
+    pre configurations in the dabase before creating the new site."""
     if not can_create_new_site():  # TODO add prealocated HostNetworkConfigs
         return HttpResponseRedirect(reverse('sitesmanagement.views.index'))
 
@@ -101,6 +106,7 @@ def new(request):
 
 @login_required
 def edit(request, site_id):
+    """View(Controller) to edit the name, description of a site and access to delete and disable options"""
     site = privileges_check(site_id, request.user)
 
     if site is None:
@@ -136,6 +142,9 @@ def edit(request, site_id):
 
 @login_required
 def delete(request, site_id):
+    """View(Controller) to delete a site. The Site object is marked as cancelled but not deleted. The VMs associated
+    to this Site are switched off but eventually they are deleted. We maintain the Site object to report and
+    billing options."""
     site = privileges_check(site_id, request.user)
 
     if site is None:
@@ -166,6 +175,7 @@ def delete(request, site_id):
 
 @login_required
 def disable(request, site_id):
+    """View(Controller) to disable a Site object. The VMs are switched off."""
     site = privileges_check(site_id, request.user)
 
     if site is None:
@@ -194,6 +204,7 @@ def disable(request, site_id):
 
 @login_required
 def enable(request, site_id):
+    """View(Controller) to reenable a Site object. The VMs are switched on."""
     site = get_object_or_404(Site, pk=site_id)
 
     try:
@@ -212,6 +223,7 @@ def enable(request, site_id):
 
 @login_required
 def show(request, site_id):
+    """View(Controller) to see the main menu of a Site with all its options. It also shows messages to the user."""
     site = privileges_check(site_id, request.user)
 
     if site is None:

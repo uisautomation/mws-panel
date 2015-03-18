@@ -127,6 +127,12 @@ ul.errorlist + p textarea {
     cursor: pointer;
 }
 
+.not-active {
+    pointer-events: none;
+    cursor: default;
+    opacity: 0.5;
+}
+
 /*! normalize.css v3.0.0 | MIT License | git.io/normalize */
 
 .btn {
