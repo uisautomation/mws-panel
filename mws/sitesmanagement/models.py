@@ -503,8 +503,8 @@ class Vhost(models.Model):
     # main domain name for this vhost
     main_domain = models.ForeignKey('DomainName', related_name='+', null=True, blank=True, on_delete=models.SET_NULL)
     service = models.ForeignKey(Service, related_name='vhosts')
-    csr = models.TextField(null=True)
-    certificate = models.TextField(null=True)
+    csr = models.TextField(null=True, blank=True)
+    certificate = models.TextField(null=True, blank=True)
 
     def sorted_domain_names(self):
         return sorted(set(self.domain_names.all()))
