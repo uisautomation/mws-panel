@@ -1,4 +1,5 @@
 import logging
+from django.conf import settings
 from django.core.urlresolvers import resolve
 from django.http import HttpResponseForbidden
 from django.template import loader, RequestContext
@@ -15,12 +16,16 @@ def check_permited_betatesters(request):
     :param request: the http request
     :return: True if they are, False otherwise'''
     if hasattr(request.user, 'suspendeduser') and (request.user.suspendeduser.suspended is True) \
-            and (resolve(request.path).url_name != 'logout') or request.user.is_authenticated() \
-            and not user_in_groups(request.user, [get_or_create_group_by_groupid(101888),
-                                                  get_or_create_group_by_groupid(101128)]):
+            and (resolve(request.path).url_name != 'logout'):
         return False
-    else:
-        return True
+
+    if request.user.is_authenticated() and getattr(settings, 'DEMO', False) and \
+            not user_in_groups(request.user,
+                               [get_or_create_group_by_groupid(101611),  # UIS members
+                                get_or_create_group_by_groupid(102170)]):  # MWS3 Betatesters
+        return False
+
+    return True
 
 
 def user_in_jackdaw(request):
