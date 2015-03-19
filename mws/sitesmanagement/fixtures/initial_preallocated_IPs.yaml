@@ -1,30 +1,3 @@
-- fields: {IPv4: 131.111.58.1, IPv4private: 172.28.18.1, IPv6: '2001:630:212:8::8c:1',
-    mws_domain: mws-59262.mws3.csx.cam.ac.uk, mws_private_domain: mws-76110.mws3.csx.private.cam.ac.uk}
-  model: sitesmanagement.ServiceNetworkConfig
-- fields: {IPv4: 131.111.58.2, IPv4private: 172.28.18.2, IPv6: '2001:630:212:8::8c:2',
-    mws_domain: mws-09069.mws3.csx.cam.ac.uk, mws_private_domain: mws-64454.mws3.csx.private.cam.ac.uk}
-  model: sitesmanagement.ServiceNetworkConfig
-- fields: {IPv4: 131.111.58.3, IPv4private: 172.28.18.3, IPv6: '2001:630:212:8::8c:3',
-    mws_domain: mws-35826.mws3.csx.cam.ac.uk, mws_private_domain: mws-53275.mws3.csx.private.cam.ac.uk}
-  model: sitesmanagement.ServiceNetworkConfig
-- fields: {IPv4: 131.111.58.4, IPv4private: 172.28.18.4, IPv6: '2001:630:212:8::8c:4',
-    mws_domain: mws-81451.mws3.csx.cam.ac.uk, mws_private_domain: mws-18657.mws3.csx.private.cam.ac.uk}
-  model: sitesmanagement.ServiceNetworkConfig
-- fields: {IPv4: 131.111.58.5, IPv4private: 172.28.18.5, IPv6: '2001:630:212:8::8c:5',
-    mws_domain: mws-54096.mws3.csx.cam.ac.uk, mws_private_domain: mws-68744.mws3.csx.private.cam.ac.uk}
-  model: sitesmanagement.ServiceNetworkConfig
-- fields: {IPv4: 131.111.58.6, IPv4private: 172.28.18.6, IPv6: '2001:630:212:8::8c:6',
-    mws_domain: mws-65121.mws3.csx.cam.ac.uk, mws_private_domain: mws-80041.mws3.csx.private.cam.ac.uk}
-  model: sitesmanagement.ServiceNetworkConfig
-- fields: {IPv4: 131.111.58.7, IPv4private: 172.28.18.7, IPv6: '2001:630:212:8::8c:7',
-    mws_domain: mws-12113.mws3.csx.cam.ac.uk, mws_private_domain: mws-79200.mws3.csx.private.cam.ac.uk}
-  model: sitesmanagement.ServiceNetworkConfig
-- fields: {IPv4: 131.111.58.8, IPv4private: 172.28.18.8, IPv6: '2001:630:212:8::8c:8',
-    mws_domain: mws-04294.mws3.csx.cam.ac.uk, mws_private_domain: mws-79879.mws3.csx.private.cam.ac.uk}
-  model: sitesmanagement.ServiceNetworkConfig
-- fields: {IPv4: 131.111.58.9, IPv4private: 172.28.18.9, IPv6: '2001:630:212:8::8c:9',
-    mws_domain: mws-69250.mws3.csx.cam.ac.uk, mws_private_domain: mws-48689.mws3.csx.private.cam.ac.uk}
-  model: sitesmanagement.ServiceNetworkConfig
 - fields: {IPv4: '131.111.58.10,', IPv4private: 172.28.18.10, IPv6: '2001:630:212:8::8c:10',
     mws_domain: mws-40760.mws3.csx.cam.ac.uk, mws_private_domain: mws-08826.mws3.csx.private.cam.ac.uk}
   model: sitesmanagement.ServiceNetworkConfig
@@ -717,34 +690,4 @@
   model: sitesmanagement.ServiceNetworkConfig
 - fields: {IPv4: 131.111.58.240, IPv4private: 172.28.18.240, IPv6: '2001:630:212:8::8c:240',
     mws_domain: mws-53686.mws3.csx.cam.ac.uk, mws_private_domain: mws-81307.mws3.csx.private.cam.ac.uk}
-  model: sitesmanagement.ServiceNetworkConfig
-- fields: {IPv4: 131.111.58.246, IPv4private: 172.28.18.246, IPv6: '2001:630:212:8::8c:246',
-    mws_domain: mws-06767.mws3.csx.cam.ac.uk, mws_private_domain: mws-47746.mws3.csx.private.cam.ac.uk}
-  model: sitesmanagement.ServiceNetworkConfig
-- fields: {IPv4: 131.111.58.247, IPv4private: 172.28.18.247, IPv6: '2001:630:212:8::8c:247',
-    mws_domain: mws-74783.mws3.csx.cam.ac.uk, mws_private_domain: mws-01990.mws3.csx.private.cam.ac.uk}
-  model: sitesmanagement.ServiceNetworkConfig
-- fields: {IPv4: 131.111.58.248, IPv4private: 172.28.18.248, IPv6: '2001:630:212:8::8c:248',
-    mws_domain: mws-02474.mws3.csx.cam.ac.uk, mws_private_domain: mws-99762.mws3.csx.private.cam.ac.uk}
-  model: sitesmanagement.ServiceNetworkConfig
-- fields: {IPv4: 131.111.58.249, IPv4private: 172.28.18.249, IPv6: '2001:630:212:8::8c:249',
-    mws_domain: mws-39354.mws3.csx.cam.ac.uk, mws_private_domain: mws-00258.mws3.csx.private.cam.ac.uk}
-  model: sitesmanagement.ServiceNetworkConfig
-- fields: {IPv4: 131.111.58.250, IPv4private: 172.28.18.250, IPv6: '2001:630:212:8::8c:250',
-    mws_domain: mws-03537.mws3.csx.cam.ac.uk, mws_private_domain: mws-72111.mws3.csx.private.cam.ac.uk}
-  model: sitesmanagement.ServiceNetworkConfig
-- fields: {IPv4: 131.111.58.251, IPv4private: 172.28.18.251, IPv6: '2001:630:212:8::8c:251',
-    mws_domain: mws-11307.mws3.csx.cam.ac.uk, mws_private_domain: mws-40394.mws3.csx.private.cam.ac.uk}
-  model: sitesmanagement.ServiceNetworkConfig
-- fields: {IPv4: 131.111.58.252, IPv4private: 172.28.18.252, IPv6: '2001:630:212:8::8c:252',
-    mws_domain: mws-07560.mws3.csx.cam.ac.uk, mws_private_domain: mws-05089.mws3.csx.private.cam.ac.uk}
-  model: sitesmanagement.ServiceNetworkConfig
-- fields: {IPv4: 131.111.58.253, IPv4private: 172.28.18.253, IPv6: '2001:630:212:8::8c:253',
-    mws_domain: mws-66424.mws3.csx.cam.ac.uk, mws_private_domain: mws-46250.mws3.csx.private.cam.ac.uk}
-  model: sitesmanagement.ServiceNetworkConfig
-- fields: {IPv4: 131.111.58.254, IPv4private: 172.28.18.254, IPv6: '2001:630:212:8::8c:254',
-    mws_domain: mws-39595.mws3.csx.cam.ac.uk, mws_private_domain: mws-23169.mws3.csx.private.cam.ac.uk}
-  model: sitesmanagement.ServiceNetworkConfig
-- fields: {IPv4: 131.111.58.255, IPv4private: 172.28.18.255, IPv6: '2001:630:212:8::8c:255',
-    mws_domain: mws-12940.mws3.csx.cam.ac.uk, mws_private_domain: mws-08246.mws3.csx.private.cam.ac.uk}
   model: sitesmanagement.ServiceNetworkConfig
