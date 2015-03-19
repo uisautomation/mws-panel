@@ -356,7 +356,7 @@
                             $("#vm_status_message_link").attr("href", "{% url 'sitesmanagement.views.reset_vm' service_id=service.id %}");
                             $("#vm_status_message_link").html("If it does not respond you can do a hard reset by clicking here");
                             $("#vm_status_link").attr("href", "{% url 'sitesmanagement.views.reset_vm' service_id=service.id %}");
-                        } else if (result['vm_is_on'] == false) {
+                        } else if (result['service_is_on'] == false) {
                             $("#vm_status_message").html("The {% if not service.primary %}test {% endif %} server is currently OFF");
                             $("#vm_status_message_link").attr("href", "{% url 'sitesmanagement.views.power_vm' service_id=service.id %}");
                             $("#vm_status_message_link").html("Power it on");
