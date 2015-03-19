@@ -205,7 +205,8 @@ def delete_vm(request, service_id):
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     if request.method == 'DELETE':
-        service.delete()
+        for vm in service.virtual_machines.all():
+            vm.delete()
         return redirect('sitesmanagement.views.show', site_id=site.id)
 
     return HttpResponseForbidden()
