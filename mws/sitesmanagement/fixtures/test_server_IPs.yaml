@@ -1,0 +1,60 @@
+- fields: {IPv4: 131.111.58.246, IPv4_gateway: 131.111.59.254, IPv4_netmask: 255.255.254.0,
+    IPv6: '2001:630:212:8::8c:246', name: mws-06767.mws3.csx.cam.ac.uk, type: ipvxpub}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv4: 172.28.18.246, IPv4_gateway: 172.28.19.254, IPv4_netmask: 255.255.254.0,
+    name: mws-47746.mws3.csx.private.cam.ac.uk, type: ipv4priv}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv4: 131.111.58.247, IPv4_gateway: 131.111.59.254, IPv4_netmask: 255.255.254.0,
+    IPv6: '2001:630:212:8::8c:247', name: mws-74783.mws3.csx.cam.ac.uk, type: ipvxpub}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv4: 172.28.18.247, IPv4_gateway: 172.28.19.254, IPv4_netmask: 255.255.254.0,
+    name: mws-01990.mws3.csx.private.cam.ac.uk, type: ipv4priv}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv4: 131.111.58.248, IPv4_gateway: 131.111.59.254, IPv4_netmask: 255.255.254.0,
+    IPv6: '2001:630:212:8::8c:248', name: mws-02474.mws3.csx.cam.ac.uk, type: ipvxpub}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv4: 172.28.18.248, IPv4_gateway: 172.28.19.254, IPv4_netmask: 255.255.254.0,
+    name: mws-99762.mws3.csx.private.cam.ac.uk, type: ipv4priv}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv4: 131.111.58.249, IPv4_gateway: 131.111.59.254, IPv4_netmask: 255.255.254.0,
+    IPv6: '2001:630:212:8::8c:249', name: mws-39354.mws3.csx.cam.ac.uk, type: ipvxpub}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv4: 172.28.18.249, IPv4_gateway: 172.28.19.254, IPv4_netmask: 255.255.254.0,
+    name: mws-00258.mws3.csx.private.cam.ac.uk, type: ipv4priv}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv4: 131.111.58.250, IPv4_gateway: 131.111.59.254, IPv4_netmask: 255.255.254.0,
+    IPv6: '2001:630:212:8::8c:250', name: mws-03537.mws3.csx.cam.ac.uk, type: ipvxpub}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv4: 172.28.18.250, IPv4_gateway: 172.28.19.254, IPv4_netmask: 255.255.254.0,
+    name: mws-72111.mws3.csx.private.cam.ac.uk, type: ipv4priv}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv4: 131.111.58.251, IPv4_gateway: 131.111.59.254, IPv4_netmask: 255.255.254.0,
+    IPv6: '2001:630:212:8::8c:251', name: mws-11307.mws3.csx.cam.ac.uk, type: ipvxpub}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv4: 172.28.18.251, IPv4_gateway: 172.28.19.254, IPv4_netmask: 255.255.254.0,
+    name: mws-40394.mws3.csx.private.cam.ac.uk, type: ipv4priv}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv4: 131.111.58.252, IPv4_gateway: 131.111.59.254, IPv4_netmask: 255.255.254.0,
+    IPv6: '2001:630:212:8::8c:252', name: mws-07560.mws3.csx.cam.ac.uk, type: ipvxpub}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv4: 172.28.18.252, IPv4_gateway: 172.28.19.254, IPv4_netmask: 255.255.254.0,
+    name: mws-05089.mws3.csx.private.cam.ac.uk, type: ipv4priv}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv4: 131.111.58.253, IPv4_gateway: 131.111.59.254, IPv4_netmask: 255.255.254.0,
+    IPv6: '2001:630:212:8::8c:253', name: mws-66424.mws3.csx.cam.ac.uk, type: ipvxpub}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv4: 172.28.18.253, IPv4_gateway: 172.28.19.254, IPv4_netmask: 255.255.254.0,
+    name: mws-46250.mws3.csx.private.cam.ac.uk, type: ipv4priv}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv4: 131.111.58.254, IPv4_gateway: 131.111.59.254, IPv4_netmask: 255.255.254.0,
+    IPv6: '2001:630:212:8::8c:254', name: mws-39595.mws3.csx.cam.ac.uk, type: ipvxpub}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv4: 172.28.18.254, IPv4_gateway: 172.28.19.254, IPv4_netmask: 255.255.254.0,
+    name: mws-23169.mws3.csx.private.cam.ac.uk, type: ipv4priv}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv4: 131.111.58.255, IPv4_gateway: 131.111.59.254, IPv4_netmask: 255.255.254.0,
+    IPv6: '2001:630:212:8::8c:255', name: mws-12940.mws3.csx.cam.ac.uk, type: ipvxpub}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv4: 172.28.18.255, IPv4_gateway: 172.28.19.254, IPv4_netmask: 255.255.254.0,
+    name: mws-08246.mws3.csx.private.cam.ac.uk, type: ipv4priv}
+  model: sitesmanagement.NetworkConfig
