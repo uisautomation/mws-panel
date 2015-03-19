@@ -235,11 +235,12 @@ def show(request, site_id):
 
     warning_messages = []
     production_service = site.production_service
+    test_service = site.test_service
 
     if production_service is not None and production_service.status == 'ansible':
         warning_messages.append("Your server is being configured.")
 
-    if site.secondary_vm is not None and site.secondary_vm.status == 'ansible':
+    if test_service is not None and test_service.status == 'ansible':
         warning_messages.append("Your test server is being configured.")
 
     if production_service is not None:
