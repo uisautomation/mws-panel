@@ -224,23 +224,26 @@ def clone_vm(site, primary_vm):
     if not delete_service:
         raise Exception("A site has no production or test service")  # TODO create custom exception
 
+    clone_vm_api_call.delay(original_service, delete_service)
+
+
+@shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
+def clone_vm_api_call(original_service, delete_service):
+    # TODO restore this service in case the clonning does not work? then do not delete the VMs
+
     delete_service.site = None
     service_netconf = delete_service.network_configuration
     delete_service.network_configuration = None
     delete_service.save()
 
-    destination_service = Service.objects.create(site=site, type=delete_service.type,
+    destination_service = Service.objects.create(site=original_service.site, type=delete_service.type,
                                                  network_configuration=service_netconf)
 
-    clone_vm_api_call.delay(original_service, destination_service, delete_service)
-
-
-@shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
-def clone_vm_api_call(original_service, destination_service, delete_service):
-    # TODO restore this service in case the clonning does not work? then do not delete the VMs
     # Now it is not possible but when IPv6 PXE works it will be
     for vm in delete_service.virtual_machines.all():
         vm.delete()
+
+    delete_service.delete()
 
     destination_vm = VirtualMachine.objects.create(token=uuid.uuid4(), service=destination_service,
                                                    network_configuration=NetworkConfig.get_free_host_config())
@@ -268,7 +271,7 @@ def clone_vm_api_call(original_service, destination_service, delete_service):
     destination_service.save()
 
     # Copy Unix Groups
-    for unix_group in original_vm.service.unix_groups.all():
+    for unix_group in original_service.unix_groups.all():
         copy_users = unix_group.users.all()
         unix_group.pk = None
         unix_group.service = destination_service
@@ -276,15 +279,16 @@ def clone_vm_api_call(original_service, destination_service, delete_service):
         unix_group.users = copy_users
 
     # Copy Ansible Configuration
-    for ansible_conf in original_vm.service.ansible_configuration.all():
+    for ansible_conf in original_service.ansible_configuration.all():
         ansible_conf.pk = None
         ansible_conf.service = destination_service
         ansible_conf.save()
 
     # Copy vhosts
     # TODO copy Domain Names
-    for vhost in original_vm.service.vhosts.all():
+    for vhost in original_service.vhosts.all():
         vhost.pk = None
+        vhost.main_domain = None
         vhost.service = destination_service
         vhost.save()
 
