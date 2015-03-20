@@ -1,3 +1,4 @@
+from datetime import timedelta
 from common_settings import *
 # This file is generated when deploying
 from production_secrets import *
@@ -41,6 +42,14 @@ hAM+a6/30F5fdkWpE1smPyrfASyXRfWE4Ccn1RVgYX9u
 BROKER_URL = 'django://'
 INSTALLED_APPS = INSTALLED_APPS+('kombu.transport.django', ) # TODO Change this to rabbitmq?
 CELERY_IMPORTS = ('apimws.platforms', 'apimws.utils', 'apimws.jackdaw', 'apimws.ansible')
+
+CELERYBEAT_SCHEDULE = {
+    'add-every-night': {
+        'task': 'apimws.jackdaw.jackdaw_api',
+        'schedule': timedelta(hours=1, minutes=3),
+        'args': ()
+    },
+}
 
 MIDDLEWARE_CLASSES += (
     'mwsauth.middleware.CheckBannedUsers',

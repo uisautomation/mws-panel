@@ -1,5 +1,4 @@
 from __future__ import absolute_import
-from celery.schedules import crontab
 from celery import Celery
 
 # to launch the celery worker use the following command line:
@@ -11,11 +10,3 @@ app = Celery('mws')
 # pickle the object when using Windows.
 app.config_from_object('django.conf:settings')
 #app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
-
-CELERYBEAT_SCHEDULE = {
-    'add-every-night': {
-        'task': 'apimws.jackdaw.jackdaw_api',
-        'schedule': crontab(hour=2, minute=30),
-        'args': ()
-    },
-}
