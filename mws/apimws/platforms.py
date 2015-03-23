@@ -49,6 +49,7 @@ def vm_api_request(**json_object):
     json_object['secret'] = get_api_secret()
     vm_api_url = "https://bes.csi.cam.ac.uk/mws-api/v1/vm.json"
     response = json.loads(requests.post(vm_api_url, data=json.dumps(json_object), headers=headers).text)
+    json_object.pop('secret', None)  # Do not output to the logger the secret key
     LOGGER.info("VM API request: %s\nVM API response: %s", json_object, response)
     if response['result'] != 'Success':
         raise PlatformsAPIFailure(json_object, response)
@@ -61,6 +62,7 @@ def on_vm_api_failure(request, response):
     :param response: the VM API response
     :return: False
     '''
+    request.pop('secret', None)  # Do not output to the logger the secret key
     LOGGER.error("VM API request: %s\nVM API response: %s", request, response)
     raise PlatformsAPIFailure(request, response)
 
