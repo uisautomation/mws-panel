@@ -76,7 +76,7 @@ def confirm_email(request, ec_id, token):
         email_confirmation.status = 'accepted'
         email_confirmation.save()
         logger.info(str(request.user.username) + " confirmed email '" + str(email_confirmation.email) + "'")
-        launch_ansible_site(email_confirmation.site)  # to update server email associated
+        # launch_ansible_site(email_confirmation.site)  # to update server email associated
         return redirect(show, site_id=email_confirmation.site.id)
     else:
         raise Exception  # TODO change this exception for an error message
