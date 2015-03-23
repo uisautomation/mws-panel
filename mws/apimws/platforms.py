@@ -226,33 +226,25 @@ def clone_vm(site, primary_vm):
     if not delete_service:
         raise Exception("A site has no production or test service")  # TODO create custom exception
 
-    clone_vm_api_call.delay(original_service, delete_service)
+    # TODO restore this service in case the clonning does not work? then do not delete the VMs
+
+    service_netconf = delete_service.network_configuration
+    service_type = delete_service.type
+    delete_service.delete()
+
+    destination_service = Service.objects.create(site=original_service.site, type=service_type,
+                                                 network_configuration=service_netconf, status='requested')
+    destination_vm = VirtualMachine.objects.create(token=uuid.uuid4(), service=destination_service,
+                                                   network_configuration=NetworkConfig.get_free_host_config())
+
+    clone_vm_api_call.delay(original_service, destination_vm)
 
 
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
-def clone_vm_api_call(original_service, delete_service):
-    # TODO restore this service in case the clonning does not work? then do not delete the VMs
-
-    delete_service.site = None
-    service_netconf = delete_service.network_configuration
-    delete_service.network_configuration = None
-    delete_service.save()
-
-    destination_service = Service.objects.create(site=original_service.site, type=delete_service.type,
-                                                 network_configuration=service_netconf)
-
-    # Now it is not possible but when IPv6 PXE works it will be
-    for vm in delete_service.virtual_machines.all():
-        vm.delete()
-
-    delete_service.delete()
-
-    destination_vm = VirtualMachine.objects.create(token=uuid.uuid4(), service=destination_service,
-                                                   network_configuration=NetworkConfig.get_free_host_config())
-    destination_service.status = 'requested'
-    destination_service.save()
+def clone_vm_api_call(original_service, destination_vm):
 
     original_vm = original_service.virtual_machines.first()
+    destination_service = destination_vm.service
 
     try:
         response = vm_api_request(command='clone', vmid=original_vm.name,

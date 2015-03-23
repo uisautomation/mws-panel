@@ -28,7 +28,7 @@
             </div>
             {% endif %}
 
-        {% if not site.production_service.is_busy %}
+        {% if site.production_service and site.production_service.active and not site.production_service.is_busy %}
 
             {% if site.production_service %}
             <div class="campl-column4">
