@@ -39,12 +39,11 @@ hAM+a6/30F5fdkWpE1smPyrfASyXRfWE4Ccn1RVgYX9u
 -----END CERTIFICATE-----
 """}
 
-BROKER_URL = 'django://'
-INSTALLED_APPS = INSTALLED_APPS+('kombu.transport.django', ) # TODO Change this to rabbitmq?
+BROKER_URL = 'redis://localhost:6379/0'
 CELERY_IMPORTS = ('apimws.platforms', 'apimws.utils', 'apimws.jackdaw', 'apimws.ansible')
 
 CELERYBEAT_SCHEDULE = {
-    'add-every-night': {
+    'jackdaw-api': {
         'task': 'apimws.jackdaw.jackdaw_api',
         'schedule': timedelta(hours=1, minutes=3),
         'args': ()
