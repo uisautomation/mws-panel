@@ -54,9 +54,9 @@ class Command(NoArgsCommand):
 
     def hostvars(self, vm):
         v = {}
-        v['ansible_ssh_host'] = (vm.network_configuration.name or
-                                 vm.network_configuration.IPv4 or
-                                 vm.network_configuration.IPv6)
+        v['ansible_ssh_host'] = (vm.service.network_configuration.name or
+                                 vm.service.network_configuration.IPv4 or
+                                 vm.service.network_configuration.IPv6)
         v['mws_name'] = vm.site.name
         v['mws_webmaster_email'] = vm.site.email
 
@@ -84,10 +84,10 @@ class Command(NoArgsCommand):
             return vhv
         v['mws_vhosts'] = [vhost_vars(vh) for vh in vm.service.vhosts.all()]
         v['mws_is_primary'] = vm.primary
-        v['mws_ipv4'] = vm.network_configuration.IPv4
-        v['mws_ipv4_netmask'] = vm.network_configuration.IPv4_netmask
-        v['mws_ipv4_gateway'] = vm.network_configuration.IPv4_gateway
-        v['mws_ipv6'] = vm.network_configuration.IPv6
+        v['mws_ipv4'] = vm.service.network_configuration.IPv4
+        v['mws_ipv4_netmask'] = vm.service.network_configuration.IPv4_netmask
+        v['mws_ipv4_gateway'] = vm.service.network_configuration.IPv4_gateway
+        v['mws_ipv6'] = vm.service.network_configuration.IPv6
         v['mws_tls_enabled'] = any(['certificate' in vhv
                                     for vhv in v['mws_vhosts']])
         v['mws_os_type'] = vm.os_type
