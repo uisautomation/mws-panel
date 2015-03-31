@@ -87,7 +87,7 @@ d-i partman/confirm_nooverwrite boolean true
 
 tasksel tasksel/first multiselect standard
 # Individual additional packages to install
-d-i pkgsel/include string openssh-server emacs vim apache2 mysql-server php5-mysql php5 libapache2-mod-php5 php5-mcrypt curl
+d-i pkgsel/include string openssh-server curl
 #XXX fixme XXX we probably also want
 # bes-config,bes-update-check,open-vm-tools,dump,userv,ook-client-dump
 #and maybe mcv21?

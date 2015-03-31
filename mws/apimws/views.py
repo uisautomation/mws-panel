@@ -143,6 +143,7 @@ def post_installation(request):
             if service.status != "installing":
                 raise Exception("The service wasn't in the OS installation process")  # TODO raise custom exception
             service.status = 'ansible'
+            service.save()
             launch_ansible_async.delay(service)
             return HttpResponse()
 
