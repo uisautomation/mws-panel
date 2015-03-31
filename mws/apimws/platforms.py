@@ -142,7 +142,7 @@ def install_vm(vm):
         "1zjDdHRKAzMKP+hdiagrR1s+ns2FQ6tTW5bfyrUm3j5RoYh8TyXPh9G2t5+GhaPRxZtw== mws-admin superuser key' "
         ">>/target/root/.ssh/authorized_keys",
 
-        '{ curl --data "vm=%s&token=%s" %s%s || true; }' %
+        '{ in-target curl --data "vm=%s&token=%s" %s%s || true; }' %
         (vm.id, vm.token, settings.MAIN_DOMAIN, reverse(post_installation))
     ]
 

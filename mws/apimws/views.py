@@ -7,7 +7,7 @@ from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from stronghold.decorators import public
-from apimws.ansible import launch_ansible_site
+from apimws.ansible import launch_ansible_async
 from apimws.utils import resend_email_confirmation
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.models import DomainName, Site, EmailConfirmation, VirtualMachine
@@ -140,8 +140,10 @@ def post_installation(request):
 
         if vm.token == token:
             service = vm.service
-            service.status = 'ready'
-            service.save()
+            if service.status != "installing":
+                raise Exception("The service wasn't in the OS installation process")  # TODO raise custom exception
+            service.status = 'ansible'
+            launch_ansible_async.delay(service)
             return HttpResponse()
 
     return HttpResponseForbidden()
