@@ -40,11 +40,12 @@ class TaskWithFailure(Task):
     abstract = True
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):
-        LOGGER.error("An error happened when trying to execute Ansible.\n The task id is %s. \n\n "
-                     "The parameters passed to the task were: %s \n\n The traceback is: \n %s", task_id, args, einfo)
+        LOGGER.error("An error happened when trying to execute Ansible.\nThe task id is %s.\n\n"
+                     "The parameters passed to the task were: %s\n\nThe traceback is:\n%s\n\n"
+                     "The output from the command was: %s\n", task_id, args, einfo, exc.output)
 
 
-@shared_task(base=TaskWithFailure, default_retry_delay=60, max_retries=5)  # Retry each 5 minutes for 24 hours
+@shared_task(base=TaskWithFailure, default_retry_delay=60, max_retries=5)  # Retry each minute for 5 minutes
 def launch_ansible_async(service):
     while service.status != 'ready':
         subprocess.check_output(["userv", "mws-admin", "mws_ansible"])
