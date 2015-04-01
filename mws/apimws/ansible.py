@@ -1,6 +1,9 @@
-from celery import shared_task
+import logging
 import subprocess
-from sitesmanagement.models import Service
+from celery import shared_task, Task
+
+
+LOGGER = logging.getLogger('mws')
 
 
 class UnexpectedVMStatus(Exception):
@@ -33,10 +36,18 @@ def launch_ansible_site(site):
         launch_ansible(site.test_service)
 
 
-@shared_task
+class TaskWithFailure(Task):
+    abstract = True
+
+    def on_failure(self, exc, task_id, args, kwargs, einfo):
+        LOGGER.error("An error happened when trying to execute Ansible.\n The task id is %s. \n\n "
+                     "The parameters passed to the task were: %s \n\n The traceback is: \n %s", task_id, args, einfo)
+
+
+@shared_task(base=TaskWithFailure, default_retry_delay=60, max_retries=5)  # Retry each 5 minutes for 24 hours
 def launch_ansible_async(service):
     while service.status != 'ready':
-        ansible_response = subprocess.check_output(["userv", "mws-admin", "mws_ansible"])
+        subprocess.check_output(["userv", "mws-admin", "mws_ansible"])
         service = refresh_object(service)
         if service.status == 'ansible_queued':
             service.status = 'ansible'
