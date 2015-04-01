@@ -139,7 +139,7 @@
 
             {% if site.is_ready %}
 
-            <div class="campl-column4">
+            <div class="campl-column4{% if DEMO %} not-active{% endif %}">
                 <div class="campl-content-container campl-side-padding">
                     <article class="node node-external-link view-mode-focus_on clearfix
                                     campl-horizontal-teaser campl-teaser campl-focus-teaser">
@@ -176,7 +176,7 @@
 
             {% else %}
 
-            <div class="campl-column4">
+            <div class="campl-column4{% if DEMO %} not-active{% endif %}">
                 <div class="campl-content-container campl-side-padding">
                     <article class="node node-external-link view-mode-focus_on clearfix
                                     campl-horizontal-teaser campl-teaser campl-focus-teaser">
@@ -197,7 +197,7 @@
                         <div class="campl-focus-teaser-txt">
                             <div class="campl-content-container campl-horizontal-teaser-txt">
                                 <h3 class="campl-teaser-title" style="color: orangered">
-                                    Clone Virtual Machines (disabled while any of the VMs are being configured)
+                                    Manage production and test servers (disabled while any of the servers are being configured)
                                 </h3>
                             </div>
                         </div>

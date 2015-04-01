@@ -188,7 +188,7 @@ def disable(request, site_id):
         0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse(show, kwargs={'site_id': site.id})),
         1: dict(name='Change information about your MWS',
                 url=reverse('sitesmanagement.views.edit', kwargs={'site_id': site.id})),
-        2: dict(name='Disable your MWS site', url=reverse('sitesmanagement.views.clone_vm_view',
+        2: dict(name='Disable your MWS site', url=reverse('sitesmanagement.views.disable',
                                                           kwargs={'site_id': site.id}))
     }
 
@@ -281,5 +281,6 @@ def show(request, site_id):
     return render(request, 'mws/show.html', {
         'breadcrumbs': breadcrumbs,
         'warning_messages': warning_messages,
-        'site': site
+        'site': site,
+        'DEMO': getattr(django_settings, 'DEMO', False)
     })

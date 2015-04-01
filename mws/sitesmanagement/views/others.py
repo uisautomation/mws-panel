@@ -61,6 +61,8 @@ def billing_management(request, site_id):
 
 @login_required
 def clone_vm_view(request, site_id):
+    if getattr(settings, 'DEMO', False):
+        return HttpResponseForbidden()
     site = privileges_check(site_id, request.user)
 
     if site is None:
