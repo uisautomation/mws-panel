@@ -48,7 +48,10 @@ class TaskWithFailure(Task):
 @shared_task(base=TaskWithFailure, default_retry_delay=60, max_retries=5)  # Retry each minute for 5 minutes
 def launch_ansible_async(service):
     while service.status != 'ready':
-        subprocess.check_output(["userv", "mws-admin", "mws_ansible"])
+        try:
+            subprocess.check_output(["userv", "mws-admin", "mws_ansible"])
+        except subprocess.CalledProcessError as e:
+            raise launch_ansible_async.retry(exc=e)
         service = refresh_object(service)
         if service.status == 'ansible_queued':
             service.status = 'ansible'
