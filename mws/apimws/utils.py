@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from celery import shared_task
 from django.core.mail import send_mail
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from apimws.platforms import TaskWithFailure
 from sitesmanagement.models import EmailConfirmation
 import uuid
@@ -42,6 +43,18 @@ def resend_email_confirmation(site):
     subject = "University of Cambridge Managed Web Service: Please confirm your email address"
     message = "Please, confirm your email address by clicking in the following link: " \
               "%s/confirm_email/%d/%s/" % (settings.MAIN_DOMAIN, email_conf.id, email_conf.token)
+    from_email = "mws3-support@cam.ac.uk"
+    recipient_list = (site.email, )
+    headers = {'Reply-To': from_email}
+    send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+
+
+@shared_task(base=TaskWithFailure, default_retry_delay=60, max_retries=5)
+def finished_installation_email_confirmation(site):
+    subject = "University of Cambridge Managed Web Service: Your MWS3 site is available"
+    message = "Your MWS3 site is now available. You can access to the web panel of your MWS3 site by clicking the " \
+              "following link: %s%s" % (settings.MAIN_DOMAIN,
+                                          reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
     from_email = "mws3-support@cam.ac.uk"
     recipient_list = (site.email, )
     headers = {'Reply-To': from_email}
