@@ -2,17 +2,16 @@ from __future__ import absolute_import
 import logging
 import re
 import uuid
-from celery import shared_task, Task
 import json
-from django.core.urlresolvers import reverse
-from django.template.loader import render_to_string
-import os
 import random
 import string
 import crypt
-from django.conf import settings
 import requests
 import platform
+from celery import shared_task, Task
+from django.conf import settings
+from django.template.loader import render_to_string
+from django.core.urlresolvers import reverse
 from sitesmanagement.models import VirtualMachine, NetworkConfig, Service
 
 
@@ -73,7 +72,6 @@ class TaskWithFailure(Task):
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         LOGGER.error("An error happened when trying to communicate with Platform's VM API.\n The task id is %s. \n\n "
                      "The parameters passed to the task were: %s \n\n The traceback is: \n %s", task_id, args, einfo)
-        # TODO raise exception?
 
 
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
