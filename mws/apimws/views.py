@@ -144,8 +144,8 @@ def post_installation(request):
                 raise Exception("The service wasn't in the OS installation process")  # TODO raise custom exception
             service.status = 'ansible'
             service.save()
-            launch_ansible_async.delay(service, countdown=90)  # Wait 90 seconds before launching ansible, this will
-                                                               # allow the machine have time to complete the reboot
+            launch_ansible_async.apply_async((service, ), countdown=90)
+            # Wait 90 seconds before launching ansible, this will allow the machine have time to complete the reboot
             finished_installation_email_confirmation.delay(service.site)  # Perhaps after ansible has finished?
             return HttpResponse()
 
