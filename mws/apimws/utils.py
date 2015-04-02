@@ -19,7 +19,7 @@ def ip_register_api_request(domain_name):
                                                                                      kwargs={'dn_id': domain_name.id})),
         from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
         to=['amc203@cam.ac.uk'],
-        headers={'Reply-To': 'mws3-support@cam.ac.uk'}
+        headers={'Return-Path': 'mws3-support@cam.ac.uk'}
     ).send()
 
 
@@ -36,7 +36,7 @@ def email_confirmation(site):
                                               kwargs={'ec_id':email_conf.id, 'token': email_conf.token})),
         from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
         to=[site.email],
-        headers={'Reply-To': 'mws3-support@cam.ac.uk'}
+        headers={'Return-Path': 'mws3-support@cam.ac.uk'}
     ).send()
 
 
@@ -50,7 +50,7 @@ def resend_email_confirmation(site):
                                               kwargs={'ec_id':email_conf.id, 'token': email_conf.token})),
         from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
         to=[site.email],
-        headers={'Reply-To': 'mws3-support@cam.ac.uk'}
+        headers={'Return-Path': 'mws3-support@cam.ac.uk'}
     ).send()
 
 
@@ -63,5 +63,5 @@ def finished_installation_email_confirmation(site):
                                         reverse('sitesmanagement.views.show', kwargs={'site_id': site.id})),
         from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
         to=[site.email],
-        headers={'Reply-To': 'mws3-support@cam.ac.uk'}
+        headers={'Return-Path': 'mws3-support@cam.ac.uk'}
     ).send()
