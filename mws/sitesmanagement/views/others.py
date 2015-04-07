@@ -271,6 +271,8 @@ def update_os(request, service_id):
 
 @login_required
 def certificates(request, vhost_id):
+    if getattr(settings, 'DEMO', False):
+        return HttpResponseForbidden()
     vhost = get_object_or_404(Vhost, pk=vhost_id)
     site = privileges_check(vhost.service.site.id, request.user)
     service = vhost.service

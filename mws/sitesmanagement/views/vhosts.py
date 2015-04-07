@@ -1,5 +1,6 @@
 """Views(Controllers) for managing Vhosts"""
 
+from django.conf import settings as django_settings
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseForbidden, HttpResponseRedirect
@@ -34,7 +35,8 @@ def vhosts_management(request, service_id):
         'breadcrumbs': breadcrumbs,
         'service': service,
         'site': site,
-        'vhost_form': VhostForm()
+        'vhost_form': VhostForm(),
+        'DEMO': getattr(django_settings, 'DEMO', False)
     })
 
 
