@@ -1,6 +1,5 @@
 import subprocess
 from tempfile import NamedTemporaryFile
-import OpenSSL
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
@@ -9,7 +8,7 @@ from ucamlookup import validate_crsids
 from apimws.ansible import launch_ansible_site
 from mwsauth.models import MWSUser
 from mwsauth.utils import privileges_check
-from sitesmanagement.views import show, index
+from sitesmanagement.views import show
 from mwsauth.validators import validate_groupids
 
 
@@ -84,30 +83,28 @@ def user_panel(request):
                 ssh_public_key_temp_file = NamedTemporaryFile()
                 ssh_public_key_temp_file.write(ssh_public_key)
                 ssh_public_key_temp_file.flush()
-                command_response = subprocess.check_output(["ssh-keygen", "-lf", ssh_public_key_temp_file.name])
+                subprocess.check_output(["ssh-keygen", "-lf", ssh_public_key_temp_file.name])
                 ssh_public_key_temp_file.close()
-            except Exception as e:
+            except subprocess.CalledProcessError:
                 error_message = "The key file is invalid"
                 return render(request, 'user/panel.html', {
                     'breadcrumbs': breadcrumbs,
-                    'ssh_public_key': request.user.mws_user.ssh_public_key
-                    if hasattr(request.user, 'mws_user') else None,
+                    'ssh_public_key': request.user.mws_user.ssh_public_key,
                     'error_message': error_message
                 })
 
-            mws_user, created = MWSUser.objects.get_or_create(user=request.user)  # TODO should we create mws_user here?
+            mws_user = MWSUser.objects.get(user=request.user)
             mws_user.ssh_public_key = ssh_public_key
             mws_user.save()
         else:
             error_message = "SSH key not present"
             return render(request, 'user/panel.html', {
                 'breadcrumbs': breadcrumbs,
-                'ssh_public_key': request.user.mws_user.ssh_public_key
-                if hasattr(request.user, 'mws_user') else None,
+                'ssh_public_key': request.user.mws_user.ssh_public_key,
                 'error_message': error_message
             })
 
     return render(request, 'user/panel.html', {
         'breadcrumbs': breadcrumbs,
-        'ssh_public_key': request.user.mws_user.ssh_public_key if hasattr(request.user, 'mws_user') else None
+        'ssh_public_key': request.user.mws_user.ssh_public_key
     })

@@ -5,7 +5,7 @@ from django.db import models
 
 
 class MWSUser(models.Model):
-    ssh_public_key = models.TextField()
+    ssh_public_key = models.TextField(null=True, blank=True)
     uid = models.IntegerField()
     user = models.OneToOneField(User, to_field='username', related_name='mws_user', db_constraint=False)
 
