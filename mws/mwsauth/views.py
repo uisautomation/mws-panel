@@ -75,6 +75,7 @@ def user_panel(request):
     breadcrumbs = {
         0: dict(name='User panel', url=reverse(user_panel))
     }
+    error_message = None
 
     if request.method == 'POST':
         if 'ssh_public_key' in request.FILES:
@@ -85,26 +86,16 @@ def user_panel(request):
                 ssh_public_key_temp_file.flush()
                 subprocess.check_output(["ssh-keygen", "-lf", ssh_public_key_temp_file.name])
                 ssh_public_key_temp_file.close()
+                mws_user = MWSUser.objects.get(user=request.user)
+                mws_user.ssh_public_key = ssh_public_key
+                mws_user.save()
             except subprocess.CalledProcessError:
                 error_message = "The key file is invalid"
-                return render(request, 'user/panel.html', {
-                    'breadcrumbs': breadcrumbs,
-                    'ssh_public_key': request.user.mws_user.ssh_public_key,
-                    'error_message': error_message
-                })
-
-            mws_user = MWSUser.objects.get(user=request.user)
-            mws_user.ssh_public_key = ssh_public_key
-            mws_user.save()
         else:
             error_message = "SSH key not present"
-            return render(request, 'user/panel.html', {
-                'breadcrumbs': breadcrumbs,
-                'ssh_public_key': request.user.mws_user.ssh_public_key,
-                'error_message': error_message
-            })
 
     return render(request, 'user/panel.html', {
         'breadcrumbs': breadcrumbs,
-        'ssh_public_key': request.user.mws_user.ssh_public_key
+        'ssh_public_key': request.user.mws_user.ssh_public_key,
+        'error_message': error_message
     })
