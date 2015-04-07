@@ -89,7 +89,7 @@ def user_panel(request):
                 mws_user = MWSUser.objects.get(user=request.user)
                 mws_user.ssh_public_key = ssh_public_key
                 mws_user.save()
-                for site in request.user.sites:
+                for site in request.user.sites.all():
                     launch_ansible_site(site)
             except subprocess.CalledProcessError:
                 error_message = "The key file is invalid"

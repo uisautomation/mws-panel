@@ -157,33 +157,27 @@ class Site(models.Model):
     def cancel(self):
         self.end_date = datetime.today()
         self.save()
-        if self.production_vms:
-            self.primary_vm.power_off()
-        if self.test_vms:
-            self.secondary_vm.power_off()
-
-    def delete_vms(self):
-        if self.production_vms:
-            self.primary_vm.delete()
-        if self.test_vms:
-            self.secondary_vm.delete()
+        if self.production_service:
+            self.production_service.power_off()
+        if self.test_service:
+            self.test_service.power_off()
 
     def disable(self):
         self.disabled = True
         self.save()
-        if self.production_vms:
-            self.primary_vm.power_off()
-        if self.test_vms:
-            self.secondary_vm.power_off()
+        if self.production_service:
+            self.production_service.power_off()
+        if self.test_service:
+            self.test_service.power_off()
         return True
 
     def enable(self):
         self.disabled = False
         self.save()
-        if self.production_vms:
-            self.primary_vm.power_on()
-        if self.test_vms:
-            self.secondary_vm.power_on()
+        if self.production_service:
+            self.production_service.power_on()
+        if self.test_service:
+            self.test_service.power_on()
         return True
 
     @property
@@ -407,13 +401,16 @@ class Service(models.Model):
         return self.virtual_machines.first().is_on()
 
     def do_reset(self):
-        return self.virtual_machines.first().do_reset()
+        for vm in self.virtual_machines.all():
+            vm.do_reset()
 
     def power_on(self):
-        return self.virtual_machines.first().power_on()
+        for vm in self.virtual_machines.all():
+            vm.power_on()
 
     def power_off(self):
-        return self.virtual_machines.first().power_off()
+        for vm in self.virtual_machines.all():
+            vm.power_off()
 
     class Meta:
         unique_together = (("site", "type"),)
@@ -462,7 +459,7 @@ class VirtualMachine(models.Model):
 
     def do_reset(self):
         from apimws.platforms import reset_vm
-        return reset_vm.delay(self)
+        reset_vm.delay(self)
 
     @property
     def os_type(self):
