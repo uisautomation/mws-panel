@@ -246,13 +246,13 @@ class AuthTestCases(TestCase):
     def test_banned_users_middleware(self):
         with self.settings(MIDDLEWARE_CLASSES=settings.MIDDLEWARE_CLASSES+('mwsauth.middleware.CheckBannedUsers',)):
             do_test_login(self, user="amc203")
-            response = self.client.get(reverse(views.index))
+            response = self.client.get(reverse('sitesmanagement.views.index'))
             self.assertEqual(response.status_code, 403)  # There is no corresponding mws_user
 
             MWSUser.objects.create(uid="9999999", ssh_public_key="testestestestest", user_id="amc203")
-            response = self.client.get(reverse(views.index))
+            response = self.client.get(reverse('sitesmanagement.views.index'))
             self.assertEqual(response.status_code, 200)  # There is a corresponding mws_user
 
             User.objects.filter(username="amc203").update(is_active=False)
-            response = self.client.get(reverse(views.index))
+            response = self.client.get(reverse('sitesmanagement.views.index'))
             self.assertEqual(response.status_code, 403)  # There user is not active
