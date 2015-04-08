@@ -193,8 +193,8 @@ def disable(request, site_id):
     }
 
     if request.method == 'POST':
-        if site.disable():
-            return redirect(index)
+        site.disable()
+        return redirect(index)
 
     return render(request, 'mws/disable.html', {
         'breadcrumbs': breadcrumbs,

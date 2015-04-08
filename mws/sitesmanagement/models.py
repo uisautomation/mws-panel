@@ -169,7 +169,6 @@ class Site(models.Model):
             self.production_service.power_off()
         if self.test_service:
             self.test_service.power_off()
-        return True
 
     def enable(self):
         self.disabled = False
@@ -178,7 +177,6 @@ class Site(models.Model):
             self.production_service.power_on()
         if self.test_service:
             self.test_service.power_on()
-        return True
 
     @property
     def is_busy(self):
