@@ -1,6 +1,7 @@
 import subprocess
 from tempfile import NamedTemporaryFile
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, redirect
@@ -96,8 +97,10 @@ def user_panel(request):
         else:
             error_message = "SSH key not present"
 
+    mws_user = MWSUser.objects.get(user=request.user)
+
     return render(request, 'user/panel.html', {
         'breadcrumbs': breadcrumbs,
-        'ssh_public_key': request.user.mws_user.ssh_public_key,
+        'ssh_public_key': mws_user.ssh_public_key,
         'error_message': error_message
     })
