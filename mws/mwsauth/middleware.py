@@ -15,20 +15,23 @@ def check_permited_betatesters(request):
     ''' Check that the user is a memeber of InfoSys or Platforms lookup group.
     :param request: the http request
     :return: True if they are, False otherwise'''
-    if hasattr(request.user, 'suspendeduser') and (request.user.suspendeduser.suspended is True) \
-            and (resolve(request.path).url_name != 'logout'):
-        return False
+    try:
+        if hasattr(request.user, 'suspendeduser') and (request.user.suspendeduser.suspended is True) \
+                and (resolve(request.path).url_name != 'logout'):
+            return False
 
-    if not hasattr(request.user, 'mws_user') and (resolve(request.path).url_name != 'logout'):
-        return False
+        if not hasattr(request.user, 'mws_user') and (resolve(request.path).url_name != 'logout'):
+            return False
 
-    if request.user.is_authenticated() and getattr(settings, 'DEMO', False) and \
-            not user_in_groups(request.user,
-                               [get_or_create_group_by_groupid(101611),  # UIS members
-                                get_or_create_group_by_groupid(102170)]):  # MWS3 Betatesters
-        return False
+        if request.user.is_authenticated() and getattr(settings, 'DEMO', False) and \
+                not user_in_groups(request.user,
+                                   [get_or_create_group_by_groupid(101611),  # UIS members
+                                    get_or_create_group_by_groupid(102170)]):  # MWS3 Betatesters
+            return False
 
-    return True
+        return True
+    except Exception:
+        return False
 
 
 def user_in_jackdaw(request):
