@@ -89,8 +89,8 @@ class Command(NoArgsCommand):
                 vhv['certificate'] = vh.certificate
             if vh.tls_key_hash:
                 vhv['tls_key_hash'] = vh.tls_key_hash
-                vhv['generate_csr'] = vh.tls_key_hash == "requested"
             vhv['tls_enabled'] = vh.tls_enabled
+            vhv['generate_csr'] = 'tls_key_hash' in vhv and vh.tls_key_hash == "requested"
             return vhv
         v['mws_vhosts'] = [vhost_vars(vh) for vh in vm.service.vhosts.all()]
         v['mws_is_primary'] = vm.primary
