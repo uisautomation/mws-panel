@@ -35,11 +35,9 @@
                                     <i title="Domains associated to this web site" class="fa fa-link fa-2x"
                                        data-toggle="tooltip" ></i>
                                 </a>
-                                {% if vhost.domain_names.all and not DEMO %}
                                 <a href="{% url 'sitesmanagement.views.certificates' vhost_id=vhost.id %}">
                                     <i title="TLS certificates" class="fa fa-lock fa-2x" data-toggle="tooltip"></i>
                                 </a>
-                                {% endif %}
                                 <a class="delete_vhost" data-href="javascript:delete_vhost('{% url 'sitesmanagement.views.delete_vhost' vhost_id=vhost.id %}')" href="#">
                                     <i title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i>
                                 </a>

@@ -501,6 +501,7 @@ class Vhost(models.Model):
     csr = models.TextField(null=True, blank=True)
     certificate = models.TextField(null=True, blank=True)
     tls_key_hash = models.TextField(null=True, blank=True)
+    tls_enabled = models.BooleanField(default=False)
 
     def sorted_domain_names(self):
         return sorted(set(self.domain_names.all()))

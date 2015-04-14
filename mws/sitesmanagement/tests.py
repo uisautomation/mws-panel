@@ -695,79 +695,79 @@ class SiteManagement2Tests(TestCase):
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
         self.assertEqual(AnsibleConfiguration.objects.get(key="system_packages").value, "2")
 
-    def test_certificates(self):
-        site = self.create_site()
-
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
-            mock_subprocess.check_output.return_value.returncode = 0
-            response = self.client.post(reverse(views.add_vhost, kwargs={'service_id': site.production_service.id}),
-                                        {'name': 'testVhost'})
-            self.assertIn(response.status_code, [200, 302])
-            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
-
-        vhost = Vhost.objects.get(name='testVhost')
-        response = self.client.post(reverse(views.generate_csr, kwargs={'vhost_id': vhost.id}))
-        self.assertContains(response, "A CSR couldn't be generated because you don't have a master domain assigned to "
-                                      "this vhost.")
-        self.assertIsNone(vhost.csr)
-
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
-            mock_subprocess.check_output.return_value.returncode = 0
-            self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}), {'name': 'randomdomain.co.uk'})
-            self.assertEqual(response.status_code, 200)
-            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
-
-        vhost = Vhost.objects.get(name='testVhost')
-        self.assertIsNone(vhost.csr)
-        self.assertIsNone(vhost.certificate)
-        self.assertIsNotNone(vhost.main_domain)
-        self.client.post(reverse(views.generate_csr, kwargs={'vhost_id': vhost.id}))
-        vhost = Vhost.objects.get(name='testVhost')
-        self.assertIsNotNone(vhost.csr)
-
-        privatekeyfile = tempfile.NamedTemporaryFile()
-        csrfile = tempfile.NamedTemporaryFile()
-        certificatefile = tempfile.NamedTemporaryFile()
-        subprocess.check_output(["openssl", "req", "-new", "-newkey", "rsa:2048", "-nodes", "-keyout",
-                                 privatekeyfile.name, "-subj", "/C=GB/CN=%s" % vhost.main_domain.name,
-                                 "-out", csrfile.name])
-        subprocess.check_output(["openssl", "x509", "-req", "-days", "365", "-in", csrfile.name, "-signkey",
-                                 privatekeyfile.name, "-out", certificatefile.name])
-
-        certificatefiledesc = open(certificatefile.name, 'r')
-        privatekeyfiledesc = open(privatekeyfile.name, 'r')
-        self.client.post(reverse(views.certificates, kwargs={'vhost_id': vhost.id}),
-                         {'key': privatekeyfile, 'cert': certificatefile})
-        certificatefiledesc.close()
-        privatekeyfiledesc.close()
-        vhost = Vhost.objects.get(name='testVhost')
-        self.assertIsNotNone(vhost.certificate)
-
-        certificatefile.seek(0)
-        self.assertEqual(vhost.certificate, certificatefile.read())
-
-        privatekeyfile.seek(0)
-        response = self.client.post(reverse(views.certificates, kwargs={'vhost_id': vhost.id}),
-                                    {'cert': privatekeyfile})
-        self.assertContains(response, "The certificate file is invalid")
-
-        certificatefile.seek(0)
-        response = self.client.post(reverse(views.certificates, kwargs={'vhost_id': vhost.id}),
-                                    {'key': certificatefile})
-        self.assertContains(response, "The key file is invalid")
-
-        privatekeyfile.close()
-        privatekeyfile = tempfile.NamedTemporaryFile()
-        subprocess.check_output(["openssl", "genrsa", "-out", privatekeyfile.name, "2048"])
-
-        certificatefile.seek(0)
-        response = self.client.post(reverse(views.certificates, kwargs={'vhost_id': vhost.id}),
-                                    {'key': privatekeyfile, 'cert': certificatefile})
-        self.assertContains(response, "The key doesn&#39;t match the certificate")
-
-        privatekeyfile.close()
-        csrfile.close()
-        certificatefile.close()
+    # def test_certificates(self):
+    #     site = self.create_site()
+    #
+    #     with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+    #         mock_subprocess.check_output.return_value.returncode = 0
+    #         response = self.client.post(reverse(views.add_vhost, kwargs={'service_id': site.production_service.id}),
+    #                                     {'name': 'testVhost'})
+    #         self.assertIn(response.status_code, [200, 302])
+    #         mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
+    #
+    #     vhost = Vhost.objects.get(name='testVhost')
+    #     response = self.client.post(reverse(views.generate_csr, kwargs={'vhost_id': vhost.id}))
+    #     self.assertContains(response, "A CSR couldn't be generated because you don't have a master domain assigned to "
+    #                                   "this vhost.")
+    #     self.assertIsNone(vhost.csr)
+    #
+    #     with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+    #         mock_subprocess.check_output.return_value.returncode = 0
+    #         self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}), {'name': 'randomdomain.co.uk'})
+    #         self.assertEqual(response.status_code, 200)
+    #         mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
+    #
+    #     vhost = Vhost.objects.get(name='testVhost')
+    #     self.assertIsNone(vhost.csr)
+    #     self.assertIsNone(vhost.certificate)
+    #     self.assertIsNotNone(vhost.main_domain)
+    #     self.client.post(reverse(views.generate_csr, kwargs={'vhost_id': vhost.id}))
+    #     vhost = Vhost.objects.get(name='testVhost')
+    #     self.assertIsNotNone(vhost.csr)
+    #
+    #     privatekeyfile = tempfile.NamedTemporaryFile()
+    #     csrfile = tempfile.NamedTemporaryFile()
+    #     certificatefile = tempfile.NamedTemporaryFile()
+    #     subprocess.check_output(["openssl", "req", "-new", "-newkey", "rsa:2048", "-nodes", "-keyout",
+    #                              privatekeyfile.name, "-subj", "/C=GB/CN=%s" % vhost.main_domain.name,
+    #                              "-out", csrfile.name])
+    #     subprocess.check_output(["openssl", "x509", "-req", "-days", "365", "-in", csrfile.name, "-signkey",
+    #                              privatekeyfile.name, "-out", certificatefile.name])
+    #
+    #     certificatefiledesc = open(certificatefile.name, 'r')
+    #     privatekeyfiledesc = open(privatekeyfile.name, 'r')
+    #     self.client.post(reverse(views.certificates, kwargs={'vhost_id': vhost.id}),
+    #                      {'key': privatekeyfile, 'cert': certificatefile})
+    #     certificatefiledesc.close()
+    #     privatekeyfiledesc.close()
+    #     vhost = Vhost.objects.get(name='testVhost')
+    #     self.assertIsNotNone(vhost.certificate)
+    #
+    #     certificatefile.seek(0)
+    #     self.assertEqual(vhost.certificate, certificatefile.read())
+    #
+    #     privatekeyfile.seek(0)
+    #     response = self.client.post(reverse(views.certificates, kwargs={'vhost_id': vhost.id}),
+    #                                 {'cert': privatekeyfile})
+    #     self.assertContains(response, "The certificate file is invalid")
+    #
+    #     certificatefile.seek(0)
+    #     response = self.client.post(reverse(views.certificates, kwargs={'vhost_id': vhost.id}),
+    #                                 {'key': certificatefile})
+    #     self.assertContains(response, "The key file is invalid")
+    #
+    #     privatekeyfile.close()
+    #     privatekeyfile = tempfile.NamedTemporaryFile()
+    #     subprocess.check_output(["openssl", "genrsa", "-out", privatekeyfile.name, "2048"])
+    #
+    #     certificatefile.seek(0)
+    #     response = self.client.post(reverse(views.certificates, kwargs={'vhost_id': vhost.id}),
+    #                                 {'key': privatekeyfile, 'cert': certificatefile})
+    #     self.assertContains(response, "The key doesn&#39;t match the certificate")
+    #
+    #     privatekeyfile.close()
+    #     csrfile.close()
+    #     certificatefile.close()
 
     def test_backups(self):
         site = self.create_site()

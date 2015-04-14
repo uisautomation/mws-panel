@@ -1,24 +1,20 @@
 """Views(Controllers) for other purposes not in other files"""
 
 import bisect
+import reversion
 import datetime
-import subprocess
-from Crypto.Util import asn1
-import OpenSSL.crypto
 from django.conf import settings
-from django.core.files.temp import NamedTemporaryFile
 from django.utils import dateparse
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
-import reversion
 from apimws.ansible import launch_ansible
 from apimws.models import AnsibleConfiguration
 from apimws.platforms import PlatformsAPINotWorkingException, clone_vm, PlatformsAPIFailure
 from mwsauth.utils import privileges_check
 from sitesmanagement.utils import get_object_or_None
-from sitesmanagement.models import BillingForm, Vhost, Service
+from sitesmanagement.models import BillingForm, Service
 
 
 @login_required
@@ -267,146 +263,6 @@ def update_os(request, service_id):
     # TODO 4) Put it as a secondary VM?
 
     return HttpResponse('')
-
-
-@login_required
-def certificates(request, vhost_id):
-    if getattr(settings, 'DEMO', False):
-        return HttpResponseForbidden()
-    vhost = get_object_or_404(Vhost, pk=vhost_id)
-    site = privileges_check(vhost.service.site.id, request.user)
-    service = vhost.service
-
-    if site is None:
-        return HttpResponseForbidden()
-
-    if not service or not service.active or service.is_busy:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
-
-    if not vhost.domain_names.all():
-        return redirect(reverse('sitesmanagement.views.vhosts_management', kwargs={'service_id': vhost.service.id}))
-
-    breadcrumbs = {
-        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse('sitesmanagement.views.show',
-                                                                                 kwargs={'site_id': site.id})),
-        1: dict(name='Server settings' if vhost.service.primary else 'Test server settings',
-                url=reverse(service_settings, kwargs={'service_id': vhost.service.id})),
-        2: dict(name='Web sites management: %s' % vhost.name,
-                url=reverse('sitesmanagement.views.vhosts_management', kwargs={'service_id': vhost.service.id})),
-        3: dict(name='TLS/SSL Certificate', url=reverse(certificates, kwargs={'vhost_id': vhost.id})),
-    }
-
-    error_message = None
-
-    if request.method == 'POST':
-        c = OpenSSL.crypto
-
-        if 'cert' in request.FILES:
-            try:
-                certificates_str = request.FILES['cert'].file.read()
-                cert = c.load_certificate(c.FILETYPE_PEM, certificates_str)
-            except Exception as e:
-                error_message = "The certificate file is invalid"
-                # raise ValidationError(e)
-
-        if 'key' in request.FILES and error_message is None:
-            try:
-                key_str = request.FILES['key'].file.read()
-                priv = c.load_privatekey(c.FILETYPE_PEM, key_str)
-            except Exception as e:
-                error_message = "The key file is invalid"
-                # raise ValidationError(e)
-
-        if 'cert' in request.FILES and 'key' in request.FILES and error_message is None:
-            try:
-                pub = cert.get_pubkey()
-
-                pub_asn1 = c.dump_privatekey(c.FILETYPE_ASN1, pub)
-                priv_asn1 = c.dump_privatekey(c.FILETYPE_ASN1, priv)
-
-                pub_der = asn1.DerSequence()
-                pub_der.decode(pub_asn1)
-                priv_der = asn1.DerSequence()
-                priv_der.decode(priv_asn1)
-
-                pub_modulus = pub_der[1]
-                priv_modulus = priv_der[1]
-
-                if pub_modulus != priv_modulus:
-                    error_message = "The key doesn't match the certificate"
-                    # raise ValidationError(e)
-
-            except Exception as e:
-                error_message = "The key doesn't match the certificate"
-                # raise ValidationError(e)
-
-        if 'cert' in request.FILES and not error_message:
-            vhost.certificate = certificates_str
-            vhost.save()
-
-    return render(request, 'mws/certificates.html', {
-        'breadcrumbs': breadcrumbs,
-        'vhost': vhost,
-        'service': vhost.service,
-        'site': site,
-        'error_message': error_message
-    })
-
-
-@login_required
-def generate_csr(request, vhost_id):
-    vhost = get_object_or_404(Vhost, pk=vhost_id)
-    site = privileges_check(vhost.service.site.id, request.user)
-
-    if request.method == 'POST':
-        if vhost.main_domain is None:
-            breadcrumbs = {
-                0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse('sitesmanagement.views.show',
-                                                                                         kwargs={'site_id': site.id})),
-                1: dict(name='Server settings' if vhost.service.primary else 'Test server settings',
-                        url=reverse(service_settings, kwargs={'service_id': vhost.service.id})),
-                2: dict(name='Vhosts Management: %s' % vhost.name,
-                        url=reverse('sitesmanagement.views.vhosts_management',
-                                    kwargs={'service_id': vhost.service.id})),
-                3: dict(name='TLS/SSL Certificates', url=reverse(certificates, kwargs={'vhost_id': vhost.id})),
-            }
-
-            return render(request, 'mws/certificates.html', {
-                'breadcrumbs': breadcrumbs,
-                'vhost': vhost,
-                'service': vhost.service,
-                'site': site,
-                'error_main_domain': True
-            })
-
-        temp_conf_file = NamedTemporaryFile()
-        temp_conf_file.write("[req]\n")
-        temp_conf_file.write("prompt = no\n")
-        temp_conf_file.write("default_bits = 2048\n")
-        temp_conf_file.write("default_md = sha256\n")
-        temp_conf_file.write("distinguished_name = dn\n")
-        temp_conf_file.write("req_extensions = ext\n\n")
-        temp_conf_file.write("[dn]\n")
-        temp_conf_file.write("C = GB\n")
-        temp_conf_file.write("CN = %s\n\n" % vhost.main_domain.name)
-        temp_conf_file.write("[ext]\n")
-        temp_conf_file.write("subjectAltName = DNS:" +
-                             ", DNS:".join(set(vhost.domain_names.values_list('name', flat=True)) -
-                                           set(vhost.main_domain.name)))
-        temp_conf_file.flush()
-
-        vhost.csr = subprocess.check_output(["openssl", "req", "-new", "-newkey", "rsa:2048", "-nodes", "-keyout",
-                                             "/dev/null", "-config", temp_conf_file.name])
-        vhost.save()
-
-        temp_conf_file.close()
-        # launch_ansible with a task to create the CSR
-        # put the main domain name as the common name
-        # include all domain names in the subject alternative name field in the extended configuration
-        # country is always GB
-        # all other parameters/fields are optional and won't appear in the certificate, just ignore them.
-
-    return redirect(reverse(certificates, kwargs={'vhost_id': vhost.id}))
 
 
 @login_required
