@@ -79,6 +79,7 @@ class Command(NoArgsCommand):
 
         def vhost_vars(vh):
             vhv = {}
+            vhv['id'] = vh.id
             vhv['name'] = vh.name
             vhv['domains'] = [dom.name for dom in
                               vh.domain_names.filter(status='accepted')]
@@ -106,7 +107,7 @@ class Command(NoArgsCommand):
         v['mws_os_version'] = vm.os_version
 
         v['mws_with_pacemaker'] = False
-        
+
         # Corosync needs a 32-bit node ID.  ID 0 is reserved, and
         # according to corosync.conf(5), "Some openais clients require
         # a signed 32 bit nodeid that is greater than zero".  For

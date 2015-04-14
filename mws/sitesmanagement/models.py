@@ -500,6 +500,7 @@ class Vhost(models.Model):
     service = models.ForeignKey(Service, related_name='vhosts')
     csr = models.TextField(null=True, blank=True)
     certificate = models.TextField(null=True, blank=True)
+    tls_key_hash = models.TextField(null=True, blank=True)
 
     def sorted_domain_names(self):
         return sorted(set(self.domain_names.all()))
