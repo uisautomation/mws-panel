@@ -108,7 +108,7 @@ def generate_csr(request, vhost_id):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
     site = privileges_check(vhost.service.site.id, request.user)
 
-    if request.method == 'POST':
+    if request.method == 'POST' and vhost.tls_key_hash != 'requested':
         if vhost.main_domain is None:
             breadcrumbs = {
                 0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse('sitesmanagement.views.show',
@@ -131,6 +131,7 @@ def generate_csr(request, vhost_id):
 
         vhost.tls_key_hash = 'requested'
         vhost.save()
+        launch_ansible(vhost.service)
 
     return redirect(reverse(certificates, kwargs={'vhost_id': vhost.id}))
 
