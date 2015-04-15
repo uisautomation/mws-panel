@@ -132,6 +132,7 @@ def generate_csr(request, vhost_id):
         vhost.tls_key_hash = 'requested'
         vhost.certificate = None
         vhost.csr = None
+        vhost.tls_enabled = False
         vhost.save()
         launch_ansible(vhost.service)
 
