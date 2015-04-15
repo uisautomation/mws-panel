@@ -3,7 +3,6 @@ from django.core.management.base import NoArgsCommand, CommandError
 from optparse import make_option
 import sys
 import json
-from itertools import chain
 from sitesmanagement.models import VirtualMachine, Site
 
 

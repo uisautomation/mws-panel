@@ -1,4 +1,5 @@
 from django.core.management.base import NoArgsCommand, CommandError
+from apimws.ansible import launch_ansible
 from sitesmanagement.models import Vhost
 
 
@@ -15,6 +16,7 @@ class Command(NoArgsCommand):
         except Vhost.DoesNotExist:
             raise CommandError("Vhost not found")
 
-        vhost.certificate = None
+        vhost.tls_key_hash = None
         vhost.tls_enabled = True
         vhost.save()
+        launch_ansible(vhost.service)
