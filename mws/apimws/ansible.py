@@ -1,6 +1,7 @@
 import logging
 import subprocess
 from celery import shared_task, Task
+from sitesmanagement.models import Site
 
 
 LOGGER = logging.getLogger('mws')
@@ -27,6 +28,11 @@ def launch_ansible(service):
         return
     else:
         raise UnexpectedVMStatus()  # TODO pass the vm object?
+
+
+def launch_ansible_by_user(user):
+    for site in Site.objects.all():
+        launch_ansible_site(site)
 
 
 def launch_ansible_site(site):

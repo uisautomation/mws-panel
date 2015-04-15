@@ -1,12 +1,11 @@
 import subprocess
 from tempfile import NamedTemporaryFile
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, redirect
 from ucamlookup import validate_crsids
-from apimws.ansible import launch_ansible_site
+from apimws.ansible import launch_ansible_site, launch_ansible_by_user
 from mwsauth.models import MWSUser
 from mwsauth.utils import privileges_check
 from sitesmanagement.views import show
@@ -90,8 +89,7 @@ def user_panel(request):
                 mws_user = MWSUser.objects.get(user=request.user)
                 mws_user.ssh_public_key = ssh_public_key
                 mws_user.save()
-                for site in request.user.sites.all():
-                    launch_ansible_site(site)
+                launch_ansible_by_user(request.user)
             except subprocess.CalledProcessError:
                 error_message = "The key file is invalid"
         else:
