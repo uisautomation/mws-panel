@@ -15,27 +15,32 @@
                 </div>
             {% endif %}
             {% if vhost.tls_key_hash != 'requested' %}
-            <form action="{% url 'sitesmanagement.views.generate_csr' vhost_id=vhost.id %}" method="post">
-                <fieldset>
-                    {% csrf_token %}
-                    <p><input type="submit" value="Generate {% if vhost.csr %}new {% endif %}CSR and key" class="campl-btn campl-primary-cta campl-primary-blue"/></p>
-                </fieldset>
-            </form>
+                <form action="{% url 'sitesmanagement.views.generate_csr' vhost_id=vhost.id %}" method="post">
+                    <fieldset>
+                        {% csrf_token %}
+                        <p><input type="submit" value="Generate {% if vhost.csr or vhost.certificate %}new {% endif %}CSR and key" class="campl-btn campl-primary-cta campl-primary-blue"/></p>
+                    </fieldset>
+                </form>
+                    {% if vhost.certificate %}
+                        <h3>TLS certificate</h3>
+                        <pre>{{ vhost.certificate }}</pre>
+                    {% endif %}
             {% else %}
                 <p>The TLS certificate is being generated</p>
             {% endif %}
-            {% if vhost.csr %}
-            <pre>{{ vhost.csr }}</pre>
-            <form id="key_cert_form" enctype="multipart/form-data" action="{% url 'sitesmanagement.views.certificates' vhost_id=vhost.id %}" method="post">
-                {% if error_message %}<p style="color: red">Error: {{ error_message }}</p>{% endif %}
-                <fieldset>
-                    {% csrf_token %}
-                    <p {% if not vhost.csr %}style="display: none;"{% endif %}>
-                        Certificate file: <input type="file" name="cert"></p>
-                    <p {% if not vhost.csr %}style="display: none;"{% endif %}>
-                        <input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
-                </fieldset>
-            </form>
+            {% if vhost.csr and not vhost.certificate %}
+                <h3>TLS CSR</h3>
+                <pre>{{ vhost.csr }}</pre>
+                <form id="key_cert_form" enctype="multipart/form-data" action="{% url 'sitesmanagement.views.certificates' vhost_id=vhost.id %}" method="post">
+                    {% if error_message %}<p style="color: red">Error: {{ error_message }}</p>{% endif %}
+                    <fieldset>
+                        {% csrf_token %}
+                        <p {% if not vhost.csr %}style="display: none;"{% endif %}>
+                            Certificate file: <input type="file" name="cert"></p>
+                        <p {% if not vhost.csr %}style="display: none;"{% endif %}>
+                            <input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
+                    </fieldset>
+                </form>
             {% endif %}
 
         </div>

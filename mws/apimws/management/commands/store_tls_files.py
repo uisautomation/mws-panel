@@ -16,7 +16,18 @@ class Command(NoArgsCommand):
         except Vhost.DoesNotExist:
             raise CommandError("Vhost not found")
 
-        vhost.tls_key_hash = None
+        key_hash_file = open("/home/mws-admin/files_repo/vhost_tls/%d/key_hash" % vhost.id, "r")
+        vhost.tls_key_hash = key_hash_file.read()
+        key_hash_file.close()
+
+        csr_file = open("/home/mws-admin/files_repo/vhost_tls/%d/csr" % vhost.id, "r")
+        vhost.csr = csr_file.read()
+        csr_file.close()
+
+        certificate_file = open("/home/mws-admin/files_repo/vhost_tls/%d/certificate.crt" % vhost.id, "r")
+        vhost.certificate = certificate_file.read()
+        certificate_file.close()
+
         vhost.tls_enabled = True
         vhost.save()
         launch_ansible(vhost.service)
