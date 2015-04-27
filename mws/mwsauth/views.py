@@ -19,7 +19,8 @@ def auth_change(request, site_id):
     if site is None:
         return HttpResponseForbidden()
 
-    if not site.production_service or site.production_service.is_busy:
+    if not site.production_service or site.production_service.virtual_machines.count() == 0 \
+            or site.production_service.is_busy:
         return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
 
     lookup_lists = {

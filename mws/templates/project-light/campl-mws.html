@@ -50,7 +50,7 @@
                     {% if site %}
                     <li><a>Panels for MWS "{{ site.name }}": </a></li>
                     <li><a href="{% url 'sitesmanagement.views.show' site_id=site.id %}">Main Panel</a></li>
-                    {% if site.production_service and not site.production_service.is_busy %}
+                    {% if site.production_service and site.production_service.virtual_machines.count != 0 and not site.production_service.is_busy %}
                     <li><a href="{% url 'mwsauth.views.auth_change' site_id=site.id %}">Auth Panel</a></li>
                     <li>
                         <a>Production Server</a>
