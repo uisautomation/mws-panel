@@ -19,6 +19,9 @@ def auth_change(request, site_id):
     if site is None:
         return HttpResponseForbidden()
 
+    if not site.production_service or site.production_service.status == 'installing':
+        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+
     lookup_lists = {
         'authorised_users': site.users.all(),
         'sshuserlist': site.ssh_users.all(),
