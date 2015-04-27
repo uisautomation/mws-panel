@@ -30,8 +30,9 @@ class Command(NoArgsCommand):
             result = {'_meta': {'hostvars': {}}}
             result[group] = [self.hostid(vm) for vm in vms]
             for site in Site.objects.all():
-                result[self.sitegroup(site)] = [
-                    self.hostid(vm) for vm in vms.filter(service__site=site)]
+                if not site.is_canceled():
+                    result[self.sitegroup(site)] = [
+                        self.hostid(vm) for vm in vms.filter(service__site=site)]
             for vm in vms:
                 result['_meta']['hostvars'][self.hostid(vm)] = (
                     self.hostvars(vm))

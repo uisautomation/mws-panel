@@ -34,7 +34,8 @@ def launch_ansible(service):
 
 def launch_ansible_by_user(user):
     for site in Site.objects.all():
-        launch_ansible_site(site)
+        if user in site.list_of_all_type_of_active_users() and not site.is_canceled():
+            launch_ansible_site(site)  # TODO: Change this to other thing more sensible
 
 
 def launch_ansible_site(site):
