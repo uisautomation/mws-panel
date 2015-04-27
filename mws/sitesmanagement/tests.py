@@ -485,7 +485,8 @@ class SiteManagement2Tests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
         response = self.client.get(reverse('mwsauth.views.auth_change', kwargs={'site_id': site.id}))
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.endswith('%s' % (reverse(views.show, kwargs={'site_id': site.id}))))
         response = self.client.get(reverse(views.delete_vm, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 403)  # Primary VM cannot be deleted
         response = self.client.get(reverse(views.delete_vm, kwargs={'service_id': service2.id}))
