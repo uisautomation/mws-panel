@@ -1,6 +1,7 @@
 import logging
 import subprocess
 from celery import shared_task, Task
+from django.conf import settings
 from sitesmanagement.models import Site
 
 
@@ -64,7 +65,8 @@ def launch_ansible_async(service):
         try:
             subprocess.check_output(["userv", "mws-admin", "mws_ansible"])
         except subprocess.CalledProcessError as e:
-            raise launch_ansible_async.retry(exc=e)
+            if getattr(settings, 'DEMO', False):
+                raise launch_ansible_async.retry(exc=e)
         service = refresh_object(service)
         if service.status == 'ansible_queued':
             service.status = 'ansible'
