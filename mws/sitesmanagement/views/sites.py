@@ -240,6 +240,10 @@ def show(request, site_id):
     if production_service is not None and production_service.status == 'ansible':
         warning_messages.append("Your server is being configured.")
 
+    if production_service is not None \
+            and (production_service.status == 'requested' or production_service.status == 'installing'):
+        warning_messages.append("Your server is being installed.")
+
     if test_service is not None and test_service.status == 'ansible':
         warning_messages.append("Your test server is being configured.")
 
