@@ -65,7 +65,7 @@ def launch_ansible_async(service):
         try:
             subprocess.check_output(["userv", "mws-admin", "mws_ansible"])
         except subprocess.CalledProcessError as e:
-            if getattr(settings, 'DEMO', False):
+            if not getattr(settings, 'DEMO', False):
                 raise launch_ansible_async.retry(exc=e)
         service = refresh_object(service)
         if service.status == 'ansible_queued':
