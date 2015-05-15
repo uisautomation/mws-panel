@@ -10,12 +10,10 @@ class MWSUser(models.Model):
     user = models.OneToOneField(User, to_field='username', related_name='mws_user', db_constraint=False)
 
 
-# TODO Check this
 @receiver(pre_save, sender=User)
 def add_name_to_user(instance, **kwargs):
-    user = instance
-    if user is not None:
-        user.set_unusable_password()
+    if len(MWSUser.objects.filter(user=instance.username)) == 0:
+        instance.is_active = False
 
 
 def get_mws_public_key(self):
