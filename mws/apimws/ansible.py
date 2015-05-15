@@ -63,7 +63,8 @@ class TaskWithFailure(Task):
 def launch_ansible_async(service):
     while service.status != 'ready':
         try:
-            subprocess.check_output(["userv", "mws-admin", "mws_ansible"])
+            for vm in service.virtual_machines.all():
+                subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name])
         except subprocess.CalledProcessError as e:
             if not getattr(settings, 'DEMO', False):
                 raise launch_ansible_async.retry(exc=e)
