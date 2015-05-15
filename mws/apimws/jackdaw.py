@@ -52,7 +52,9 @@ def jackdaw_api():
     jackdaw_response = subprocess.check_output(["ssh", "mwsv3@jackdaw.csi.cam.ac.uk", "p", "get_people"])
     jackdaw_response_parsed = jackdaw_response.splitlines()  # TODO Raise a custom exception if response is empty
     jackdaw_users = dict(map(extract_crsid_and_uuid, jackdaw_response_parsed))
-    jackdaw_users_crsids = jackdaw_users.keys()
+    # Only take as valid users, users with uid
+    jackdaw_valid_users = filter(lambda user: user.value() is not None, jackdaw_users)
+    jackdaw_users_crsids = jackdaw_valid_users.keys()
     list_of_mws_users = MWSUser.objects.values_list('user', flat=True)
     # Deactivate those users that are no longer in Jackdaw
     deactivate_users(jackdaw_users_crsids, list_of_mws_users)
