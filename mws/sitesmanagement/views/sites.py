@@ -14,7 +14,8 @@ from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in
 from apimws.platforms import new_site_primary_vm
 from apimws.utils import email_confirmation
 from mwsauth.utils import privileges_check, get_or_create_group_by_groupid
-from sitesmanagement.models import SiteForm, NetworkConfig, Service, EmailConfirmation, Site
+from sitesmanagement.forms import SiteForm
+from sitesmanagement.models import NetworkConfig, Service, EmailConfirmation, Site
 from django.conf import settings as django_settings
 from sitesmanagement.utils import can_create_new_site
 

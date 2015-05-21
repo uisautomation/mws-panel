@@ -8,7 +8,8 @@ from django.shortcuts import get_object_or_404, render, redirect
 from ucamlookup import validate_crsids
 from apimws.ansible import launch_ansible
 from mwsauth.utils import privileges_check
-from sitesmanagement.models import Service, UnixGroupForm, UnixGroup
+from sitesmanagement.forms import UnixGroupForm
+from sitesmanagement.models import Service, UnixGroup
 
 
 @login_required

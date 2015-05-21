@@ -7,7 +7,8 @@ from django.shortcuts import get_object_or_404, render, redirect
 from apimws.ansible import launch_ansible
 from apimws.utils import ip_register_api_request
 from mwsauth.utils import privileges_check
-from sitesmanagement.models import Vhost, DomainNameFormNew, DomainName
+from sitesmanagement.forms import DomainNameFormNew
+from sitesmanagement.models import Vhost, DomainName
 from sitesmanagement.utils import is_camacuk
 
 

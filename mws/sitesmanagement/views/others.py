@@ -13,8 +13,9 @@ from apimws.ansible import launch_ansible
 from apimws.models import AnsibleConfiguration
 from apimws.platforms import PlatformsAPINotWorkingException, clone_vm, PlatformsAPIFailure
 from mwsauth.utils import privileges_check
+from sitesmanagement.forms import BillingForm
 from sitesmanagement.utils import get_object_or_None
-from sitesmanagement.models import BillingForm, Service
+from sitesmanagement.models import Service
 
 
 @login_required

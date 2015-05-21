@@ -1,17 +1,15 @@
 """Views(Controllers) for managing Vhosts"""
 from Crypto.Util import asn1
 import OpenSSL
-
 from django.conf import settings as django_settings
 from django.contrib.auth.decorators import login_required
-from django.core.files.temp import NamedTemporaryFile
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseForbidden, HttpResponseRedirect
+from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
-import subprocess
 from apimws.ansible import launch_ansible
 from mwsauth.utils import privileges_check
-from sitesmanagement.models import Service, VhostForm, Vhost
+from sitesmanagement.forms import VhostForm
+from sitesmanagement.models import Service, Vhost
 
 
 @login_required
