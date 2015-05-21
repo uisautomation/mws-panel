@@ -17,7 +17,7 @@ urlpatterns = patterns('',
     # sitesmanagement app
     url(r'^$', 'sitesmanagement.views.index'),
     url(r'^new/$', 'sitesmanagement.views.new'),
-    url(r'^show/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.show'),
+    url(r'^show/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.show', name='showsite'),
     url(r'^edit/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.edit'),
     url(r'^settings/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.service_settings'),
     url(r'^billing/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.billing_management'),
