@@ -25,11 +25,10 @@ def vhosts_management(request, service_id):
         return HttpResponseForbidden()
 
     if not service or not service.active or service.is_busy:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+        return redirect(site)
 
     breadcrumbs = {
-        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse('sitesmanagement.views.show',
-                                                                                 kwargs={'site_id': site.id})),
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
         1: dict(name='Server settings' if service.primary else 'Test server settings',
                 url=reverse('sitesmanagement.views.service_settings', kwargs={'service_id': service.id})),
         2: dict(name='Web sites management', url=reverse(vhosts_management, kwargs={'service_id': service.id}))
@@ -54,7 +53,7 @@ def add_vhost(request, service_id):
         return HttpResponseForbidden()
 
     if not service or not service.active or service.is_busy:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+        return redirect(site)
 
     if request.method == 'POST':
         vhost_form = VhostForm(request.POST)
@@ -78,7 +77,7 @@ def visit_vhost(request, vhost_id):
         return HttpResponseForbidden()
 
     if not service or not service.active or service.is_busy:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+        return redirect(site)
 
     return redirect("http://"+str(vhost.main_domain.name))
 
@@ -94,12 +93,12 @@ def delete_vhost(request, vhost_id):
         return HttpResponseForbidden()
 
     if not service or not service.active or service.is_busy:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+        return redirect(site)
 
     if request.method == 'DELETE':
         vhost.delete()
         launch_ansible(vhost.service)
-        return redirect('sitesmanagement.views.show', site_id=site.id)
+        return redirect(site)
 
     return HttpResponseForbidden()
 
@@ -111,8 +110,7 @@ def generate_csr(request, vhost_id):
     if request.method == 'POST' and vhost.tls_key_hash != 'requested':
         if vhost.main_domain is None:
             breadcrumbs = {
-                0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse('sitesmanagement.views.show',
-                                                                                         kwargs={'site_id': site.id})),
+                0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
                 1: dict(name='Server settings' if vhost.service.primary else 'Test server settings',
                         url=reverse('sitesmanagement.views.service_settings', kwargs={'service_id': vhost.service.id})),
                 2: dict(name='Vhosts Management: %s' % vhost.name,
@@ -149,14 +147,13 @@ def certificates(request, vhost_id):
         return HttpResponseForbidden()
 
     if not service or not service.active or service.is_busy:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+        return redirect(site)
 
     if not vhost.domain_names.all():
         return redirect(reverse('sitesmanagement.views.vhosts_management', kwargs={'service_id': vhost.service.id}))
 
     breadcrumbs = {
-        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse('sitesmanagement.views.show',
-                                                                                 kwargs={'site_id': site.id})),
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
         1: dict(name='Server settings' if vhost.service.primary else 'Test server settings',
                 url=reverse('sitesmanagement.views.service_settings', kwargs={'service_id': vhost.service.id})),
         2: dict(name='Web sites management: %s' % vhost.name,

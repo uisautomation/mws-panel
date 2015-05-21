@@ -22,11 +22,10 @@ def unix_groups(request, service_id):
         return HttpResponseForbidden()
 
     if not service or not service.active or service.is_busy:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+        return redirect(site)
 
     breadcrumbs = {
-        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse('sitesmanagement.views.show',
-                                                                                 kwargs={'site_id': site.id})),
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
         1: dict(name='Server settings' if service.primary else 'Test server settings',
                 url=reverse('sitesmanagement.views.service_settings', kwargs={'service_id': service.id})),
         2: dict(name='Manage Unix Groups', url=reverse(unix_groups, kwargs={'service_id': service.id}))
@@ -50,11 +49,10 @@ def add_unix_group(request, service_id):
         return HttpResponseForbidden()
 
     if not service or not service.active or service.is_busy:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+        return redirect(site)
 
     breadcrumbs = {
-        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse('sitesmanagement.views.show',
-                                                                                 kwargs={'site_id': site.id})),
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
         1: dict(name='Server settings' if service.primary else 'Test server settings',
                 url=reverse('sitesmanagement.views.service_settings', kwargs={'service_id': service.id})),
         2: dict(name='Manage Unix Groups', url=reverse(unix_groups, kwargs={'service_id': service.id})),
@@ -103,11 +101,10 @@ def unix_group(request, ug_id):
         return HttpResponseForbidden()
 
     if not service or not service.active or service.is_busy:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+        return redirect(site)
 
     breadcrumbs = {
-        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse('sitesmanagement.views.show',
-                                                                                 kwargs={'site_id': site.id})),
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
         1: dict(name='Server settings' if unix_group_i.service.primary else 'Test server settings',
                 url=reverse('sitesmanagement.views.service_settings', kwargs={'service_id': unix_group_i.service.id})),
         2: dict(name='Manage Unix Groups', url=reverse(unix_groups, kwargs={'service_id': unix_group_i.service.id})),
@@ -155,7 +152,7 @@ def delete_unix_group(request, ug_id):
         return HttpResponseForbidden()
 
     if not service or not service.active or service.is_busy:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+        return redirect(site)
 
     if request.method == 'DELETE':
         unix_group.delete()

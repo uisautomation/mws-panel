@@ -25,8 +25,7 @@ def billing_management(request, site_id):
         return HttpResponseForbidden()
 
     breadcrumbs = {
-        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse('sitesmanagement.views.show',
-                                                                                 kwargs={'site_id': site.id})),
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
         1: dict(name='Billing', url=reverse(billing_management, kwargs={'site_id': site.id}))
     }
 
@@ -35,14 +34,14 @@ def billing_management(request, site_id):
             billing_form = BillingForm(request.POST, request.FILES, instance=site.billing)
             if billing_form.is_valid():
                 billing_form.save()
-                return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+                return redirect(site)
         else:
             billing_form = BillingForm(request.POST, request.FILES)
             if billing_form.is_valid():
                 billing = billing_form.save(commit=False)
                 billing.site = site
                 billing.save()
-                return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+                return redirect(site)
     elif hasattr(site, 'billing'):
         billing_form = BillingForm(instance=site.billing)
     else:
@@ -65,11 +64,10 @@ def clone_vm_view(request, site_id):
         return HttpResponseForbidden()
 
     if not site.is_ready:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+        return redirect(site)
 
     breadcrumbs = {
-        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse('sitesmanagement.views.show',
-                                                                                 kwargs={'site_id': site.id})),
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
         1: dict(name='Production and test servers management', url=reverse(clone_vm_view, kwargs={'site_id': site.id}))
     }
 
@@ -79,7 +77,7 @@ def clone_vm_view(request, site_id):
         if request.POST.get('primary_vm') == "false":
             clone_vm(site, False)
 
-        return redirect('sitesmanagement.views.show', site_id=site.id)
+        return redirect(site)
 
     return render(request, 'mws/clone_vm.html', {
         'breadcrumbs': breadcrumbs,
@@ -100,11 +98,10 @@ def service_settings(request, service_id):
         return HttpResponseForbidden()
 
     if service.is_busy:
-        return redirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+        return redirect(site)
 
     breadcrumbs = {
-        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse('sitesmanagement.views.show',
-                                                                                 kwargs={'site_id': site.id})),
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
         1: dict(name='Server settings' if service.primary else 'Test server settings',
                 url=reverse(service_settings, kwargs={'service_id': service.id}))
     }
@@ -151,7 +148,7 @@ def system_packages(request, service_id):
         return HttpResponseForbidden()
 
     if not service or not service.active or service.is_busy:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+        return redirect(site)
 
     ansible_configuraton = get_object_or_None(AnsibleConfiguration, service=service, key="system_packages") \
                            or AnsibleConfiguration.objects.create(service=service, key="system_packages", value="")
@@ -160,8 +157,7 @@ def system_packages(request, service_id):
         if ansible_configuraton.value != '' else []
 
     breadcrumbs = {
-        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse('sitesmanagement.views.show',
-                                                                                 kwargs={'site_id': site.id})),
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
         1: dict(name='Server settings' if service.primary else 'Test server settings',
                 url=reverse(service_settings, kwargs={'service_id': service.id})),
         2: dict(name='System packages', url=reverse(system_packages, kwargs={'service_id': service.id}))
@@ -200,12 +196,12 @@ def delete_vm(request, service_id):
         return HttpResponseForbidden()
 
     if not service or not service.active or service.is_busy:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+        return redirect(site)
 
     if request.method == 'DELETE':
         for vm in service.virtual_machines.all():
             vm.delete()
-        return redirect('sitesmanagement.views.show', site_id=site.id)
+        return redirect(site)
 
     return HttpResponseForbidden()
 
@@ -219,7 +215,7 @@ def power_vm(request, service_id):
         return HttpResponseForbidden()
 
     if not service or not service.active or service.is_busy:
-        return redirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+        return redirect(site)
 
     service.power_on()
 
@@ -235,7 +231,7 @@ def reset_vm(request, service_id):
         return HttpResponseForbidden()
 
     if not service or not service.active or service.is_busy:
-        return redirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+        return redirect(site)
 
     if service.do_reset() is False:
         pass  # TODO add error messages in session if it is False
@@ -255,7 +251,7 @@ def update_os(request, service_id):
 
     if not service or not service.active or service.is_busy:
     # TODO change the button format (disabled) if the vm is not ready
-        return redirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+        return redirect(site)
 
     # TODO 1) Warn about the secondary VM if exists
     # TODO 2) Delete secondary VM if exists
@@ -276,11 +272,10 @@ def change_db_root_password(request, service_id):
         return HttpResponseForbidden()
 
     if not service or not service.active or service.is_busy:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+        return redirect(site)
 
     breadcrumbs = {
-        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse('sitesmanagement.views.show',
-                                                                                 kwargs={'site_id': site.id})),
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
         1: dict(name='Server settings' if service.primary else 'Test server settings',
                 url=reverse(service_settings, kwargs={'service_id': service.id})),
         2: dict(name='Change db root pass', url=reverse(change_db_root_password, kwargs={'service_id': service.id})),
@@ -309,11 +304,10 @@ def backups(request, service_id):
         return HttpResponseForbidden()
 
     if not service or not service.active or service.is_busy:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+        return redirect(site)
 
     breadcrumbs = {
-        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse('sitesmanagement.views.show',
-                                                                                 kwargs={'site_id': site.id})),
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
         1: dict(name='Server settings' if service.primary else 'Test server settings',
                 url=reverse(service_settings, kwargs={'service_id': service.id})),
         2: dict(name='Restore backup', url=reverse(backups, kwargs={'service_id': service.id})),
@@ -352,6 +346,6 @@ def backups(request, service_id):
             return render(request, 'mws/backups.html', parameters)
 
         # TODO do something + check that dates are correct
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+        return redirect(site)
 
     return render(request, 'mws/backups.html', parameters)

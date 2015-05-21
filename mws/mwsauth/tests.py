@@ -174,8 +174,7 @@ class AuthTestCases(TestCase):
             # we authorise amc203 user and 101888 group
         })
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(
-            '%s' % reverse('sitesmanagement.views.show', kwargs={'site_id': site_with_auth_users.id})))
+        self.assertTrue(response.url.endswith(site_with_auth_users.get_absolute_url()))
         self.assertEqual(self.client.get(response.url).status_code, 200)
         self.assertEqual(len(site_with_auth_users.users.all()), 1)
         self.assertEqual(site_with_auth_users.users.first(), amc203_user)
@@ -186,8 +185,7 @@ class AuthTestCases(TestCase):
             # we remove all users and groups authorised, we do not send any crsids or groupids
         })
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(
-            '%s' % reverse('sitesmanagement.views.show', kwargs={'site_id': site_with_auth_users.id})))
+        self.assertTrue(response.url.endswith(site_with_auth_users.get_absolute_url()))
         self.assertEqual(self.client.get(response.url).status_code, 403)  # User is no longer authorised
         self.assertEqual(len(site_with_auth_users.users.all()), 0)
         self.assertEqual(len(site_with_auth_users.groups.all()), 0)
@@ -225,8 +223,7 @@ class AuthTestCases(TestCase):
             # we authorise amc203 user and 101888 group
         })
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(
-            '%s' % reverse('sitesmanagement.views.show', kwargs={'site_id': site_with_auth_groups.id})))
+        self.assertTrue(response.url.endswith(site_with_auth_groups.get_absolute_url()))
         self.assertEqual(self.client.get(response.url).status_code, 200)
         self.assertEqual(len(site_with_auth_groups.users.all()), 1)
         self.assertEqual(site_with_auth_groups.users.first(), amc203_user)
@@ -237,8 +234,7 @@ class AuthTestCases(TestCase):
             # we remove all users and groups authorised, we do not send any crsids or groupids
         })
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(
-            '%s' % reverse('sitesmanagement.views.show', kwargs={'site_id': site_with_auth_groups.id})))
+        self.assertTrue(response.url.endswith(site_with_auth_groups.get_absolute_url()))
         self.assertEqual(self.client.get(response.url).status_code, 403)  # User is no longer authorised
         self.assertEqual(len(site_with_auth_groups.users.all()), 0)
         self.assertEqual(len(site_with_auth_groups.groups.all()), 0)

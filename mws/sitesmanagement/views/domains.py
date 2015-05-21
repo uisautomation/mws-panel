@@ -23,11 +23,10 @@ def domains_management(request, vhost_id):
         return HttpResponseForbidden()
 
     if not service or not service.active or service.is_busy:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+        return redirect(site)
 
     breadcrumbs = {
-        0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse('sitesmanagement.views.show',
-                                                                                 kwargs={'site_id': site.id})),
+        0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
         1: dict(name='Server settings' if vhost.service.primary else 'Test server settings',
                 url=reverse('sitesmanagement.views.service_settings', kwargs={'service_id': vhost.service.id})),
         2: dict(name='Web sites management: %s' % vhost.name, url=reverse('sitesmanagement.views.vhosts_management',
@@ -55,7 +54,7 @@ def add_domain(request, vhost_id, socket_error=None):
         return HttpResponseForbidden()
 
     if not service or not service.active or service.is_busy:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+        return redirect(site)
 
     if request.method == 'POST':
         domain_form = DomainNameFormNew(request.POST)
@@ -73,8 +72,7 @@ def add_domain(request, vhost_id, socket_error=None):
                 launch_ansible(vhost.service)  # to add the new domain name to the vhost apache configuration
         else:
             breadcrumbs = {
-                0: dict(name='Manage Web Service server: ' + str(site.name), url=reverse('sitesmanagement.views.show',
-                                                                                         kwargs={'site_id': site.id})),
+                0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
                 1: dict(name='Server settings' if vhost.service.primary else 'Test server settings',
                         url=reverse('sitesmanagement.views.service_settings',
                                     kwargs={'service_id': vhost.service.id})),
@@ -108,7 +106,7 @@ def set_dn_as_main(request, domain_id):
         return HttpResponseForbidden()
 
     if not service or not service.active or service.is_busy:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+        return redirect(site)
 
     if request.method == 'POST':
         vhost.main_domain = domain
@@ -130,7 +128,7 @@ def delete_dn(request, domain_id):
         return HttpResponseForbidden()
 
     if not service or not service.active or service.is_busy:
-        return HttpResponseRedirect(reverse('sitesmanagement.views.show', kwargs={'site_id': site.id}))
+        return redirect(site)
 
     if request.method == 'DELETE':
         if is_camacuk(domain.name):

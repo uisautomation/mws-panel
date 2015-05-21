@@ -59,8 +59,7 @@ def finished_installation_email_confirmation(site):
     EmailMessage(
         subject="University of Cambridge Managed Web Service: Your MWS3 site is available",
         body="Your MWS3 site is now available. You can access to the web panel of your MWS3 site by clicking the " \
-              "following link: %s%s" % (settings.MAIN_DOMAIN,
-                                        reverse('sitesmanagement.views.show', kwargs={'site_id': site.id})),
+              "following link: %s%s" % (settings.MAIN_DOMAIN, site.get_absolute_url()),
         from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
         to=[site.email],
         headers={'Return-Path': 'mws3-support@cam.ac.uk'}
