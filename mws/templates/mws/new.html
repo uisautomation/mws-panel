@@ -5,13 +5,10 @@
         <div class="campl-content-container">
             <h1>Request new site</h1>
 
-            <form action={% url 'sitesmanagement.views.new' %} method="post">{% csrf_token %}
+            <form action={% url 'newsite' %} method="post">{% csrf_token %}
                 <fieldset>
                     <div id="site_form">
-                        {{ site_form.as_p }}
-                    </div>
-                    <div id="domain_form">
-                        {{ domain_form.as_p }}
+                        {{ form.as_p }}
                     </div>
                     <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
                 </fieldset>

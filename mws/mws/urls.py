@@ -2,6 +2,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
+from sitesmanagement.views.sites import SiteCreate, SiteShow
 
 urlpatterns = patterns('',
     # external apps urls
@@ -16,8 +17,8 @@ urlpatterns = patterns('',
 
     # sitesmanagement app
     url(r'^$', 'sitesmanagement.views.index'),
-    url(r'^new/$', 'sitesmanagement.views.new'),
-    url(r'^show/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.show', name='showsite'),
+    url(r'^new/$', SiteCreate.as_view(), name='newsite'),
+    url(r'^show/(?P<pk>[0-9]+)/$', SiteShow.as_view(), name='showsite'),
     url(r'^edit/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.edit'),
     url(r'^settings/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.service_settings'),
     url(r'^billing/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.billing_management'),

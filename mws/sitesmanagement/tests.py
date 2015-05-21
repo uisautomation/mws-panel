@@ -74,7 +74,7 @@ class SiteManagementTests(TestCase):
 
         response = self.client.get(reverse(views.index))
         self.assertInHTML("<p><a href=\"%s\" class=\"campl-primary-cta\">Register new server</a></p>" %
-                          reverse(views.new), response.content)
+                          reverse('newsite'), response.content)
 
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
 
@@ -87,14 +87,14 @@ class SiteManagementTests(TestCase):
         self.assertContains(response, "testSite")
 
     def test_view_show(self):
-        response = self.client.get(reverse(views.show, kwargs={'site_id': 1}))
+        response = self.client.get(reverse('showsite', kwargs={'pk': 1}))
         self.assertEqual(response.status_code, 302)  # Not logged in, redirected to login
         self.assertTrue(response.url.endswith(
-            '%s?next=%s' % (reverse('raven_login'), reverse(views.show, kwargs={'site_id': 1}))))
+            '%s?next=%s' % (reverse('raven_login'), reverse('showsite', kwargs={'pk': 1}))))
 
         do_test_login(self, user="test0001")
 
-        response = self.client.get(reverse(views.show, kwargs={'site_id': 1}))
+        response = self.client.get(reverse('showsite', kwargs={'pk': 1}))
         self.assertEqual(response.status_code, 404)  # The Site does not exist
 
         NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
@@ -116,14 +116,14 @@ class SiteManagementTests(TestCase):
 
     @unittest.skipUnless(hasattr(settings, 'PLATFORMS_API_USERNAME'), "Platforms API login details not available.")
     def test_view_new(self):
-        response = self.client.get(reverse(views.new))
+        response = self.client.get(reverse('newsite'))
         self.assertEqual(response.status_code, 302)  # Not logged in, redirected to login
         self.assertTrue(response.url.endswith(
-            '%s?next=%s' % (reverse('raven_login'), reverse(views.new))))
+            '%s?next=%s' % (reverse('raven_login'), reverse('newsite'))))
 
         do_test_login(self, user="test0001")
 
-        response = self.client.get(reverse(views.new))
+        response = self.client.get(reverse('newsite'))
         self.assertEqual(response.status_code, 302)  # There aren't prealocated network configurations
         self.assertTrue(response.url.endswith(reverse(views.index)))
 
@@ -138,15 +138,15 @@ class SiteManagementTests(TestCase):
         NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff2', name='mws-client3', type='ipv6')
         NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff1', name='mws-client4', type='ipv6')
 
-        response = self.client.get(reverse(views.new))
+        response = self.client.get(reverse('newsite'))
         self.assertContains(response, "Request new site")
 
-        response = self.client.post(reverse(views.new), {'siteform-description': 'Desc',
+        response = self.client.post(reverse('newsite'), {'siteform-description': 'Desc',
                                                          'siteform-institution_id': 'UIS',
                                                          'siteform-email': 'amc203@cam.ac.uk'})
         self.assertContains(response, "This field is required.")  # Empty name, error
 
-        response = self.client.post(reverse(views.new), {'siteform-name': 'Test Site',
+        response = self.client.post(reverse('newsite'), {'siteform-name': 'Test Site',
                                                          'siteform-description': 'Desc',
                                                          'siteform-institution_id': 'UIS',
                                                          'siteform-email': 'amc203@cam.ac.uk'})

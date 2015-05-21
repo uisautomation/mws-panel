@@ -392,7 +392,7 @@
                 url: url,
                 type: 'DELETE',
                 success: function(result) {
-                    window.location = "{% url 'sitesmanagement.views.show' site_id=site.id %}";
+                    window.location = "{% url 'showsite' pk=site.id %}";
                 },
                 beforeSend: function(xhr, settings) {
                     xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
@@ -413,7 +413,7 @@
                 url: url,
                 type: 'POST',
                 success: function(result) {
-                    window.location = "{% url 'sitesmanagement.views.show' site_id=site.id %}";
+                    window.location = "{% url 'showsite' pk=site.id %}";
                 },
                 beforeSend: function(xhr, settings) {
                     xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
