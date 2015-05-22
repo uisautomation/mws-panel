@@ -52,14 +52,14 @@ class SiteManagementTests(TestCase):
         self.assertIsNotNone(get_object_or_None(User, username="test0001"))
 
     def test_view_index(self):
-        response = self.client.get(reverse(views.index))
+        response = self.client.get(reverse('listsites'))
         self.assertEqual(response.status_code, 302)  # Not logged in, redirected to login
         self.assertTrue(response.url.endswith(
-            '%s?next=%s' % (reverse('raven_login'), reverse(views.index))))
+            '%s?next=%s' % (reverse('raven_login'), reverse('listsites'))))
 
         do_test_login(self, user="test0001")
 
-        response = self.client.get(reverse(views.index))
+        response = self.client.get(reverse('listsites'))
         self.assertInHTML("<p class=\"campl-notifications-icon campl-warning-icon\" style=\"float:none; margin-bottom: "
                           "10px;\">At this moment we cannot process any new request for the Managed Web Service, please"
                           " try again later.</p>", response.content)
@@ -72,18 +72,18 @@ class SiteManagementTests(TestCase):
 
         NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff4', name='mws-client1', type='ipv6')
 
-        response = self.client.get(reverse(views.index))
+        response = self.client.get(reverse('listsites'))
         self.assertInHTML("<p><a href=\"%s\" class=\"campl-primary-cta\">Register new server</a></p>" %
                           reverse('newsite'), response.content)
 
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
 
-        response = self.client.get(reverse(views.index))
+        response = self.client.get(reverse('listsites'))
         self.assertNotContains(response, "testSite")
 
         site.users.add(User.objects.get(username="test0001"))
 
-        response = self.client.get(reverse(views.index))
+        response = self.client.get(reverse('listsites'))
         self.assertContains(response, "testSite")
 
     def test_view_show(self):
@@ -125,7 +125,7 @@ class SiteManagementTests(TestCase):
 
         response = self.client.get(reverse('newsite'))
         self.assertEqual(response.status_code, 302)  # There aren't prealocated network configurations
-        self.assertTrue(response.url.endswith(reverse(views.index)))
+        self.assertTrue(response.url.endswith(reverse('listsites')))
 
         NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
                                      name="mws-66424.mws3.csx.cam.ac.uk")
@@ -471,7 +471,7 @@ class SiteManagement2Tests(TestCase):
         self.assertTrue(response.url.endswith(site.get_absolute_url()))
         response = self.client.get(reverse(views.enable, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith('%s' % (reverse(views.index))))
+        self.assertTrue(response.url.endswith('%s' % (reverse('listsites'))))
         response = self.client.get(reverse(views.vhosts_management, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith(site.get_absolute_url()))

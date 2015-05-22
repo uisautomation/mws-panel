@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils.html import format_html
-from django.views.generic import FormView
+from django.views.generic import FormView, ListView
 from django.views.generic.detail import SingleObjectMixin, DetailView
 from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups
 from apimws.platforms import new_site_primary_vm
@@ -31,6 +31,7 @@ class LoginRequiredMixin(object):
 
 class SitePriviledgeCheck(LoginRequiredMixin, SingleObjectMixin):
     model = Site
+
     def dispatch(self, request, *args, **kwargs):
         site = self.get_object()
 
@@ -56,36 +57,37 @@ class SitePriviledgeAndBusyCheck(SitePriviledgeCheck):
         return super(SitePriviledgeAndBusyCheck, self).dispatch(request, *args, **kwargs)
 
 
-@login_required
-def index(request):
+class SiteList(LoginRequiredMixin, ListView):
     """View(Controller) of the index page that shows the list of sites where the user is authorised. These sites are
     separated in sites where the user is authorised as the admin and sites where the user is authorised as a simple
     user (only SSH access)"""
-    try:
-        groups_id = get_group_ids_of_a_user_in_lookup(request.user)
-    except IbisException:
-        groups_id = []
+    template_name = 'index.html'
 
-    sites = []
-    for group_id in groups_id:
-        group = get_or_create_group_by_groupid(group_id)
-        sites += group.sites.all()
+    def get_context_data(self, **kwargs):
+        context = super(SiteList, self).get_context_data(**kwargs)
+        context['sites_enabled'] = filter(lambda site: not site.is_canceled() and not site.is_disabled(),
+                                                     self.object_list)
+        context['sites_disabled'] = filter(lambda site: not site.is_canceled() and site.is_disabled(),
+                                                      self.object_list)
+        context['sites_authorised'] = filter(lambda site: not site.is_canceled() and not site.is_disabled(),
+                                                        self.request.user.sites_auth_as_user.all())
+        context['deactivate_new'] = not can_create_new_site()
+        return context
 
-    sites += request.user.sites.all()
+    def get_queryset(self):
+        try:
+            groups_id = get_group_ids_of_a_user_in_lookup(self.request.user)
+        except IbisException:
+            groups_id = []
 
-    sites_enabled = filter(lambda site: not site.is_canceled() and not site.is_disabled(), sites)
+        sites = []
+        for group_id in groups_id:
+            group = get_or_create_group_by_groupid(group_id)
+            sites += group.sites.all()
 
-    sites_disabled = filter(lambda site: not site.is_canceled() and site.is_disabled(), sites)
+        sites += self.request.user.sites.all()
 
-    sites_authorised = filter(lambda site: not site.is_canceled() and not site.is_disabled(),
-                              request.user.sites_auth_as_user.all())
-
-    return render(request, 'index.html', {
-        'sites_enabled': sorted(set(sites_enabled)),
-        'sites_disabled': sorted(set(sites_disabled)),
-        'sites_authorised': sorted(set(sites_authorised)),
-        'deactivate_new': not can_create_new_site()
-    })
+        return sites
 
 
 class SiteCreate(LoginRequiredMixin, FormView):
@@ -126,7 +128,7 @@ class SiteCreate(LoginRequiredMixin, FormView):
 
     def dispatch(self, *args, **kwargs):
         if not can_create_new_site():  # TODO add prealocated HostNetworkConfigs
-            return HttpResponseRedirect(reverse_lazy(index))
+            return HttpResponseRedirect(reverse_lazy(reverse('listsites')))
         return super(SiteCreate, self).dispatch(*args, **kwargs)
 
 
@@ -177,9 +179,9 @@ class SiteShow(SitePriviledgeCheck, DetailView):
                 site_email = EmailConfirmation.objects.get(email=self.object.email, site_id=self.object.id)
                 if site_email.status == 'pending':
                     from apimws.views import resend_email_confirmation_view
-                    warning_messages.append(format_html('Your email \'%s\' is still unconfirmed, please check your email '
-                                                        'inbox and click on the link of the email we sent you. <a '
-                                                        'id="resend_email_link" data-href="%s" href="#" '
+                    warning_messages.append(format_html('Your email \'%s\' is still unconfirmed, please check your '
+                                                        'email inbox and click on the link of the email we sent you. '
+                                                        '<a id="resend_email_link" data-href="%s" href="#" '
                                                         'style="text-decoration: underline;">Resend confirmation '
                                                         'email</a>' % (self.object.email,
                                                                        reverse(resend_email_confirmation_view,
@@ -254,7 +256,7 @@ def delete(request, site_id):
     if request.method == 'POST':
         if request.POST.get('confirmation') == "yes":
             site.cancel()
-            return redirect(index)
+            return redirect(reverse('listsites'))
         else:
             return redirect(site)
 
@@ -285,7 +287,7 @@ def disable(request, site_id):
 
     if request.method == 'POST':
         site.disable()
-        return redirect(index)
+        return redirect(reverse('listsites'))
 
     return render(request, 'mws/disable.html', {
         'breadcrumbs': breadcrumbs,
@@ -309,4 +311,4 @@ def enable(request, site_id):
         if site.enable():
             return redirect(site)
 
-    return redirect(index)
+    return redirect(reverse('listsites'))

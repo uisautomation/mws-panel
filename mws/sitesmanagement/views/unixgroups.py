@@ -15,7 +15,7 @@ from sitesmanagement.models import Service, UnixGroup
 @login_required
 def unix_groups(request, service_id):
     if getattr(settings, 'DEMO', False):
-        return HttpResponseRedirect(reverse('sitesmanagement.views.index'))
+        return HttpResponseRedirect(reverse('listsites'))
     service = get_object_or_404(Service, pk=service_id)
     site = privileges_check(service.site.id, request.user)
 
@@ -42,7 +42,7 @@ def unix_groups(request, service_id):
 @login_required
 def add_unix_group(request, service_id):
     if getattr(settings, 'DEMO', False):
-        return HttpResponseRedirect(reverse('sitesmanagement.views.index'))
+        return HttpResponseRedirect(reverse('listsites'))
     service = get_object_or_404(Service, pk=service_id)
     site = privileges_check(service.site.id, request.user)
 
@@ -93,7 +93,7 @@ def add_unix_group(request, service_id):
 @login_required
 def unix_group(request, ug_id):
     if getattr(settings, 'DEMO', False):
-        return HttpResponseRedirect(reverse('sitesmanagement.views.index'))
+        return HttpResponseRedirect(reverse('listsites'))
     unix_group_i = get_object_or_404(UnixGroup, pk=ug_id)
     site = privileges_check(unix_group_i.service.site.id, request.user)
     service = unix_group_i.service
@@ -144,7 +144,7 @@ def unix_group(request, ug_id):
 @login_required
 def delete_unix_group(request, ug_id):
     if getattr(settings, 'DEMO', False):
-        return HttpResponseRedirect(reverse('sitesmanagement.views.index'))
+        return HttpResponseRedirect(reverse('listsites'))
     unix_group = get_object_or_404(UnixGroup, pk=ug_id)
     site = privileges_check(unix_group.service.site.id, request.user)
     service = unix_group.service

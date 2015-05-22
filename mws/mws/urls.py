@@ -2,7 +2,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
-from sitesmanagement.views.sites import SiteCreate, SiteShow
+from sitesmanagement.views.sites import SiteCreate, SiteShow, SiteList
 
 urlpatterns = patterns('',
     # external apps urls
@@ -16,7 +16,7 @@ urlpatterns = patterns('',
     url(r'^ucamlookup/', include('ucamlookup.urls')),
 
     # sitesmanagement app
-    url(r'^$', 'sitesmanagement.views.index'),
+    url(r'^$', SiteList.as_view(), name='listsites'),
     url(r'^new/$', SiteCreate.as_view(), name='newsite'),
     url(r'^show/(?P<pk>[0-9]+)/$', SiteShow.as_view(), name='showsite'),
     url(r'^edit/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.edit'),
