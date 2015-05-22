@@ -153,7 +153,7 @@ class SiteManagementTests(TestCase):
 
         test_site = Site.objects.get(name='Test Site')
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(site.get_absolute_url()))
+        self.assertTrue(response.url.endswith(test_site.get_absolute_url()))
 
         # TODO test platforms API
         # TODO test email check

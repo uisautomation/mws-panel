@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
+from django.forms import ModelForm
 from reversion import VersionAdmin
+from suit.widgets import LinkedSelect
 from .models import Site, Billing, DomainName, Suspension, VirtualMachine, EmailConfirmation, \
     Vhost, UnixGroup, NetworkConfig, SiteKeys, Service
 from ucamlookup import get_institutions, get_institution_name_by_id
@@ -71,8 +73,21 @@ class VhostAdmin(VersionAdmin):
     list_display = ('name', 'service', )
 
 
+class VirtualMachineForm(ModelForm):
+    class Meta:
+        widgets = {
+            'service': LinkedSelect
+        }
+
+
 class VirtualMachineAdmin(VersionAdmin):
-    list_display = ('name', 'site')
+    form = VirtualMachineForm
+    list_display = ('name', 'site', 'services')
+
+    def services(self, obj):
+        return '<a href="/admin/sitesmanagement/service/%d/">%s</a>' % (obj.service.id, obj.service)
+
+    services.allow_tags = True
 
 
 class EmailConfirmationAdmin(ModelAdmin):

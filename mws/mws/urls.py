@@ -6,7 +6,6 @@ from sitesmanagement.views.sites import SiteCreate, SiteShow, SiteList
 
 urlpatterns = patterns('',
     # external apps urls
-    url(r'^grappelli/', include('grappelli.urls')),
     url(r'', include('ucamwebauth.urls')),
 
     # admin app urls
