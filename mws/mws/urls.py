@@ -2,7 +2,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
-from sitesmanagement.views.sites import SiteCreate, SiteShow, SiteList
+from sitesmanagement.views.sites import SiteCreate, SiteShow, SiteList, SiteDisable, SiteEnable
 
 urlpatterns = patterns('',
     # external apps urls
@@ -17,13 +17,13 @@ urlpatterns = patterns('',
     # sitesmanagement app
     url(r'^$', SiteList.as_view(), name='listsites'),
     url(r'^new/$', SiteCreate.as_view(), name='newsite'),
-    url(r'^show/(?P<pk>[0-9]+)/$', SiteShow.as_view(), name='showsite'),
+    url(r'^show/(?P<site_id>[0-9]+)/$', SiteShow.as_view(), name='showsite'),
     url(r'^edit/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.edit'),
     url(r'^settings/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.service_settings'),
     url(r'^billing/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.billing_management'),
     url(r'^delete/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.delete'),
-    url(r'^disable/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.disable'),
-    url(r'^enable/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.enable'),
+    url(r'^disable/(?P<site_id>[0-9]+)/$', SiteDisable.as_view(), name='disablesite'),
+    url(r'^enable/(?P<site_id>[0-9]+)/$', SiteEnable.as_view(), name='enablesite'),
     url(r'^privacy/$', 'sitesmanagement.views.privacy'),
     url(r'^domains/(?P<vhost_id>[0-9]+)/$', 'sitesmanagement.views.domains_management'),
     url(r'^vhosts/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.vhosts_management'),

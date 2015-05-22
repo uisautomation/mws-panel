@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils.html import format_html
-from django.views.generic import FormView, ListView
+from django.views.generic import FormView, ListView, View, TemplateView, UpdateView
 from django.views.generic.detail import SingleObjectMixin, DetailView
 from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups
 from apimws.platforms import new_site_primary_vm
@@ -31,6 +31,8 @@ class LoginRequiredMixin(object):
 
 class SitePriviledgeCheck(LoginRequiredMixin, SingleObjectMixin):
     model = Site
+    context_object_name = 'site'
+    pk_url_kwarg = 'site_id'
 
     def dispatch(self, request, *args, **kwargs):
         site = self.get_object()
@@ -266,49 +268,32 @@ def delete(request, site_id):
     })
 
 
-@login_required
-def disable(request, site_id):
+class SiteDisable(SitePriviledgeAndBusyCheck, UpdateView):
     """View(Controller) to disable a Site object. The VMs are switched off."""
-    site = privileges_check(site_id, request.user)
+    template_name = 'mws/disable.html'
 
-    if site is None:
-        return HttpResponseForbidden()
+    def get_context_data(self, **kwargs):
+        context = super(SiteDisable, self).get_context_data(**kwargs)
+        context['breadcrumbs'] = {
+            0: dict(name='Manage Web Service server: ' + str(self.object.name), url=self.object.get_absolute_url()),
+            1: dict(name='Change information about your MWS',
+                    url=reverse('sitesmanagement.views.edit', kwargs={'site_id': self.object.id})),
+            2: dict(name='Disable your MWS site', url=reverse('disablesite',
+                                                              kwargs={'site_id': self.object.id}))
+        }
+        return context
 
-    if site.is_busy:
-        return redirect(site)
-
-    breadcrumbs = {
-        0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
-        1: dict(name='Change information about your MWS',
-                url=reverse('sitesmanagement.views.edit', kwargs={'site_id': site.id})),
-        2: dict(name='Disable your MWS site', url=reverse('sitesmanagement.views.disable',
-                                                          kwargs={'site_id': site.id}))
-    }
-
-    if request.method == 'POST':
-        site.disable()
+    def post(self, request, *args, **kwargs):
+        super(SiteDisable, self).post(request, *args, **kwargs)
+        self.object.disable()
         return redirect(reverse('listsites'))
 
-    return render(request, 'mws/disable.html', {
-        'breadcrumbs': breadcrumbs,
-        'site': site,
-    })
 
-
-@login_required
-def enable(request, site_id):
+class SiteEnable(SitePriviledgeAndBusyCheck, UpdateView):
     """View(Controller) to reenable a Site object. The VMs are switched on."""
-    site = get_object_or_404(Site, pk=site_id)
 
-    try:
-        if (site not in request.user.sites.all() and not user_in_groups(request.user, site.groups.all())) \
-                or site.is_admin_suspended() or site.is_canceled():
-            return HttpResponseForbidden()
-    except Exception:
-        return HttpResponseForbidden()
-
-    if request.method == 'POST':
-        if site.enable():
-            return redirect(site)
-
-    return redirect(reverse('listsites'))
+    def post(self, request, *args, **kwargs):
+        super(SiteEnable, self).post(request, *args, **kwargs)
+        if self.object.enable():
+            return redirect(self.object)
+        return redirect(reverse('listsites'))

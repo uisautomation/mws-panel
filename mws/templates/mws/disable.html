@@ -4,7 +4,7 @@
     <div class="campl-column12">
         <div class="campl-content-container">
             <h1 id="page-title">Disable your MWS site</h1>
-            <form action={% url 'sitesmanagement.views.disable' site_id=site.id %} method="post">
+            <form action={% url 'disablesite' site_id=site.id %} method="post">
                 <fieldset>
                     {% csrf_token %}
                     <div>

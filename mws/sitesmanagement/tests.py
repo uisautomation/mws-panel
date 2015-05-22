@@ -87,14 +87,14 @@ class SiteManagementTests(TestCase):
         self.assertContains(response, "testSite")
 
     def test_view_show(self):
-        response = self.client.get(reverse('showsite', kwargs={'pk': 1}))
+        response = self.client.get(reverse('showsite', kwargs={'site_id': 1}))
         self.assertEqual(response.status_code, 302)  # Not logged in, redirected to login
         self.assertTrue(response.url.endswith(
-            '%s?next=%s' % (reverse('raven_login'), reverse('showsite', kwargs={'pk': 1}))))
+            '%s?next=%s' % (reverse('raven_login'), reverse('showsite', kwargs={'site_id': 1}))))
 
         do_test_login(self, user="test0001")
 
-        response = self.client.get(reverse('showsite', kwargs={'pk': 1}))
+        response = self.client.get(reverse('showsite', kwargs={'site_id': 1}))
         self.assertEqual(response.status_code, 404)  # The Site does not exist
 
         NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
@@ -391,9 +391,9 @@ class SiteManagement2Tests(TestCase):
         self.assertEqual(response.status_code, 403)
         response = self.client.get(reverse(views.delete, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.disable, kwargs={'site_id': site.id}))
+        response = self.client.get(reverse('disablesite', kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.enable, kwargs={'site_id': site.id}))
+        response = self.client.get(reverse('enablesite', kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)
         response = self.client.get(reverse(views.vhosts_management, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 403)
@@ -466,10 +466,10 @@ class SiteManagement2Tests(TestCase):
         response = self.client.get(reverse(views.delete, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith(site.get_absolute_url()))
-        response = self.client.get(reverse(views.disable, kwargs={'site_id': site.id}))
+        response = self.client.get(reverse('disablesite', kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith(site.get_absolute_url()))
-        response = self.client.get(reverse(views.enable, kwargs={'site_id': site.id}))
+        response = self.client.get(reverse('enablesite', kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith('%s' % (reverse('listsites'))))
         response = self.client.get(reverse(views.vhosts_management, kwargs={'service_id': service.id}))

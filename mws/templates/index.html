@@ -45,12 +45,12 @@
                     <tbody>
                     {% for site in sites_enabled %}
                         {% if site.is_admin_suspended %}
-                            <tr class="site_suspended" data-href="{% url 'showsite' pk=site.id %}">
+                            <tr class="site_suspended" data-href="{% url 'showsite' site_id=site.id %}">
                                 <td>
                                     {{ site.name }} <br/>
                                     This server has been administratively suspended
                         {% else %}
-                            <tr data-href="{% url 'showsite' pk=site.id %}">
+                            <tr data-href="{% url 'showsite' site_id=site.id %}">
                                 <td>
                                     {{ site.name }}
                         {% endif %}
@@ -78,7 +78,7 @@
                                 </td>
                                 <td style="width: 30px; padding-left: 0px; padding-right: 0px;">
                                     {% if not site.is_admin_suspended %}
-                                        <a href="{% url 'showsite' pk=site.id %}">
+                                        <a href="{% url 'showsite' site_id=site.id %}">
                                             <i title="Administrator panel" class="fa fa-angle-double-right fa-2x"
                                                data-toggle="tooltip"></i>
                                         </a>
@@ -123,7 +123,7 @@
                                     </td>
                                     <td style="width: 35px;">
                                         {% if not site.is_admin_suspended %}
-                                            <form action={% url 'sitesmanagement.views.enable' site_id=site.id %} method="post">
+                                            <form action={% url 'enablesite' site_id=site.id %} method="post">
                                                 <fieldset>
                                                     {% csrf_token %}
                                                     <input type="submit" value="Enable" class="campl-btn campl-primary-cta">
