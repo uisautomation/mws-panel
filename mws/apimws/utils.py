@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 from celery import shared_task
-from django.core.mail import send_mail, EmailMessage
+from django.core.mail import EmailMessage
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from apimws.platforms import TaskWithFailure
@@ -23,35 +23,26 @@ def ip_register_api_request(domain_name):
     ).send()
 
 
-@shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
 def email_confirmation(site):
-    previous = EmailConfirmation.objects.filter(site=site)
-    if previous:
-        previous.first().delete()
-    email_conf = EmailConfirmation.objects.create(email=site.email, token=uuid.uuid4(), status="pending", site=site)
-    EmailMessage(
-        subject="University of Cambridge Managed Web Service: Please confirm your email address",
-        body="Please, confirm your email address by clicking in the following link: %s%s"
-             % (settings.MAIN_DOMAIN, reverse('apimws.views.confirm_email',
-                                              kwargs={'ec_id':email_conf.id, 'token': email_conf.token})),
-        from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
-        to=[site.email],
-        headers={'Return-Path': 'mws3-support@cam.ac.uk'}
-    ).send()
+    EmailConfirmation.objects.filter(site=site).delete() # Delete previous one
+    EmailConfirmation.objects.create(email=site.email, token=uuid.uuid4(), status="pending", site=site)
+    send_email_confirmation.delay(site)
 
 
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
-def resend_email_confirmation(site):
-    email_conf = EmailConfirmation.objects.get(site=site)
-    EmailMessage(
-        subject="University of Cambridge Managed Web Service: Please confirm your email address",
-        body="Please, confirm your email address by clicking in the following link: %s%s"
-             % (settings.MAIN_DOMAIN, reverse('apimws.views.confirm_email',
-                                              kwargs={'ec_id':email_conf.id, 'token': email_conf.token})),
-        from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
-        to=[site.email],
-        headers={'Return-Path': 'mws3-support@cam.ac.uk'}
-    ).send()
+def send_email_confirmation(site):
+    email_conf = EmailConfirmation.objects.filter(site=site)
+    if email_conf:
+        email_conf = email_conf.first()
+        EmailMessage(
+            subject="University of Cambridge Managed Web Service: Please confirm your email address",
+            body="Please, confirm your email address by clicking in the following link: %s%s"
+                 % (settings.MAIN_DOMAIN, reverse('apimws.views.confirm_email',
+                                                  kwargs={'ec_id':email_conf.id, 'token': email_conf.token})),
+            from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
+            to=[site.email],
+            headers={'Return-Path': 'mws3-support@cam.ac.uk'}
+        ).send()
 
 
 @shared_task(base=TaskWithFailure, default_retry_delay=60, max_retries=5)

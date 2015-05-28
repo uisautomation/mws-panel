@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from stronghold.decorators import public
 from apimws.ansible import launch_ansible_async
-from apimws.utils import resend_email_confirmation, finished_installation_email_confirmation
+from apimws.utils import finished_installation_email_confirmation, send_email_confirmation
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.models import DomainName, Site, EmailConfirmation, VirtualMachine
 from ucamlookup import user_in_groups
@@ -159,7 +159,7 @@ def resend_email_confirmation_view(request, site_id):
         return HttpResponseForbidden()
 
     if request.method == 'POST':
-        resend_email_confirmation.delay(site)
+        send_email_confirmation.delay(site)
     else:
         return HttpResponseForbidden()
 

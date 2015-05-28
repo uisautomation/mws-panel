@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils.html import format_html
-from django.views.generic import FormView, ListView, View, TemplateView, UpdateView
+from django.views.generic import FormView, ListView, View, TemplateView, UpdateView, DeleteView
 from django.views.generic.detail import SingleObjectMixin, DetailView
 from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups
 from apimws.platforms import new_site_primary_vm
@@ -124,7 +124,7 @@ class SiteCreate(LoginRequiredMixin, FormView):
                                               network_configuration=test_service_network_configuration)
         new_site_primary_vm.delay(prod_service, host_network_configuration)
         if site.email:
-            email_confirmation.delay(site)
+            email_confirmation(site)
         LOGGER.info(str(self.request.user.username) + " created a new site '" + str(site.name) + "'")
         return super(SiteCreate, self).form_valid(form)
 
@@ -199,73 +199,53 @@ class SiteShow(SitePriviledgeCheck, DetailView):
         return context
 
 
-@login_required
-def edit(request, site_id):
+class SiteEdit(SitePriviledgeAndBusyCheck, UpdateView):
     """View(Controller) to edit the name, description of a site and access to delete and disable options"""
-    site = privileges_check(site_id, request.user)
+    template_name = 'mws/edit.html'
+    form_class = SiteForm
 
-    if site is None:
-        return HttpResponseForbidden()
+    def get_context_data(self, **kwargs):
+        context = super(SiteEdit, self).get_context_data(**kwargs)
+        context['breadcrumbs'] = {
+            0: dict(name='Manage Web Service server: ' + str(self.object.name), url=self.object.get_absolute_url()),
+            1: dict(name='Manage Web Service account settings',
+                    url=reverse('editsite', kwargs={'site_id': self.object.id}))
+        }
+        return context
 
-    if site.is_busy:
-        return redirect(site)
-
-    breadcrumbs = {
-        0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
-        1: dict(name='Manage Web Service account settings',
-                url=reverse('sitesmanagement.views.edit', kwargs={'site_id': site.id}))
-    }
-
-    if request.method == 'POST':
-        site_form = SiteForm(request.POST, user=request.user, instance=site)
-        if site_form.is_valid():
-            site_form.save()
-            if 'email' in site_form.changed_data:
-                if site.email:
-                    email_confirmation.delay(site)
-                    # TODO launch ansible to update webmaster email address in host?
-            return redirect(site)
-    else:
-        site_form = SiteForm(user=request.user, instance=site)
-
-    return render(request, 'mws/edit.html', {
-        'site_form': site_form,
-        'site': site,
-        'breadcrumbs': breadcrumbs
-    })
+    def form_valid(self, form):
+        form.user = self.request.user
+        return_value = super(SiteEdit, self).form_valid(form)
+        if 'email' in form.changed_data:
+            if self.object.email:
+                email_confirmation(self.object)
+                # TODO launch ansible to update webmaster email address in host?
+        return return_value
 
 
-@login_required
-def delete(request, site_id):
+class SiteDelete(SitePriviledgeAndBusyCheck, UpdateView):
     """View(Controller) to delete a site. The Site object is marked as cancelled but not deleted. The VMs associated
     to this Site are switched off but eventually they are deleted. We maintain the Site object to report and
     billing options."""
-    site = privileges_check(site_id, request.user)
+    template_name = 'mws/disable.html'
 
-    if site is None:
-        return HttpResponseForbidden()
+    def get_context_data(self, **kwargs):
+        context = super(SiteDelete, self).get_context_data(**kwargs)
+        context['breadcrumbs'] = {
+            0: dict(name='Manage Web Service server: ' + str(self.object.name), url=self.object.get_absolute_url()),
+            1: dict(name='Change information about your MWS',
+                    url=reverse('editsite', kwargs={'site_id': self.object.id})),
+            2: dict(name='Delete your MWS', url=reverse('deletesite', kwargs={'site_id': self.object.id}))
+        }
+        return context
 
-    if site.is_busy:
-        return redirect(site)
-
-    breadcrumbs = {
-        0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
-        1: dict(name='Change information about your MWS',
-                url=reverse('sitesmanagement.views.edit', kwargs={'site_id': site.id})),
-        2: dict(name='Delete your MWS', url=reverse('sitesmanagement.views.delete', kwargs={'site_id': site.id}))
-    }
-
-    if request.method == 'POST':
+    def post(self, request, *args, **kwargs):
+        super(SiteDelete, self).post(request, *args, **kwargs)
         if request.POST.get('confirmation') == "yes":
-            site.cancel()
+            self.object.cancel()
             return redirect(reverse('listsites'))
         else:
-            return redirect(site)
-
-    return render(request, 'mws/delete.html', {
-        'site': site,
-        'breadcrumbs': breadcrumbs
-    })
+            return redirect(self.object)
 
 
 class SiteDisable(SitePriviledgeAndBusyCheck, UpdateView):
@@ -277,7 +257,7 @@ class SiteDisable(SitePriviledgeAndBusyCheck, UpdateView):
         context['breadcrumbs'] = {
             0: dict(name='Manage Web Service server: ' + str(self.object.name), url=self.object.get_absolute_url()),
             1: dict(name='Change information about your MWS',
-                    url=reverse('sitesmanagement.views.edit', kwargs={'site_id': self.object.id})),
+                    url=reverse('editsite', kwargs={'site_id': self.object.id})),
             2: dict(name='Disable your MWS site', url=reverse('disablesite',
                                                               kwargs={'site_id': self.object.id}))
         }

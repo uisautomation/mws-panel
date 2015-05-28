@@ -73,7 +73,7 @@
                                     campl-horizontal-teaser campl-teaser campl-focus-teaser">
                         <div class="campl-focus-teaser-img">
                             <div class="campl-content-container campl-horizontal-teaser-img">
-                                <a href="{% url 'sitesmanagement.views.edit' site_id=site.id %}">
+                                <a href="{% url 'editsite' site_id=site.id %}">
                                     <div class="field field-name-field-external-url-image field-type-image
                                                 field-label-hidden">
                                         <div class="field-items">
@@ -90,11 +90,11 @@
                         <div class="campl-focus-teaser-txt">
                             <div class="campl-content-container campl-horizontal-teaser-txt">
                                 <h3 class="campl-teaser-title">
-                                    <a href="{% url 'sitesmanagement.views.edit' site_id=site.id %}">
+                                    <a href="{% url 'editsite' site_id=site.id %}">
                                         MWS account settings
                                     </a>
                                 </h3>
-                                <a href="{% url 'sitesmanagement.views.edit' site_id=site.id %}"
+                                <a href="{% url 'editsite' site_id=site.id %}"
                                    class="ir campl-focus-link">MWS account settings</a>
                             </div>
                         </div>

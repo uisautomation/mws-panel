@@ -12,7 +12,7 @@
 						<p>Canceling your MWS will cause the deletion of all the data.</p>
 					</div>
                 </div>
-            <form action={% url 'sitesmanagement.views.delete' site_id=site.id %} method="post">
+            <form action={% url 'deletesite' site_id=site.id %} method="post">
                 <fieldset>
                     {% csrf_token %}
                     <p>Proceed?</p>

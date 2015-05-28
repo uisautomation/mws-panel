@@ -194,23 +194,23 @@ class SiteManagementTests(TestCase):
 
         self.client.delete(reverse(views.delete_vm, kwargs={'service_id': test_site.secondary_vm.service.id}))
 
-        self.client.post(reverse(views.delete, kwargs={'site_id': test_site.id}))
+        self.client.post(reverse('deletesite', kwargs={'site_id': test_site.id}))
         self.assertIsNone(Site.objects.get(pk=test_site.id).end_date)
 
-        self.client.post(reverse(views.delete, kwargs={'site_id': test_site.id}), {'confirmation': 'yes'})
+        self.client.post(reverse('deletesite', kwargs={'site_id': test_site.id}), {'confirmation': 'yes'})
         self.assertIsNotNone(Site.objects.get(pk=test_site.id).end_date)
 
         test_site.delete()
 
     def test_view_edit(self):
-        response = self.client.get(reverse(views.edit, kwargs={'site_id': 1}))
+        response = self.client.get(reverse('editsite', kwargs={'site_id': 1}))
         self.assertEqual(response.status_code, 302)  # Not logged in, redirected to login
         self.assertTrue(response.url.endswith(
-            '%s?next=%s' % (reverse('raven_login'), reverse(views.edit, kwargs={'site_id': 1}))))
+            '%s?next=%s' % (reverse('raven_login'), reverse('editsite', kwargs={'site_id': 1}))))
 
         do_test_login(self, user="test0001")
 
-        response = self.client.get(reverse(views.edit, kwargs={'site_id': 1}))
+        response = self.client.get(reverse('editsite', kwargs={'site_id': 1}))
         self.assertEqual(response.status_code, 404)  # The Site does not exist
 
         NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
@@ -230,27 +230,27 @@ class SiteManagementTests(TestCase):
         VirtualMachine.objects.create(name="test_vm", token=uuid.uuid4(),
                                       service=service, network_configuration=NetworkConfig.get_free_host_config())
 
-        response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
+        response = self.client.get(reverse('editsite', kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)  # The User is not in the list of auth users
 
         site.users.add(User.objects.get(username="test0001"))
-        response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
+        response = self.client.get(reverse('editsite', kwargs={'site_id': site.id}))
         self.assertContains(response, "Managed Web Service account settings")
 
         suspension = site.suspend_now(input_reason="test suspension")
-        response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
+        response = self.client.get(reverse('editsite', kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)  # The site is suspended
 
         suspension.active = False
         suspension.save()
-        response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
+        response = self.client.get(reverse('editsite', kwargs={'site_id': site.id}))
         self.assertContains(response, "Managed Web Service account settings")
 
         self.assertNotEqual(site.name, 'testSiteChange')
         self.assertNotEqual(site.description, 'testDescChange')
         self.assertNotEqual(site.institution_id, 'UIS')
         self.assertNotEqual(site.email, 'email@change.test')
-        response = self.client.post(reverse(views.edit, kwargs={'site_id': site.id}),
+        response = self.client.post(reverse('editsite', kwargs={'site_id': site.id}),
                                     {'name': 'testSiteChange', 'description': 'testDescChange',
                                      'institution_id': 'UIS', 'email': 'email@change.test'})
         self.assertEqual(response.status_code, 302)  # Changes done, redirecting
@@ -383,13 +383,13 @@ class SiteManagement2Tests(TestCase):
         # TODO test index empty
         response = self.client.get(site.get_absolute_url())
         self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
+        response = self.client.get(reverse('editsite', kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)
         response = self.client.get(reverse(views.service_settings, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 403)
         response = self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.delete, kwargs={'site_id': site.id}))
+        response = self.client.get(reverse('deletesite', kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)
         response = self.client.get(reverse('disablesite', kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)
@@ -455,7 +455,7 @@ class SiteManagement2Tests(TestCase):
         unix_group = UnixGroup.objects.create(name="testUnixGroup", service=service)
 
         # TODO test index not empty
-        response = self.client.get(reverse(views.edit, kwargs={'site_id': site.id}))
+        response = self.client.get(reverse('editsite', kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith(site.get_absolute_url()))
         response = self.client.get(reverse(views.service_settings, kwargs={'service_id': service.id}))
@@ -463,7 +463,7 @@ class SiteManagement2Tests(TestCase):
         self.assertTrue(response.url.endswith(site.get_absolute_url()))
         response = self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 200)
-        response = self.client.get(reverse(views.delete, kwargs={'site_id': site.id}))
+        response = self.client.get(reverse('deletesite', kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith(site.get_absolute_url()))
         response = self.client.get(reverse('disablesite', kwargs={'site_id': site.id}))
