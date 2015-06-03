@@ -123,3 +123,4 @@ STRONGHOLD_PUBLIC_NAMED_URLS = ('raven_login', 'raven_return')
 
 OS_VERSION = {'debian': 8}
 OS_VERSION_VMAPI = "Debian 8RC1 x86_64 preseed"
+OS_VERSION_VMXENAPI = "debian8"
