@@ -172,16 +172,23 @@ class SiteManagementTests(TestCase):
         self.assertEqual(len(test_site.production_vms), 1)
 
         # Force post installation ACK
-        self.client.post(reverse(post_installation), {'vm': test_site.production_vms[0].id,
-                                                      'token': test_site.production_vms[0].token})
+
+        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            mock_subprocess.check_output.return_value.returncode = 0
+            response = self.client.post(reverse(post_installation), {'vm': test_site.production_vms[0].id,
+                                                                     'token': test_site.production_vms[0].token})
+            self.assertIn(response.status_code, [200, 302])
+            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
+                                                             test_site.production_service.virtual_machines.first()
+                                                            .network_configuration.name])
 
         # Disable site
         self.assertFalse(test_site.disabled)
-        self.client.post(reverse(views.disable, kwargs={'site_id': test_site.id}))
+        self.client.post(reverse('disablesite', kwargs={'site_id': test_site.id}))
         # TODO test that views are restricted
         self.assertTrue(Site.objects.get(pk=test_site.id).disabled)
         # Enable site
-        self.client.post(reverse(views.enable, kwargs={'site_id': test_site.id}))
+        self.client.post(reverse('enablesite', kwargs={'site_id': test_site.id}))
         # TODO test that views are no longer restricted
         self.assertFalse(Site.objects.get(pk=test_site.id).disabled)
 

@@ -18,15 +18,15 @@ from sitesmanagement.models import VirtualMachine, NetworkConfig, Service
 LOGGER = logging.getLogger('mws')
 
 
-class PlatformsAPINotWorkingException(Exception):
+class VMAPINotWorkingException(Exception):
     pass
 
 
-class PlatformsAPIInputException(Exception):
+class VMAPIInputException(Exception):
     pass
 
 
-class PlatformsAPIFailure(Exception):
+class VMAPIFailure(Exception):
     pass
 
 
@@ -51,7 +51,7 @@ def vm_api_request(**json_object):
     json_object.pop('secret', None)  # Do not output to the logger the secret key
     LOGGER.info("VM API request: %s\nVM API response: %s", json_object, response)
     if response['result'] != 'Success':
-        raise PlatformsAPIFailure(json_object, response)
+        raise VMAPIFailure(json_object, response)
     return response
 
 
@@ -63,7 +63,7 @@ def on_vm_api_failure(request, response):
     '''
     request.pop('secret', None)  # Do not output to the logger the secret key
     LOGGER.error("VM API request: %s\nVM API response: %s", request, response)
-    raise PlatformsAPIFailure(request, response)
+    raise VMAPIFailure(request, response)
 
 
 class TaskWithFailure(Task):
@@ -86,8 +86,10 @@ def new_site_primary_vm(service, host_network_configuration):
         # TODO this is temporal until we support service network configuration, then we will use
         # host_network_configuration.ipv6 as a parameter for ip in vm_api_request and host_network_configuration.name
         # for the parameter hostname in vm_api_request
-    except PlatformsAPIFailure as e:
+    except VMAPIFailure as e:
         return on_vm_api_failure(*e.args)
+    except AttributeError:
+        return
     except Exception as e:
         raise new_site_primary_vm.retry(exc=e)
 
@@ -149,7 +151,7 @@ def install_vm(vm):
 
     try:
         vm_api_request(command='install', vmid=vm.name, profile=profile)
-    except PlatformsAPIFailure as e:
+    except VMAPIFailure as e:
         return on_vm_api_failure(*e.args)
     except Exception as e:
         raise install_vm.retry(exc=e)
@@ -160,26 +162,26 @@ def install_vm(vm):
 def get_vm_power_state(vm):
     try:
         response = vm_api_request(command='get power state', vmid=vm.name)
-    except PlatformsAPIFailure:
+    except VMAPIFailure:
         raise
     except Exception as e:
-        raise PlatformsAPINotWorkingException(e.message)
+        raise VMAPINotWorkingException(e.message)
 
     if response['powerState'] == 'poweredOff':
         return "Off"
     elif response['powerState'] == 'poweredOn':
         return "On"
     else:
-        raise PlatformsAPIFailure(None, response)
+        raise VMAPIFailure(None, response)
 
 
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
 def change_vm_power_state(vm, on):
     if on != 'on' and on != 'off':
-        raise PlatformsAPIInputException("passed wrong parameter power %s" % on)
+        raise VMAPIInputException("passed wrong parameter power %s" % on)
     try:
         vm_api_request(command='power ' + on, vmid=vm.name)
-    except PlatformsAPIFailure as e:
+    except VMAPIFailure as e:
         return on_vm_api_failure(*e.args)
     except Exception as e:
         raise change_vm_power_state.retry(exc=e)
@@ -191,7 +193,7 @@ def change_vm_power_state(vm, on):
 def reset_vm(vm):
     try:
         vm_api_request(command='reset', vmid=vm.name)
-    except PlatformsAPIFailure as e:
+    except VMAPIFailure as e:
         return on_vm_api_failure(*e.args)
     except Exception as e:
         raise reset_vm.retry(exc=e)  # TODO are we sure we want to do that?
@@ -205,7 +207,7 @@ def destroy_vm(vm):
         change_vm_power_state(vm, "off")
     try:
         vm_api_request(command='destroy', vmid=vm.name)
-    except PlatformsAPIFailure as e:
+    except VMAPIFailure as e:
         return on_vm_api_failure(*e.args)
     except Exception as e:
         raise destroy_vm.retry(exc=e)
@@ -251,7 +253,7 @@ def clone_vm_api_call(original_service, destination_vm):
         # TODO this is temporal until we support service network configuration, then we will use
         # host_network_configuration.ipv6 as a parameter for ip in vm_api_request and host_network_configuration.name
         # for the parameter hostname in vm_api_request
-    except PlatformsAPIFailure as e:
+    except VMAPIFailure as e:
         return on_vm_api_failure(*e.args)
     except Exception as e:
         raise clone_vm_api_call.retry(exc=e)

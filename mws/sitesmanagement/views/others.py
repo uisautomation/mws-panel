@@ -11,7 +11,7 @@ from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonRespons
 from django.shortcuts import render, get_object_or_404, redirect
 from apimws.ansible import launch_ansible
 from apimws.models import AnsibleConfiguration
-from apimws.platforms import PlatformsAPINotWorkingException, clone_vm, PlatformsAPIFailure
+from apimws.vm import VMAPINotWorkingException, clone_vm, VMAPIFailure
 from mwsauth.utils import privileges_check
 from sitesmanagement.forms import BillingForm
 from sitesmanagement.utils import get_object_or_None
@@ -129,11 +129,11 @@ def check_vm_status(request, service_id):
 
     try:
         return JsonResponse({'service_is_on': service.is_on()})
-    except PlatformsAPINotWorkingException:
-        return JsonResponse({'error': 'PlatformsAPINotWorking'})
-        # return JsonResponse({'error': 'PlatformsAPINotWorking'}, status_code=500) # TODO status_code doesn't work
-    except PlatformsAPIFailure:
-        return JsonResponse({'error': 'PlatformsAPIFailure'})
+    except VMAPINotWorkingException:
+        return JsonResponse({'error': 'VMAPINotWorking'})
+        # return JsonResponse({'error': 'VMAPINotWorking'}, status_code=500) # TODO status_code doesn't work
+    except VMAPIFailure:
+        return JsonResponse({'error': 'VMAPIFailure'})
     except Exception:
         return JsonResponse({'error': 'Exception'})
 

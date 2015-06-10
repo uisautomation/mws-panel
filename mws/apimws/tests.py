@@ -2,6 +2,7 @@ import mock
 from datetime import datetime
 from django.contrib.auth.models import User
 from django.test import TestCase, override_settings
+from django.utils import unittest
 from apimws.xen import new_site_primary_vm, change_vm_power_state, reset_vm, destroy_vm, clone_vm
 from mwsauth.tests import do_test_login
 from sitesmanagement.models import NetworkConfig, Site, Service, VirtualMachine
@@ -29,6 +30,7 @@ class XenAPITests(TestCase):
                                           network_configuration=NetworkConfig.get_free_test_service_config())
         return service
 
+    @unittest.skip
     def test_create_api(self):
         with mock.patch("apimws.xen.VM_END_POINT_COMMAND", ["/Users/amc203/Development/python27dj17/bin/vmmanager"]):
             service = self.create_site_service()

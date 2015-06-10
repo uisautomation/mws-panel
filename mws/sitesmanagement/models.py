@@ -444,24 +444,24 @@ class VirtualMachine(models.Model):
             return None
 
     def is_on(self):
-        from apimws.platforms import get_vm_power_state
+        from apimws.vm import get_vm_power_state
         if get_vm_power_state(self) == "On":
             return True
         else:
             return False
 
     def power_on(self):
-        from apimws.platforms import change_vm_power_state
+        from apimws.vm import change_vm_power_state
         if not self.is_on():
             change_vm_power_state(self, 'on')
 
     def power_off(self):
-        from apimws.platforms import change_vm_power_state
+        from apimws.vm import change_vm_power_state
         if self.is_on():
             change_vm_power_state.delay(self, 'off')
 
     def do_reset(self):
-        from apimws.platforms import reset_vm
+        from apimws.vm import reset_vm
         reset_vm.delay(self)
 
     @property

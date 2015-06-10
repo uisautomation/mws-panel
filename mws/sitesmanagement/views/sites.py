@@ -11,7 +11,7 @@ from django.utils.html import format_html
 from django.views.generic import FormView, ListView, View, TemplateView, UpdateView, DeleteView
 from django.views.generic.detail import SingleObjectMixin, DetailView
 from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups
-from apimws.platforms import new_site_primary_vm
+from apimws.vm import new_site_primary_vm
 from apimws.utils import email_confirmation
 from mwsauth.utils import privileges_check, get_or_create_group_by_groupid
 from sitesmanagement.forms import SiteForm

@@ -16,15 +16,15 @@ VM_END_POINT = ["ophon.csi.cam.ac.uk", "opus.csi.cam.ac.uk"]
 VM_END_POINT_COMMAND = ["ssh", "mws-admin@%s" % VM_END_POINT[0], "vmmanager"]
 
 
-class XenAPINotWorkingException(Exception):
+class VMAPINotWorkingException(Exception):
     pass
 
 
-class XenAPIInputException(Exception):
+class VMAPIInputException(Exception):
     pass
 
 
-class XenAPIFailure(Exception):
+class VMAPIFailure(Exception):
     pass
 
 
@@ -43,7 +43,7 @@ def vm_api_request(**json_object):
     except subprocess.CalledProcessError as e:
         response = e.output
         LOGGER.error("VM API request: %s\nVM API response: %s", api_command, response)
-        raise XenAPIFailure(json_object, response)
+        raise VMAPIFailure(json_object, response)
     return response
 
 
@@ -54,7 +54,7 @@ def on_vm_api_failure(request, response):
     :return: False
     """
     LOGGER.error("VM API request: %s\nVM API response: %s", request, response)
-    raise XenAPIFailure(request, response)
+    raise VMAPIFailure(request, response)
 
 
 class TaskWithFailure(Task):
@@ -103,7 +103,7 @@ def new_site_primary_vm(service, host_network_configuration=None):
         # TODO this is temporal until we support service network configuration, then we will use
         # host_network_configuration.ipv6 as a parameter for ip in vm_api_request and host_network_configuration.name
         # for the parameter hostname in vm_api_request
-    except XenAPIFailure as e:
+    except VMAPIFailure as e:
         return on_vm_api_failure(*e.args)
     except AttributeError:
         return
@@ -124,26 +124,26 @@ def get_vm_power_state(vm):
     try:
         # TODO implement something sensible
         response = {"powerState": "On"}
-    except XenAPIFailure:
+    except VMAPIFailure:
         raise
     except Exception as e:
-        raise XenAPINotWorkingException(e.message)
+        raise VMAPINotWorkingException(e.message)
 
-    if response['powerState'] == 'poweredOff':
+    if response['powerState'] == 'Off':
         return "Off"
-    elif response['powerState'] == 'poweredOn':
+    elif response['powerState'] == 'On':
         return "On"
     else:
-        raise XenAPIFailure(None, response)
+        raise VMAPIFailure(None, response)
 
 
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
 def change_vm_power_state(vm, on):
     if on != 'on' and on != 'off':
-        raise XenAPIInputException("passed wrong parameter power %s" % on)
+        raise VMAPIInputException("passed wrong parameter power %s" % on)
     try:
         vm_api_request(command='button', parameters='power%s' % on, vmid=vm.name)
-    except XenAPIFailure as e:
+    except VMAPIFailure as e:
         return on_vm_api_failure(*e.args)
     except Exception as e:
         raise change_vm_power_state.retry(exc=e)
@@ -155,7 +155,7 @@ def change_vm_power_state(vm, on):
 def reset_vm(vm):
     try:
         vm_api_request(command='button', parameters='reboot', vmid=vm.name)
-    except XenAPIFailure as e:
+    except VMAPIFailure as e:
         return on_vm_api_failure(*e.args)
     except Exception as e:
         raise reset_vm.retry(exc=e)  # TODO are we sure we want to do that?
@@ -167,7 +167,7 @@ def reset_vm(vm):
 def destroy_vm(vm):
     try:
         vm_api_request(command='delete', vmid=vm.name)
-    except XenAPIFailure as e:
+    except VMAPIFailure as e:
         return on_vm_api_failure(*e.args)
     except Exception as e:
         raise destroy_vm.retry(exc=e)
@@ -217,7 +217,7 @@ def clone_vm_api_call(original_service, destination_vm):
 
     try:
         response = vm_api_request(command='clone', vmid=original_vm.name, parameters=parameters)
-    except XenAPIFailure as e:
+    except VMAPIFailure as e:
         return on_vm_api_failure(*e.args)
     except Exception as e:
         raise clone_vm_api_call.retry(exc=e)

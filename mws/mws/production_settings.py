@@ -40,7 +40,7 @@ hAM+a6/30F5fdkWpE1smPyrfASyXRfWE4Ccn1RVgYX9u
 """}
 
 BROKER_URL = 'redis://localhost:6379/0'
-CELERY_IMPORTS = ('apimws.platforms', 'apimws.utils', 'apimws.jackdaw', 'apimws.ansible')
+CELERY_IMPORTS = ('apimws.platforms', 'apimws.xen', 'apimws.utils', 'apimws.jackdaw', 'apimws.ansible')
 
 CELERYBEAT_SCHEDULE = {
     'jackdaw-api': {

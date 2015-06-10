@@ -3,7 +3,7 @@ from celery import shared_task
 from django.core.mail import EmailMessage
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from apimws.platforms import TaskWithFailure
+from apimws.vm import TaskWithFailure
 from sitesmanagement.models import EmailConfirmation
 import uuid
 

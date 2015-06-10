@@ -69,4 +69,4 @@ wOq24EIbX5LquL9w+uvnfXw=
 
 BROKER_URL = 'django://'
 INSTALLED_APPS = INSTALLED_APPS+('kombu.transport.django', )
-CELERY_IMPORTS = ('apimws.platforms', 'apimws.utils', 'apimws.jackdaw')
+CELERY_IMPORTS = ('apimws.platforms', 'apimws.xen', 'apimws.utils', 'apimws.jackdaw')
