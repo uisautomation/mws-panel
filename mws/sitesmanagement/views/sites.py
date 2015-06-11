@@ -271,31 +271,20 @@ class SiteDisable(SitePriviledgeAndBusyCheck, UpdateView):
         return redirect(reverse('listsites'))
 
 
-class SiteEnable(LoginRequiredMixin, UpdateView):
+@login_required
+def site_enable(request, site_id):
     """View(Controller) to reenable a Site object. The VMs are switched on."""
-    model = Site
-    context_object_name = 'site'
-    pk_url_kwarg = 'site_id'
+    site = get_object_or_404(Site, pk=site_id)
 
-    def post(self, request, *args, **kwargs):
-        super(SiteEnable, self).post(request, *args, **kwargs)
-        if self.object.enable():
-            return redirect(self.object)
-        return redirect(reverse('listsites'))
-
-    def get(self, request, *args, **kwargs):
-        return redirect(reverse('listsites'))
-
-    def dispatch(self, request, *args, **kwargs):
-        site = self.get_object()
-
-        # If the user is not in the user auth list of the site and neither belongs to a group in the group auth list or
-        # the site is suspended or canceled return None
-        try:
-            if (site not in request.user.sites.all() and not user_in_groups(request.user, site.groups.all())) \
-                    or site.is_admin_suspended() or site.is_canceled():
-                return HttpResponseForbidden()
-        except Exception:
+    try:
+        if (site not in request.user.sites.all() and not user_in_groups(request.user, site.groups.all())) \
+                or site.is_admin_suspended() or site.is_canceled():
             return HttpResponseForbidden()
+    except Exception:
+        return HttpResponseForbidden()
 
-        return super(SiteEnable, self).dispatch(request, *args, **kwargs)
+    if request.method == 'POST':
+        if site.enable():
+            return redirect(site)
+
+    return redirect(reverse('listsites'))

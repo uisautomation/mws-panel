@@ -2,7 +2,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
-from sitesmanagement.views.sites import SiteCreate, SiteShow, SiteList, SiteDisable, SiteEnable, SiteDelete, SiteEdit
+from sitesmanagement.views.sites import SiteCreate, SiteShow, SiteList, SiteDisable, SiteDelete, SiteEdit
 
 urlpatterns = patterns('',
     # external apps urls
@@ -23,7 +23,7 @@ urlpatterns = patterns('',
     url(r'^billing/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.billing_management'),
     url(r'^delete/(?P<site_id>[0-9]+)/$', SiteDelete.as_view(), name='deletesite'),
     url(r'^disable/(?P<site_id>[0-9]+)/$', SiteDisable.as_view(), name='disablesite'),
-    url(r'^enable/(?P<site_id>[0-9]+)/$', SiteEnable.as_view(), name='enablesite'),
+    url(r'^enable/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.sites.site_enable', name='enablesite'),
     url(r'^privacy/$', 'sitesmanagement.views.privacy'),
     url(r'^domains/(?P<vhost_id>[0-9]+)/$', 'sitesmanagement.views.domains_management'),
     url(r'^vhosts/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.vhosts_management'),
