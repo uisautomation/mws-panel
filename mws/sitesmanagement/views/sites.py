@@ -5,22 +5,68 @@ import logging
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse, reverse_lazy
-from django.http import HttpResponseForbidden, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render, redirect
+from django.http import HttpResponseForbidden
+from django.shortcuts import get_object_or_404, redirect
 from django.utils.html import format_html
-from django.views.generic import FormView, ListView, View, TemplateView, UpdateView, DeleteView
+from django.views.generic import FormView, ListView, UpdateView
 from django.views.generic.detail import SingleObjectMixin, DetailView
 from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups
 from apimws.vm import new_site_primary_vm
 from apimws.utils import email_confirmation
 from mwsauth.utils import get_or_create_group_by_groupid
 from sitesmanagement.forms import SiteForm
-from sitesmanagement.models import NetworkConfig, Service, EmailConfirmation, Site
+from sitesmanagement.models import NetworkConfig, Service, EmailConfirmation, Site, DomainName, Billing
 from django.conf import settings as django_settings
 from sitesmanagement.utils import can_create_new_site
 
 
 LOGGER = logging.getLogger('mws')
+
+
+def warning_messages(site):
+    production_service = site.production_service
+    test_service = site.test_service
+    warning_messages_list = []
+
+    if test_service is not None and test_service.status == 'ansible':
+        warning_messages_list.append("Your test server is being configured.")
+
+    if production_service is not None:
+        if production_service.status == 'ansible':
+            warning_messages_list.append("Your server is being configured.")
+
+        if production_service.status == 'installing':
+            warning_messages_list.append("Your server is being installed.")
+
+        if production_service.status == 'requested':
+            warning_messages_list.append("Your request in the Managed Web Service is being processed")
+
+        if production_service.due_update():
+            warning_messages_list.append("Your server is due to an OS update. From %s %.2f to %s %.2f" %
+                                         (production_service.os_type, production_service.os_version,
+                                          production_service.os_type,
+                                          django_settings.OS_VERSION[production_service.os_type]))
+        for domain_name in DomainName.objects.filter(vhost__service=production_service, status='requested'):
+            warning_messages_list.append("Your domain name %s has been requested and is under review." %
+                                         domain_name.name)
+    else:
+        warning_messages_list.append("Your request in the Managed Web Service is being processed")
+
+    if not Billing.objects.filter(site=site).exists():
+        warning_messages_list.append(
+            format_html('No billing details are available, please <a href="%s" style="text-decoration: underline;">add '
+                        'them</a>.' % reverse('sitesmanagement.views.billing_management', kwargs={'site_id': site.id})))
+
+    if site.email:
+        if EmailConfirmation.objects.filter(email=site.email, site_id=site.id, status='pending').exists():
+            from apimws.views import resend_email_confirmation_view
+            warning_messages_list.append(
+                format_html('Your email \'%s\' is still unconfirmed, please check your email inbox and click on '
+                            'the link of the email we sent you. <a id="resend_email_link" data-href="%s" href="#" '
+                            'style="text-decoration: underline;">Resend confirmation email</a>' %
+                            (site.email, reverse(resend_email_confirmation_view, kwargs={'site_id': site.id}))))
+
+    return warning_messages_list
 
 
 class LoginRequiredMixin(object):
@@ -145,58 +191,7 @@ class SiteShow(SitePriviledgeCheck, DetailView):
         context['breadcrumbs'] = {
             0: dict(name='Manage Web Service server: ' + str(self.object.name), url=self.object.get_absolute_url())
         }
-
-        warning_messages = []
-        production_service = self.object.production_service
-        test_service = self.object.test_service
-
-        if production_service is not None and production_service.status == 'ansible':
-            warning_messages.append("Your server is being configured.")
-
-        if production_service is not None \
-                and (production_service.status == 'requested' or production_service.status == 'installing'):
-            warning_messages.append("Your server is being installed.")
-
-        if test_service is not None and test_service.status == 'ansible':
-            warning_messages.append("Your test server is being configured.")
-
-        if production_service is not None:
-            if production_service.due_update():
-                warning_messages.append("Your server is due to an OS update. From %s %.2f to %s %.2f" %
-                                        (production_service.os_type, production_service.os_version,
-                                         production_service.os_type,
-                                         django_settings.OS_VERSION[production_service.os_type]))
-            for vhost in production_service.vhosts.all():
-                for domain_name in vhost.domain_names.all():
-                    if domain_name.status == 'requested':
-                        warning_messages.append("Your domain name %s has been requested and is under review." %
-                                                domain_name.name)
-
-        if not hasattr(self.object, 'billing'):
-            warning_messages.append(format_html('No billing details are available, please <a href="%s" '
-                                                'style="text-decoration: underline;">add them</a>.' %
-                                                reverse('sitesmanagement.views.billing_management',
-                                                        kwargs={'site_id': self.object.id})))
-
-        if self.object.email:
-            try:
-                site_email = EmailConfirmation.objects.get(email=self.object.email, site_id=self.object.id)
-                if site_email.status == 'pending':
-                    from apimws.views import resend_email_confirmation_view
-                    warning_messages.append(format_html('Your email \'%s\' is still unconfirmed, please check your '
-                                                        'email inbox and click on the link of the email we sent you. '
-                                                        '<a id="resend_email_link" data-href="%s" href="#" '
-                                                        'style="text-decoration: underline;">Resend confirmation '
-                                                        'email</a>' % (self.object.email,
-                                                                       reverse(resend_email_confirmation_view,
-                                                                               kwargs={'site_id': self.object.id}))))
-            except EmailConfirmation.DoesNotExist:
-                pass
-
-        if production_service is None or production_service.status == 'requested':
-            warning_messages.append("Your request in the Managed Web Service is being processed")
-
-        context['warning_messages'] = warning_messages
+        context['warning_messages'] = warning_messages(self.object)
         context['DEMO'] = getattr(django_settings, 'DEMO', False)
         return context
 
