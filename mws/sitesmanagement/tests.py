@@ -1,20 +1,17 @@
-from datetime import datetime
-import tempfile
 import uuid
 import mock
 import os
+import reversion
+from datetime import datetime
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
-from django.utils import unittest
-import subprocess
-import reversion
 from apimws.models import AnsibleConfiguration
 from apimws.views import post_installation
 from mwsauth.tests import do_test_login
-from sitesmanagement.models import Site, VirtualMachine, UnixGroup, Vhost, DomainName, NetworkConfig, Service
 import sitesmanagement.views as views
+from sitesmanagement.models import Site, VirtualMachine, UnixGroup, Vhost, DomainName, NetworkConfig, Service
 from sitesmanagement.utils import is_camacuk, get_object_or_None
 
 
@@ -114,7 +111,6 @@ class SiteManagementTests(TestCase):
         response = self.client.get(site.get_absolute_url())
         self.assertContains(response, "No billing details are available")
 
-    @unittest.skipUnless(hasattr(settings, 'PLATFORMS_API_USERNAME'), "Platforms API login details not available.")
     def test_view_new(self):
         response = self.client.get(reverse('newsite'))
         self.assertEqual(response.status_code, 302)  # Not logged in, redirected to login

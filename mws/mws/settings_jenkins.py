@@ -81,3 +81,5 @@ JENKINS_TASKS = (
 
 PEP8_RCFILE = os.path.join(BASE_DIR, 'jenkins/pep8')
 PYLINT_RCFILE = os.path.join(BASE_DIR, 'jenkins/pylint')
+
+VM_END_POINT_COMMAND = ["vmmanager"]

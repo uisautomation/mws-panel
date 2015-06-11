@@ -1,8 +1,6 @@
-import mock
 from datetime import datetime
 from django.contrib.auth.models import User
 from django.test import TestCase, override_settings
-from django.utils import unittest
 from apimws.xen import new_site_primary_vm, change_vm_power_state, reset_vm, destroy_vm, clone_vm
 from mwsauth.tests import do_test_login
 from sitesmanagement.models import NetworkConfig, Site, Service, VirtualMachine
@@ -31,13 +29,12 @@ class XenAPITests(TestCase):
         return service
 
     def test_create_api(self):
-        with mock.patch("apimws.xen.VM_END_POINT_COMMAND", ["vmmanager"]):
-            service = self.create_site_service()
-            new_site_primary_vm(service)
-            vm = VirtualMachine.objects.first()
-            self.assertEqual(vm.service, service)
-            change_vm_power_state(vm, "off")
-            change_vm_power_state(vm, "on")
-            reset_vm(vm)
-            clone_vm(vm.site, vm)
-            destroy_vm(vm)
+        service = self.create_site_service()
+        new_site_primary_vm(service)
+        vm = VirtualMachine.objects.first()
+        self.assertEqual(vm.service, service)
+        change_vm_power_state(vm, "off")
+        change_vm_power_state(vm, "on")
+        reset_vm(vm)
+        clone_vm(vm.site, vm)
+        destroy_vm(vm)

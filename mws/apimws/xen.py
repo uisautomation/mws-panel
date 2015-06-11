@@ -12,8 +12,6 @@ from sitesmanagement.models import VirtualMachine, NetworkConfig, Service
 
 
 LOGGER = logging.getLogger('mws')
-VM_END_POINT = ["ophon.csi.cam.ac.uk", "opus.csi.cam.ac.uk"]
-VM_END_POINT_COMMAND = ["ssh", "mws-admin@%s" % VM_END_POINT[0], "vmmanager"]
 
 
 class VMAPINotWorkingException(Exception):
@@ -29,7 +27,9 @@ class VMAPIFailure(Exception):
 
 
 def vm_api_request(**json_object):
-    api_command = copy.copy(VM_END_POINT_COMMAND)
+    if not getattr(settings, 'VM_END_POINT_COMMAND', False):
+        raise VMAPIFailure("VM_END_POINT_COMMAND not found")
+    api_command = copy.copy(settings.VM_END_POINT_COMMAND)
     api_command.append(json_object['command'])
     if 'vmid' in json_object:
         api_command.append(json_object['vmid'])
