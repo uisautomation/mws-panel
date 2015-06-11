@@ -13,7 +13,7 @@ from django.views.generic.detail import SingleObjectMixin, DetailView
 from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups
 from apimws.vm import new_site_primary_vm
 from apimws.utils import email_confirmation
-from mwsauth.utils import privileges_check, get_or_create_group_by_groupid
+from mwsauth.utils import get_or_create_group_by_groupid
 from sitesmanagement.forms import SiteForm
 from sitesmanagement.models import NetworkConfig, Service, EmailConfirmation, Site
 from django.conf import settings as django_settings
@@ -98,6 +98,7 @@ class SiteCreate(LoginRequiredMixin, FormView):
     form_class = SiteForm
     template_name = 'mws/new.html'
     prefix = "siteform"
+    success_url = reverse_lazy('listsites')
 
     def get_context_data(self, **kwargs):
         context = super(SiteCreate, self).get_context_data(**kwargs)
@@ -126,11 +127,12 @@ class SiteCreate(LoginRequiredMixin, FormView):
         if site.email:
             email_confirmation(site)
         LOGGER.info(str(self.request.user.username) + " created a new site '" + str(site.name) + "'")
-        return super(SiteCreate, self).form_valid(form)
+        super(SiteCreate, self).form_valid(form)
+        return redirect(site)
 
     def dispatch(self, *args, **kwargs):
         if not can_create_new_site():  # TODO add prealocated HostNetworkConfigs
-            return HttpResponseRedirect(reverse_lazy(reverse('listsites')))
+            return redirect(reverse_lazy('listsites'))
         return super(SiteCreate, self).dispatch(*args, **kwargs)
 
 
@@ -269,11 +271,31 @@ class SiteDisable(SitePriviledgeAndBusyCheck, UpdateView):
         return redirect(reverse('listsites'))
 
 
-class SiteEnable(SitePriviledgeAndBusyCheck, UpdateView):
+class SiteEnable(LoginRequiredMixin, UpdateView):
     """View(Controller) to reenable a Site object. The VMs are switched on."""
+    model = Site
+    context_object_name = 'site'
+    pk_url_kwarg = 'site_id'
 
     def post(self, request, *args, **kwargs):
         super(SiteEnable, self).post(request, *args, **kwargs)
         if self.object.enable():
             return redirect(self.object)
         return redirect(reverse('listsites'))
+
+    def get(self, request, *args, **kwargs):
+        return redirect(reverse('listsites'))
+
+    def dispatch(self, request, *args, **kwargs):
+        site = self.get_object()
+
+        # If the user is not in the user auth list of the site and neither belongs to a group in the group auth list or
+        # the site is suspended or canceled return None
+        try:
+            if (site not in request.user.sites.all() and not user_in_groups(request.user, site.groups.all())) \
+                    or site.is_admin_suspended() or site.is_canceled():
+                return HttpResponseForbidden()
+        except Exception:
+            return HttpResponseForbidden()
+
+        return super(SiteEnable, self).dispatch(request, *args, **kwargs)

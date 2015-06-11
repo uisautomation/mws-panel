@@ -8,7 +8,6 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from stronghold.decorators import public
 from apimws.ansible import launch_ansible_async
-from apimws.utils import finished_installation_email_confirmation, send_email_confirmation
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.models import DomainName, Site, EmailConfirmation, VirtualMachine
 from ucamlookup import user_in_groups
@@ -145,6 +144,7 @@ def post_installation(request):
             service.save()
             launch_ansible_async.apply_async((service, ), countdown=90)
             # Wait 90 seconds before launching ansible, this will allow the machine have time to complete the reboot
+            from apimws.utils import finished_installation_email_confirmation
             finished_installation_email_confirmation.delay(service.site)  # Perhaps after ansible has finished?
             return HttpResponse()
 
@@ -159,6 +159,7 @@ def resend_email_confirmation_view(request, site_id):
         return HttpResponseForbidden()
 
     if request.method == 'POST':
+        from apimws.utils import send_email_confirmation
         send_email_confirmation.delay(site)
     else:
         return HttpResponseForbidden()
