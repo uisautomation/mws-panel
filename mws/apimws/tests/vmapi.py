@@ -30,9 +30,8 @@ class XenAPITests(TestCase):
                                           network_configuration=NetworkConfig.get_free_test_service_config())
         return service
 
-    @unittest.skip("Under development")
     def test_create_api(self):
-        with mock.patch("apimws.xen.VM_END_POINT_COMMAND", ["/Users/amc203/Development/python27dj17/bin/vmmanager"]):
+        with mock.patch("apimws.xen.VM_END_POINT_COMMAND", ["vmmanager"]):
             service = self.create_site_service()
             new_site_primary_vm(service)
             vm = VirtualMachine.objects.first()
