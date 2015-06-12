@@ -11,7 +11,6 @@ class Command(NoArgsCommand):
         if len(args) != 1:
             raise CommandError("All arguments need to be supplied")
         try:
-
             vhost = Vhost.objects.get(id=args[0])
         except Vhost.DoesNotExist:
             raise CommandError("Vhost not found")

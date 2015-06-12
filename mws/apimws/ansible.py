@@ -75,3 +75,14 @@ def launch_ansible_async(service):
         else:
             service.status = 'ready'
             service.save()
+
+
+@shared_task(base=TaskWithFailure, default_retry_delay=60, max_retries=5)  # Retry each minute for 5 minutes
+def ansible_change_mysql_root_pwd(service):
+    try:
+        for vm in service.virtual_machines.all():
+            subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name,
+                                     "--tags", "change_mysql_password", "-e", "change_mysql_root_pwd=true"])
+    except subprocess.CalledProcessError as e:
+        if not getattr(settings, 'DEMO', False):
+            raise launch_ansible_async.retry(exc=e)

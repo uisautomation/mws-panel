@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from apimws.ansible import launch_ansible
+from apimws.ansible import launch_ansible, ansible_change_mysql_root_pwd
 from apimws.models import AnsibleConfiguration
 from apimws.vm import VMAPINotWorkingException, clone_vm, VMAPIFailure
 from mwsauth.utils import privileges_check
@@ -284,7 +284,7 @@ def change_db_root_password(request, service_id):
 
     if request.method == 'POST':
         new_root_passwd = request.POST['new_root_passwd']
-        # TODO implement
+        ansible_change_mysql_root_pwd.delay(service)
         return HttpResponseRedirect(reverse(service_settings, kwargs={'service_id': service.id}))
 
     return render(request, 'mws/change_db_root_password.html', {
