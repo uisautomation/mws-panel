@@ -28,13 +28,24 @@ class XenAPITests(TestCase):
                                           network_configuration=NetworkConfig.get_free_test_service_config())
         return service
 
-    def test_create_api(self):
+    @override_settings(VM_END_POINT_COMMAND = ["vmmanager"])
+    def test_xen_api(self):
+        # We get a free service address
         service = self.create_site_service()
+        # Xen API create call with the free service address previously retrieved
         new_site_primary_vm(service)
+        # We retrieve the VM created by the create Xen API call
         vm = VirtualMachine.objects.first()
         self.assertEqual(vm.service, service)
+        # We try that the switch off change of state works
         change_vm_power_state(vm, "off")
+        # We try that the switch on change of state works
         change_vm_power_state(vm, "on")
+        # We try that the reset call works
         reset_vm(vm)
-        clone_vm(vm.site, vm)
-        destroy_vm(vm)
+        # We clone the production VM to a test VM
+        site = vm.site
+        clone_vm(site, vm)
+        # We try the deletion of both VMs through a Xen API call
+        destroy_vm(site.secondary_vm)
+        destroy_vm(site.primary_vm)
