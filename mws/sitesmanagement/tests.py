@@ -147,7 +147,7 @@ class SiteManagementTests(TestCase):
                                                          'siteform-email': 'amc203@cam.ac.uk'})
 
         test_site = Site.objects.get(name='Test Site')
-        self.assertRedirects(response, expected_url=reverse(test_site))
+        self.assertRedirects(response, expected_url=test_site.get_absolute_url())
 
         # TODO test email check
         # TODO test dns api
