@@ -378,136 +378,118 @@ class SiteManagement2Tests(TestCase):
         unix_group = UnixGroup.objects.create(name="testUnixGroup", service=service)
 
         # TODO test index empty
-        response = self.client.get(site.get_absolute_url())
-        self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse('editsite', kwargs={'site_id': site.id}))
-        self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.service_settings, kwargs={'service_id': service.id}))
-        self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id}))
-        self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse('deletesite', kwargs={'site_id': site.id}))
-        self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse('disablesite', kwargs={'site_id': site.id}))
-        self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse('enablesite', kwargs={'site_id': site.id}))
-        self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.vhosts_management, kwargs={'service_id': service.id}))
-        self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.add_vhost, kwargs={'service_id': service.id}))
-        self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.system_packages, kwargs={'service_id': service.id}))
-        self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.clone_vm_view, kwargs={'site_id': site.id}))
-        self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse('mwsauth.views.auth_change', kwargs={'site_id': site.id}))
-        self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.delete_vm, kwargs={'service_id': service.id}))
-        self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.power_vm, kwargs={'service_id': service.id}))
-        self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.reset_vm, kwargs={'service_id': service.id}))
-        self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.unix_groups, kwargs={'service_id': service.id}))
-        self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.unix_groups, kwargs={'service_id': service.id}))
-        self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.add_unix_group, kwargs={'service_id': service.id}))
-        self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.check_vm_status, kwargs={'service_id': service.id}))
-        self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.vhosts_management, kwargs={'service_id': service.id}))
-        self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.domains_management, kwargs={'vhost_id': vhost.id}))
-        self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.delete_vhost, kwargs={'vhost_id': vhost.id}))
-        self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.certificates, kwargs={'vhost_id': vhost.id}))
-        self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}))
-        self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.delete_dn, kwargs={'domain_id': dn.id}))
-        self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.set_dn_as_main, kwargs={'domain_id': dn.id}))
-        self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.unix_group, kwargs={'ug_id': unix_group.id}))
-        self.assertEqual(response.status_code, 403)
-        response = self.client.get(reverse(views.delete_unix_group, kwargs={'ug_id': unix_group.id}))
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(self.client.get(site.get_absolute_url()).status_code, 403)
+        self.assertEqual(self.client.get(reverse('editsite', kwargs={'site_id': site.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse(views.service_settings,
+                                                 kwargs={'service_id': service.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse(views.billing_management,
+                                                 kwargs={'site_id': site.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse('deletesite', kwargs={'site_id': site.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse('disablesite', kwargs={'site_id': site.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse('enablesite', kwargs={'site_id': site.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse(views.vhosts_management,
+                                                 kwargs={'service_id': service.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse(views.add_vhost, kwargs={'service_id': service.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse(views.system_packages,
+                                                 kwargs={'service_id': service.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse(views.clone_vm_view, kwargs={'site_id': site.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse('mwsauth.views.auth_change',
+                                                 kwargs={'site_id': site.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse(views.delete_vm, kwargs={'service_id': service.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse(views.power_vm, kwargs={'service_id': service.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse(views.reset_vm, kwargs={'service_id': service.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse(views.unix_groups,
+                                                 kwargs={'service_id': service.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse(views.unix_groups,
+                                                 kwargs={'service_id': service.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse(views.add_unix_group,
+                                                 kwargs={'service_id': service.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse(views.check_vm_status,
+                                                 kwargs={'service_id': service.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse(views.vhosts_management,
+                                                 kwargs={'service_id': service.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse(views.domains_management,
+                                                 kwargs={'vhost_id': vhost.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse(views.delete_vhost, kwargs={'vhost_id': vhost.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse(views.certificates, kwargs={'vhost_id': vhost.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse(views.add_domain, kwargs={'vhost_id': vhost.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse(views.delete_dn, kwargs={'domain_id': dn.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse(views.set_dn_as_main, kwargs={'domain_id': dn.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse(views.unix_group, kwargs={'ug_id': unix_group.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse(views.delete_unix_group,
+                                                 kwargs={'ug_id': unix_group.id})).status_code, 403)
 
     def test_vm_is_busy(self):
-        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
-        site.users.add(User.objects.get(username='test0001'))
-        service = Service.objects.create(site=site, type='production', status="requested",
-                                         network_configuration=NetworkConfig.get_free_prod_service_config())
-        vm = VirtualMachine.objects.create(name="test_vm", token=uuid.uuid4(),
-                                           service=service, network_configuration=NetworkConfig.get_free_host_config())
+        site = self.create_site()
+        service = site.production_service
+        service.status = "requested"
+        service.save()
         service2 = Service.objects.create(site=site, type='test', status="requested",
                                           network_configuration=NetworkConfig.get_free_prod_service_config())
-        vm2 = VirtualMachine.objects.create(name="test_vm2", token=uuid.
-                                            uuid4(), service=service2, network_configuration=NetworkConfig.
-                                            get_free_host_config())
+        VirtualMachine.objects.create(name="test_vm2", token=uuid.uuid4(), service=service2,
+                                      network_configuration=NetworkConfig.get_free_host_config())
         vhost = Vhost.objects.create(name="tests_vhost", service=service)
         dn = DomainName.objects.create(name="testtestest.mws3.csx.cam.ac.uk", status="accepted", vhost=vhost)
         unix_group = UnixGroup.objects.create(name="testUnixGroup", service=service)
 
         # TODO test index not empty
-        response = self.client.get(reverse('editsite', kwargs={'site_id': site.id}))
-        self.assertRedirects(response, expected_url=site.get_absolute_url())
-        response = self.client.get(reverse(views.service_settings, kwargs={'service_id': service.id}))
-        self.assertRedirects(response, expected_url=site.get_absolute_url())
-        response = self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id}))
-        self.assertEqual(response.status_code, 200)
-        response = self.client.get(reverse('deletesite', kwargs={'site_id': site.id}))
-        self.assertRedirects(response, expected_url=site.get_absolute_url())
-        response = self.client.get(reverse('disablesite', kwargs={'site_id': site.id}))
-        self.assertRedirects(response, expected_url=site.get_absolute_url())
-        response = self.client.get(reverse('enablesite', kwargs={'site_id': site.id}))
-        self.assertRedirects(response, expected_url=reverse('listsites'))
-        response = self.client.get(reverse(views.vhosts_management, kwargs={'service_id': service.id}))
-        self.assertRedirects(response, expected_url=site.get_absolute_url())
-        response = self.client.get(reverse(views.add_vhost, kwargs={'service_id': service.id}))
-        self.assertRedirects(response, expected_url=site.get_absolute_url())
-        response = self.client.get(reverse(views.system_packages, kwargs={'service_id': service.id}))
-        self.assertRedirects(response, expected_url=site.get_absolute_url())
-        response = self.client.get(reverse(views.clone_vm_view, kwargs={'site_id': site.id}))
-        self.assertRedirects(response, expected_url=site.get_absolute_url())
-        response = self.client.get(reverse('mwsauth.views.auth_change', kwargs={'site_id': site.id}))
-        self.assertRedirects(response, expected_url=site.get_absolute_url())
-        response = self.client.get(reverse(views.delete_vm, kwargs={'service_id': service.id}))
-        self.assertEqual(response.status_code, 403)  # Primary VM cannot be deleted
-        response = self.client.get(reverse(views.delete_vm, kwargs={'service_id': service2.id}))
-        self.assertRedirects(response, expected_url=site.get_absolute_url())
-        response = self.client.get(reverse(views.power_vm, kwargs={'service_id': service.id}))
-        self.assertRedirects(response, expected_url=site.get_absolute_url())
-        response = self.client.get(reverse(views.reset_vm, kwargs={'service_id': service.id}))
-        self.assertRedirects(response, expected_url=site.get_absolute_url())
-        response = self.client.get(reverse(views.unix_groups, kwargs={'service_id': service.id}))
-        self.assertRedirects(response, expected_url=site.get_absolute_url())
-        response = self.client.get(reverse(views.unix_groups, kwargs={'service_id': service.id}))
-        self.assertRedirects(response, expected_url=site.get_absolute_url())
-        response = self.client.get(reverse(views.add_unix_group, kwargs={'service_id': service.id}))
-        self.assertRedirects(response, expected_url=site.get_absolute_url())
-        response = self.client.get(reverse(views.check_vm_status, kwargs={'service_id': service.id}))
-        self.assertEqual(response.status_code, 200)  # The error is shown in JSON format
-        response = self.client.get(reverse(views.vhosts_management, kwargs={'service_id': service.id}))
-        self.assertRedirects(response, expected_url=site.get_absolute_url())
-        response = self.client.get(reverse(views.domains_management, kwargs={'vhost_id': vhost.id}))
-        self.assertRedirects(response, expected_url=site.get_absolute_url())
-        response = self.client.get(reverse(views.delete_vhost, kwargs={'vhost_id': vhost.id}))
-        self.assertRedirects(response, expected_url=site.get_absolute_url())
-        response = self.client.get(reverse(views.certificates, kwargs={'vhost_id': vhost.id}))
-        self.assertRedirects(response, expected_url=site.get_absolute_url())
-        response = self.client.get(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}))
-        self.assertRedirects(response, expected_url=site.get_absolute_url())
-        response = self.client.get(reverse(views.delete_dn, kwargs={'domain_id': dn.id}))
-        self.assertRedirects(response, expected_url=site.get_absolute_url())
-        response = self.client.get(reverse(views.set_dn_as_main, kwargs={'domain_id': dn.id}))
-        self.assertRedirects(response, expected_url=site.get_absolute_url())
-        response = self.client.get(reverse(views.unix_group, kwargs={'ug_id': unix_group.id}))
-        self.assertRedirects(response, expected_url=site.get_absolute_url())
-        response = self.client.get(reverse(views.delete_unix_group, kwargs={'ug_id': unix_group.id}))
-        self.assertRedirects(response, expected_url=site.get_absolute_url())
+        self.assertRedirects(self.client.get(reverse('editsite', kwargs={'site_id': site.id})),
+                             expected_url=site.get_absolute_url())
+        self.assertRedirects(self.client.get(reverse(views.service_settings, kwargs={'service_id': service.id})),
+                             expected_url=site.get_absolute_url())
+        self.assertEqual(self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id})).status_code,
+                         200)
+        self.assertRedirects(self.client.get(reverse('deletesite', kwargs={'site_id': site.id})),
+                             expected_url=site.get_absolute_url())
+        self.assertRedirects(self.client.get(reverse('disablesite', kwargs={'site_id': site.id})),
+                             expected_url=site.get_absolute_url())
+        self.assertRedirects(self.client.get(reverse('enablesite', kwargs={'site_id': site.id})),
+                             expected_url=reverse('listsites'))
+        self.assertRedirects(self.client.get(reverse(views.vhosts_management, kwargs={'service_id': service.id})),
+                             expected_url=site.get_absolute_url())
+        self.assertRedirects(self.client.get(reverse(views.add_vhost, kwargs={'service_id': service.id})),
+                             expected_url=site.get_absolute_url())
+        self.assertRedirects(self.client.get(reverse(views.system_packages, kwargs={'service_id': service.id})),
+                             expected_url=site.get_absolute_url())
+        self.assertRedirects(self.client.get(reverse(views.clone_vm_view, kwargs={'site_id': site.id})),
+                             expected_url=site.get_absolute_url())
+        self.assertRedirects(self.client.get(reverse('mwsauth.views.auth_change', kwargs={'site_id': site.id})),
+                             expected_url=site.get_absolute_url())
+        self.assertEqual(self.client.get(reverse(views.delete_vm, kwargs={'service_id': service.id})).status_code,
+                         403) # Primary VM cannot be deleted
+        self.assertRedirects(self.client.get(reverse(views.delete_vm, kwargs={'service_id': service2.id})),
+                             expected_url=site.get_absolute_url())
+        self.assertRedirects(self.client.get(reverse(views.power_vm, kwargs={'service_id': service.id})),
+                             expected_url=site.get_absolute_url())
+        self.assertRedirects(self.client.get(reverse(views.reset_vm, kwargs={'service_id': service.id})),
+                             expected_url=site.get_absolute_url())
+        self.assertRedirects(self.client.get(reverse(views.unix_groups, kwargs={'service_id': service.id})),
+                             expected_url=site.get_absolute_url())
+        self.assertRedirects(self.client.get(reverse(views.unix_groups, kwargs={'service_id': service.id})),
+                             expected_url=site.get_absolute_url())
+        self.assertRedirects(self.client.get(reverse(views.add_unix_group, kwargs={'service_id': service.id})),
+                             expected_url=site.get_absolute_url())
+        self.assertEqual(self.client.get(reverse(views.check_vm_status,
+                                                 kwargs={'service_id': service.id})).status_code,
+                         200)  # The error is shown in JSON format
+        self.assertRedirects(self.client.get(reverse(views.vhosts_management, kwargs={'service_id': service.id})),
+                             expected_url=site.get_absolute_url())
+        self.assertRedirects(self.client.get(reverse(views.domains_management, kwargs={'vhost_id': vhost.id})),
+                             expected_url=site.get_absolute_url())
+        self.assertRedirects(self.client.get(reverse(views.delete_vhost, kwargs={'vhost_id': vhost.id})),
+                             expected_url=site.get_absolute_url())
+        self.assertRedirects(self.client.get(reverse(views.certificates, kwargs={'vhost_id': vhost.id})),
+                             expected_url=site.get_absolute_url())
+        self.assertRedirects(self.client.get(reverse(views.add_domain, kwargs={'vhost_id': vhost.id})),
+                             expected_url=site.get_absolute_url())
+        self.assertRedirects(self.client.get(reverse(views.delete_dn, kwargs={'domain_id': dn.id})),
+                             expected_url=site.get_absolute_url())
+        self.assertRedirects(self.client.get(reverse(views.set_dn_as_main, kwargs={'domain_id': dn.id})),
+                             expected_url=site.get_absolute_url())
+        self.assertRedirects(self.client.get(reverse(views.unix_group, kwargs={'ug_id': unix_group.id})),
+                             expected_url=site.get_absolute_url())
+        self.assertRedirects(self.client.get(reverse(views.delete_unix_group, kwargs={'ug_id': unix_group.id})),
+                             expected_url=site.get_absolute_url())
 
     def test_unix_groups(self):
         site = self.create_site()
