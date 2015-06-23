@@ -120,8 +120,7 @@ class SiteManagementTests(TestCase):
         do_test_login(self, user="test0001")
 
         response = self.client.get(reverse('newsite'))
-        self.assertEqual(response.status_code, 302)  # There aren't prealocated network configurations
-        self.assertTrue(response.url.endswith(reverse('listsites')))
+        self.assertRedirects(response, expected_url=reverse('listsites'))
 
         NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
                                      name="mws-66424.mws3.csx.cam.ac.uk")
@@ -148,10 +147,8 @@ class SiteManagementTests(TestCase):
                                                          'siteform-email': 'amc203@cam.ac.uk'})
 
         test_site = Site.objects.get(name='Test Site')
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(test_site.get_absolute_url()))
+        self.assertRedirects(response, expected_url=reverse(test_site))
 
-        # TODO test platforms API
         # TODO test email check
         # TODO test dns api
         # TODO test errors
@@ -256,8 +253,7 @@ class SiteManagementTests(TestCase):
         response = self.client.post(reverse('editsite', kwargs={'site_id': site.id}),
                                     {'name': 'testSiteChange', 'description': 'testDescChange',
                                      'institution_id': 'UIS', 'email': 'email@change.test'})
-        self.assertEqual(response.status_code, 302)  # Changes done, redirecting
-        self.assertTrue(response.url.endswith(site.get_absolute_url()))
+        self.assertRedirects(response, expected_url=site.get_absolute_url()) # Changes done, redirecting
         site_changed = Site.objects.get(pk=site.id)
         self.assertEqual(site_changed.name, 'testSiteChange')
         self.assertEqual(site_changed.description, 'testDescChange')
@@ -319,8 +315,7 @@ class SiteManagementTests(TestCase):
             response = self.client.post(reverse(views.billing_management, kwargs={'site_id': site.id}),
                                         {'purchase_order_number': 'testOrderNumber', 'group': 'testGroup',
                                          'purchase_order': fp})
-        self.assertEqual(response.status_code, 302)  # Changes done, redirecting
-        self.assertTrue(response.url.endswith(site.get_absolute_url()))
+        self.assertRedirects(response, expected_url=site.get_absolute_url())  # Changes done, redirecting
         site_changed = Site.objects.get(pk=site.id)
         self.assertEqual(site_changed.billing.purchase_order_number, 'testOrderNumber')
         self.assertEqual(site_changed.billing.group, 'testGroup')
@@ -339,8 +334,7 @@ class SiteManagementTests(TestCase):
             response = self.client.post(reverse(views.billing_management, kwargs={'site_id': site.id}),
                                         {'purchase_order_number': 'testOrderNumber1', 'group': 'testGroup1',
                                          'purchase_order': fp})
-        self.assertEqual(response.status_code, 302)  # Changes done, redirecting
-        self.assertTrue(response.url.endswith(site.get_absolute_url()))
+        self.assertRedirects(response, expected_url=site.get_absolute_url()) # Changes done, redirecting
         site_changed = Site.objects.get(pk=site.id)
         self.assertEqual(site_changed.billing.purchase_order_number, 'testOrderNumber1')
         self.assertEqual(site_changed.billing.group, 'testGroup1')
@@ -459,86 +453,61 @@ class SiteManagement2Tests(TestCase):
 
         # TODO test index not empty
         response = self.client.get(reverse('editsite', kwargs={'site_id': site.id}))
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(site.get_absolute_url()))
+        self.assertRedirects(response, expected_url=site.get_absolute_url())
         response = self.client.get(reverse(views.service_settings, kwargs={'service_id': service.id}))
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(site.get_absolute_url()))
+        self.assertRedirects(response, expected_url=site.get_absolute_url())
         response = self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 200)
         response = self.client.get(reverse('deletesite', kwargs={'site_id': site.id}))
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(site.get_absolute_url()))
+        self.assertRedirects(response, expected_url=site.get_absolute_url())
         response = self.client.get(reverse('disablesite', kwargs={'site_id': site.id}))
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(site.get_absolute_url()))
+        self.assertRedirects(response, expected_url=site.get_absolute_url())
         response = self.client.get(reverse('enablesite', kwargs={'site_id': site.id}))
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith('%s' % (reverse('listsites'))))
+        self.assertRedirects(response, expected_url=reverse('listsites'))
         response = self.client.get(reverse(views.vhosts_management, kwargs={'service_id': service.id}))
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(site.get_absolute_url()))
+        self.assertRedirects(response, expected_url=site.get_absolute_url())
         response = self.client.get(reverse(views.add_vhost, kwargs={'service_id': service.id}))
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(site.get_absolute_url()))
+        self.assertRedirects(response, expected_url=site.get_absolute_url())
         response = self.client.get(reverse(views.system_packages, kwargs={'service_id': service.id}))
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(site.get_absolute_url()))
+        self.assertRedirects(response, expected_url=site.get_absolute_url())
         response = self.client.get(reverse(views.clone_vm_view, kwargs={'site_id': site.id}))
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(site.get_absolute_url()))
+        self.assertRedirects(response, expected_url=site.get_absolute_url())
         response = self.client.get(reverse('mwsauth.views.auth_change', kwargs={'site_id': site.id}))
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(site.get_absolute_url()))
+        self.assertRedirects(response, expected_url=site.get_absolute_url())
         response = self.client.get(reverse(views.delete_vm, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 403)  # Primary VM cannot be deleted
         response = self.client.get(reverse(views.delete_vm, kwargs={'service_id': service2.id}))
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(site.get_absolute_url()))
+        self.assertRedirects(response, expected_url=site.get_absolute_url())
         response = self.client.get(reverse(views.power_vm, kwargs={'service_id': service.id}))
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(site.get_absolute_url()))
+        self.assertRedirects(response, expected_url=site.get_absolute_url())
         response = self.client.get(reverse(views.reset_vm, kwargs={'service_id': service.id}))
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(site.get_absolute_url()))
+        self.assertRedirects(response, expected_url=site.get_absolute_url())
         response = self.client.get(reverse(views.unix_groups, kwargs={'service_id': service.id}))
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(site.get_absolute_url()))
+        self.assertRedirects(response, expected_url=site.get_absolute_url())
         response = self.client.get(reverse(views.unix_groups, kwargs={'service_id': service.id}))
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(site.get_absolute_url()))
+        self.assertRedirects(response, expected_url=site.get_absolute_url())
         response = self.client.get(reverse(views.add_unix_group, kwargs={'service_id': service.id}))
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(site.get_absolute_url()))
+        self.assertRedirects(response, expected_url=site.get_absolute_url())
         response = self.client.get(reverse(views.check_vm_status, kwargs={'service_id': service.id}))
         self.assertEqual(response.status_code, 200)  # The error is shown in JSON format
         response = self.client.get(reverse(views.vhosts_management, kwargs={'service_id': service.id}))
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(site.get_absolute_url()))
+        self.assertRedirects(response, expected_url=site.get_absolute_url())
         response = self.client.get(reverse(views.domains_management, kwargs={'vhost_id': vhost.id}))
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(site.get_absolute_url()))
+        self.assertRedirects(response, expected_url=site.get_absolute_url())
         response = self.client.get(reverse(views.delete_vhost, kwargs={'vhost_id': vhost.id}))
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(site.get_absolute_url()))
+        self.assertRedirects(response, expected_url=site.get_absolute_url())
         response = self.client.get(reverse(views.certificates, kwargs={'vhost_id': vhost.id}))
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(site.get_absolute_url()))
+        self.assertRedirects(response, expected_url=site.get_absolute_url())
         response = self.client.get(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}))
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(site.get_absolute_url()))
+        self.assertRedirects(response, expected_url=site.get_absolute_url())
         response = self.client.get(reverse(views.delete_dn, kwargs={'domain_id': dn.id}))
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(site.get_absolute_url()))
+        self.assertRedirects(response, expected_url=site.get_absolute_url())
         response = self.client.get(reverse(views.set_dn_as_main, kwargs={'domain_id': dn.id}))
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(site.get_absolute_url()))
+        self.assertRedirects(response, expected_url=site.get_absolute_url())
         response = self.client.get(reverse(views.unix_group, kwargs={'ug_id': unix_group.id}))
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(site.get_absolute_url()))
+        self.assertRedirects(response, expected_url=site.get_absolute_url())
         response = self.client.get(reverse(views.delete_unix_group, kwargs={'ug_id': unix_group.id}))
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(site.get_absolute_url()))
+        self.assertRedirects(response, expected_url=site.get_absolute_url())
 
     def test_unix_groups(self):
         site = self.create_site()
