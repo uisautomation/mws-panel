@@ -511,6 +511,9 @@ class Vhost(models.Model):
     def sorted_domain_names(self):
         return sorted(set(self.domain_names.all()))
 
+    class Meta:
+        unique_together = ("name", "service")
+
     def __unicode__(self):
         return self.name
 
