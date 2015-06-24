@@ -17,7 +17,7 @@
                                     campl-horizontal-teaser campl-teaser campl-focus-teaser">
                         <div class="campl-focus-teaser-img">
                             <div class="campl-content-container campl-horizontal-teaser-img">
-                                <a href="{% url 'sitesmanagement.views.vhosts_management' service_id=service.id %}">
+                                <a href="{% url 'listvhost' service_id=service.id %}">
                                     <div class="field field-name-field-external-url-image field-type-image
                                                 field-label-hidden">
                                         <div class="field-items">
@@ -34,11 +34,11 @@
                         <div class="campl-focus-teaser-txt">
                             <div class="campl-content-container campl-horizontal-teaser-txt">
                                 <h3 class="campl-teaser-title">
-                                    <a href="{% url 'sitesmanagement.views.vhosts_management' service_id=service.id %}">
+                                    <a href="{% url 'listvhost' service_id=service.id %}">
                                         Web sites
                                     </a>
                                 </h3>
-                                <a href="{% url 'sitesmanagement.views.vhosts_management' service_id=service.id %}"
+                                <a href="{% url 'listvhost' service_id=service.id %}"
                                    class="ir campl-focus-link">Web sites</a>
                             </div>
                         </div>

@@ -387,7 +387,7 @@ class SiteManagement2Tests(TestCase):
         self.assertEqual(self.client.get(reverse('deletesite', kwargs={'site_id': site.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse('disablesite', kwargs={'site_id': site.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse('enablesite', kwargs={'site_id': site.id})).status_code, 403)
-        self.assertEqual(self.client.get(reverse(views.vhosts_management,
+        self.assertEqual(self.client.get(reverse('listvhost',
                                                  kwargs={'service_id': service.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse(views.add_vhost, kwargs={'service_id': service.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse(views.system_packages,
@@ -406,8 +406,7 @@ class SiteManagement2Tests(TestCase):
                                                  kwargs={'service_id': service.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse(views.check_vm_status,
                                                  kwargs={'service_id': service.id})).status_code, 403)
-        self.assertEqual(self.client.get(reverse(views.vhosts_management,
-                                                 kwargs={'service_id': service.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse('listvhost', kwargs={'service_id': service.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse(views.domains_management,
                                                  kwargs={'vhost_id': vhost.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse(views.delete_vhost, kwargs={'vhost_id': vhost.id})).status_code, 403)
@@ -445,7 +444,7 @@ class SiteManagement2Tests(TestCase):
                              expected_url=site.get_absolute_url())
         self.assertRedirects(self.client.get(reverse('enablesite', kwargs={'site_id': site.id})),
                              expected_url=reverse('listsites'))
-        self.assertRedirects(self.client.get(reverse(views.vhosts_management, kwargs={'service_id': service.id})),
+        self.assertRedirects(self.client.get(reverse('listvhost', kwargs={'service_id': service.id})),
                              expected_url=site.get_absolute_url())
         self.assertRedirects(self.client.get(reverse(views.add_vhost, kwargs={'service_id': service.id})),
                              expected_url=site.get_absolute_url())
@@ -472,7 +471,7 @@ class SiteManagement2Tests(TestCase):
         self.assertEqual(self.client.get(reverse(views.check_vm_status,
                                                  kwargs={'service_id': service.id})).status_code,
                          200)  # The error is shown in JSON format
-        self.assertRedirects(self.client.get(reverse(views.vhosts_management, kwargs={'service_id': service.id})),
+        self.assertRedirects(self.client.get(reverse('listvhost', kwargs={'service_id': service.id})),
                              expected_url=site.get_absolute_url())
         self.assertRedirects(self.client.get(reverse(views.domains_management, kwargs={'vhost_id': vhost.id})),
                              expected_url=site.get_absolute_url())
@@ -538,7 +537,7 @@ class SiteManagement2Tests(TestCase):
         self.assertInHTML('<td>testUnixGroup2</td>', response.content, count=0)
         self.assertInHTML('<td>jw35</td>', response.content, count=0)
 
-    def test_vhosts_management(self):
+    def test_vhosts_list(self):
         site = self.create_site()
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0

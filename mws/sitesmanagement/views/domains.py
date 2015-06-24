@@ -30,7 +30,7 @@ def domains_management(request, vhost_id):
         0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
         1: dict(name='Server settings' if vhost.service.primary else 'Test server settings',
                 url=reverse('sitesmanagement.views.service_settings', kwargs={'service_id': vhost.service.id})),
-        2: dict(name='Web sites management: %s' % vhost.name, url=reverse('sitesmanagement.views.vhosts_management',
+        2: dict(name='Web sites management: %s' % vhost.name, url=reverse('listvhost',
                                                                           kwargs={'service_id': vhost.service.id})),
         3: dict(name='Domain Names management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id}))
     }
@@ -78,7 +78,7 @@ def add_domain(request, vhost_id, socket_error=None):
                         url=reverse('sitesmanagement.views.service_settings',
                                     kwargs={'service_id': vhost.service.id})),
                 2: dict(name='Web sites management: %s' % vhost.name,
-                        url=reverse('sitesmanagement.views.vhosts_management',
+                        url=reverse('listvhost',
                                     kwargs={'service_id': vhost.service.id})),
                 3: dict(name='Domain Names management', url=reverse(domains_management, kwargs={'vhost_id': vhost.id}))
             }

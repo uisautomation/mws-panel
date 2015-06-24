@@ -1,44 +1,68 @@
 """Views(Controllers) for managing Vhosts"""
 from Crypto.Util import asn1
 import OpenSSL
+from django import forms
 from django.conf import settings as django_settings
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
+from django.db import IntegrityError
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
+from django.views.generic import ListView
+from ucamlookup import user_in_groups
 from apimws.ansible import launch_ansible
 from mwsauth.utils import privileges_check
 from sitesmanagement.forms import VhostForm
 from sitesmanagement.models import Service, Vhost
+from sitesmanagement.views.sites import LoginRequiredMixin
 
 
-@login_required
-def vhosts_management(request, service_id):
-    """View(Controller) to show the current list of vhosts for a service. For each vhost you can go to manage
-    tls key/certificates, and domain names for this vhost, or add a new vhost"""
-    service = get_object_or_404(Service, pk=service_id)
-    site = privileges_check(service.site.id, request.user)
+class ServicePriviledgeCheck(LoginRequiredMixin):
+    def dispatch(self, request, *args, **kwargs):
+        service = get_object_or_404(Service, pk=self.kwargs['service_id'])
+        site = service.site
+        self.site = site
+        self.service = service
 
-    if site is None:
-        return HttpResponseForbidden()
+        # If the user is not in the user auth list of the site and neither belongs to a group in the group auth list or
+        # the site is suspended or canceled return None
+        try:
+            if (site not in request.user.sites.all() and not user_in_groups(request.user, site.groups.all())) \
+                    or site.is_admin_suspended() or site.is_canceled() or site.is_disabled():
+                return HttpResponseForbidden()
+        except Exception:
+            return HttpResponseForbidden()
 
-    if not service or not service.active or service.is_busy:
-        return redirect(site)
+        if not service or not service.active or service.is_busy:
+            return redirect(site)
 
-    breadcrumbs = {
-        0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
-        1: dict(name='Server settings' if service.primary else 'Test server settings',
-                url=reverse('sitesmanagement.views.service_settings', kwargs={'service_id': service.id})),
-        2: dict(name='Web sites management', url=reverse(vhosts_management, kwargs={'service_id': service.id}))
-    }
+        return super(ServicePriviledgeCheck, self).dispatch(request, *args, **kwargs)
 
-    return render(request, 'mws/vhosts.html', {
-        'breadcrumbs': breadcrumbs,
-        'service': service,
-        'site': site,
-        'vhost_form': VhostForm(),
-        'DEMO': getattr(django_settings, 'DEMO', False)
-    })
+
+class VhostListView(ServicePriviledgeCheck, ListView):
+
+    model = Vhost
+    template_name = 'mws/vhosts.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(VhostListView, self).get_context_data(**kwargs)
+        breadcrumbs = {
+            0: dict(name='Manage Web Service server: ' + str(self.site.name), url=self.site.get_absolute_url()),
+            1: dict(name='Server settings' if self.service.primary else 'Test server settings',
+                    url=reverse('sitesmanagement.views.service_settings', kwargs={'service_id': self.service.id})),
+            2: dict(name='Web sites management', url=reverse('listvhost', kwargs={'service_id': self.service.id}))
+        }
+        context.update({
+            'breadcrumbs': breadcrumbs,
+            'service': self.service,
+            'site': self.site,
+            'vhost_form': VhostForm(),
+            'DEMO': getattr(django_settings, 'DEMO', False)
+        })
+        return context
+
+    def get_queryset(self):
+        return self.service.vhosts
 
 
 @login_required
@@ -61,8 +85,7 @@ def add_vhost(request, service_id):
             vhost.save()
             launch_ansible(service)  # to create a new vhost configuration file
 
-    return redirect(reverse('sitesmanagement.views.vhosts_management', kwargs={'service_id': service.id}))
-
+    return redirect(reverse('listvhost', kwargs={'service_id': service.id}))
 
 @login_required
 def visit_vhost(request, vhost_id):
@@ -112,8 +135,7 @@ def generate_csr(request, vhost_id):
                 1: dict(name='Server settings' if vhost.service.primary else 'Test server settings',
                         url=reverse('sitesmanagement.views.service_settings', kwargs={'service_id': vhost.service.id})),
                 2: dict(name='Vhosts Management: %s' % vhost.name,
-                        url=reverse('sitesmanagement.views.vhosts_management',
-                                    kwargs={'service_id': vhost.service.id})),
+                        url=reverse('listvhost', kwargs={'service_id': vhost.service.id})),
                 3: dict(name='TLS/SSL Certificates', url=reverse(certificates, kwargs={'vhost_id': vhost.id})),
             }
 
@@ -148,14 +170,14 @@ def certificates(request, vhost_id):
         return redirect(site)
 
     if not vhost.domain_names.all():
-        return redirect(reverse('sitesmanagement.views.vhosts_management', kwargs={'service_id': vhost.service.id}))
+        return redirect(reverse('listvhost', kwargs={'service_id': vhost.service.id}))
 
     breadcrumbs = {
         0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
         1: dict(name='Server settings' if vhost.service.primary else 'Test server settings',
                 url=reverse('sitesmanagement.views.service_settings', kwargs={'service_id': vhost.service.id})),
         2: dict(name='Web sites management: %s' % vhost.name,
-                url=reverse('sitesmanagement.views.vhosts_management', kwargs={'service_id': vhost.service.id})),
+                url=reverse('listvhost', kwargs={'service_id': vhost.service.id})),
         3: dict(name='TLS/SSL Certificate', url=reverse(certificates, kwargs={'vhost_id': vhost.id})),
     }
 

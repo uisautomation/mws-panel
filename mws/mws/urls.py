@@ -3,6 +3,7 @@ from django.conf.urls.static import static
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from sitesmanagement.views.sites import SiteCreate, SiteShow, SiteList, SiteDisable, SiteDelete, SiteEdit
+from sitesmanagement.views.vhosts import VhostListView
 
 urlpatterns = patterns('',
     # external apps urls
@@ -26,7 +27,7 @@ urlpatterns = patterns('',
     url(r'^enable/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.sites.site_enable', name='enablesite'),
     url(r'^privacy/$', 'sitesmanagement.views.privacy'),
     url(r'^domains/(?P<vhost_id>[0-9]+)/$', 'sitesmanagement.views.domains_management'),
-    url(r'^vhosts/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.vhosts_management'),
+    url(r'^vhosts/(?P<service_id>[0-9]+)/$', VhostListView.as_view(), name='listvhost'),
     url(r'^vhosts/(?P<vhost_id>[0-9]+)/delete/$', 'sitesmanagement.views.delete_vhost'),
     url(r'^vhosts/(?P<vhost_id>[0-9]+)/certificates/$', 'sitesmanagement.views.certificates'),
     url(r'^vhosts/(?P<vhost_id>[0-9]+)/generate_csr/$', 'sitesmanagement.views.generate_csr'),
