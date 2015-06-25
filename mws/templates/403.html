@@ -2,8 +2,11 @@
 {% block page_content %}
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
+            {% for message in messages %}
+                <p class="campl-notifications-icon campl-warning-icon" style="float:none; margin-bottom: 10px;">{{ message }}</p>
+            {% endfor %}
             <p class="campl-notifications-icon campl-warning-icon" style="float:none; margin-bottom: 10px;">You have no permission to access to this web application.</p>
-            <p>If you think you should have, please contact <a href="mailto:mws3-support@ucs.cam.ac.uk">raven-support@ucs.cam.ac.uk</a> for more information.</p>
+            <p>If you think you should have, please contact <a href="mailto:mws3-support@ucs.cam.ac.uk">mws3-support@ucs.cam.ac.uk</a> for more information.</p>
         </div>
     </div>
 {% endblock %}
