@@ -2,9 +2,9 @@
 
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseForbidden, HttpResponseRedirect
+from django.http import HttpResponseForbidden, HttpResponseRedirect, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
-from django.views.generic import ListView
+from django.views.generic import ListView, DeleteView
 from apimws.ansible import launch_ansible
 from apimws.utils import ip_register_api_request
 from mwsauth.utils import privileges_check
@@ -12,6 +12,14 @@ from sitesmanagement.forms import DomainNameFormNew
 from sitesmanagement.models import Vhost, DomainName
 from sitesmanagement.utils import is_camacuk
 from sitesmanagement.views.vhosts import VhostPriviledgeCheck
+
+
+class DomainPriviledgeCheck(VhostPriviledgeCheck):
+    def dispatch(self, request, *args, **kwargs):
+        domain = get_object_or_404(DomainName, pk=self.kwargs['domain_id'])
+        self.domain = domain
+        self.kwargs['vhost_id'] = domain.vhost.id
+        return super(DomainPriviledgeCheck, self).dispatch(request, *args, **kwargs)
 
 
 class DomainListView(VhostPriviledgeCheck, ListView):
@@ -118,27 +126,23 @@ def set_dn_as_main(request, domain_id):
     return HttpResponseRedirect(reverse('listdomains', kwargs={'vhost_id': vhost.id}))
 
 
-@login_required
-def delete_dn(request, domain_id):
-    """View(Controller) to delete the domain name selected."""
-    domain = get_object_or_404(DomainName, pk=domain_id)
-    vhost = domain.vhost
-    site = privileges_check(vhost.service.site.id, request.user)
-    service = vhost.service
+class DomainDelete(DomainPriviledgeCheck, DeleteView):
+    """View to delete the domain name selected."""
+    model = DomainName
+    pk_url_kwarg = 'domain_id'
 
-    if site is None:
-        return HttpResponseForbidden()
+    def get(self, request, *args, **kwargs):
+        return HttpResponseRedirect(reverse('listdomains', kwargs={'vhost_id': self.vhost.id}))
 
-    if not service or not service.active or service.is_busy:
-        return redirect(site)
-
-    if request.method == 'DELETE':
-        if is_camacuk(domain.name):
-            domain.status = 'to_be_deleted'
-            domain.save()
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if is_camacuk(self.object.name):
+            self.object.status = 'to_be_deleted'
+            self.object.save()
         else:
-            domain.delete()
-        launch_ansible(vhost.service)
-        return HttpResponseRedirect(reverse('listdomains', kwargs={'vhost_id': vhost.id}))
+            self.object.delete()
+        launch_ansible(self.service)
+        return HttpResponse()
 
-    return HttpResponseForbidden()
+    def get_success_url(self):
+        return reverse('listdomains', kwargs={'vhost_id': self.vhost.id})

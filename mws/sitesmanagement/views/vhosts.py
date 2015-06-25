@@ -4,7 +4,7 @@ import OpenSSL
 from django.conf import settings as django_settings
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseForbidden, HttpResponse
+from django.http import HttpResponseForbidden, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import ListView, DeleteView, CreateView, DetailView
 from ucamlookup import user_in_groups
@@ -104,13 +104,16 @@ class VhostDelete(VhostPriviledgeCheck, DeleteView):
     model = Vhost
     pk_url_kwarg = 'vhost_id'
 
+    def get(self, request, *args, **kwargs):
+        return HttpResponseRedirect(reverse('listvhost', kwargs={'service_id': self.service.id}))
+
     def delete(self, request, *args, **kwargs):
         super(VhostDelete, self).delete(request, *args, **kwargs)
         launch_ansible(self.service)
         return HttpResponse()
 
     def get_success_url(self):
-        return self.site.get_absolute_url()
+        return HttpResponseRedirect(reverse('listvhost', kwargs={'service_id': self.service.id}))
 
 
 @login_required

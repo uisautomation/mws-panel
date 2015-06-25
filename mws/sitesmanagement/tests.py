@@ -412,7 +412,7 @@ class SiteManagement2Tests(TestCase):
         self.assertEqual(self.client.get(reverse('deletevhost', kwargs={'vhost_id': vhost.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse(views.certificates, kwargs={'vhost_id': vhost.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse(views.add_domain, kwargs={'vhost_id': vhost.id})).status_code, 403)
-        self.assertEqual(self.client.get(reverse(views.delete_dn, kwargs={'domain_id': dn.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse('deletedomain', kwargs={'domain_id': dn.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse(views.set_dn_as_main, kwargs={'domain_id': dn.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse(views.unix_group, kwargs={'ug_id': unix_group.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse(views.delete_unix_group,
@@ -481,7 +481,7 @@ class SiteManagement2Tests(TestCase):
                              expected_url=site.get_absolute_url())
         self.assertRedirects(self.client.get(reverse(views.add_domain, kwargs={'vhost_id': vhost.id})),
                              expected_url=site.get_absolute_url())
-        self.assertRedirects(self.client.get(reverse(views.delete_dn, kwargs={'domain_id': dn.id})),
+        self.assertRedirects(self.client.get(reverse('deletedomain', kwargs={'domain_id': dn.id})),
                              expected_url=site.get_absolute_url())
         self.assertRedirects(self.client.get(reverse(views.set_dn_as_main, kwargs={'domain_id': dn.id})),
                              expected_url=site.get_absolute_url())
@@ -582,7 +582,7 @@ class SiteManagement2Tests(TestCase):
                                                              site.production_service.virtual_machines.first()
                                                                  .network_configuration.name])
 
-        response = self.client.get(response.url)  # TODO assert that url is domains_management
+        response = self.client.get(reverse('listdomains', kwargs={'vhost_id': vhost.id}))
         self.assertInHTML('<tbody><tr><td><p>test.mws3.csx.cam.ac.uk</p></td><td><p>Requested</p></td>'
                           '<td><p>Managed domain name</p></td><td style="width: 155px; cursor: pointer"><p>'
                           '<a onclick="javascript:ajax_call(\'/set_dn_as_main/1/\', \'POST\')">Set as main domain</a>'
@@ -604,7 +604,7 @@ class SiteManagement2Tests(TestCase):
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
                                                              site.production_service.virtual_machines.first()
                                                                  .network_configuration.name])
-        response = self.client.get(response.url)
+        response = self.client.get(reverse('listdomains', kwargs={'vhost_id': vhost.id}))
         self.assertInHTML('<tbody><tr><td><p>test.mws3.csx.cam.ac.uk<br>This is the current main domain</p></td>'
                           '<td><p>Requested</p></td> <td><p>Managed domain name</p></td>'
                           '<td style="width: 155px; cursor: pointer"><p><a onclick="javascript:ajax_call'
@@ -614,11 +614,11 @@ class SiteManagement2Tests(TestCase):
                           '</tbody>', response.content, count=1)
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
-            response = self.client.delete(reverse(views.delete_dn, kwargs={'domain_id': 1}))
+            response = self.client.delete(reverse('deletedomain', kwargs={'domain_id': 1}))
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
                                                              site.production_service.virtual_machines.first()
                                                                  .network_configuration.name])
-        response = self.client.get(response.url)
+        response = self.client.get(reverse('listdomains', kwargs={'vhost_id': vhost.id}))
         self.assertInHTML('<tbody><tr><td><p>test.mws3.csx.cam.ac.uk<br>This is the current main domain</p></td>'
                           '<td><p>Requested</p></td><td><p>Managed domain name</p></td>'
                           '<td style="width: 155px; cursor: pointer"><p><a onclick="javascript:ajax_call'
