@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.db import IntegrityError
 from django.http import HttpResponseForbidden, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
-from django.views.generic import ListView, DeleteView, CreateView
+from django.views.generic import ListView, DeleteView, CreateView, DetailView
 from ucamlookup import user_in_groups
 from apimws.ansible import launch_ansible
 from mwsauth.utils import privileges_check
@@ -91,20 +91,13 @@ class VhostCreate(ServicePriviledgeCheck, CreateView):
         return reverse('listvhost', kwargs={'service_id': self.service.id})
 
 
-@login_required
-def visit_vhost(request, vhost_id):
+class VisitVhost(VhostPriviledgeCheck, DetailView):
     """View(Controller) to redirect the user to the URL of the vhost selected."""
-    vhost = get_object_or_404(Vhost, pk=vhost_id)
-    site = privileges_check(vhost.service.site.id, request.user)
-    service = vhost.service
+    model = Vhost
+    pk_url_kwarg = 'vhost_id'
 
-    if site is None:
-        return HttpResponseForbidden()
-
-    if not service or not service.active or service.is_busy:
-        return redirect(site)
-
-    return redirect("http://"+str(vhost.main_domain.name))
+    def get(self):
+        return redirect("http://"+str(self.object.main_domain.name))
 
 
 class VhostDelete(VhostPriviledgeCheck, DeleteView):
