@@ -4,11 +4,11 @@ import OpenSSL
 from django import forms
 from django.conf import settings as django_settings
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, reverse_lazy
 from django.db import IntegrityError
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
-from django.views.generic import ListView
+from django.views.generic import ListView, DeleteView
 from ucamlookup import user_in_groups
 from apimws.ansible import launch_ansible
 from mwsauth.utils import privileges_check
@@ -39,8 +39,15 @@ class ServicePriviledgeCheck(LoginRequiredMixin):
         return super(ServicePriviledgeCheck, self).dispatch(request, *args, **kwargs)
 
 
-class VhostListView(ServicePriviledgeCheck, ListView):
+class VhostPriviledgeCheck(ServicePriviledgeCheck):
+    def dispatch(self, request, *args, **kwargs):
+        vhost = get_object_or_404(Vhost, pk=self.kwargs['vhost_id'])
+        self.vhost = vhost
+        self.kwargs['service_id'] = vhost.service.id
+        return super(VhostPriviledgeCheck, self).dispatch(request, *args, **kwargs)
 
+
+class VhostListView(ServicePriviledgeCheck, ListView):
     model = Vhost
     template_name = 'mws/vhosts.html'
 
@@ -87,6 +94,7 @@ def add_vhost(request, service_id):
 
     return redirect(reverse('listvhost', kwargs={'service_id': service.id}))
 
+
 @login_required
 def visit_vhost(request, vhost_id):
     """View(Controller) to redirect the user to the URL of the vhost selected."""
@@ -103,25 +111,18 @@ def visit_vhost(request, vhost_id):
     return redirect("http://"+str(vhost.main_domain.name))
 
 
-@login_required
-def delete_vhost(request, vhost_id):
-    """View(Controller) to delete the vhost selected."""
-    vhost = get_object_or_404(Vhost, pk=vhost_id)
-    site = privileges_check(vhost.service.site.id, request.user)
-    service = vhost.service
+class VhostDelete(VhostPriviledgeCheck, DeleteView):
+    """View to delete the vhost selected."""
+    model = Vhost
+    pk_url_kwarg = 'vhost_id'
 
-    if site is None:
-        return HttpResponseForbidden()
+    def delete(self, request, *args, **kwargs):
+        super(VhostDelete, self).delete(request, *args, **kwargs)
+        launch_ansible(self.service)
+        return HttpResponse()
 
-    if not service or not service.active or service.is_busy:
-        return redirect(site)
-
-    if request.method == 'DELETE':
-        vhost.delete()
-        launch_ansible(vhost.service)
-        return redirect(site)
-
-    return HttpResponseForbidden()
+    def get_success_url(self):
+        return self.site.get_absolute_url()
 
 @login_required
 def generate_csr(request, vhost_id):

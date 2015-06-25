@@ -38,7 +38,7 @@
                                 <a href="{% url 'sitesmanagement.views.certificates' vhost_id=vhost.id %}">
                                     <i title="TLS certificates" class="fa fa-lock fa-2x" data-toggle="tooltip"></i>
                                 </a>
-                                <a class="delete_vhost" data-href="javascript:delete_vhost('{% url 'sitesmanagement.views.delete_vhost' vhost_id=vhost.id %}')" href="#">
+                                <a class="delete_vhost" data-href="javascript:delete_vhost('{% url 'deletevhost' vhost_id=vhost.id %}')" href="#">
                                     <i title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i>
                                 </a>
                             </td>
@@ -104,7 +104,7 @@
             $.ajax({
                 url: url,
                 type: 'DELETE',
-                success: function(result) {
+                success: function(data) {
                     location.reload();
                 },
                 beforeSend: function(xhr, settings) {
