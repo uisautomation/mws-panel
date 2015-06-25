@@ -389,7 +389,7 @@ class SiteManagement2Tests(TestCase):
         self.assertEqual(self.client.get(reverse('enablesite', kwargs={'site_id': site.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse('listvhost',
                                                  kwargs={'service_id': service.id})).status_code, 403)
-        self.assertEqual(self.client.get(reverse(views.add_vhost, kwargs={'service_id': service.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse('createvhost', kwargs={'service_id': service.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse(views.system_packages,
                                                  kwargs={'service_id': service.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse(views.clone_vm_view, kwargs={'site_id': site.id})).status_code, 403)
@@ -446,7 +446,7 @@ class SiteManagement2Tests(TestCase):
                              expected_url=reverse('listsites'))
         self.assertRedirects(self.client.get(reverse('listvhost', kwargs={'service_id': service.id})),
                              expected_url=site.get_absolute_url())
-        self.assertRedirects(self.client.get(reverse(views.add_vhost, kwargs={'service_id': service.id})),
+        self.assertRedirects(self.client.get(reverse('createvhost', kwargs={'service_id': service.id})),
                              expected_url=site.get_absolute_url())
         self.assertRedirects(self.client.get(reverse(views.system_packages, kwargs={'service_id': service.id})),
                              expected_url=site.get_absolute_url())
@@ -541,7 +541,7 @@ class SiteManagement2Tests(TestCase):
         site = self.create_site()
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
-            response = self.client.post(reverse(views.add_vhost, kwargs={'service_id': site.production_service.id}),
+            response = self.client.post(reverse('createvhost', kwargs={'service_id': site.production_service.id}),
                                         {'name': 'testVhost'})
             self.assertIn(response.status_code, [200, 302])
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
@@ -569,7 +569,7 @@ class SiteManagement2Tests(TestCase):
 
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
-            self.client.post(reverse(views.add_vhost, kwargs={'service_id': site.production_service.id}),
+            self.client.post(reverse('createvhost', kwargs={'service_id': site.production_service.id}),
                              {'name': 'testVhost'})
 
             vhost = Vhost.objects.get(name='testVhost')
@@ -681,7 +681,7 @@ class SiteManagement2Tests(TestCase):
     #
     #     with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
     #         mock_subprocess.check_output.return_value.returncode = 0
-    #         response = self.client.post(reverse(views.add_vhost, kwargs={'service_id': site.production_service.id}),
+    #         response = self.client.post(reverse('createvhost', kwargs={'service_id': site.production_service.id}),
     #                                     {'name': 'testVhost'})
     #         self.assertIn(response.status_code, [200, 302])
     #         mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
@@ -755,7 +755,7 @@ class SiteManagement2Tests(TestCase):
 
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
-            response = self.client.post(reverse(views.add_vhost, kwargs={'service_id': site.production_service.id}),
+            response = self.client.post(reverse('createvhost', kwargs={'service_id': site.production_service.id}),
                                         {'name': 'testVhost'})
             self.assertIn(response.status_code, [200, 302])
             vhost = Vhost.objects.get(name='testVhost')

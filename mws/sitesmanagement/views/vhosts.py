@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.db import IntegrityError
 from django.http import HttpResponseForbidden, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
-from django.views.generic import ListView, DeleteView
+from django.views.generic import ListView, DeleteView, CreateView
 from ucamlookup import user_in_groups
 from apimws.ansible import launch_ansible
 from mwsauth.utils import privileges_check
@@ -72,27 +72,23 @@ class VhostListView(ServicePriviledgeCheck, ListView):
         return self.service.vhosts
 
 
-@login_required
-def add_vhost(request, service_id):
+class VhostCreate(ServicePriviledgeCheck, CreateView):
     """View(Controller) to add a new vhost to the service. It shows a form with the Vhost required fields."""
-    service = get_object_or_404(Service, pk=service_id)
-    site = privileges_check(service.site.id, request.user)
+    model = Vhost
+    form_class = VhostForm
 
-    if site is None:
-        return HttpResponseForbidden()
+    def get(self, request, *args, **kwargs):
+        return redirect(reverse('listvhost', kwargs={'service_id': self.service.id}))
 
-    if not service or not service.active or service.is_busy:
-        return redirect(site)
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.service = self.service
+        self.object.save()
+        launch_ansible(self.service)  # to create a new vhost configuration file
+        return super(VhostCreate, self).form_valid(form)
 
-    if request.method == 'POST':
-        vhost_form = VhostForm(request.POST)
-        if vhost_form.is_valid():
-            vhost = vhost_form.save(commit=False)
-            vhost.service = service
-            vhost.save()
-            launch_ansible(service)  # to create a new vhost configuration file
-
-    return redirect(reverse('listvhost', kwargs={'service_id': service.id}))
+    def get_success_url(self):
+        return reverse('listvhost', kwargs={'service_id': self.service.id})
 
 
 @login_required
@@ -123,6 +119,7 @@ class VhostDelete(VhostPriviledgeCheck, DeleteView):
 
     def get_success_url(self):
         return self.site.get_absolute_url()
+
 
 @login_required
 def generate_csr(request, vhost_id):

@@ -53,7 +53,7 @@
             <p><a id="add_vhost_button" href="#" class="campl-primary-cta">Add a new Web site</a></p>
 
             <div id="add_vhost_div" style="display: none; margin-top: 20px">
-                <form action={% url 'sitesmanagement.views.add_vhost' service_id=service.id %} method="post">{% csrf_token %}
+                <form action={% url 'createvhost' service_id=service.id %} method="post">{% csrf_token %}
                     <fieldset>
                         <div id="vhost_form">
                             {{ vhost_form.as_p }}
