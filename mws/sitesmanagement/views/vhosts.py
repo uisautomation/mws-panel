@@ -96,7 +96,7 @@ class VisitVhost(VhostPriviledgeCheck, DetailView):
     model = Vhost
     pk_url_kwarg = 'vhost_id'
 
-    def get(self):
+    def get(self, request, *args, **kwargs):
         return redirect("http://"+str(self.object.main_domain.name))
 
 
