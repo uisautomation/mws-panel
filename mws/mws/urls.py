@@ -2,6 +2,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
+from sitesmanagement.views.domains import DomainListView
 from sitesmanagement.views.sites import SiteCreate, SiteShow, SiteList, SiteDisable, SiteDelete, SiteEdit
 from sitesmanagement.views.vhosts import VhostListView, VhostDelete, VhostCreate, VisitVhost
 
@@ -28,7 +29,6 @@ urlpatterns = patterns('',
     url(r'^disable/(?P<site_id>[0-9]+)/$', SiteDisable.as_view(), name='disablesite'),
     url(r'^enable/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.sites.site_enable', name='enablesite'),
     url(r'^privacy/$', 'sitesmanagement.views.privacy'),
-    url(r'^domains/(?P<vhost_id>[0-9]+)/$', 'sitesmanagement.views.domains_management'),
     url(r'^vhosts/(?P<vhost_id>[0-9]+)/certificates/$', 'sitesmanagement.views.certificates'),
     url(r'^vhosts/(?P<vhost_id>[0-9]+)/generate_csr/$', 'sitesmanagement.views.generate_csr'),
     url(r'^add_domain/(?P<vhost_id>[0-9]+)/$', 'sitesmanagement.views.add_domain'),
@@ -52,6 +52,9 @@ urlpatterns = patterns('',
     url(r'^add_vhost/(?P<service_id>[0-9]+)/$', VhostCreate.as_view(), name='createvhost'),
     url(r'^vhosts/(?P<vhost_id>[0-9]+)/delete/$', VhostDelete.as_view(), name='deletevhost'),
     url(r'^visit_website/(?P<vhost_id>[0-9]+)/$', VisitVhost.as_view(), name='visitvhost'),
+
+    # Domains management
+    url(r'^domains/(?P<vhost_id>[0-9]+)/$', DomainListView.as_view(), name='listdomains'),
 
     # apimws app
     url(r'^api/confirm_dns/(?P<dn_id>[0-9]+)/$', 'apimws.views.confirm_dns'),

@@ -1,11 +1,9 @@
 """Views(Controllers) for managing Vhosts"""
 from Crypto.Util import asn1
 import OpenSSL
-from django import forms
 from django.conf import settings as django_settings
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse, reverse_lazy
-from django.db import IntegrityError
+from django.core.urlresolvers import reverse
 from django.http import HttpResponseForbidden, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import ListView, DeleteView, CreateView, DetailView

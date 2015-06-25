@@ -30,7 +30,7 @@
                                     <i title="Visit website" class="fa fa-eye fa-2x" data-toggle="tooltip"></i>
                                 </a>
                                 {% endif %}
-                                <a href="{% url 'sitesmanagement.views.domains_management' vhost_id=vhost.id %}"
+                                <a href="{% url 'listdomains' vhost_id=vhost.id %}"
                                    style="text-decoration: none;">
                                     <i title="Domains associated to this web site" class="fa fa-link fa-2x"
                                        data-toggle="tooltip" ></i>
