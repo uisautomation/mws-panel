@@ -113,7 +113,7 @@ class VhostDelete(VhostPriviledgeCheck, DeleteView):
         return HttpResponse()
 
     def get_success_url(self):
-        return HttpResponseRedirect(reverse('listvhost', kwargs={'service_id': self.service.id}))
+        return reverse('listvhost', kwargs={'service_id': self.service.id})
 
 
 @login_required
