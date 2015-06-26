@@ -29,7 +29,7 @@
                                 <a href="{% url 'sitesmanagement.views.unix_group' ug_id=unix_group.id %}">
                                     <i title="Users in this group" class="fa fa-group fa-2x" data-toggle="tooltip"></i>
                                 </a>
-                                <a class="delete_unix_group" data-href="javascript:delete_unix_group('{% url 'sitesmanagement.views.delete_unix_group' ug_id=unix_group.id %}')" href="#">
+                                <a class="delete_unix_group" data-href="javascript:delete_unix_group('{% url 'deleteunixgroup' ug_id=unix_group.id %}')" href="#">
                                     <i title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i>
                                 </a>
                             </td>

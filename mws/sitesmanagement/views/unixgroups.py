@@ -3,9 +3,9 @@ from django.conf import settings
 
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseForbidden, HttpResponseRedirect
+from django.http import HttpResponseForbidden, HttpResponseRedirect, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
-from django.views.generic import ListView, CreateView
+from django.views.generic import ListView, CreateView, DeleteView
 from ucamlookup import validate_crsids, user_in_groups
 from apimws.ansible import launch_ansible
 from mwsauth.utils import privileges_check
@@ -149,23 +149,18 @@ def unix_group(request, ug_id):
     })
 
 
-@login_required
-def delete_unix_group(request, ug_id):
-    if getattr(settings, 'DEMO', False):
-        return HttpResponseRedirect(reverse('listsites'))
-    unix_group = get_object_or_404(UnixGroup, pk=ug_id)
-    site = privileges_check(unix_group.service.site.id, request.user)
-    service = unix_group.service
+class UnixGroupDelete(UnixGroupPriviledgeCheck, DeleteView):
+    """View to delete the unix group selected."""
+    model = UnixGroup
+    pk_url_kwarg = 'ug_id'
 
-    if site is None:
-        return HttpResponseForbidden()
+    def get(self, request, *args, **kwargs):
+        return HttpResponseRedirect(reverse('listunixgroups', kwargs={'service_id': self.service.id}))
 
-    if not service or not service.active or service.is_busy:
-        return redirect(site)
+    def delete(self, request, *args, **kwargs):
+        super(UnixGroupDelete, self).delete(request, *args, **kwargs)
+        launch_ansible(self.service)
+        return HttpResponse()
 
-    if request.method == 'DELETE':
-        unix_group.delete()
-        launch_ansible(unix_group.service)
-        return redirect('listunixgroups', service_id=unix_group.service.id)
-
-    return HttpResponseForbidden()
+    def get_success_url(self):
+        return reverse('listunixgroups', kwargs={'service_id': self.service.id})

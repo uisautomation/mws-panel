@@ -415,7 +415,7 @@ class SiteManagement2Tests(TestCase):
         self.assertEqual(self.client.get(reverse('deletedomain', kwargs={'domain_id': dn.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse(views.set_dn_as_main, kwargs={'domain_id': dn.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse(views.unix_group, kwargs={'ug_id': unix_group.id})).status_code, 403)
-        self.assertEqual(self.client.get(reverse(views.delete_unix_group,
+        self.assertEqual(self.client.get(reverse('deleteunixgroup',
                                                  kwargs={'ug_id': unix_group.id})).status_code, 403)
 
     def test_vm_is_busy(self):
@@ -485,7 +485,7 @@ class SiteManagement2Tests(TestCase):
                              expected_url=site.get_absolute_url())
         self.assertRedirects(self.client.get(reverse(views.unix_group, kwargs={'ug_id': unix_group.id})),
                              expected_url=site.get_absolute_url())
-        self.assertRedirects(self.client.get(reverse(views.delete_unix_group, kwargs={'ug_id': unix_group.id})),
+        self.assertRedirects(self.client.get(reverse('deleteunixgroup', kwargs={'ug_id': unix_group.id})),
                              expected_url=site.get_absolute_url())
 
     def test_unix_groups(self):
@@ -527,11 +527,11 @@ class SiteManagement2Tests(TestCase):
 
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
-            response = self.client.delete(reverse(views.delete_unix_group, kwargs={'ug_id': unix_group.id}))
+            response = self.client.delete(reverse('deleteunixgroup', kwargs={'ug_id': unix_group.id}))
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
                                                              site.production_service.virtual_machines.first()
                                                                  .network_configuration.name])
-        response = self.client.get(response.url)
+        response = self.client.get(reverse('listunixgroups', kwargs={'service_id': service.id}))
         self.assertInHTML('<td>testUnixGroup2</td>', response.content, count=0)
         self.assertInHTML('<td>jw35</td>', response.content, count=0)
 
