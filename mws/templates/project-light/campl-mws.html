@@ -58,7 +58,7 @@
                             <li><a href="{% url 'sitesmanagement.views.service_settings' service_id=site.production_service.id %}">Settings</a></li>
                             <li><a href="{% url 'listvhost' service_id=site.production_service.id %}">Web Sites</a></li>
                             <li><a href="{% url 'sitesmanagement.views.system_packages' service_id=site.production_service.id %}">System Packages</a></li>
-                            <li><a href="{% url 'sitesmanagement.views.unix_groups' service_id=site.production_service.id %}">Unix Groups</a></li>
+                            <li><a href="{% url 'listunixgroups' service_id=site.production_service.id %}">Unix Groups</a></li>
                         </ul>
                     </li>
                     {% endif %}
@@ -69,7 +69,7 @@
                             <li><a href="{% url 'sitesmanagement.views.service_settings' service_id=site.test_service.id %}">Settings</a></li>
                             <li><a href="{% url 'listvhost' service_id=site.test_service.id %}">Web Sites</a></li>
                             <li><a href="{% url 'sitesmanagement.views.system_packages' service_id=site.test_service.id %}">System Packages</a></li>
-                            <li><a href="{% url 'sitesmanagement.views.unix_groups' service_id=site.test_service.id %}">Unix Groups</a></li>
+                            <li><a href="{% url 'listunixgroups' service_id=site.test_service.id %}">Unix Groups</a></li>
                         </ul>
                     </li>
                     {% endif %}

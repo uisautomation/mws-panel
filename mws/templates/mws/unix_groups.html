@@ -41,7 +41,7 @@
                 <p style="margin-top: 20px; margin-bottom: 20px">The server doesn't have Unix Groups configured</p>
             {% endif %}
 
-        <p><a href="{% url 'sitesmanagement.views.add_unix_group' service_id=service.id %}" class="campl-primary-cta">Add a new Unix Group</a></p>
+        <p><a href="{% url 'createunixgroup' service_id=service.id %}" class="campl-primary-cta">Add a new Unix Group</a></p>
 
         </div>
     </div>

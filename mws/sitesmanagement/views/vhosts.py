@@ -46,6 +46,7 @@ class VhostPriviledgeCheck(ServicePriviledgeCheck):
 
 
 class VhostListView(ServicePriviledgeCheck, ListView):
+    """View that shows the list of vhost associated to a service with service id passed by url kwargs"""
     model = Vhost
     template_name = 'mws/vhosts.html'
 

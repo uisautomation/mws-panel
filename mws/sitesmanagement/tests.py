@@ -398,11 +398,11 @@ class SiteManagement2Tests(TestCase):
         self.assertEqual(self.client.get(reverse(views.delete_vm, kwargs={'service_id': service.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse(views.power_vm, kwargs={'service_id': service.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse(views.reset_vm, kwargs={'service_id': service.id})).status_code, 403)
-        self.assertEqual(self.client.get(reverse(views.unix_groups,
+        self.assertEqual(self.client.get(reverse('listunixgroups',
                                                  kwargs={'service_id': service.id})).status_code, 403)
-        self.assertEqual(self.client.get(reverse(views.unix_groups,
+        self.assertEqual(self.client.get(reverse('listunixgroups',
                                                  kwargs={'service_id': service.id})).status_code, 403)
-        self.assertEqual(self.client.get(reverse(views.add_unix_group,
+        self.assertEqual(self.client.get(reverse('createunixgroup',
                                                  kwargs={'service_id': service.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse(views.check_vm_status,
                                                  kwargs={'service_id': service.id})).status_code, 403)
@@ -462,11 +462,9 @@ class SiteManagement2Tests(TestCase):
                              expected_url=site.get_absolute_url())
         self.assertRedirects(self.client.get(reverse(views.reset_vm, kwargs={'service_id': service.id})),
                              expected_url=site.get_absolute_url())
-        self.assertRedirects(self.client.get(reverse(views.unix_groups, kwargs={'service_id': service.id})),
+        self.assertRedirects(self.client.get(reverse('listunixgroups', kwargs={'service_id': service.id})),
                              expected_url=site.get_absolute_url())
-        self.assertRedirects(self.client.get(reverse(views.unix_groups, kwargs={'service_id': service.id})),
-                             expected_url=site.get_absolute_url())
-        self.assertRedirects(self.client.get(reverse(views.add_unix_group, kwargs={'service_id': service.id})),
+        self.assertRedirects(self.client.get(reverse('createunixgroup', kwargs={'service_id': service.id})),
                              expected_url=site.get_absolute_url())
         self.assertEqual(self.client.get(reverse(views.check_vm_status,
                                                  kwargs={'service_id': service.id})).status_code,
@@ -494,7 +492,7 @@ class SiteManagement2Tests(TestCase):
         site = self.create_site()
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
-            response = self.client.post(reverse(views.add_unix_group,
+            response = self.client.post(reverse('createunixgroup',
                                                 kwargs={'service_id': site.production_service.id}),
                                         {'unix_users': 'amc203,jw35', 'name': 'testUnixGroup'})
             self.assertIn(response.status_code, [200, 302])

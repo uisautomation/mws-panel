@@ -4,6 +4,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from sitesmanagement.views.domains import DomainListView, DomainDelete
 from sitesmanagement.views.sites import SiteCreate, SiteShow, SiteList, SiteDisable, SiteDelete, SiteEdit
+from sitesmanagement.views.unixgroups import UnixGroupListView, UnixGroupCreate
 from sitesmanagement.views.vhosts import VhostListView, VhostDelete, VhostCreate, VisitVhost
 
 urlpatterns = patterns('',
@@ -38,8 +39,6 @@ urlpatterns = patterns('',
     url(r'^delete_vm/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.delete_vm'),
     url(r'^settings/vm/(?P<service_id>[0-9]+)/on/$', 'sitesmanagement.views.power_vm'),
     url(r'^settings/vm/(?P<service_id>[0-9]+)/reset/$', 'sitesmanagement.views.reset_vm'),
-    url(r'^unix_groups/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.unix_groups'),
-    url(r'^unix_groups/(?P<service_id>[0-9]+)/add/$', 'sitesmanagement.views.add_unix_group'),
     url(r'^unix_groups/edit/(?P<ug_id>[0-9]+)/$', 'sitesmanagement.views.unix_group'),
     url(r'^unix_groups/delete/(?P<ug_id>[0-9]+)/$', 'sitesmanagement.views.delete_unix_group'),
     url(r'^settings/vm/(?P<service_id>[0-9]+)/db_root_pass/$', 'sitesmanagement.views.change_db_root_password'),
@@ -55,6 +54,10 @@ urlpatterns = patterns('',
     # Domains management
     url(r'^domains/(?P<vhost_id>[0-9]+)/$', DomainListView.as_view(), name='listdomains'),
     url(r'^delete_domain/(?P<domain_id>[0-9]+)/$', DomainDelete.as_view(), name='deletedomain'),
+
+    # Unix groups management
+    url(r'^unix_groups/(?P<service_id>[0-9]+)/$', UnixGroupListView.as_view(), name='listunixgroups'),
+    url(r'^unix_groups/(?P<service_id>[0-9]+)/add/$', UnixGroupCreate.as_view(), name='createunixgroup'),
 
     # apimws app
     url(r'^api/confirm_dns/(?P<dn_id>[0-9]+)/$', 'apimws.views.confirm_dns'),
