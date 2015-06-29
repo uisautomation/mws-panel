@@ -114,11 +114,11 @@ class SiteList(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super(SiteList, self).get_context_data(**kwargs)
         context['sites_enabled'] = filter(lambda site: not site.is_canceled() and not site.is_disabled(),
-                                                     self.object_list)
+                                          self.object_list)
         context['sites_disabled'] = filter(lambda site: not site.is_canceled() and site.is_disabled(),
-                                                      self.object_list)
+                                           self.object_list)
         context['sites_authorised'] = filter(lambda site: not site.is_canceled() and not site.is_disabled(),
-                                                        self.request.user.sites_auth_as_user.all())
+                                             self.request.user.sites_auth_as_user.all())
         context['deactivate_new'] = not can_create_new_site()
         return context
 

@@ -244,7 +244,7 @@ class AuthTestCases(TestCase):
             do_test_login(self, user="amc203")
             response = self.client.get(reverse('listsites'))
             self.assertEqual(response.status_code, 403)  # There user was created without its corresponding mws_user
-            self.assertFalse(User.objects.get(username="amc203").is_active) # therefore is deactivated by default
+            self.assertFalse(User.objects.get(username="amc203").is_active)  # therefore is deactivated by default
 
             User.objects.filter(username="amc203").update(is_active=True)
             response = self.client.get(reverse('listsites'))

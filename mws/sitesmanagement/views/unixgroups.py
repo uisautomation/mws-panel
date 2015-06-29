@@ -1,14 +1,12 @@
 """Views(Controllers) for managing Unix Groups"""
 from django.conf import settings
 
-from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseForbidden, HttpResponseRedirect, HttpResponse
-from django.shortcuts import get_object_or_404, render, redirect
+from django.http import HttpResponseRedirect, HttpResponse
+from django.shortcuts import get_object_or_404
 from django.views.generic import ListView, CreateView, DeleteView, UpdateView
 from ucamlookup import validate_crsids
 from apimws.ansible import launch_ansible
-from mwsauth.utils import privileges_check
 from sitesmanagement.forms import UnixGroupForm
 from sitesmanagement.models import UnixGroup
 from sitesmanagement.views.vhosts import ServicePriviledgeCheck
@@ -124,9 +122,7 @@ class UnixGroupUpdate(UnixGroupPriviledgeCheck, UpdateView):
         return context
 
     def form_valid(self, form):
-        self.object = form.save(commit=False)
-        self.object.service = self.service
-        self.object.save()
+        self.object = form.save()
 
         unix_users = validate_crsids(self.request.POST.get('unix_users'))
         # TODO If there are no users in the list return an Exception?
@@ -135,8 +131,6 @@ class UnixGroupUpdate(UnixGroupPriviledgeCheck, UpdateView):
 
         launch_ansible(self.service)  # to apply these changes to the vm
         return super(UnixGroupUpdate, self).form_valid(form)
-
-        # The service shoulnd't have to be update. Make sure the modelform does not include the service. Check how the parent do things to do it the same way
 
     def get_success_url(self):
         return reverse('listunixgroups', kwargs={'service_id': self.service.id})

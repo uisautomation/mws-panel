@@ -28,7 +28,7 @@ class XenAPITests(TestCase):
                                           network_configuration=NetworkConfig.get_free_test_service_config())
         return service
 
-    @override_settings(VM_END_POINT_COMMAND = ["vmmanager"])
+    @override_settings(VM_END_POINT_COMMAND=["vmmanager"])
     def test_xen_api(self):
         # We get a free service address
         service = self.create_site_service()

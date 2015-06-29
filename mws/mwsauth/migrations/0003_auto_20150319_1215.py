@@ -15,7 +15,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='mwsuser',
             name='user',
-            field=models.OneToOneField(related_name='mws_user', db_constraint=False, to_field=b'username', to=settings.AUTH_USER_MODEL),
+            field=models.OneToOneField(related_name='mws_user', db_constraint=False, to_field=b'username',
+                                       to=settings.AUTH_USER_MODEL),
             preserve_default=True,
         ),
     ]

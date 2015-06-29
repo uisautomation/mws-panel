@@ -253,7 +253,7 @@ class SiteManagementTests(TestCase):
         response = self.client.post(reverse('editsite', kwargs={'site_id': site.id}),
                                     {'name': 'testSiteChange', 'description': 'testDescChange',
                                      'institution_id': 'UIS', 'email': 'email@change.test'})
-        self.assertRedirects(response, expected_url=site.get_absolute_url()) # Changes done, redirecting
+        self.assertRedirects(response, expected_url=site.get_absolute_url())  # Changes done, redirecting
         site_changed = Site.objects.get(pk=site.id)
         self.assertEqual(site_changed.name, 'testSiteChange')
         self.assertEqual(site_changed.description, 'testDescChange')
@@ -334,7 +334,7 @@ class SiteManagementTests(TestCase):
             response = self.client.post(reverse(views.billing_management, kwargs={'site_id': site.id}),
                                         {'purchase_order_number': 'testOrderNumber1', 'group': 'testGroup1',
                                          'purchase_order': fp})
-        self.assertRedirects(response, expected_url=site.get_absolute_url()) # Changes done, redirecting
+        self.assertRedirects(response, expected_url=site.get_absolute_url())  # Changes done, redirecting
         site_changed = Site.objects.get(pk=site.id)
         self.assertEqual(site_changed.billing.purchase_order_number, 'testOrderNumber1')
         self.assertEqual(site_changed.billing.group, 'testGroup1')
@@ -454,8 +454,8 @@ class SiteManagement2Tests(TestCase):
                              expected_url=site.get_absolute_url())
         self.assertRedirects(self.client.get(reverse('mwsauth.views.auth_change', kwargs={'site_id': site.id})),
                              expected_url=site.get_absolute_url())
-        self.assertEqual(self.client.get(reverse(views.delete_vm, kwargs={'service_id': service.id})).status_code,
-                         403) # Primary VM cannot be deleted
+        self.assertEqual(self.client.get(reverse(views.delete_vm, kwargs={'service_id': service.id})).status_code, 403)
+        # Primary VM cannot be deleted
         self.assertRedirects(self.client.get(reverse(views.delete_vm, kwargs={'service_id': service2.id})),
                              expected_url=site.get_absolute_url())
         self.assertRedirects(self.client.get(reverse(views.power_vm, kwargs={'service_id': service.id})),
@@ -686,8 +686,8 @@ class SiteManagement2Tests(TestCase):
     #
     #     vhost = Vhost.objects.get(name='testVhost')
     #     response = self.client.post(reverse(views.generate_csr, kwargs={'vhost_id': vhost.id}))
-    #     self.assertContains(response, "A CSR couldn't be generated because you don't have a master domain assigned to "
-    #                                   "this vhost.")
+    #     self.assertContains(response, "A CSR couldn't be generated because you don't have a master domain "
+    #                                   "assigned to this vhost.")
     #     self.assertIsNone(vhost.csr)
     #
     #     with mock.patch("apimws.ansible.subprocess") as mock_subprocess:

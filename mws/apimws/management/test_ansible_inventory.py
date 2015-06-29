@@ -82,7 +82,7 @@ class TestsWithData(TestCase):
             self.vm.network_configuration.IPv4,
             self.vm.network_configuration.IPv6,
             self.vm.network_configuration.name))
-        
+
         self.assertEqual(v['mws_name'], self.site.name)
         self.assertEqual(v['mws_service_ipv4'],
                          self.service.network_configuration.IPv4)
