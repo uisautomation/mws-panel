@@ -5,12 +5,12 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseForbidden, HttpResponseRedirect, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
-from django.views.generic import ListView, CreateView, DeleteView
-from ucamlookup import validate_crsids, user_in_groups
+from django.views.generic import ListView, CreateView, DeleteView, UpdateView
+from ucamlookup import validate_crsids
 from apimws.ansible import launch_ansible
 from mwsauth.utils import privileges_check
 from sitesmanagement.forms import UnixGroupForm
-from sitesmanagement.models import Service, UnixGroup
+from sitesmanagement.models import UnixGroup
 from sitesmanagement.views.vhosts import ServicePriviledgeCheck
 
 
@@ -97,56 +97,54 @@ class UnixGroupCreate(ServicePriviledgeCheck, CreateView):
         return super(UnixGroupCreate, self).dispatch(request, *args, **kwargs)
 
 
-@login_required
-def unix_group(request, ug_id):
-    if getattr(settings, 'DEMO', False):
-        return HttpResponseRedirect(reverse('listsites'))
-    unix_group_i = get_object_or_404(UnixGroup, pk=ug_id)
-    site = privileges_check(unix_group_i.service.site.id, request.user)
-    service = unix_group_i.service
+class UnixGroupUpdate(UnixGroupPriviledgeCheck, UpdateView):
+    """View and edit the unix group selected."""
+    model = UnixGroup
+    form_class = UnixGroupForm
+    template_name = 'mws/unix_group.html'
+    pk_url_kwarg = 'ug_id'
 
-    if site is None:
-        return HttpResponseForbidden()
+    def get_context_data(self, **kwargs):
+        context = super(UnixGroupUpdate, self).get_context_data(**kwargs)
+        breadcrumbs = {
+            0: dict(name='Manage Web Service server: ' + str(self.site.name), url=self.site.get_absolute_url()),
+            1: dict(name='Server settings' if self.service.primary else 'Test server settings',
+                    url=reverse('sitesmanagement.views.service_settings', kwargs={'service_id': self.service.id})),
+            2: dict(name='Manage Unix Groups', url=reverse('listunixgroups', kwargs={'service_id': self.service.id})),
+            3: dict(name='Edit Unix Group', url=reverse('updateunixgroup', kwargs={'ug_id': self.object.id}))
+        }
+        context.update({
+            'breadcrumbs': breadcrumbs,
+            'site': self.site,
+            'service': self.service,
+            'lookup_lists': {
+                'unix_users': []
+            },  # TODO to be removed once django-ucam-lookup is modified
+        })
+        return context
 
-    if not service or not service.active or service.is_busy:
-        return redirect(site)
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.service = self.service
+        self.object.save()
 
-    breadcrumbs = {
-        0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
-        1: dict(name='Server settings' if unix_group_i.service.primary else 'Test server settings',
-                url=reverse('sitesmanagement.views.service_settings', kwargs={'service_id': unix_group_i.service.id})),
-        2: dict(name='Manage Unix Groups',
-                url=reverse('listunixgroups', kwargs={'service_id': unix_group_i.service.id})),
-        3: dict(name='Edit Unix Group', url=reverse('sitesmanagement.views.unix_group',
-                                                    kwargs={'ug_id': unix_group_i.id}))
-    }
+        unix_users = validate_crsids(self.request.POST.get('unix_users'))
+        # TODO If there are no users in the list return an Exception?
+        self.object.users.clear()
+        self.object.users.add(*unix_users)
 
-    lookup_lists = {
-        'unix_users': unix_group_i.users.all()
-    }
+        launch_ansible(self.service)  # to apply these changes to the vm
+        return super(UnixGroupUpdate, self).form_valid(form)
 
-    if request.method == 'POST':
-        unix_group_form = UnixGroupForm(request.POST, instance=unix_group_i)
-        if unix_group_form.is_valid():
-            unix_group_form.save()
+        # The service shoulnd't have to be update. Make sure the modelform does not include the service. Check how the parent do things to do it the same way
 
-            unix_users = validate_crsids(request.POST.get('unix_users'))
-            # TODO If there are no users in the list return an Exception?
-            unix_group_i.users.clear()
-            unix_group_i.users.add(*unix_users)
+    def get_success_url(self):
+        return reverse('listunixgroups', kwargs={'service_id': self.service.id})
 
-            launch_ansible(unix_group_i.service)  # to apply these changes to the service
-            return HttpResponseRedirect(reverse('listunixgroups', kwargs={'service_id': unix_group_i.service.id}))
-    else:
-        unix_group_form = UnixGroupForm(instance=unix_group_i)
-
-    return render(request, 'mws/unix_group.html', {
-        'breadcrumbs': breadcrumbs,
-        'lookup_lists': lookup_lists,
-        'site': site,
-        'service': unix_group_i.service,
-        'unix_group_form': unix_group_form
-    })
+    def dispatch(self, request, *args, **kwargs):
+        if getattr(settings, 'DEMO', False):
+            return HttpResponseRedirect(reverse('listsites'))
+        return super(UnixGroupUpdate, self).dispatch(request, *args, **kwargs)
 
 
 class UnixGroupDelete(UnixGroupPriviledgeCheck, DeleteView):

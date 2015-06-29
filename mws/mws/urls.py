@@ -4,7 +4,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from sitesmanagement.views.domains import DomainListView, DomainDelete
 from sitesmanagement.views.sites import SiteCreate, SiteShow, SiteList, SiteDisable, SiteDelete, SiteEdit
-from sitesmanagement.views.unixgroups import UnixGroupListView, UnixGroupCreate, UnixGroupDelete
+from sitesmanagement.views.unixgroups import UnixGroupListView, UnixGroupCreate, UnixGroupDelete, UnixGroupUpdate
 from sitesmanagement.views.vhosts import VhostListView, VhostDelete, VhostCreate, VisitVhost
 
 urlpatterns = patterns('',
@@ -39,7 +39,6 @@ urlpatterns = patterns('',
     url(r'^delete_vm/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.delete_vm'),
     url(r'^settings/vm/(?P<service_id>[0-9]+)/on/$', 'sitesmanagement.views.power_vm'),
     url(r'^settings/vm/(?P<service_id>[0-9]+)/reset/$', 'sitesmanagement.views.reset_vm'),
-    url(r'^unix_groups/edit/(?P<ug_id>[0-9]+)/$', 'sitesmanagement.views.unix_group'),
     url(r'^settings/vm/(?P<service_id>[0-9]+)/db_root_pass/$', 'sitesmanagement.views.change_db_root_password'),
     url(r'^update_os/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.update_os'),
     url(r'^backups/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.backups'),
@@ -57,6 +56,7 @@ urlpatterns = patterns('',
     # Unix groups management
     url(r'^unix_groups/(?P<service_id>[0-9]+)/$', UnixGroupListView.as_view(), name='listunixgroups'),
     url(r'^unix_groups/(?P<service_id>[0-9]+)/add/$', UnixGroupCreate.as_view(), name='createunixgroup'),
+    url(r'^unix_groups/edit/(?P<ug_id>[0-9]+)/$', UnixGroupUpdate.as_view(), name='updateunixgroup'),
     url(r'^unix_groups/delete/(?P<ug_id>[0-9]+)/$', UnixGroupDelete.as_view(), name='deleteunixgroup'),
 
     # apimws app

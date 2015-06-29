@@ -4,11 +4,11 @@
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
             <h1>Edit the Unix Group "{{ unix_group.name }}"</h1>
-            <form action={% url 'sitesmanagement.views.unix_group' ug_id=unix_group_form.instance.id %} method="post">
+            <form action={% url 'updateunixgroup' ug_id=form.instance.id %} method="post">
                 <fieldset>
                     {% csrf_token %}
                     <div id="unix_group_form">
-                        {{ unix_group_form.as_p }}
+                        {{ form.as_p }}
                         <p>
                             Users:<br/>
                             <input id="input-lookup-users-ajax" name="unix_users">
