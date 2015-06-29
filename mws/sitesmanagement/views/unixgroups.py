@@ -118,7 +118,7 @@ class UnixGroupUpdate(UnixGroupPriviledgeCheck, UpdateView):
             'site': self.site,
             'service': self.service,
             'lookup_lists': {
-                'unix_users': []
+                'unix_users': self.object.users.all()
             },  # TODO to be removed once django-ucam-lookup is modified
         })
         return context
