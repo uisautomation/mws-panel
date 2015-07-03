@@ -193,6 +193,7 @@ class SiteShow(SitePriviledgeCheck, DetailView):
         }
         context['warning_messages'] = warning_messages(self.object)
         context['DEMO'] = getattr(django_settings, 'DEMO', False)
+        context['stats_name'] = self.object.production_service.network_configuration.name.replace(".","_")
         return context
 
 
