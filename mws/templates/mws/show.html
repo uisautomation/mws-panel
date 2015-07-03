@@ -248,18 +248,14 @@
 
             <div class="campl-column4">
                 <div class="campl-content-container campl-side-padding">
-                    <article class="node node-external-link view-mode-focus_on clearfix
-                                    campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                    <article class="node node-external-link view-mode-focus_on clearfix campl-horizontal-teaser campl-teaser campl-focus-teaser">
                         <div class="campl-focus-teaser-img">
                             <div class="campl-content-container campl-horizontal-teaser-img">
-                                <a href="{% url 'sitesmanagement.views.billing_management' site_id=site.id %}">
-                                    <div class="field field-name-field-external-url-image field-type-image
-                                                field-label-hidden">
+                                <a href="http://test.dev.mws3.csx.cam.ac.uk:3000/dashboard/script/mws3.js?name={{ site.production_service.network_configuration.name }}">
+                                    <div class="field field-name-field-external-url-image field-type-image field-label-hidden">
                                         <div class="field-items">
                                             <div class="field-item even">
-                                                <img class="campl-scale-with-grid"
-                                                     src="{% static "icons/billing.png" %}"
-                                                     height="128" style="margin: 10px;" alt="">
+                                                <img class="campl-scale-with-grid" src="{% static "icons/analytics.png" %}" height="128" style="margin: 10px; height: 128px;" alt="">
                                             </div>
                                         </div>
                                     </div>
@@ -269,12 +265,37 @@
                         <div class="campl-focus-teaser-txt">
                             <div class="campl-content-container campl-horizontal-teaser-txt">
                                 <h3 class="campl-teaser-title">
-                                    <a href="{% url 'sitesmanagement.views.billing_management' site_id=site.id %}">
-                                        Billing settings
-                                    </a>
+                                    <a href="http://test.dev.mws3.csx.cam.ac.uk:3000/dashboard/script/mws3.js?name={{ site.production_service.network_configuration.name }}">Statistics</a>
                                 </h3>
-                                <a href="{% url 'sitesmanagement.views.billing_management' site_id=site.id %}"
-                                   class="ir campl-focus-link">Billing settings</a>
+                                <a href="http://test.dev.mws3.csx.cam.ac.uk:3000/dashboard/script/mws3.js?name={{ site.production_service.network_configuration.name }}" class="ir campl-focus-link">Statistics</a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <div class="campl-column4">
+                <div class="campl-content-container campl-side-padding">
+                    <article class="node node-external-link view-mode-focus_on clearfix campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                        <div class="campl-focus-teaser-img">
+                            <div class="campl-content-container campl-horizontal-teaser-img">
+                                <a href="{% url 'sitesmanagement.views.billing_management' site_id=site.id %}">
+                                    <div class="field field-name-field-external-url-image field-type-image field-label-hidden">
+                                        <div class="field-items">
+                                            <div class="field-item even">
+                                                <img class="campl-scale-with-grid" src="{% static "icons/billing.png" %}" height="128" style="margin: 10px;" alt="">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="campl-focus-teaser-txt">
+                            <div class="campl-content-container campl-horizontal-teaser-txt">
+                                <h3 class="campl-teaser-title">
+                                    <a href="{% url 'sitesmanagement.views.billing_management' site_id=site.id %}">Billing settings</a>
+                                </h3>
+                                <a href="{% url 'sitesmanagement.views.billing_management' site_id=site.id %}" class="ir campl-focus-link">Billing settings</a>
                             </div>
                         </div>
                     </article>
