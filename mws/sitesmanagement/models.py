@@ -416,7 +416,7 @@ class Service(models.Model):
             vm.power_off()
 
     class Meta:
-        unique_together = (("site", "type"),)
+        unique_together = (("site", "type"), ("network_configuration", ), )
 
     def __unicode__(self):
         if self.network_configuration is None:
@@ -433,7 +433,7 @@ class VirtualMachine(models.Model):
     name = models.CharField(max_length=250, blank=True, null=True)
     token = models.CharField(max_length=50)
 
-    network_configuration = models.OneToOneField(NetworkConfig, related_name="vm")
+    network_configuration = models.OneToOneField(NetworkConfig, related_name="vm", unique=True)
     service = models.ForeignKey(Service, related_name='virtual_machines')
 
     @property
