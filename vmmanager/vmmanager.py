@@ -53,7 +53,7 @@ parameters_json_schema = {
                 "sshecdsa": {
                     "type": "string",
                 },
-                "corosync": {
+                "ed25519": {
                     "type": "string",
                 },
             },
