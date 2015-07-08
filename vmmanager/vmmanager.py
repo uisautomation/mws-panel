@@ -78,8 +78,23 @@ parameters_json_schema = {
         "os": {
             "type": "string",
         },
-        "token": {
-            "type": "string",
+        "callback": {
+            "description": "the URL to call after the installation process has finished",
+            "type": "object",
+            "properties": {
+                "endpoint": {
+                    "description": "the callback url where to POST the following two parameters",
+                    "type": "string",
+                },
+                "vm_id": {
+                    "description": "POST parameter for the callback with the VM id",
+                    "type": "integer",
+                },
+                "secret": {
+                    "description": "POST parameter for the callback with the token/secret",
+                    "type": "string",
+                },
+            },
         },
     },
     "required": ["netconf"]
