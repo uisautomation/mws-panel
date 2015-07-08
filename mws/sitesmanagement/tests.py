@@ -104,6 +104,9 @@ class SiteManagementTests(TestCase):
 
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
 
+        Service.objects.create(network_configuration=NetworkConfig.get_free_prod_service_config(), site=site,
+                               type='production', status='requested')
+
         response = self.client.get(site.get_absolute_url())
         self.assertEqual(response.status_code, 403)  # The User is not in the list of auth users
 
