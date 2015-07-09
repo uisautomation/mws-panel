@@ -53,7 +53,7 @@ parameters_json_schema = {
                 "sshecdsa": {
                     "type": "string",
                 },
-                "ed25519": {
+                "sshed25519": {
                     "type": "string",
                 },
             },
