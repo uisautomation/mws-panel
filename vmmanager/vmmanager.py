@@ -6,7 +6,7 @@ from jsonschema import validate
 
 
 default_options = {
-    'os': 'debian8',
+    'os': 'jessie',
     'features': {
         'cpu': 1,
         'memory': 2048,
