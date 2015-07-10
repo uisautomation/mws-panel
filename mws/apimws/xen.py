@@ -93,7 +93,11 @@ def new_site_primary_vm(service, host_network_configuration=None):
                                            network_configuration=service.network_configuration)
 
     parameters["netconf"] = netconf
-    parameters["token"] = "%s%svm=%s&token=%s" % (settings.MAIN_DOMAIN, reverse(post_installation), vm.id, vm.token)
+    parameters["callback"] = {
+        "endpoint": "%s%s" % (settings.MAIN_DOMAIN, reverse(post_installation)),
+        "vm_id": vm.id,
+        "secret": vm.token,
+    }
 
     service.status = 'installing'
     service.save()
