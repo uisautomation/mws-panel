@@ -96,7 +96,7 @@ def new_site_primary_vm(service, host_network_configuration=None):
     parameters["callback"] = {
         "endpoint": "%s%s" % (settings.MAIN_DOMAIN, reverse(post_installation)),
         "vm_id": vm.id,
-        "secret": vm.token,
+        "secret": str(vm.token),
     }
 
     service.status = 'installing'
