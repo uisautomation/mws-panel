@@ -2,6 +2,7 @@ import click
 import json
 import six
 import ipaddress
+from subprocess import Popen, PIPE, STDOUT
 from jsonschema import validate
 
 
@@ -15,7 +16,7 @@ default_options = {
 }
 
 
-OS_SUPPORTED = ['debian8']
+OS_SUPPORTED = ['jessie']
 BUTTON_ACTIONS_ALLOWED = ['shutdown', 'reboot', 'poweroff', 'poweron']
 
 
@@ -142,9 +143,13 @@ class VirtualMachinesManager(object):
     @classmethod
     def create(self, parameters):
         """This function creates a new VM with the parameters and options passed in parameters"""
-        subprocess.check_output(["userv", "root", "vm_create", parameters])
-        return {"vmid": parameters['netconf']['hostname']}
-
+        p = Popen(["userv", "root", "vm_create"], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+        output = p.communicate(input=json.dumps(parameters))
+        if p.returncode == 0:
+            return {"vmid": parameters['netconf']['hostname']}
+        else:
+            raise click.ClickException(str(output))
+    
     @classmethod
     def delete(self, vmid):
         """This function deletes the vm with id = vmid"""
