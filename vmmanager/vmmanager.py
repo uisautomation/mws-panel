@@ -142,6 +142,7 @@ class VirtualMachinesManager(object):
     @classmethod
     def create(self, parameters):
         """This function creates a new VM with the parameters and options passed in parameters"""
+        subprocess.check_output(["userv", "root", "vm_create", parameters])
         return {"vmid": parameters['netconf']['hostname']}
 
     @classmethod
