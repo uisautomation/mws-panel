@@ -159,7 +159,13 @@ class VirtualMachinesManager(object):
     def button(self, vmid, action):
         """This function manages all the options related with power management of the VM.
         It can power on or power off the VM, and shutdown or reboot it."""
-        pass
+        parameters={"vmid": vmid, "action": action}
+        p = Popen(["userv", "root", "vm_button"], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+        output = p.communicate(input=json.dumps(parameters))
+        if p.returncode == 0:
+            return "OK"
+        else:
+            raise click.ClickException(str(output))
 
     @classmethod
     def copy(self, vmid_o, vmid_d):
