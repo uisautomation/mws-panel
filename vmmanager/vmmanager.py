@@ -143,7 +143,7 @@ class VirtualMachinesManager(object):
     @classmethod
     def create(self, parameters):
         """This function creates a new VM with the parameters and options passed in parameters"""
-        p = Popen(["userv", "root", "vm_create"], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+        p = Popen(["userv", "-w1=close", "-w2=close", "root", "vm_create"], stdout=PIPE, stdin=PIPE, stderr=PIPE)
         output = p.communicate(input=json.dumps(parameters))
         if p.returncode == 0:
             return {"vmid": parameters['netconf']['hostname']}
