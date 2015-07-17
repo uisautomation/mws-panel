@@ -153,7 +153,13 @@ class VirtualMachinesManager(object):
     @classmethod
     def delete(self, vmid):
         """This function deletes the vm with id = vmid"""
-        pass
+        p = Popen(["userv", "root", "vm_delete"], 
+                  stdout=PIPE, stdin=PIPE, stderr=PIPE)
+        output = p.communicate(input=json.dumps({"vmid":vmid}))
+        if p.returncode == 0:
+            return "OK"
+        else:
+            raise click.ClickException(str(output))
 
     @classmethod
     def button(self, vmid, action):
