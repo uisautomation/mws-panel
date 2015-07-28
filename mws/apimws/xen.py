@@ -38,7 +38,7 @@ def vm_api_request(**json_object):
     if json_object['command'] == 'button':
         api_command.append(json_object['parameters'])
     try:
-        response = subprocess.check_output(api_command)
+        response = subprocess.check_output(api_command,stderr=subprocess.STDOUT)
         LOGGER.info("VM API request: %s\nVM API response: %s", api_command, response)
     except subprocess.CalledProcessError as e:
         response = e.output
