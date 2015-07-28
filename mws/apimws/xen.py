@@ -34,7 +34,7 @@ def vm_api_request(**json_object):
     if 'vmid' in json_object:
         api_command.append(json_object['vmid'])
     if json_object['command'] in ['create', 'clone']:
-        api_command.append(json.dumps(json_object['parameters']))
+        api_command.append("'%s'" % json.dumps(json_object['parameters']))
     if json_object['command'] == 'button':
         api_command.append(json_object['parameters'])
     try:
