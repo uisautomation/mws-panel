@@ -10,7 +10,8 @@ default_options = {
     'os': 'jessie',
     'features': {
         'cpu': 1,
-        'memory': 2048,
+        'maxmem': 2048,
+        'memory': 1024,
         'disk': 20
     }
 }
