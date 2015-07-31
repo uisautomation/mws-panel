@@ -66,6 +66,10 @@ parameters_json_schema = {
                     "description": "the number of CPUs assigned",
                     "type": "integer",
                 },
+                "maxmem": {
+                    "description": "the maximum MB RAM the guest may use",
+                    "type": "integer",
+                },
                 "memory": {
                     "description": "the number of MB of RAM assigned",
                     "type": "integer",
