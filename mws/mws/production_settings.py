@@ -55,7 +55,8 @@ MIDDLEWARE_CLASSES += (
 )
 
 VM_END_POINT = ["ophon.csi.cam.ac.uk", "opus.csi.cam.ac.uk"]
-VM_END_POINT_COMMAND = ["ssh", "mws-admin@%s" % VM_END_POINT[0], "vmmanager"]
+VM_END_POINT_COMMAND = ["userv", "mws-admin", "mws_xen_vm_api",
+                        VM_END_POINT[0] ]
 VM_API = "xen"
 
 from logging_configuration import *
