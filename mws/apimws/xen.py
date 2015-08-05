@@ -32,13 +32,13 @@ def vm_api_request(**json_object):
     api_command = copy.copy(settings.VM_END_POINT_COMMAND)
     api_command.append(json_object['command'])
     if 'vmid' in json_object:
-        api_command.append(json_object['vmid'])
+        api_command.append(str(json_object['vmid']))
     if json_object['command'] in ['create', 'clone']:
         api_command.append("'%s'" % json.dumps(json_object['parameters']))
     if json_object['command'] == 'button':
-        api_command.append(json_object['parameters'])
+        api_command.append(str(json_object['parameters']))
     try:
-        response = subprocess.check_output(api_command,stderr=subprocess.STDOUT)
+        response = subprocess.check_output(api_command, stderr=subprocess.STDOUT)
         LOGGER.info("VM API request: %s\nVM API response: %s", api_command, response)
     except subprocess.CalledProcessError as e:
         response = e.output
