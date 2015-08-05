@@ -31,12 +31,7 @@ def vm_api_request(**json_object):
         raise VMAPIFailure("VM_END_POINT_COMMAND not found")
     api_command = copy.copy(settings.VM_END_POINT_COMMAND)
     api_command.append(json_object['command'])
-    if 'vmid' in json_object:
-        api_command.append(str(json_object['vmid']))
-    if json_object['command'] in ['create', 'clone']:
-        api_command.append("'%s'" % json.dumps(json_object['parameters']))
-    if json_object['command'] == 'button':
-        api_command.append(str(json_object['parameters']))
+    api_command.append("'%s'" % json.dumps(json_object['parameters']))
     try:
         response = subprocess.check_output(api_command, stderr=subprocess.STDOUT)
         LOGGER.info("VM API request: %s\nVM API response: %s", api_command, response)
@@ -146,31 +141,29 @@ def change_vm_power_state(vm, on):
     if on != 'on' and on != 'off':
         raise VMAPIInputException("passed wrong parameter power %s" % on)
     try:
-        vm_api_request(command='button', parameters='power%s' % on, vmid=vm.name)
+        vm_api_request(command='button', parameters={"action": "power%s" % on, "vmid": vm.name})
     except VMAPIFailure as e:
         return on_vm_api_failure(*e.args)
     except Exception as e:
         raise change_vm_power_state.retry(exc=e)
-
     return True
 
 
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
 def reset_vm(vm):
     try:
-        vm_api_request(command='button', parameters='reboot', vmid=vm.name)
+        vm_api_request(command='button', parameters={"action": "reboot", "vmid": vm.name})
     except VMAPIFailure as e:
         return on_vm_api_failure(*e.args)
     except Exception as e:
         raise reset_vm.retry(exc=e)  # TODO are we sure we want to do that?
-
     return True
 
 
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
 def destroy_vm(vm):
     try:
-        vm_api_request(command='delete', vmid=vm.name)
+        vm_api_request(command='delete', parameters={'vmid': vm.name})
     except VMAPIFailure as e:
         return on_vm_api_failure(*e.args)
     except Exception as e:

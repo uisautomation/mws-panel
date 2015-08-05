@@ -21,7 +21,7 @@ OS_SUPPORTED = ['jessie']
 BUTTON_ACTIONS_ALLOWED = ['shutdown', 'reboot', 'poweroff', 'poweron']
 
 
-parameters_json_schema = {
+create_parameters_json_schema = {
     "title": "JSON Schema for the create command",
     "type": "object",
     "properties": {
@@ -107,6 +107,37 @@ parameters_json_schema = {
 }
 
 
+delete_parameters_json_schema = {
+    "title": "JSON Schema for the delete command",
+    "type": "object",
+    "properties": {
+        "vmid": {
+            "description": "The VM id to be deleted, currently, the host fqdn",
+            "type": "string",
+        },
+    },
+    "required": ["vmid"]
+}
+
+
+button_parameters_json_schema = {
+    "title": "JSON Schema for the button command",
+    "type": "object",
+    "properties": {
+        "vmid": {
+            "description": "The VM id to be affected, currently, the host fqdn",
+            "type": "string",
+        },
+        "action": {
+            "description": "The action from the list of power actions that should be performed",
+            "type": "string",
+            "enum": BUTTON_ACTIONS_ALLOWED,
+        },
+    },
+    "required": ["vmid"]
+}
+
+
 class OSNotSupportedException(Exception):
     pass
 
@@ -116,24 +147,10 @@ class JsonParamType(click.ParamType):
 
     def convert(self, value, param, ctx):
         try:
-            parameters = json.loads(value)
-            validate(parameters, parameters_json_schema)
-            # Validation of IPv4 address
-            if 'IPv4' in parameters['netconf']:
-                ipaddress.ip_address(parameters['netconf']['IPv4'])
-            if 'IPv6' in parameters['netconf']:
-                ipaddress.ip_address(parameters['netconf']['IPv6'])
-            if 'os' not in parameters:
-                parameters['os'] = default_options['os']
-            if parameters['os'] not in OS_SUPPORTED:
-                raise OSNotSupportedException
-            return parameters
+            return json.loads(value)
         except ValueError:
             self.fail("The JSON parameter needs to be properly formatted")
             # raise click.ClickException("The JSON parameter needs to be properly formatted")
-        except OSNotSupportedException:
-            self.fail("The OS selected is not supported")
-            # raise click.ClickException("The OS selected is not supported")
 
     def __repr__(self):
         return 'JSON'
@@ -148,29 +165,61 @@ class VirtualMachinesManager(object):
     @classmethod
     def create(self, parameters):
         """This function creates a new VM with the parameters and options passed in parameters"""
+
+        try:
+            validate(parameters, create_parameters_json_schema)
+            # Validation of IPv4 address
+            if 'IPv4' in parameters['netconf']:
+                ipaddress.ip_address(parameters['netconf']['IPv4'])
+            if 'IPv6' in parameters['netconf']:
+                ipaddress.ip_address(parameters['netconf']['IPv6'])
+            if 'os' not in parameters:
+                parameters['os'] = default_options['os']
+            if parameters['os'] not in OS_SUPPORTED:
+                raise OSNotSupportedException
+        except ValueError:
+            self.fail("The JSON parameter needs to be properly formatted")
+            # raise click.ClickException("The JSON parameter needs to be properly formatted")
+        except OSNotSupportedException:
+            self.fail("The OS selected is not supported")
+            # raise click.ClickException("The OS selected is not supported")
+
         p = Popen(["userv", "-w1=close", "-w2=close", "root", "vm_create"], stdout=PIPE, stdin=PIPE, stderr=PIPE)
         output = p.communicate(input=json.dumps(parameters))
         if p.returncode == 0:
-            return {"vmid": parameters['netconf']['hostname']}
+            return json.dumps({"vmid": parameters['netconf']['hostname']})
         else:
             raise click.ClickException(str(output))
     
     @classmethod
-    def delete(self, vmid):
+    def delete(self, parameters):
         """This function deletes the vm with id = vmid"""
+
+        try:
+            validate(parameters, delete_parameters_json_schema)
+        except ValueError:
+            self.fail("The JSON parameter needs to be properly formatted")
+            # raise click.ClickException("The JSON parameter needs to be properly formatted")
+
         p = Popen(["userv", "root", "vm_delete"], 
                   stdout=PIPE, stdin=PIPE, stderr=PIPE)
-        output = p.communicate(input=json.dumps({"vmid":vmid}))
+        output = p.communicate(input=json.dumps(parameters))
         if p.returncode == 0:
             return "OK"
         else:
             raise click.ClickException(str(output))
 
     @classmethod
-    def button(self, vmid, action):
+    def button(self, parameters):
         """This function manages all the options related with power management of the VM.
         It can power on or power off the VM, and shutdown or reboot it."""
-        parameters={"vmid": vmid, "action": action}
+
+        try:
+            validate(parameters, button_parameters_json_schema)
+        except ValueError:
+            self.fail("The JSON parameter needs to be properly formatted")
+            # raise click.ClickException("The JSON parameter needs to be properly formatted")
+
         p = Popen(["userv", "root", "vm_button"], stdout=PIPE, stdin=PIPE, stderr=PIPE)
         output = p.communicate(input=json.dumps(parameters))
         if p.returncode == 0:
@@ -198,16 +247,15 @@ def create(json_parameters):
 
 
 @cli.command()
-@click.argument('vmid', required=True, type=click.STRING)
-def delete(vmid):
-    VirtualMachinesManager.delete(vmid)
+@click.argument('json-parameters', required=True, type=JSONTYPE)
+def delete(json_parameters):
+    VirtualMachinesManager.delete(json_parameters)
 
 
 @cli.command()
-@click.argument('vmid', required=True, type=click.STRING)
-@click.argument('action', required=True, type=click.Choice(BUTTON_ACTIONS_ALLOWED))
-def button(vmid, action):
-    VirtualMachinesManager.button(vmid, action)
+@click.argument('json-parameters', required=True, type=JSONTYPE)
+def button(json_parameters):
+    VirtualMachinesManager.button(json_parameters)
 
 
 @cli.command()
