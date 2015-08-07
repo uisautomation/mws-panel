@@ -78,15 +78,7 @@ def new_site_primary_vm(service, host_network_configuration=None):
         vm = VirtualMachine.objects.create(service=service, token=uuid.uuid4(),
                                            network_configuration=host_network_configuration)
     else:
-        netconf = {}
-        if service.network_configuration.IPv4:
-            netconf["IPv4"] = service.network_configuration.IPv4
-        if service.network_configuration.IPv6:
-            netconf["IPv6"] = service.network_configuration.IPv6
-        if service.network_configuration.name:
-            netconf["hostname"] = service.network_configuration.name
-        vm = VirtualMachine.objects.create(service=service, token=uuid.uuid4(),
-                                           network_configuration=service.network_configuration)
+        raise AttributeError("No host network configuration")
 
     parameters["netconf"] = netconf
     parameters["callback"] = {
