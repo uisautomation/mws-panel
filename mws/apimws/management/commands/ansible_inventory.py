@@ -129,11 +129,14 @@ class Command(NoArgsCommand):
 
         # mws_service_group refers to the Ansible host group representing
         # this host's service.
-        v['mws_service_group'] = self.servicegroup(vm.service)
-        v['mws_service_ipv4'] = vm.service.network_configuration.IPv4
-        v['mws_service_ipv4_netmask'] = (
-            vm.service.network_configuration.IPv4_netmask)
-        v['mws_service_ipv4_gateway'] = (
-            vm.service.network_configuration.IPv4_gateway)
-        v['mws_service_ipv6'] = vm.service.network_configuration.IPv6
+        if vm.service.type == "production":
+            # Only output mws_service_* if the VM is in the prod service, do not use/show test service addresses
+            v['mws_service_group'] = self.servicegroup(vm.service)
+            v['mws_service_ipv4'] = vm.service.network_configuration.IPv4
+            v['mws_service_ipv4_netmask'] = (
+                vm.service.network_configuration.IPv4_netmask)
+            v['mws_service_ipv4_gateway'] = (
+                vm.service.network_configuration.IPv4_gateway)
+            v['mws_service_ipv6'] = vm.service.network_configuration.IPv6
+
         return v
