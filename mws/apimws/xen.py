@@ -63,6 +63,7 @@ class TaskWithFailure(Task):
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
 def new_site_primary_vm(service, host_network_configuration=None):
     parameters = {}
+    parameters['site-id'] = service.site.id
     if getattr(settings, 'OS_VERSION_VMXENAPI', False):
         parameters['os'] = settings.OS_VERSION_VMXENAPI
 
