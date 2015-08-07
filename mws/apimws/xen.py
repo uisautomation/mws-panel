@@ -103,15 +103,15 @@ def new_site_primary_vm(service, host_network_configuration=None):
         raise new_site_primary_vm.retry(exc=e)
 
     try:
-        response = json.loads(response)
+        jresponse = json.loads(response)
     except ValueError as e:
         LOGGER.error("VM API response is not properly formated: %s", response)
         vm.name = vm.network_configuration.name
         vm.save()
         raise e
 
-    if 'vmid' in response:
-        vm.name = response['vmid']
+    if 'vmid' in jresponse:
+        vm.name = jresponse['vmid']
     else:
         vm.name = vm.network_configuration.name
     vm.save()
