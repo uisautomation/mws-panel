@@ -106,6 +106,8 @@ def new_site_primary_vm(service, host_network_configuration=None):
         response = json.loads(response)
     except ValueError as e:
         LOGGER.error("VM API response is not properly formated: %s", response)
+        vm.name = vm.network_configuration.name
+        vm.save()
         raise e
 
     if 'vmid' in response:
