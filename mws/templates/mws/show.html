@@ -303,9 +303,13 @@
                             </div>
                         </div>
                         <div style="width: 50%; float: left; margin-right: 0; padding: 0;">
-                            {% for fingerprint in site.keys.all %}
-                                {{fingerprint}}<br/>
-                            {% endfor %}
+                            <div class="campl-content-container campl-horizontal-teaser-txt">
+                                <a>
+                                {% for fingerprint in site.keys.all %}
+                                    {{fingerprint.fingerprint}}<br/>
+                                {% endfor %}
+                                </a>
+                            </div>
                         </div>
                     </article>
                 </div>
