@@ -66,14 +66,12 @@
                                         IPv4: {{ site.primary_vm.ipv4 }}<br/>
                                         IPv6: {{ site.primary_vm.ipv6 }}<br/>
                                         hostname: {{ site.primary_vm.hostname }}<br/>
-                                        hostkey fingerprint: {{ site.primary_vm.sshfp }}<br/>
                                     {% endif %}
                                 </td>
                                 <td>
                                     {% if site.secondary_vm %}
                                         IPv4: {{ site.secondary_vm.ipv4 }}<br/>
                                         hostname: {{ site.secondary_vm.hostname }}<br/>
-                                        hostkey fingerprint: {{ site.secondary_vm.sshfp }}<br/>
                                     {% endif %}
                                 </td>
                                 <td style="width: 30px; padding-left: 0px; padding-right: 0px;">

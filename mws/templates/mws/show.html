@@ -293,22 +293,19 @@
                     <article class="node node-external-link view-mode-focus_on clearfix
                                     campl-horizontal-teaser campl-teaser campl-focus-teaser">
                         <div style="width: 50%; float: left; margin-right: 0; padding: 0;">
-                            <div class="campl-content-container campl-horizontal-teaser-txt">
-                                <a>
+                            <div class="campl-content-container campl-horizontal-teaser-txt" style="color: #fffffff;">
                                     Production server<br/>
                                     IPv4: {{ site.production_service.ipv4 }}<br/>
                                     IPv6: {{ site.production_service.ipv6 }}<br/>
                                     hostname: {{ site.production_service.hostname }}<br/>
-                                </a>
                             </div>
                         </div>
                         <div style="width: 50%; float: left; margin-right: 0; padding: 0;">
-                            <div class="campl-content-container campl-horizontal-teaser-txt">
-                                <a>
+                            List of fingerprints<br/>
+                            <div class="campl-content-container campl-horizontal-teaser-txt" style="color: #fffffff;">
                                 {% for fingerprint in site.keys.all %}
-                                    {{fingerprint.fingerprint}}<br/>
+                                    {{fingerprint.type}} - {{fingerprint.fingerprint}}<br/>
                                 {% endfor %}
-                                </a>
                             </div>
                         </div>
                     </article>
