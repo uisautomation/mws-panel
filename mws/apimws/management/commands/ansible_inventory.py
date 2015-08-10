@@ -55,14 +55,9 @@ class Command(NoArgsCommand):
 
     def hostvars(self, vm):
         v = {}
-        if getattr(settings, 'DEMO', False):
-            v['ansible_ssh_host'] = (vm.service.network_configuration.name or
-                                     vm.service.network_configuration.IPv4 or
-                                     vm.service.network_configuration.IPv6)
-        else:
-            v['ansible_ssh_host'] = (vm.network_configuration.name or
-                                     vm.network_configuration.IPv4 or
-                                     vm.network_configuration.IPv6)
+        v['ansible_ssh_host'] = (vm.network_configuration.name or
+                                 vm.network_configuration.IPv4 or
+                                 vm.network_configuration.IPv6)
         v['mws_name'] = vm.site.name
         v['mws_webmaster_email'] = vm.site.email
 
