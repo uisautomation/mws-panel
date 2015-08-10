@@ -66,6 +66,7 @@ def launch_ansible_async(service):
             for vm in service.virtual_machines.all():
                 subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name])
         except subprocess.CalledProcessError as e:
+            LOGGER.error("An error happened when trying to execute Ansible.\nThe error is %s.\n\n", str(e))
             if not getattr(settings, 'DEMO', False):
                 raise launch_ansible_async.retry(exc=e)
         service = refresh_object(service)
