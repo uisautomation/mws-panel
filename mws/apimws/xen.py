@@ -110,10 +110,14 @@ def new_site_primary_vm(service, host_network_configuration=None):
         vm.save()
         raise e
 
-    if 'vmid' in jresponse:
-        vm.name = jresponse['vmid']
-    else:
+    try:
+        if 'vmid' in jresponse:
+            vm.name = jresponse['vmid']
+        else:
+            vm.name = vm.network_configuration.name
+    except Exception as e:
         vm.name = vm.network_configuration.name
+    
     vm.save()
     return True
 
