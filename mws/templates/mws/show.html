@@ -292,17 +292,17 @@
                 <div class="campl-content-container campl-side-padding">
                     <article class="node node-external-link view-mode-focus_on clearfix
                                     campl-horizontal-teaser campl-teaser campl-focus-teaser">
-                        <div style="width: 50%; float: left; margin-right: 0; padding: 0;">
-                            <div class="campl-content-container campl-horizontal-teaser-txt" style="color: #fffffff;">
+                        <div style="width: 33%; float: left; margin-right: 0; padding: 0;">
+                            <div class="campl-content-container campl-horizontal-teaser-txt" style="color: white;">
                                     Production server<br/>
                                     IPv4: {{ site.production_service.ipv4 }}<br/>
                                     IPv6: {{ site.production_service.ipv6 }}<br/>
                                     hostname: {{ site.production_service.hostname }}<br/>
                             </div>
                         </div>
-                        <div style="width: 50%; float: left; margin-right: 0; padding: 0;">
+                        <div style="width: 66%; float: left; margin-right: 0; padding: 0;">
+                            <div class="campl-content-container campl-horizontal-teaser-txt" style="color: white;">
                             List of fingerprints<br/>
-                            <div class="campl-content-container campl-horizontal-teaser-txt" style="color: #fffffff;">
                                 {% for fingerprint in site.keys.all %}
                                     {{fingerprint.type}} - {{fingerprint.fingerprint}}<br/>
                                 {% endfor %}
