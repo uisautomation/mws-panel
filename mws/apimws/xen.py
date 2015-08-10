@@ -8,8 +8,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 import subprocess
 from apimws.views import post_installation
-from sitesmanagement.models import VirtualMachine, NetworkConfig, Service
-
+from sitesmanagement.models import VirtualMachine, NetworkConfig, Service, SiteKeys
 
 LOGGER = logging.getLogger('mws')
 
@@ -119,6 +118,16 @@ def new_site_primary_vm(service, host_network_configuration=None):
         vm.name = vm.network_configuration.name
     
     vm.save()
+
+    # TODO move this to preallocation
+    for keytype in ["sshrsa", "sshdsa", "sshecdsa", "sshed25519"]:
+        p = subprocess.Popen(["userv", "mws-admin", "mws_pubkey"], stdin=subprocess.PIPE,
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = p.communicate(json.dumps({"id": parameters["site-id"], "keytype": keytype}))
+        result = json.loads(stdout)
+        SiteKeys.objects.create(site=service.site, type=keytype, public_key=result["pubkey"],
+                                fingerprint=result["fingerprint"])
+
     return True
 
 
