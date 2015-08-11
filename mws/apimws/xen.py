@@ -2,6 +2,7 @@ from __future__ import absolute_import
 import copy
 import logging
 import re
+import tempfile
 import uuid
 import json
 from celery import shared_task, Task
@@ -121,6 +122,9 @@ def new_site_primary_vm(service, host_network_configuration=None):
     vm.save()
 
     # TODO move this to preallocation
+
+    sshfprecord = ""
+
     for keytype in ["sshrsa", "sshdsa", "sshecdsa", "sshed25519"]:
         p = subprocess.Popen(["userv", "mws-admin", "mws_pubkey"], stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -128,6 +132,14 @@ def new_site_primary_vm(service, host_network_configuration=None):
         result = json.loads(stdout)
         SiteKeys.objects.create(site=service.site, type=keytype.replace("ssh","").upper(), public_key=result["pubkey"],
                                 fingerprint=re.search("([0-9a-f]{2}:)+[0-9a-f]{2}", result["fingerprint"]).group(0))
+
+        pubkey = tempfile.NamedTemporaryFile()
+        pubkey.write(result["pubkey"])
+        pubkey.flush()
+        sshfprecord += subprocess.check_output(["ssh-keygen", "-r",
+                                                service.network_configuration.name, "-f", pubkey.name])
+        pubkey.close()
+
 
     return True
 
