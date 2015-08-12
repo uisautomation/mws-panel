@@ -130,12 +130,15 @@ def new_site_primary_vm(service, host_network_configuration=None):
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = p.communicate(json.dumps({"id": parameters["site-id"], "keytype": keytype}))
         result = json.loads(stdout)
-        SiteKeys.objects.create(site=service.site, type=keytype.replace("ssh","").upper(), public_key=result["pubkey"],
-                                fingerprint=re.search("([0-9a-f]{2}:)+[0-9a-f]{2}", result["fingerprint"]).group(0))
 
         pubkey = tempfile.NamedTemporaryFile()
         pubkey.write(result["pubkey"])
         pubkey.flush()
+        fingerprint = subprocess.check_output(["ssh-keygen", "-lf", pubkey.name])
+
+        SiteKeys.objects.create(site=service.site, type=keytype.replace("ssh","").upper(), public_key=result["pubkey"],
+                                fingerprint=re.search("([0-9a-f]{2}:)+[0-9a-f]{2}", fingerprint).group(0))
+
         sshfprecord += subprocess.check_output(["ssh-keygen", "-r",
                                                 service.network_configuration.name, "-f", pubkey.name])
         pubkey.close()
