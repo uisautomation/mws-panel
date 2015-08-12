@@ -59,4 +59,4 @@ def jackdaw_api():
     # Deactivate those users that are no longer in Jackdaw
     deactivate_users(jackdaw_users_crsids, list_of_mws_users)
     # Reactivate those users that are in Jackdaw but not in MWS3 db
-    reactivate_users(jackdaw_users_crsids, list_of_mws_users, jackdaw_users)
+    reactivate_users(jackdaw_users_crsids, list_of_mws_users, dict(jackdaw_users))
