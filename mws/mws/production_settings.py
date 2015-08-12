@@ -41,7 +41,8 @@ hAM+a6/30F5fdkWpE1smPyrfASyXRfWE4Ccn1RVgYX9u
 
 BROKER_URL = 'redis://localhost:6379/0'
 CELERY_IMPORTS = ('apimws.platforms', 'apimws.xen', 'apimws.utils', 'apimws.jackdaw', 'apimws.ansible')
-
+CELERYD_TASK_SOFT_TIME_LIMIT = 20*60  # 20 minutes
+CELERYD_TASK_TIME_LIMIT = 20*60  # 20 minutes
 CELERYBEAT_SCHEDULE = {
     'jackdaw-api': {
         'task': 'apimws.jackdaw.jackdaw_api',
