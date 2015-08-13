@@ -129,7 +129,11 @@ def new_site_primary_vm(service, host_network_configuration=None):
         p = subprocess.Popen(["userv", "mws-admin", "mws_pubkey"], stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = p.communicate(json.dumps({"id": parameters["site-id"], "keytype": keytype}))
-        result = json.loads(stdout)
+        try:
+            result = json.loads(stdout)
+        except ValueError as e:
+            LOGGER.error("mws_pubkey response is not properly formated:\n\nstdout: %s\n\nstderr: %s" % (stdout, stderr))
+            raise e
 
         pubkey = tempfile.NamedTemporaryFile()
         pubkey.write(result["pubkey"])
@@ -143,8 +147,8 @@ def new_site_primary_vm(service, host_network_configuration=None):
                                                 service.network_configuration.name, "-f", pubkey.name])
         pubkey.close()
 
-        from apimws.utils import ip_register_api_sshfp
-        ip_register_api_sshfp(service.network_configuration.name, sshfprecord)
+    from apimws.utils import ip_register_api_sshfp
+    ip_register_api_sshfp(service.network_configuration.name, sshfprecord)
     return True
 
 
