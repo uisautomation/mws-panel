@@ -24,10 +24,10 @@ def ip_register_api_request(domain_name):
 
 
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
-def ip_register_api_sshfp(domain_name, sshfprecord):
+def ip_register_api_sshfp(sshfprecord):
     EmailMessage(
         subject="Managed Web Service: Please update the following DNS entries",
-        body="Domain Name: " + domain_name + "\n\n" + sshfprecord,
+        body=sshfprecord,
         from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
         to=['amc203@cam.ac.uk'],
         headers={'Return-Path': 'mws3-support@cam.ac.uk'}

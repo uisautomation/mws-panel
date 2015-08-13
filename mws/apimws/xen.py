@@ -123,7 +123,8 @@ def new_site_primary_vm(service, host_network_configuration=None):
 
     # TODO move this to preallocation
 
-    sshfprecord = ""
+    servicesshfprecord = ""
+    hostsshfprecord = ""
 
     for keytype in ["sshrsa", "sshdsa", "sshecdsa", "sshed25519"]:
         p = subprocess.Popen(["userv", "mws-admin", "mws_pubkey"], stdin=subprocess.PIPE,
@@ -132,7 +133,7 @@ def new_site_primary_vm(service, host_network_configuration=None):
         try:
             result = json.loads(stdout)
         except ValueError as e:
-            LOGGER.error("mws_pubkey response is not properly formated:\n\nstdout: %s\n\nstderr: %s" % (stdout, stderr))
+            LOGGER.error("mws_pubkey response is not properly formated:\nstdout: %s\nstderr: %s" % (stdout, stderr))
             raise e
 
         pubkey = tempfile.NamedTemporaryFile()
@@ -143,12 +144,14 @@ def new_site_primary_vm(service, host_network_configuration=None):
         SiteKeys.objects.create(site=service.site, type=keytype.replace("ssh","").upper(), public_key=result["pubkey"],
                                 fingerprint=re.search("([0-9a-f]{2}:)+[0-9a-f]{2}", fingerprint).group(0))
 
-        sshfprecord += subprocess.check_output(["ssh-keygen", "-r",
-                                                service.network_configuration.name, "-f", pubkey.name])
+        servicesshfprecord += subprocess.check_output(["ssh-keygen", "-r",
+                                                       service.network_configuration.name, "-f", pubkey.name])
+        hostsshfprecord += subprocess.check_output(["ssh-keygen", "-r",
+                                                    vm.network_configuration.name, "-f", pubkey.name])
         pubkey.close()
 
     from apimws.utils import ip_register_api_sshfp
-    ip_register_api_sshfp(service.network_configuration.name, sshfprecord)
+    ip_register_api_sshfp("%s\n\n%s" % (hostsshfprecord, servicesshfprecord))
     return True
 
 
