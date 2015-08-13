@@ -9,7 +9,6 @@ from celery import shared_task, Task
 from django.conf import settings
 from django.core.urlresolvers import reverse
 import subprocess
-from apimws.utils import ip_register_api_sshfp
 from apimws.views import post_installation
 from sitesmanagement.models import VirtualMachine, NetworkConfig, Service, SiteKeys
 
@@ -144,6 +143,7 @@ def new_site_primary_vm(service, host_network_configuration=None):
                                                 service.network_configuration.name, "-f", pubkey.name])
         pubkey.close()
 
+        from apimws.utils import ip_register_api_sshfp
         ip_register_api_sshfp(service.network_configuration.name, sshfprecord)
     return True
 
