@@ -121,6 +121,10 @@ def new_site_primary_vm(service, host_network_configuration=None):
     
     vm.save()
 
+    from apimws.models import AnsibleConfiguration
+    AnsibleConfiguration.objects.update_or_create(service=service, key='os',
+                                                  defaults={'value': json.dumps(settings.OS_VERSION)})
+
     # TODO move this to preallocation
 
     servicesshfprecord = ""
