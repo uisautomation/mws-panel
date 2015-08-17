@@ -283,14 +283,24 @@ def change_db_root_password(request, service_id):
     }
 
     if request.method == 'POST':
-        new_root_passwd = request.POST['new_root_passwd']
-        ansible_change_mysql_root_pwd.delay(service)
-        return HttpResponseRedirect(reverse(service_settings, kwargs={'service_id': service.id}))
+        if request.POST.get('typepost') == "Delete temporal mySQL root password":
+            AnsibleConfiguration.objects.filter(service=service, key="mysql_root_password").delete()
+        else:
+            ansibleconf, created = AnsibleConfiguration.objects.get_or_create(service=service,
+                                                                              key="mysql_root_password")
+            ansibleconf.value = "Resetting"
+            ansibleconf.save()
+            ansible_change_mysql_root_pwd.delay(service)
+            return HttpResponseRedirect(reverse(service_settings, kwargs={'service_id': service.id}))
+
+    ansibleconf = AnsibleConfiguration.objects.filter(service=service, key="mysql_root_password")
+    ansibleconf = ansibleconf[0].value if ansibleconf else None
 
     return render(request, 'mws/change_db_root_password.html', {
         'breadcrumbs': breadcrumbs,
         'service': service,
         'site': site,
+        'ansibleconf': ansibleconf,
     })
 
 
