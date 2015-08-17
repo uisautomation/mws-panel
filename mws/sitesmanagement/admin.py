@@ -37,6 +37,12 @@ class SiteAdmin(ModelAdmin):
     institution.admin_order_field = 'institution_id'
 
 
+class ServiceAdmin(VersionAdmin):
+    list_display = ('site', 'type', 'status')
+    ordering = ('site', 'type', 'status')
+    search_fields = ('name', 'site')
+
+
 class DomainNameAdmin(VersionAdmin):
     list_display = ('name', 'vhost', 'status')
     ordering = ('name', )
@@ -103,5 +109,5 @@ admin.site.register(VirtualMachine, VirtualMachineAdmin)
 admin.site.register(EmailConfirmation, EmailConfirmationAdmin)
 admin.site.register(UnixGroup, VersionAdmin)
 admin.site.register(NetworkConfig, NetworkConfigAdmin)
-admin.site.register(Service, VersionAdmin)
+admin.site.register(Service, ServiceAdmin)
 admin.site.register(SiteKeys, VersionAdmin)
