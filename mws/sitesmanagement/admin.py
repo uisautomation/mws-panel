@@ -38,9 +38,12 @@ class SiteAdmin(ModelAdmin):
 
 
 class ServiceAdmin(VersionAdmin):
-    list_display = ('site', 'type', 'status')
-    ordering = ('site', 'type', 'status')
+    list_display = ('site', 'type', 'fqdn', 'status')
+    ordering = ('site', 'type')
     search_fields = ('name', 'site')
+
+    def fqdn(self, obj):
+        return str(obj)
 
 
 class DomainNameAdmin(VersionAdmin):
