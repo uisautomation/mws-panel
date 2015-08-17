@@ -20,4 +20,6 @@ class Command(NoArgsCommand):
         except:
             raise CommandError("Incorrect variable name")
 
-        AnsibleConfiguration.objects.update_or_create(service=service, key=variable_name, value=args[2])
+        ansibleconf = AnsibleConfiguration.objects.get_or_create(service=service, key=variable_name)
+        ansibleconf.value = args[2]
+        ansibleconf.save()
