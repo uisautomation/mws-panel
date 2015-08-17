@@ -10,7 +10,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 import subprocess
 from apimws.views import post_installation
-from sitesmanagement.models import VirtualMachine, NetworkConfig, Service, SiteKeys
+from sitesmanagement.models import VirtualMachine, NetworkConfig, Service, SiteKeys, Vhost, DomainName
 
 LOGGER = logging.getLogger('mws')
 
@@ -126,7 +126,8 @@ def new_site_primary_vm(service, host_network_configuration=None):
                                                   defaults={'value': json.dumps(settings.OS_VERSION)})
 
     # TODO move this to preallocation
-
+    # Gets all the keys generated for the site and generates the fingerprint and the SSHFP from them
+    # It sends the SSHFP record to ip-register
     servicesshfprecord = ""
     hostsshfprecord = ""
 
@@ -156,6 +157,14 @@ def new_site_primary_vm(service, host_network_configuration=None):
 
     from apimws.utils import ip_register_api_sshfp
     ip_register_api_sshfp("%s\n\n%s" % (hostsshfprecord, servicesshfprecord))
+
+    # Create a default Vhost with the Service FQDN as main domain name
+    default_vhost = Vhost.objects.create(service=service, name="default")
+    default_vhost_dn = DomainName.objects.create(name=service.network_configuration.name,
+                                                 status="accepted", vhost=default_vhost)
+    default_vhost.main_domain = default_vhost_dn
+    default_vhost.save()
+
     return True
 
 

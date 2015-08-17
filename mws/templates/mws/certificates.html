@@ -18,7 +18,7 @@
                 <form action="{% url 'sitesmanagement.views.generate_csr' vhost_id=vhost.id %}" method="post">
                     <fieldset>
                         {% csrf_token %}
-                        <p><input type="submit" value="Generate {% if vhost.csr or vhost.certificate %}new {% endif %}CSR and key" class="campl-btn campl-primary-cta campl-primary-blue"/></p>
+                        <p><input type="submit" value="Generate {% if vhost.csr or vhost.certificate %}new {% endif %}Certificate" class="campl-btn campl-primary-cta campl-primary-blue"/></p>
                     </fieldset>
                 </form>
                     {% if vhost.certificate %}
