@@ -123,6 +123,7 @@ class Command(NoArgsCommand):
         if vm.service.type == "production":
             # Only output mws_service_* if the VM is in the prod service, do not use/show test service addresses
             v['mws_service_group'] = self.servicegroup(vm.service)
+            v['mws_service_fqdn'] = vm.service.network_configuration.name
             v['mws_service_ipv4'] = vm.service.network_configuration.IPv4
             v['mws_service_ipv4_netmask'] = vm.service.network_configuration.IPv4_netmask
             v['mws_service_ipv4_gateway'] = vm.service.network_configuration.IPv4_gateway

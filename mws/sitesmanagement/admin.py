@@ -47,10 +47,15 @@ class ServiceAdmin(VersionAdmin):
 
 
 class DomainNameAdmin(VersionAdmin):
-    list_display = ('name', 'vhost', 'status')
+    list_display = ('name', 'vhost', 'get_site', 'status')
     ordering = ('name', )
     search_fields = ('name', )
     list_filter = ('vhost', 'status')
+
+    def get_site(self, obj):
+        return obj.vhost.service.site
+    get_site.short_description = 'Site'
+    get_site.admin_order_field = 'vhost__service__site'
 
 
 class SuspensionAdmin(ModelAdmin):
