@@ -72,3 +72,8 @@ INSTALLED_APPS = INSTALLED_APPS+('kombu.transport.django', )
 CELERY_IMPORTS = ('apimws.platforms', 'apimws.xen', 'apimws.utils', 'apimws.jackdaw')
 
 VM_END_POINT_COMMAND = ["vmmanager"]
+VM_API = "xen"
+
+CELERY_EAGER_PROPAGATES_EXCEPTIONS=True
+CELERY_ALWAYS_EAGER=True
+BROKER_BACKEND='memory'
