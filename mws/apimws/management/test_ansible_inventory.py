@@ -84,9 +84,9 @@ class TestsWithData(TestCase):
             self.vm.network_configuration.name))
 
         self.assertEqual(v['mws_name'], self.site.name)
-        self.assertEqual(v['mws_service_ipv4'],
-                         self.service.network_configuration.IPv4)
-        self.assertEqual(v['mws_service_ipv6'],
-                         self.service.network_configuration.IPv6)
-        self.assertEqual(v['mws_ipv4'], self.vm.network_configuration.IPv4)
+        self.assertEqual(v['mws_service_ipv4'], self.service.network_configuration.IPv4)
+        self.assertEqual(v['mws_service_ipv6'], self.service.network_configuration.IPv6)
+        if self.vm.network_configuration.IPv4:
+            self.assertEqual(v['mws_ipv4'], self.vm.network_configuration.IPv4)
         self.assertEqual(v['mws_ipv6'], self.vm.network_configuration.IPv6)
+        self.assertEqual(v['mws_service_fqdn'], self.vm.service.network_configuration.name)
