@@ -144,10 +144,27 @@ class SiteManagementTests(TestCase):
                                                          'siteform-email': 'amc203@cam.ac.uk'})
         self.assertContains(response, "This field is required.")  # Empty name, error
 
-        response = self.client.post(reverse('newsite'), {'siteform-name': 'Test Site',
-                                                         'siteform-description': 'Desc',
-                                                         'siteform-institution_id': 'UIS',
-                                                         'siteform-email': 'amc203@cam.ac.uk'})
+        with mock.patch("apimws.xen.subprocess") as mock_subprocess:
+            mock_subprocess.check_output.return_value.returncode = 0
+            mock_subprocess.check_output.return_value = '{"vmid": "mws-client1", "fingerprint": "22:22:22:22"}'
+            mock_subprocess.Popen().communicate.return_value = (
+                '{"pubkey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQClBKpj+/WXlxJMY2iYw1mB1qYLM8YDjFS6qSiT6UmNLLhXJ' \
+                'BEfd6vOMErM1IfDsYN+W3604hukxwC859TU4ZLQYD6wFI2D+qMhb2UTcoLlOYD7TG436RXKbxK4iAT7ll3XUT8VxZUq/AZKVs' \
+                'vmH309l5LcW6UPO0PVYoafpo4+Fmv5c/CRTvp5X0eaoXtgT49h58/GwNlD2RrVPInjI9isa8/k8qiNaWEHYOGKC343BQIR9Sx' \
+                '+5HQ16wf3x3fUFeMTOYfsbvwQ9T5pkKpFoiUYRxjsz7bXdPQPT4A1UrfgmGnTLJGSUh+uvHYLe7izWoMCCDCV0+Zyn0Ilrlfm' \
+                'N+cD"}', '')
+            response = self.client.post(reverse('newsite'), {'siteform-name': 'Test Site',
+                                                             'siteform-description': 'Desc',
+                                                             'siteform-institution_id': 'UIS',
+                                                             'siteform-email': 'amc203@cam.ac.uk'})
+            self.assertIn(response.status_code, [200, 302])
+            # TODO create the checks of how the mock was called
+            # mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_xen_vm_api",
+            #                                                  settings.VM_END_POINT[0],
+            #                                                  "create",
+            #                                                  "{}"])
+
+
 
         test_site = Site.objects.get(name='Test Site')
         self.assertRedirects(response, expected_url=test_site.get_absolute_url())
@@ -180,30 +197,40 @@ class SiteManagementTests(TestCase):
 
         # Disable site
         self.assertFalse(test_site.disabled)
-        self.client.post(reverse('disablesite', kwargs={'site_id': test_site.id}))
+        with mock.patch("apimws.vm.change_vm_power_state") as mock_vm_api:
+            mock_vm_api.change_vm_power_state.return_value = None
+            self.client.post(reverse('disablesite', kwargs={'site_id': test_site.id}))
         # TODO test that views are restricted
         self.assertTrue(Site.objects.get(pk=test_site.id).disabled)
         # Enable site
-        self.client.post(reverse('enablesite', kwargs={'site_id': test_site.id}))
+        with mock.patch("apimws.vm.change_vm_power_state") as mock_vm_api:
+            mock_vm_api.change_vm_power_state.return_value = None
+            self.client.post(reverse('enablesite', kwargs={'site_id': test_site.id}))
         # TODO test that views are no longer restricted
         self.assertFalse(Site.objects.get(pk=test_site.id).disabled)
 
         self.assertEqual(len(test_site.test_vms), 0)
 
-        # Clone first VM into the secondary VM
-        self.client.post(reverse(views.clone_vm_view, kwargs={'site_id': test_site.id}), {'primary_vm': 'true'})
+        # TODO Clone first VM into the secondary VM
+        # self.client.post(reverse(views.clone_vm_view, kwargs={'site_id': test_site.id}), {'primary_vm': 'true'})
+        #
+        # self.assertEqual(len(test_site.test_vms), 1)
+        #
+        # self.client.delete(reverse(views.delete_vm, kwargs={'service_id': test_site.secondary_vm.service.id}))
 
-        self.assertEqual(len(test_site.test_vms), 1)
-
-        self.client.delete(reverse(views.delete_vm, kwargs={'service_id': test_site.secondary_vm.service.id}))
-
-        self.client.post(reverse('deletesite', kwargs={'site_id': test_site.id}))
+        with mock.patch("apimws.vm.change_vm_power_state") as mock_vm_api:
+            mock_vm_api.return_value = None
+            self.client.post(reverse('deletesite', kwargs={'site_id': test_site.id}))
         self.assertIsNone(Site.objects.get(pk=test_site.id).end_date)
 
-        self.client.post(reverse('deletesite', kwargs={'site_id': test_site.id}), {'confirmation': 'yes'})
+        with mock.patch("apimws.vm.change_vm_power_state") as mock_vm_api:
+            mock_vm_api.return_value = None
+            self.client.post(reverse('deletesite', kwargs={'site_id': test_site.id}), {'confirmation': 'yes'})
         self.assertIsNotNone(Site.objects.get(pk=test_site.id).end_date)
 
-        test_site.delete()
+        with mock.patch("apimws.vm.destroy_vm") as mock_vm_api:
+            mock_vm_api.delay.return_value = None
+            test_site.delete()
 
     def test_view_edit(self):
         response = self.client.get(reverse('editsite', kwargs={'site_id': 1}))

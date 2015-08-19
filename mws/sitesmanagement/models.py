@@ -248,7 +248,6 @@ class Suspension(models.Model):
     start_date = models.DateField()
     # end date of the suspension
     end_date = models.DateField(null=True, blank=True)
-
     site = models.ForeignKey(Site, related_name="suspensions")
 
 
