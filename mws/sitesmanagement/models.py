@@ -134,10 +134,7 @@ class Site(models.Model):
 
     @property
     def domain_names(self):
-        domains = []
-        for vhost in self.primary_vm.vhosts.all():
-            domains += vhost.domain_names.all()
-        return sorted(set(domains))
+        return DomainName.objects.filter(vhost__service = self.production_service)
 
     def calculate_billing(self, financial_year_start, financial_year_end):
         start_date = end_date = None
