@@ -228,9 +228,7 @@ class SiteManagementTests(TestCase):
             self.client.post(reverse('deletesite', kwargs={'site_id': test_site.id}), {'confirmation': 'yes'})
         self.assertIsNotNone(Site.objects.get(pk=test_site.id).end_date)
 
-        with mock.patch("apimws.vm.destroy_vm") as mock_vm_api:
-            mock_vm_api.return_value = None
-            test_site.delete()
+        # TODO test delete
 
     def test_view_edit(self):
         response = self.client.get(reverse('editsite', kwargs={'site_id': 1}))
