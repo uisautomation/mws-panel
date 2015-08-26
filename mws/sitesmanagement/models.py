@@ -64,7 +64,7 @@ class Site(models.Model):
     # Administrator users of a site
     users = models.ManyToManyField(User, related_name='sites')
     # SSH only users of a site
-    ssh_users = models.ManyToManyField(User, related_name='sites_auth_as_user')
+    ssh_users = models.ManyToManyField(User, related_name='sites_auth_as_user', blank=True)
     # Administrator groups of a site
     groups = models.ManyToManyField(LookupGroup, related_name='sites', null=True, blank=True)
     # SSH only groups
