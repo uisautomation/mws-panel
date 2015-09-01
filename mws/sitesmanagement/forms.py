@@ -1,6 +1,6 @@
 from django import forms
 from ucamlookup import get_institutions
-from sitesmanagement.models import Site, Vhost, DomainName, Billing, UnixGroup
+from sitesmanagement.models import Site, Vhost, DomainName, Billing, UnixGroup, Snapshot
 
 
 class SiteForm(forms.ModelForm):
@@ -61,3 +61,12 @@ class UnixGroupForm(forms.ModelForm):
     class Meta:
         model = UnixGroup
         fields = ('name', )
+
+
+class SnapshotForm(forms.ModelForm):
+    class Meta:
+        model = Snapshot
+        fields = ('name', )
+        labels = {
+            'name': 'Snapshot name',
+        }
