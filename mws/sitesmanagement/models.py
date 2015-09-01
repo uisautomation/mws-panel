@@ -551,7 +551,7 @@ class SiteKeys(models.Model):
 
 
 class Snapshot(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=50, validators=[validate_slug])
     date = models.DateTimeField(auto_now_add=True)
     service = models.ForeignKey(to=Service, related_name="snapshots")
 
