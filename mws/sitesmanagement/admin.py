@@ -4,7 +4,7 @@ from django.forms import ModelForm
 from reversion import VersionAdmin
 from suit.widgets import LinkedSelect
 from .models import Site, Billing, DomainName, Suspension, VirtualMachine, EmailConfirmation, \
-    Vhost, UnixGroup, NetworkConfig, SiteKeys, Service
+    Vhost, UnixGroup, NetworkConfig, SiteKeys, Service, Snapshot
 from ucamlookup import get_institutions, get_institution_name_by_id
 
 
@@ -87,6 +87,10 @@ class VhostAdmin(VersionAdmin):
     list_display = ('name', 'service', )
 
 
+class SnapshotAdmin(ModelAdmin):
+    list_display = ('name', 'date', 'service', )
+
+
 class VirtualMachineForm(ModelForm):
     class Meta:
         widgets = {
@@ -119,3 +123,4 @@ admin.site.register(UnixGroup, VersionAdmin)
 admin.site.register(NetworkConfig, NetworkConfigAdmin)
 admin.site.register(Service, ServiceAdmin)
 admin.site.register(SiteKeys, VersionAdmin)
+admin.site.register(Snapshot, SnapshotAdmin)
