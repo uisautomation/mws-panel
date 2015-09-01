@@ -324,11 +324,15 @@ def backups(request, service_id):
         2: dict(name='Restore backup', url=reverse(backups, kwargs={'service_id': service.id})),
     }
 
+    fromdate = datetime.date.today()-datetime.timedelta(days=30)
+    if fromdate < site.start_date+datetime.timedelta(days=1):
+        fromdate = site.start_date+datetime.timedelta(days=1)
+
     parameters = {
         'breadcrumbs': breadcrumbs,
         'service': service,
         'site': site,
-        'fromdate': datetime.date.today()-datetime.timedelta(days=30),
+        'fromdate': fromdate,
         'todate': datetime.date.today()-datetime.timedelta(days=1),
         'snapshot_form': SnapshotForm(),
     }
