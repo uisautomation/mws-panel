@@ -2,6 +2,7 @@ import logging
 import subprocess
 from celery import shared_task, Task
 from django.conf import settings
+from django.utils import timezone
 from sitesmanagement.models import Site
 
 
@@ -95,6 +96,8 @@ def ansible_create_custom_snapshot(service, snapshot):
         for vm in service.virtual_machines.all():
             subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name,
                                      "--tags", "create_custom_snapshot", "-e", 'snapshot_name="%s"' % snapshot.name])
+        snapshot.date = timezone.now()
+        snapshot.save()
     except Exception as e:
         snapshot.delete()
         raise e
