@@ -550,6 +550,15 @@ class SiteKeys(models.Model):
     site = models.ForeignKey(Site, related_name="keys")
 
 
+class Snapshot(models.Model):
+    name = models.CharField(max_length=100)
+    date = models.DateTimeField(auto_now_add=True)
+    service = models.ForeignKey(to=Service, related_name="snapshots")
+
+    class Meta:
+        unique_together = (("name", "service"), )
+
+
 reversion.register(Service, follow=["unix_groups", "ansible_configuration", "vhosts", "virtual_machines"])
 reversion.register(VirtualMachine, follow=["service"])
 reversion.register(Vhost, follow=["domain_names", "service"])
