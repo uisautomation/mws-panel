@@ -63,6 +63,9 @@ urlpatterns = patterns('',
     # Snapshot management
     url(r'^create_snapshot/(?P<service_id>[0-9]+)/$', SnapshotCreate.as_view(), name='createsnapshot'),
 
+    # bes++ api
+    url(r'^bes/$', 'apimws.bes.bes'),
+
     # apimws app
     url(r'^api/confirm_dns/(?P<dn_id>[0-9]+)/$', 'apimws.views.confirm_dns'),
     url(r'^api/finance/billing/(?P<year>20[0-9]{2})/$', 'apimws.views.billing_year'),
