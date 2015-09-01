@@ -4,6 +4,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from sitesmanagement.views.domains import DomainListView, DomainDelete
 from sitesmanagement.views.sites import SiteCreate, SiteShow, SiteList, SiteDisable, SiteDelete, SiteEdit
+from sitesmanagement.views.snapshots import SnapshotCreate
 from sitesmanagement.views.unixgroups import UnixGroupListView, UnixGroupCreate, UnixGroupDelete, UnixGroupUpdate
 from sitesmanagement.views.vhosts import VhostListView, VhostDelete, VhostCreate, VisitVhost
 
@@ -58,6 +59,9 @@ urlpatterns = patterns('',
     url(r'^unix_groups/(?P<service_id>[0-9]+)/add/$', UnixGroupCreate.as_view(), name='createunixgroup'),
     url(r'^unix_groups/edit/(?P<ug_id>[0-9]+)/$', UnixGroupUpdate.as_view(), name='updateunixgroup'),
     url(r'^unix_groups/delete/(?P<ug_id>[0-9]+)/$', UnixGroupDelete.as_view(), name='deleteunixgroup'),
+
+    # Snapshot management
+    url(r'^create_snapshot/(?P<service_id>[0-9]+)/$', SnapshotCreate.as_view(), name='createsnapshot'),
 
     # apimws app
     url(r'^api/confirm_dns/(?P<dn_id>[0-9]+)/$', 'apimws.views.confirm_dns'),
