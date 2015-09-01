@@ -25,6 +25,6 @@ def bes(request):
             json_vm['backup'] = True  # TODO change it for a variable in the model
             json_vm['backup-user'] = "dump"  # TODO change it for a variable in the model
             json_vms.append(json_vm)
-        json_site['vm'] = json_vms
+        json_site['vms'] = json_vms
         json_all.append(json_site)
     return HttpResponse(json.dumps(json_all), content_type='application/json')
