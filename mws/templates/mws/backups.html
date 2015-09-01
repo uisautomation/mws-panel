@@ -3,14 +3,42 @@
 {% block page_content %}
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
-            <h1>Restore backups</h1>
+            <h2>Snapshots</h2>
+            <p>You can create a snapshot of your current filesystem by pressing the following button.
+            This will create a backup of the contents of your MWS site that you can restore in the future.
+            This option is useful when you have an stable system and you want to preserve the current
+            configuration for future disaster recoveries.</p>
+            <form action="{% url 'createsnapshot' service_id=service.id %}" method="post">
+                <fieldset>
+                    <div id="snapshot_form">
+                        {% csrf_token %}
+                        {{ snapshot_form.as_p }}
+                        <p><input type="submit" value="Create Snapshot" class="campl-btn campl-primary-cta"/></p>
+                    </div>
+                </fieldset>
+            </form>
+            <h2>List existing snapshots</h2>
+            {% for snapshot in service.snapshots.all %}
+            <form action="{% url 'sitesmanagement.views.backups' service_id=service.id %}" method="delete">
+                <fieldset>
+                    {% csrf_token %}
+                    <p>
+                        {{ snapshot.name }} ({{ snapshot.date }})
+                        <input type="submit" value="Delete snapshot" class="campl-btn campl-primary-cta"/>
+                    </p>
+                </fieldset>
+            </form>
+            {% endfor %}
+            <h2>Backups</h2>
+            <p>All MWS are backed up nightly. You can restore one of these automatic snapshots by selecting
+            the date in the date picker below and clicking the submit button</p>
             <form action="{% url 'sitesmanagement.views.backups' service_id=service.id %}" method="post">
                 {% if error_message %}<p style="color: red">{{ error_message }}</p>{% endif %}
                 <fieldset>
                     {% csrf_token %}
                     <p>Choose date</p>
                     <p><input type="date" name="backupdate" id="datepicker" class="datepicker" min="{{ fromdate|date:"Y-m-d" }}" max="{{ todate|date:"Y-m-d" }}" /></p>
-                    <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
+                    <p><input type="submit" value="Restore backup" class="campl-btn campl-primary-cta"/></p>
                 </fieldset>
             </form>
         </div>

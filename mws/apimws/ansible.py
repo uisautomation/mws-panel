@@ -87,3 +87,14 @@ def ansible_change_mysql_root_pwd(service):
     except subprocess.CalledProcessError as e:
         if not getattr(settings, 'DEMO', False):
             raise launch_ansible_async.retry(exc=e)
+
+
+@shared_task()
+def ansible_create_custom_snapshot(service, snapshot):
+    try:
+        for vm in service.virtual_machines.all():
+            subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name,
+                                     "--tags", "create_custom_snapshot", "-e", 'snapshot_name="%s"' % snapshot.name])
+    except Exception as e:
+        snapshot.delete()
+        raise e

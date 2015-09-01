@@ -13,7 +13,7 @@ from apimws.ansible import launch_ansible, ansible_change_mysql_root_pwd
 from apimws.models import AnsibleConfiguration
 from apimws.vm import VMAPINotWorkingException, clone_vm, VMAPIFailure
 from mwsauth.utils import privileges_check
-from sitesmanagement.forms import BillingForm
+from sitesmanagement.forms import BillingForm, SnapshotForm
 from sitesmanagement.utils import get_object_or_None
 from sitesmanagement.models import Service
 
@@ -330,6 +330,7 @@ def backups(request, service_id):
         'site': site,
         'fromdate': datetime.date.today()-datetime.timedelta(days=30),
         'todate': datetime.date.today()-datetime.timedelta(days=1),
+        'snapshot_form': SnapshotForm(),
     }
 
     if request.method == 'POST':
