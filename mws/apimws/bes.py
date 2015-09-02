@@ -22,7 +22,7 @@ def bes(request):
             json_vm['fqdn'] = vm.network_configuration.name
             json_vm['service_fqdn'] = vm.service.network_configuration.name
             json_vm['location'] = 'mws-cluster-1'  # TODO change it for a variable in the model
-            json_vm['backup'] = True  # TODO change it for a variable in the model
+            json_vm['backup'] = ['/replicated']  # TODO change it for a variable?
             json_vm['backup-user'] = "dump"  # TODO change it for a variable in the model
             json_vms.append(json_vm)
         json_site['vms'] = json_vms
