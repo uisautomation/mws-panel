@@ -3,8 +3,7 @@ import subprocess
 from celery import shared_task, Task
 from django.conf import settings
 from django.utils import timezone
-from sitesmanagement.models import Site
-
+from sitesmanagement.models import Site, Snapshot
 
 LOGGER = logging.getLogger('mws')
 
@@ -109,3 +108,12 @@ def restore_snapshot(service, snapshot_name):
     for vm in service.virtual_machines.all():
         subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name,
                                  "--tags", "restore_snapshot", "-e", 'restore_snapshot_name="%s"' % snapshot_name])
+
+
+@shared_task()
+def delete_snapshot(snapshot_id):
+    snapshot = Snapshot.objects.get(id=snapshot_id)
+    for vm in snapshot.service.virtual_machines.all():
+        subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name,
+                                 "--tags", "delete_snapshot", "-e", 'delete_snapshot_name="%s"' % snapshot.name])
+    snapshot.delete()

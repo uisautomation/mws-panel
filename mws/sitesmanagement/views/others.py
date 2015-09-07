@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from apimws.ansible import launch_ansible, ansible_change_mysql_root_pwd, restore_snapshot
+from apimws.ansible import launch_ansible, ansible_change_mysql_root_pwd, restore_snapshot, delete_snapshot
 from apimws.models import AnsibleConfiguration
 from apimws.vm import VMAPINotWorkingException, clone_vm, VMAPIFailure
 from mwsauth.utils import privileges_check
@@ -341,8 +341,8 @@ def backups(request, service_id):
             if backup_date is None or backup_date > datetime.date.today() or backup_date < fromdate:
                 raise ValueError
             if 'snapshot_id' in request.POST:
-                snapshot = Snapshot.objects.get(id=request.POST['snapshot_id'])
-                restore_snapshot.delay(service, backup_date.strftime("%Y-%m-%d")+"-%s"%snapshot.name)
+                snapshot = Snapshot.objects.get(id=request.POST['snapshot_id'], service=service)
+                restore_snapshot.delay(service, snapshot.date.strftime("%Y-%m-%d")+"-%s"%snapshot.name)
             else:
                 restore_snapshot.delay(service, backup_date.strftime("%Y-%m-%d"))
         except ValueError:

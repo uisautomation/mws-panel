@@ -4,7 +4,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from sitesmanagement.views.domains import DomainListView, DomainDelete
 from sitesmanagement.views.sites import SiteCreate, SiteShow, SiteList, SiteDisable, SiteDelete, SiteEdit
-from sitesmanagement.views.snapshots import SnapshotCreate
+from sitesmanagement.views.snapshots import SnapshotCreate, SnapshotDelete
 from sitesmanagement.views.unixgroups import UnixGroupListView, UnixGroupCreate, UnixGroupDelete, UnixGroupUpdate
 from sitesmanagement.views.vhosts import VhostListView, VhostDelete, VhostCreate, VisitVhost
 
@@ -62,6 +62,7 @@ urlpatterns = patterns('',
 
     # Snapshot management
     url(r'^create_snapshot/(?P<service_id>[0-9]+)/$', SnapshotCreate.as_view(), name='createsnapshot'),
+    url(r'^delete_snapshot/(?P<snapshot_id>[0-9]+)/$', SnapshotDelete.as_view(), name='deletesnapshot'),
 
     # bes++ api
     url(r'^bes/$', 'apimws.bes.bes'),

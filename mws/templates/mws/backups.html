@@ -30,7 +30,7 @@
                         <input type="submit" value="Restore snapshot" class="campl-btn campl-primary-cta"/>
                     </fieldset>
                 </form>
-                <form action="{% url 'sitesmanagement.views.backups' service_id=service.id %}" method="delete" style="float: left;">
+                <form action="{% url 'deletesnapshot' snapshot_id=snapshot.id %}" method="post" style="float: left;">
                     <fieldset>
                         {% csrf_token %}
                         <input type="submit" value="Delete snapshot" class="campl-btn campl-primary-cta"/>
