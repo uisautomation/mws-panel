@@ -55,5 +55,11 @@ class SnapshotCreate(ServicePriviledgeCheck, CreateView):
         ansible_create_custom_snapshot.delay(self.service, self.object)
         return redirect(reverse('sitesmanagement.views.backups', kwargs={'service_id': self.service.id}))
 
+    def form_invalid(self, form):
+        response = redirect('sitesmanagement.views.backups', service_id=self.service.id)
+        key, value = form.errors.popitem()
+        response['Location'] += '?error_message=%s' % value.data[0].messages[0]
+        return response
+
     def get_success_url(self):
         return reverse('sitesmanagement.views.backups', kwargs={'service_id': self.service.id})

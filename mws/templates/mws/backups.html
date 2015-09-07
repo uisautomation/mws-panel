@@ -8,6 +8,7 @@
             This will create a backup of the contents of your MWS site that you can restore in the future.
             This option is useful when you have an stable system and you want to preserve the current
             configuration for future disaster recoveries.</p>
+            {% if error_message_snap %}<p style="color: red">{{ error_message_snap }}</p>{% endif %}
             <form action="{% url 'createsnapshot' service_id=service.id %}" method="post">
                 <fieldset>
                     <div id="snapshot_form">

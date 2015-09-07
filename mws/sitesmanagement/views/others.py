@@ -332,6 +332,7 @@ def backups(request, service_id):
         'fromdate': fromdate,
         'todate': datetime.date.today()-datetime.timedelta(days=1),
         'snapshot_form': SnapshotForm(),
+        'error_message_snap': request.GET['error_message'] if 'error_message' in request.GET else None
     }
 
     if request.method == 'POST':
