@@ -1,7 +1,6 @@
 """Views(Controllers) for other purposes not in other files"""
 
 import bisect
-import reversion
 import datetime
 from django.conf import settings
 from django.utils import dateparse
@@ -9,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from apimws.ansible import launch_ansible, ansible_change_mysql_root_pwd
+from apimws.ansible import launch_ansible, ansible_change_mysql_root_pwd, restore_snapshot
 from apimws.models import AnsibleConfiguration
 from apimws.vm import VMAPINotWorkingException, clone_vm, VMAPIFailure
 from mwsauth.utils import privileges_check
@@ -306,8 +305,6 @@ def change_db_root_password(request, service_id):
 
 @login_required
 def backups(request, service_id):
-    if getattr(settings, 'DEMO', False):
-        return HttpResponseRedirect(reverse('listsites'))
     service = get_object_or_404(Service, pk=service_id)
     site = privileges_check(service.site.id, request.user)
 
@@ -339,29 +336,16 @@ def backups(request, service_id):
 
     if request.method == 'POST':
         try:
-            backup_date = dateparse.parse_datetime(request.POST['backupdate'])
-            if backup_date is None or backup_date > datetime.datetime.now() \
-                    or backup_date < (datetime.datetime.now()-datetime.timedelta(days=30)):
-                    # TODO or backup_date >= datetime.date.today() ????
+            backup_date = dateparse.parse_date(request.POST['backupdate'])
+            if backup_date is None or backup_date > datetime.date.today() or backup_date < fromdate:
                 raise ValueError
-            # TODO restore data, once successfully completed restore database data
-            version = reversion.get_for_date(service, backup_date)
-            version.revision.revert(delete=True)
-            for domain in service.all_domain_names:
-                if domain.status == "requested":
-                    last_version = reversion.get_for_object(domain)[0]
-                    if last_version.field_dict['id'] != domain.id:
-                        raise Exception  # TODO change this to a custom exception
-                    domain.status = last_version.field_dict['status']
-                    domain.save()
+            restore_snapshot.delay(service, backup_date.strftime("%Y-%m-%d"))
         except ValueError:
             parameters['error_message'] = "Incorrect date"
             return render(request, 'mws/backups.html', parameters)
         except Exception as e:
             parameters['error_message'] = str(e)
             return render(request, 'mws/backups.html', parameters)
-
-        # TODO do something + check that dates are correct
         return redirect(site)
 
     return render(request, 'mws/backups.html', parameters)

@@ -95,9 +95,17 @@ def ansible_create_custom_snapshot(service, snapshot):
     try:
         for vm in service.virtual_machines.all():
             subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name,
-                                     "--tags", "create_custom_snapshot", "-e", 'snapshot_name="%s"' % snapshot.name])
+                                     "--tags", "create_custom_snapshot", "-e",
+                                     'create_snapshot_name="%s"' % snapshot.name])
         snapshot.date = timezone.now()
         snapshot.save()
     except Exception as e:
         snapshot.delete()
         raise e
+
+
+@shared_task()
+def restore_snapshot(service, snapshot):
+    for vm in service.virtual_machines.all():
+        subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name,
+                                 "--tags", "restore_snapshot", "-e", 'restore_snapshot_name="%s"' % snapshot.name])
