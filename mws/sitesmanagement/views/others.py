@@ -14,7 +14,7 @@ from apimws.vm import VMAPINotWorkingException, clone_vm, VMAPIFailure
 from mwsauth.utils import privileges_check
 from sitesmanagement.forms import BillingForm, SnapshotForm
 from sitesmanagement.utils import get_object_or_None
-from sitesmanagement.models import Service
+from sitesmanagement.models import Service, Snapshot
 
 
 @login_required
@@ -340,7 +340,11 @@ def backups(request, service_id):
             backup_date = dateparse.parse_date(request.POST['backupdate'])
             if backup_date is None or backup_date > datetime.date.today() or backup_date < fromdate:
                 raise ValueError
-            restore_snapshot.delay(service, backup_date.strftime("%Y-%m-%d"))
+            if 'snapshot_id' in request.POST:
+                snapshot = Snapshot.objects.get(id=request.POST['snapshot_id'])
+                restore_snapshot.delay(service, backup_date.strftime("%Y-%m-%d")+"-%s"%snapshot.name)
+            else:
+                restore_snapshot.delay(service, backup_date.strftime("%Y-%m-%d"))
         except ValueError:
             parameters['error_message'] = "Incorrect date"
             return render(request, 'mws/backups.html', parameters)

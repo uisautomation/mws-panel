@@ -20,15 +20,23 @@
             </form>
             <h2>List existing snapshots</h2>
             {% for snapshot in service.snapshots.all %}
-            <form action="{% url 'sitesmanagement.views.backups' service_id=service.id %}" method="delete">
-                <fieldset>
-                    {% csrf_token %}
-                    <p>
+            <div style="display: inline-block; width: 100%;">
+                <form action="{% url 'sitesmanagement.views.backups' service_id=service.id %}" method="post" style="float: left; padding-right: 5px;">
+                    <fieldset>
+                        {% csrf_token %}
                         {{ snapshot.name }} ({{ snapshot.date }})
+                        <input type="hidden" value="{{ snapshot.id }}" name="snapshot_id"/>
+                        <input type="hidden" value="{{ snapshot.date|date:"Y-m-d" }}" name="backupdate"/>
+                        <input type="submit" value="Restore snapshot" class="campl-btn campl-primary-cta"/>
+                    </fieldset>
+                </form>
+                <form action="{% url 'sitesmanagement.views.backups' service_id=service.id %}" method="delete" style="float: left;">
+                    <fieldset>
+                        {% csrf_token %}
                         <input type="submit" value="Delete snapshot" class="campl-btn campl-primary-cta"/>
-                    </p>
-                </fieldset>
-            </form>
+                    </fieldset>
+                </form>
+            </div>
             {% endfor %}
             <h2>Backups</h2>
             <p>All MWS are backed up nightly. You can restore one of these automatic snapshots by selecting
