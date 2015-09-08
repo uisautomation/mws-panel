@@ -342,7 +342,7 @@ def backups(request, service_id):
                 raise ValueError
             if 'snapshot_id' in request.POST:
                 snapshot = Snapshot.objects.get(id=request.POST['snapshot_id'], service=service)
-                restore_snapshot.delay(service, snapshot.date.strftime("%Y-%m-%d")+"-%s"%snapshot.name)
+                restore_snapshot.delay(service, snapshot.name)
             else:
                 restore_snapshot.delay(service, backup_date.strftime("%Y-%m-%d"))
         except ValueError:
