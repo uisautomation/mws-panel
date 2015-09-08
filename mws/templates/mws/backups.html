@@ -9,6 +9,7 @@
             This option is useful when you have an stable system and you want to preserve the current
             configuration for future disaster recoveries.</p>
             {% if error_message_snap %}<p style="color: red">{{ error_message_snap }}</p>{% endif %}
+            {% if not limit_snaps %}
             <form action="{% url 'createsnapshot' service_id=service.id %}" method="post">
                 <fieldset>
                     <div id="snapshot_form">
@@ -18,6 +19,7 @@
                     </div>
                 </fieldset>
             </form>
+            {% endif %}
             <h2>List existing snapshots</h2>
             {% for snapshot in service.snapshots.all %}
                 {% if snapshot.pending_delete %}
