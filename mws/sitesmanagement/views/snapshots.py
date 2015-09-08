@@ -1,4 +1,5 @@
 """Views(Controllers) for managing Snapshots"""
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect
@@ -48,6 +49,8 @@ class SnapshotCreate(ServicePriviledgeCheck, CreateView):
         return redirect(reverse('sitesmanagement.views.backups', kwargs={'service_id': self.service.id}))
 
     def form_valid(self, form):
+        if Snapshot.objects.filter(service=self.service).count() >= 2:
+            raise ValidationError("You can only create two snapshots")
         self.object = form.save(commit=False)
         self.object.service = self.service
         self.object.save()
