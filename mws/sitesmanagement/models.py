@@ -550,8 +550,17 @@ class SiteKeys(models.Model):
     site = models.ForeignKey(Site, related_name="keys")
 
 
+def no_date_validator(name):
+    """
+    Validates that the name is not a data in iso format to avoid clashes with daily snapshots
+    """
+    PATTERN = re.compile("^[0-9]{4}-[0-9]{2}-[0-9]{2}$")
+    if PATTERN.match(name):
+        raise ValidationError("Do not use a data format for the snapshot name")
+
+
 class Snapshot(models.Model):
-    name = models.CharField(max_length=50, validators=[validate_slug])
+    name = models.CharField(max_length=50, validators=[validate_slug, no_date_validator])
     date = models.DateTimeField(auto_now_add=True)
     service = models.ForeignKey(to=Service, related_name="snapshots")
     pending_delete = models.BooleanField(default=False)

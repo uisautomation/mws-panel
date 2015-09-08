@@ -73,8 +73,10 @@ class SnapshotDelete(SnapshotPriviledgeCheck, DeleteView):
 
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()
+        self.object.pending_delete = True
+        self.object.save()
         delete_snapshot.delay(self.object.id)
-        return super(SnapshotDelete, self).delete(request, *args, **kwargs)
+        return redirect(self.get_success_url())
 
     def get_success_url(self):
         return reverse('sitesmanagement.views.backups', kwargs={'service_id': self.service.id})
