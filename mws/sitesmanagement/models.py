@@ -554,6 +554,7 @@ class Snapshot(models.Model):
     name = models.CharField(max_length=50, validators=[validate_slug])
     date = models.DateTimeField(auto_now_add=True)
     service = models.ForeignKey(to=Service, related_name="snapshots")
+    pending_delete = models.BooleanField(default=False)
 
     class Meta:
         unique_together = (("name", "service"), )
