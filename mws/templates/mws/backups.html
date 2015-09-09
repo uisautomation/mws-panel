@@ -1,5 +1,15 @@
 {% extends 'project-light/campl-mws.html' %}
 {% load static %}
+
+{% block app_head %}
+    {{ block.super }}
+    <script src="{% static 'js/polyfiller.js' %}"></script>
+    <script>
+      webshims.setOptions('forms-ext', {types: 'date'});
+      webshims.polyfill('forms-ext');
+    </script>
+{% endblock %}
+
 {% block page_content %}
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
