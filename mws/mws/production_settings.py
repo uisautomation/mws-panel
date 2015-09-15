@@ -7,7 +7,7 @@ from production_secrets import *
 DEBUG = False
 
 ADMINS = (('MWS3 robot mail receiver', 'mws-robotmail@uis.cam.ac.uk'), )
-SERVER_EMAIL = "mws3-support@cam.ac.uk"
+SERVER_EMAIL = "mws3-support@ucs.cam.ac.uk"
 
 TEMPLATE_DEBUG = False
 
