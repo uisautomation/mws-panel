@@ -154,13 +154,15 @@ def new_site_primary_vm(service, host_network_configuration=None):
             sshkeygeno = subprocess.check_output(["ssh-keygen", "-r", "replacehostname", "-f", pubkey.name])
             servicesshfprecord += sshkeygeno.replace('replacehostname', service.network_configuration.name)
             hostsshfprecord += sshkeygeno.replace('replacehostname', vm.network_configuration.name)
-            sshkeygeno = sshkeygeno.split(' ')
-            sqlcommand += "INSERT INTO IPREG.MY_SSHFP (NAME, ALGORITHM, FPTYPE, FINGERPRINT) " \
-                          "VALUES ('%s', %i, %i, '%s');\n" % (service.network_configuration.name, int(sshkeygeno[3]),
-                                                              int(sshkeygeno[4]), sshkeygeno[5])
-            sqlcommand += "INSERT INTO IPREG.MY_SSHFP (NAME, ALGORITHM, FPTYPE, FINGERPRINT) " \
-                          "VALUES ('%s', %i, %i, '%s');\n" % (vm.network_configuration.name, int(sshkeygeno[3]),
-                                                              int(sshkeygeno[4]), sshkeygeno[5])
+            sshkeygeno = sshkeygeno.split('\n')
+            for i in [0, 1]:
+                sshkglnout = sshkeygeno[i].split(' ')
+                sqlcommand += "INSERT INTO IPREG.MY_SSHFP (NAME, ALGORITHM, FPTYPE, FINGERPRINT) " \
+                              "VALUES ('%s', %i, %i, '%s');\n" % (service.network_configuration.name,
+                                                                  int(sshkglnout[3]), int(sshkglnout[4]), sshkglnout[5])
+                sqlcommand += "INSERT INTO IPREG.MY_SSHFP (NAME, ALGORITHM, FPTYPE, FINGERPRINT) " \
+                              "VALUES ('%s', %i, %i, '%s');\n" % (vm.network_configuration.name, int(sshkglnout[3]),
+                                                                  int(sshkglnout[4]), sshkglnout[5])
         pubkey.close()
 
     from apimws.utils import ip_register_api_sshfp
