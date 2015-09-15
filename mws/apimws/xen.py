@@ -130,6 +130,7 @@ def new_site_primary_vm(service, host_network_configuration=None):
     # It sends the SSHFP record to ip-register
     servicesshfprecord = ""
     hostsshfprecord = ""
+    sqlcommand = ""
 
     for keytype in ["sshrsa", "sshdsa", "sshecdsa", "sshed25519"]:
         p = subprocess.Popen(["userv", "mws-admin", "mws_pubkey"], stdin=subprocess.PIPE,
@@ -149,14 +150,21 @@ def new_site_primary_vm(service, host_network_configuration=None):
         SiteKeys.objects.create(site=service.site, type=keytype.replace("ssh","").upper(), public_key=result["pubkey"],
                                 fingerprint=re.search("([0-9a-f]{2}:)+[0-9a-f]{2}", fingerprint).group(0))
 
-        servicesshfprecord += subprocess.check_output(["ssh-keygen", "-r",
-                                                       service.network_configuration.name, "-f", pubkey.name])
-        hostsshfprecord += subprocess.check_output(["ssh-keygen", "-r",
-                                                    vm.network_configuration.name, "-f", pubkey.name])
+        if keytype is not "sshed25519":  # "sshed25519" as of 2015 is not supported by jackdaw
+            sshkeygeno = subprocess.check_output(["ssh-keygen", "-r", "replacehostname", "-f", pubkey.name])
+            servicesshfprecord += sshkeygeno.replace('replacehostname', service.network_configuration.name)
+            hostsshfprecord += sshkeygeno.replace('replacehostname', vm.network_configuration.name)
+            sshkeygeno = sshkeygeno.split(' ')
+            sqlcommand += "INSERT INTO IPREG.MY_SSHFP (NAME, ALGORITHM, FPTYPE, FINGERPRINT) " \
+                          "VALUES ('%s', %i, %i, '%s');\n" % (service.network_configuration.name, int(sshkeygeno[3]),
+                                                              int(sshkeygeno[4]), sshkeygeno[5])
+            sqlcommand += "INSERT INTO IPREG.MY_SSHFP (NAME, ALGORITHM, FPTYPE, FINGERPRINT) " \
+                          "VALUES ('%s', %i, %i, '%s');\n" % (vm.network_configuration.name, int(sshkeygeno[3]),
+                                                              int(sshkeygeno[4]), sshkeygeno[5])
         pubkey.close()
 
     from apimws.utils import ip_register_api_sshfp
-    ip_register_api_sshfp("%s\n\n%s" % (hostsshfprecord, servicesshfprecord))
+    ip_register_api_sshfp("%s\n\n%s\n\n%s" % (hostsshfprecord, servicesshfprecord, sqlcommand))
 
     # Create a default Vhost with the Service FQDN as main domain name
     default_vhost = Vhost.objects.create(service=service, name="default")
