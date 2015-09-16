@@ -25,7 +25,7 @@ def billing_management(request, site_id):
         return HttpResponseForbidden()
 
     breadcrumbs = {
-        0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
+        0: dict(name='Manage Web Service site: ' + str(site.name), url=site.get_absolute_url()),
         1: dict(name='Billing', url=reverse(billing_management, kwargs={'site_id': site.id}))
     }
 
@@ -67,7 +67,7 @@ def clone_vm_view(request, site_id):
         return redirect(site)
 
     breadcrumbs = {
-        0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
+        0: dict(name='Manage Web Service site: ' + str(site.name), url=site.get_absolute_url()),
         1: dict(name='Production and test servers management', url=reverse(clone_vm_view, kwargs={'site_id': site.id}))
     }
 
@@ -101,7 +101,7 @@ def service_settings(request, service_id):
         return redirect(site)
 
     breadcrumbs = {
-        0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
+        0: dict(name='Manage Web Service site: ' + str(site.name), url=site.get_absolute_url()),
         1: dict(name='Server settings' if service.primary else 'Test server settings',
                 url=reverse(service_settings, kwargs={'service_id': service.id}))
     }
@@ -157,7 +157,7 @@ def system_packages(request, service_id):
         if ansible_configuraton.value != '' else []
 
     breadcrumbs = {
-        0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
+        0: dict(name='Manage Web Service site: ' + str(site.name), url=site.get_absolute_url()),
         1: dict(name='Server settings' if service.primary else 'Test server settings',
                 url=reverse(service_settings, kwargs={'service_id': service.id})),
         2: dict(name='System packages', url=reverse(system_packages, kwargs={'service_id': service.id}))
@@ -275,7 +275,7 @@ def change_db_root_password(request, service_id):
         return redirect(site)
 
     breadcrumbs = {
-        0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
+        0: dict(name='Manage Web Service site: ' + str(site.name), url=site.get_absolute_url()),
         1: dict(name='Server settings' if service.primary else 'Test server settings',
                 url=reverse(service_settings, kwargs={'service_id': service.id})),
         2: dict(name='Change db root pass', url=reverse(change_db_root_password, kwargs={'service_id': service.id})),
@@ -315,7 +315,7 @@ def backups(request, service_id):
         return redirect(site)
 
     breadcrumbs = {
-        0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
+        0: dict(name='Manage Web Service site: ' + str(site.name), url=site.get_absolute_url()),
         1: dict(name='Server settings' if service.primary else 'Test server settings',
                 url=reverse(service_settings, kwargs={'service_id': service.id})),
         2: dict(name='Restore backup', url=reverse(backups, kwargs={'service_id': service.id})),
