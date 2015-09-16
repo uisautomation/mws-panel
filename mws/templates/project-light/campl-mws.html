@@ -38,7 +38,7 @@
         <div class="campl-wrap clearfix campl-local-navigation" id="local-nav">
             <div class="campl-local-navigation-container campl-mobile">
                 <ul class="campl-unstyled-list">
-                    <li><a href="{% url 'listsites' %}">List of MWS Servers</a></li>
+                    <li><a href="{% url 'listsites' %}">List of MWS Sites</a></li>
                     {% if site %}
                     <li><a>Panels for MWS "{{ site.name }}": </a></li>
                     <li><a href="{% url 'showsite' site_id=site.id %}">Main Panel</a></li>
