@@ -9,7 +9,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from apimws.ansible import launch_ansible, ansible_change_mysql_root_pwd, restore_snapshot, delete_snapshot
-from apimws.models import AnsibleConfiguration
+from apimws.models import AnsibleConfiguration, ApacheModulesForm
 from apimws.vm import VMAPINotWorkingException, clone_vm, VMAPIFailure
 from mwsauth.utils import privileges_check
 from sitesmanagement.forms import BillingForm, SnapshotForm
@@ -355,3 +355,37 @@ def backups(request, service_id):
         return redirect(site)
 
     return render(request, 'mws/backups.html', parameters)
+
+
+@login_required
+def apache_modules(request, service_id):
+    service = get_object_or_404(Service, pk=service_id)
+    site = privileges_check(service.site.id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if not service or not service.active or service.is_busy:
+        return redirect(site)
+
+    breadcrumbs = {
+        0: dict(name='Manage Web Service site: ' + str(site.name), url=site.get_absolute_url()),
+        1: dict(name='Server settings' if service.primary else 'Test server settings',
+                url=reverse(service_settings, kwargs={'service_id': service.id})),
+        2: dict(name='Apache modules', url=reverse(apache_modules, kwargs={'service_id': service.id})),
+    }
+
+    parameters = {
+        'breadcrumbs': breadcrumbs,
+        'service': service,
+        'site': site,
+        'form': ApacheModulesForm(initial={'apache_modules': service.apache_modules.values_list('name', flat=True)}),
+    }
+
+    if request.method == 'POST':
+        f = ApacheModulesForm(request.POST)
+        if f.is_valid():
+            service.apache_modules = f.cleaned_data['apache_modules']
+            service.save()
+
+    return render(request, 'mws/apache.html', parameters)

@@ -43,6 +43,7 @@ urlpatterns = patterns('',
     url(r'^settings/vm/(?P<service_id>[0-9]+)/db_root_pass/$', 'sitesmanagement.views.change_db_root_password'),
     url(r'^update_os/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.update_os'),
     url(r'^backups/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.backups'),
+    url(r'^apache/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.apache_modules'),
 
     # Vhosts management
     url(r'^vhosts/(?P<service_id>[0-9]+)/$', VhostListView.as_view(), name='listvhost'),

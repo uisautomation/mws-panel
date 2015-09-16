@@ -1,3 +1,4 @@
+from django import forms
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
@@ -12,6 +13,18 @@ class AnsibleConfiguration(models.Model):
 
     class Meta:
         unique_together = ("service", "key")
+
+
+class ApacheModules(models.Model):
+    name = models.CharField(max_length=150, primary_key=True)
+    description = models.CharField(max_length=250)
+    available = models.BooleanField(default=True)
+    services = models.ManyToManyField(Service, related_name='apache_modules')
+
+
+class ApacheModulesForm(forms.Form):
+    apache_modules = forms.MultipleChoiceField(choices=tuple(ApacheModules.objects.values_list('name','description')),
+                                               label='', widget=forms.CheckboxSelectMultiple(), required=False)
 
 
 @receiver(pre_delete, sender=VirtualMachine)

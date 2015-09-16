@@ -133,6 +133,11 @@ ul.errorlist + p textarea {
     opacity: 0.5;
 }
 
+ul#id_apache_modules {
+    list-style: none;
+    margin-left: 0;
+}
+
 /*! normalize.css v3.0.0 | MIT License | git.io/normalize */
 
 .btn {
