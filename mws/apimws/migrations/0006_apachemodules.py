@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='ApacheModules',
+            name='ApacheModule',
             fields=[
                 ('name', models.CharField(max_length=150, serialize=False, primary_key=True)),
                 ('description', models.CharField(max_length=250)),

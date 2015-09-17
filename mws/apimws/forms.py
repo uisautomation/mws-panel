@@ -1,10 +1,10 @@
 from django import forms
-from apimws.models import ApacheModules, PHPLib
+from apimws.models import ApacheModule, PHPLib
 
 
-class ApacheModulesForm(forms.Form):
+class ApacheModuleForm(forms.Form):
     apache_modules = forms.MultipleChoiceField(
-        choices=tuple(ApacheModules.objects.filter(available=True).values_list('name','description')),
+        choices=tuple(ApacheModule.objects.filter(available=True).values_list('name','description')),
         label='', widget=forms.CheckboxSelectMultiple(), required=False)
 
 class PHPLibForm(forms.Form):

@@ -375,17 +375,17 @@ def apache_modules(request, service_id):
         2: dict(name='Apache modules', url=reverse(apache_modules, kwargs={'service_id': service.id})),
     }
 
-    from apimws.forms import ApacheModulesForm
+    from apimws.forms import ApacheModuleForm
 
     parameters = {
         'breadcrumbs': breadcrumbs,
         'service': service,
         'site': site,
-        'form': ApacheModulesForm(initial={'apache_modules': service.apache_modules.values_list('name', flat=True)}),
+        'form': ApacheModuleForm(initial={'apache_modules': service.apache_modules.values_list('name', flat=True)}),
     }
 
     if request.method == 'POST':
-        f = ApacheModulesForm(request.POST)
+        f = ApacheModuleForm(request.POST)
         if f.is_valid():
             service.apache_modules = f.cleaned_data['apache_modules']
             service.save()

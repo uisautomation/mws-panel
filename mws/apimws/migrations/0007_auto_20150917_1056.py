@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterField(
-            model_name='apachemodules',
+            model_name='apachemodule',
             name='services',
             field=models.ManyToManyField(related_name='apache_modules', to='sitesmanagement.Service', blank=True),
         ),

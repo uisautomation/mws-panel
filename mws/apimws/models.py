@@ -14,7 +14,7 @@ class AnsibleConfiguration(models.Model):
         unique_together = ("service", "key")
 
 
-class ApacheModules(models.Model):
+class ApacheModule(models.Model):
     name = models.CharField(max_length=150, primary_key=True)
     description = models.CharField(max_length=250)
     available = models.BooleanField(default=True)
