@@ -1,7 +1,6 @@
 from django.contrib import admin
-from django.contrib.admin import ModelAdmin
 from reversion import VersionAdmin
-from apimws.models import AnsibleConfiguration
+from apimws.models import AnsibleConfiguration, ApacheModules
 
 
 class AnsibleConfigurationAdmin(VersionAdmin):
@@ -11,3 +10,4 @@ class AnsibleConfigurationAdmin(VersionAdmin):
 
 
 admin.site.register(AnsibleConfiguration, AnsibleConfigurationAdmin)
+admin.site.register(ApacheModules, VersionAdmin)
