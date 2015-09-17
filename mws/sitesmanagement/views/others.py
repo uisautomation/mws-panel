@@ -374,7 +374,7 @@ def apache_modules(request, service_id):
                 url=reverse(service_settings, kwargs={'service_id': service.id})),
         2: dict(name='Apache modules', url=reverse(apache_modules, kwargs={'service_id': service.id})),
     }
-    
+
     from apimws.forms import ApacheModulesForm
 
     parameters = {
