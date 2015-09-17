@@ -21,6 +21,9 @@ class ApacheModules(models.Model):
     available = models.BooleanField(default=True)
     services = models.ManyToManyField(Service, related_name='apache_modules')
 
+    def __unicode__(self):
+        return self.name
+
 
 class ApacheModulesForm(forms.Form):
     apache_modules = forms.MultipleChoiceField(choices=tuple(ApacheModules.objects.values_list('name','description')),

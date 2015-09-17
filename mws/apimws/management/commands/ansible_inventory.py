@@ -3,6 +3,7 @@ from django.core.management.base import NoArgsCommand, CommandError
 from optparse import make_option
 import sys
 import json
+from apimws.models import ApacheModules
 from sitesmanagement.models import VirtualMachine, Site
 
 
@@ -87,6 +88,7 @@ class Command(NoArgsCommand):
             vhv['tls_enabled'] = vh.tls_enabled
             vhv['generate_csr'] = 'tls_key_hash' in vhv and vh.tls_key_hash == "requested"
             return vhv
+
         v['mws_vhosts'] = [vhost_vars(vh) for vh in vm.service.vhosts.all()]
         v['mws_is_primary'] = vm.primary
         if vm.network_configuration.IPv4:
@@ -128,5 +130,12 @@ class Command(NoArgsCommand):
             v['mws_service_ipv4_netmask'] = vm.service.network_configuration.IPv4_netmask
             v['mws_service_ipv4_gateway'] = vm.service.network_configuration.IPv4_gateway
             v['mws_service_ipv6'] = vm.service.network_configuration.IPv6
+
+        # List of Apache modules to be installed and enable
+        v['mws_apache_mods_enabled'] = ApacheModules.objects.filter(services__id=10,
+                                                                    available=True).values_list('name', flat=True)
+
+        # List of Apache modules to be disabled
+        v['mws_apache_mods_disabled'] = ApacheModules.objects.exclude(services__id=10).values_list('name', flat=True)
 
         return v
