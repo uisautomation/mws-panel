@@ -1,12 +1,12 @@
 - model: apimws.ApacheModules
   fields:
-    name: mod_proxy
+    name: proxy
     description: mod_proxy
 - model: apimws.ApacheModules
   fields:
-    name: mod_proxy_http
+    name: proxy_http
     description: mod_proxy_http
 - model: apimws.ApacheModules
   fields:
-    name: mod_cgi
+    name: cgi
     description: mod_cgi

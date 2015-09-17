@@ -389,5 +389,6 @@ def apache_modules(request, service_id):
         if f.is_valid():
             service.apache_modules = f.cleaned_data['apache_modules']
             service.save()
+            launch_ansible(service)
 
     return render(request, 'mws/apache.html', parameters)
