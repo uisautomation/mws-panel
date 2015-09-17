@@ -9,7 +9,8 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from apimws.ansible import launch_ansible, ansible_change_mysql_root_pwd, restore_snapshot, delete_snapshot
-from apimws.models import AnsibleConfiguration, ApacheModulesForm
+from apimws.forms import ApacheModulesForm
+from apimws.models import AnsibleConfiguration
 from apimws.vm import VMAPINotWorkingException, clone_vm, VMAPIFailure
 from mwsauth.utils import privileges_check
 from sitesmanagement.forms import BillingForm, SnapshotForm
