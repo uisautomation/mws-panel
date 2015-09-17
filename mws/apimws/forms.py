@@ -11,4 +11,4 @@ class PHPLibForm(forms.Form):
     php_libs = forms.MultipleChoiceField(
         choices=tuple((phplib.name, phplib.name + " - " + phplib.description)
                       for phplib in PHPLib.objects.filter(available=True).order_by('name')),
-        label='', widget=forms.CheckboxSelectMultiple(), required=False)
+        label='', widget=forms.SelectMultiple(), required=False)
