@@ -24,6 +24,16 @@ class ApacheModules(models.Model):
         return self.name
 
 
+class PHPLibs(models.Model):
+    name = models.CharField(max_length=150, primary_key=True)
+    description = models.CharField(max_length=250)
+    available = models.BooleanField(default=True)
+    services = models.ManyToManyField(Service, related_name='php_libs', blank=True)
+
+    def __unicode__(self):
+        return self.name
+
+
 @receiver(pre_delete, sender=VirtualMachine)
 def api_call_to_delete_vm(instance, **kwargs):
     if instance.name:

@@ -44,6 +44,7 @@ urlpatterns = patterns('',
     url(r'^update_os/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.update_os'),
     url(r'^backups/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.backups'),
     url(r'^apache/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.apache_modules'),
+    url(r'^phplibs/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.php_libs'),
 
     # Vhosts management
     url(r'^vhosts/(?P<service_id>[0-9]+)/$', VhostListView.as_view(), name='listvhost'),

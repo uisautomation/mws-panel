@@ -133,7 +133,7 @@ ul.errorlist + p textarea {
     opacity: 0.5;
 }
 
-ul#id_apache_modules {
+ul#id_apache_modules, ul#id_php_libs {
     list-style: none;
     margin-left: 0;
 }

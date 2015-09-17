@@ -1,0 +1,36 @@
+{% extends 'project-light/campl-mws.html' %}
+{% load static %}
+
+{% block app_head %}
+    {{ block.super }}
+    <link href="{% static 'stylesheets/bootstrap-switch.min.css' %}" rel="stylesheet">
+    <script src="{% static 'js/bootstrap-switch.min.js' %}"></script>
+{% endblock %}
+
+{% block page_content %}
+    <div class="campl-column12 campl-main-content">
+        <div class="campl-content-container">
+            <h2>PHP Libraries</h2>
+            <p>You can enable or disable the libraries you want.</p>
+            <form action="{% url 'sitesmanagement.views.php_libs' service_id=service.id %}" method="post">
+                {% if error_message %}<p style="color: red">{{ error_message }}</p>{% endif %}
+                <fieldset>
+                    {% csrf_token %}
+                    <div>
+                        {{ form.as_p }}
+                    </div>
+                    <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block campl_foot_js %}
+    <script>
+        $.fn.bootstrapSwitch.defaults.size = 'mini';
+        $(document).ready(function() {
+            $("[name='php_libs']").bootstrapSwitch();
+        });
+    </script>
+{% endblock %}

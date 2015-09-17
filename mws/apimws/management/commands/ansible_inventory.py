@@ -2,7 +2,7 @@ from django.core.management.base import NoArgsCommand, CommandError
 from optparse import make_option
 import sys
 import json
-from apimws.models import ApacheModules
+from apimws.models import ApacheModules, PHPLibs
 from sitesmanagement.models import VirtualMachine, Site
 
 
@@ -137,5 +137,13 @@ class Command(NoArgsCommand):
         # List of Apache modules to be disabled
         v['mws_apache_mods_disabled'] = list(ApacheModules.objects.exclude(services__id=vm.service.id)
                                              .values_list('name', flat=True))
+
+        # List of PHP libraries to be installed
+        v['mws_php_libs_enabled'] = list(PHPLibs.objects.filter(services__id=vm.service.id, available=True)
+                                         .values_list('name', flat=True))
+
+        # List of PHP libraries to be deleted
+        v['mws_php_libs_disabled'] = list(PHPLibs.objects.exclude(services__id=vm.service.id)
+                                          .values_list('name', flat=True))
 
         return v

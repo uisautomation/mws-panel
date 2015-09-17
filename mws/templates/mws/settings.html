@@ -116,6 +116,41 @@
                 </div>
             </div>
 
+            <div class="campl-column3">
+                <div class="campl-content-container campl-side-padding">
+                    <article class="node node-external-link view-mode-focus_on clearfix
+                                    campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                        <div class="campl-focus-teaser-img">
+                            <div class="campl-content-container campl-horizontal-teaser-img">
+                                <a href="{% url 'sitesmanagement.views.php_libs' service_id=service.id %}">
+                                    <div class="field field-name-field-external-url-image field-type-image
+                                                field-label-hidden">
+                                        <div class="field-items">
+                                            <div class="field-item even">
+                                                <img class="campl-scale-with-grid"
+                                                     src="{% static "icons/system-settings.png" %}"
+                                                     height="128" style="margin: 10px;" alt="">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="campl-focus-teaser-txt">
+                            <div class="campl-content-container campl-horizontal-teaser-txt">
+                                <h3 class="campl-teaser-title">
+                                    <a href="{% url 'sitesmanagement.views.php_libs' service_id=service.id %}">
+                                        PHP Libraries
+                                    </a>
+                                </h3>
+                                <a href="{% url 'sitesmanagement.views.php_libs' service_id=service.id %}"
+                                   class="ir campl-focus-link">PHP Libraries</a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
             <div class="campl-column3{% if DEMO %} not-active{% endif %}">
                 <div class="campl-content-container campl-side-padding">
                     <article class="node node-external-link view-mode-focus_on clearfix
@@ -185,52 +220,6 @@
                     </article>
                 </div>
             </div>
-        </div>
-
-        {% if service.is_ready %}
-            <div class="campl-column6">
-                <div class="campl-content-container campl-side-padding">
-                    <article class="node node-external-link view-mode-focus_on clearfix
-                                    campl-horizontal-teaser campl-teaser campl-focus-teaser">
-                        <div class="campl-focus-teaser-img">
-                            <div class="campl-content-container campl-horizontal-teaser-txt">
-                                <div class="field field-name-field-external-url-image field-type-image
-                                            field-label-hidden">
-                                    <div class="field-items">
-                                        <div id="vm_status_message" class="field-item even" style="color: #ffffff">
-                                            Checking the status of the {% if not service.primary %}test {% endif %} server
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="campl-focus-teaser-txt">
-                            <div class="campl-content-container campl-horizontal-teaser-txt">
-                                <h3 class="campl-teaser-title">
-                                    <a id="vm_status_message_link" href="#"
-                                       onclick='$("#translucidframe")[0].style.visibility = "visible"'></a>
-                                </h3>
-                                <a id="vm_status_link" href="#" class="ir campl-focus-link"
-                                   onclick='$("#translucidframe")[0].style.visibility = "visible"'></a>
-                            </div>
-                        </div>
-                    </article>
-                </div>
-            </div>
-        {% else %}
-            <div class="campl-column6">
-                <div class="campl-content-container campl-side-padding">
-                    <article class="node node-external-link view-mode-focus_on clearfix
-                                    campl-horizontal-teaser campl-teaser campl-focus-teaser">
-                            <div class="campl-content-container campl-horizontal-teaser-txt">
-                                <div id="vm_status_busy" class="field-item even" style="color: #ffffff">
-                                    The server is busy, we are configuring it
-                                </div>
-                            </div>
-                    </article>
-                </div>
-            </div>
-        {% endif %}
 
         {% if service.primary %}
             <div class="campl-column3">
@@ -303,40 +292,84 @@
             </div>
             {% endif %}
         {% else %}
-        <div class="campl-column3">
-            <div class="campl-content-container campl-side-padding">
-                <article class="node node-external-link view-mode-focus_on clearfix
-                                campl-horizontal-teaser campl-teaser campl-focus-teaser campl-focus-teaser-red">
-                    <div class="campl-focus-teaser-img">
-                        <div class="campl-content-container campl-horizontal-teaser-img">
-                            <a class="delete_vm" data-href="javascript:delete_vm('{% url 'sitesmanagement.views.delete_vm' service_id=service.id %}')" href="#">
-                                <div class="field field-name-field-external-url-image field-type-image field-label-hidden">
+            <div class="campl-column3">
+                <div class="campl-content-container campl-side-padding">
+                    <article class="node node-external-link view-mode-focus_on clearfix
+                                    campl-horizontal-teaser campl-teaser campl-focus-teaser campl-focus-teaser-red">
+                        <div class="campl-focus-teaser-img">
+                            <div class="campl-content-container campl-horizontal-teaser-img">
+                                <a class="delete_vm" data-href="javascript:delete_vm('{% url 'sitesmanagement.views.delete_vm' service_id=service.id %}')" href="#">
+                                    <div class="field field-name-field-external-url-image field-type-image field-label-hidden">
+                                        <div class="field-items">
+                                            <div class="field-item even">
+                                                <img class="campl-scale-with-grid" src="{% static "icons/recyclebin.png" %}" height="128" style="margin: 10px;" alt="">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="campl-focus-teaser-txt">
+                            <div class="campl-content-container campl-horizontal-teaser-txt">
+                                <h3 class="campl-teaser-title">
+                                    <a class="delete_vm" data-href="javascript:delete_vm('{% url 'sitesmanagement.views.delete_vm' service_id=service.id %}')" href="#">
+                                        Delete the test server
+                                    </a>
+                                </h3>
+                                <a class="delete_vm ir campl-focus-link campl-focus-link-red" data-href="javascript:delete_vm('{% url 'sitesmanagement.views.delete_vm' service_id=service.id %}')" href="#">
+                                    Delete the test server
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if service.is_ready %}
+            <div class="campl-column6">
+                <div class="campl-content-container campl-side-padding">
+                    <article class="node node-external-link view-mode-focus_on clearfix
+                                    campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                        <div class="campl-focus-teaser-img">
+                            <div class="campl-content-container campl-horizontal-teaser-txt">
+                                <div class="field field-name-field-external-url-image field-type-image
+                                            field-label-hidden">
                                     <div class="field-items">
-                                        <div class="field-item even">
-                                            <img class="campl-scale-with-grid" src="{% static "icons/recyclebin.png" %}" height="128" style="margin: 10px;" alt="">
+                                        <div id="vm_status_message" class="field-item even" style="color: #ffffff">
+                                            Checking the status of the {% if not service.primary %}test {% endif %} server
                                         </div>
                                     </div>
                                 </div>
-                            </a>
+                            </div>
                         </div>
-                    </div>
-                    <div class="campl-focus-teaser-txt">
-                        <div class="campl-content-container campl-horizontal-teaser-txt">
-                            <h3 class="campl-teaser-title">
-                                <a class="delete_vm" data-href="javascript:delete_vm('{% url 'sitesmanagement.views.delete_vm' service_id=service.id %}')" href="#">
-                                    Delete the test server
-                                </a>
-                            </h3>
-                            <a class="delete_vm ir campl-focus-link campl-focus-link-red" data-href="javascript:delete_vm('{% url 'sitesmanagement.views.delete_vm' service_id=service.id %}')" href="#">
-                                Delete the test server
-                            </a>
+                        <div class="campl-focus-teaser-txt">
+                            <div class="campl-content-container campl-horizontal-teaser-txt">
+                                <h3 class="campl-teaser-title">
+                                    <a id="vm_status_message_link" href="#"
+                                       onclick='$("#translucidframe")[0].style.visibility = "visible"'></a>
+                                </h3>
+                                <a id="vm_status_link" href="#" class="ir campl-focus-link"
+                                   onclick='$("#translucidframe")[0].style.visibility = "visible"'></a>
+                            </div>
                         </div>
-                    </div>
-                </article>
+                    </article>
+                </div>
             </div>
-        </div>
+        {% else %}
+            <div class="campl-column6">
+                <div class="campl-content-container campl-side-padding">
+                    <article class="node node-external-link view-mode-focus_on clearfix
+                                    campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                            <div class="campl-content-container campl-horizontal-teaser-txt">
+                                <div id="vm_status_busy" class="field-item even" style="color: #ffffff">
+                                    The server is busy, we are configuring it
+                                </div>
+                            </div>
+                    </article>
+                </div>
+            </div>
         {% endif %}
-
     </div>
 
     {% if not service.primary %}

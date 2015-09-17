@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from apimws.ansible import launch_ansible, ansible_change_mysql_root_pwd, restore_snapshot, delete_snapshot
+from apimws.ansible import launch_ansible, ansible_change_mysql_root_pwd, restore_snapshot
 from apimws.models import AnsibleConfiguration
 from apimws.vm import VMAPINotWorkingException, clone_vm, VMAPIFailure
 from mwsauth.utils import privileges_check
@@ -392,3 +392,40 @@ def apache_modules(request, service_id):
             launch_ansible(service)
 
     return render(request, 'mws/apache.html', parameters)
+
+
+@login_required
+def php_libs(request, service_id):
+    service = get_object_or_404(Service, pk=service_id)
+    site = privileges_check(service.site.id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if not service or not service.active or service.is_busy:
+        return redirect(site)
+
+    breadcrumbs = {
+        0: dict(name='Manage Web Service site: ' + str(site.name), url=site.get_absolute_url()),
+        1: dict(name='Server settings' if service.primary else 'Test server settings',
+                url=reverse(service_settings, kwargs={'service_id': service.id})),
+        2: dict(name='PHP Libraries', url=reverse(php_libs, kwargs={'service_id': service.id})),
+    }
+
+    from apimws.forms import PHPLibsForm
+
+    parameters = {
+        'breadcrumbs': breadcrumbs,
+        'service': service,
+        'site': site,
+        'form': PHPLibsForm(initial={'php_libs': service.php_libs.values_list('name', flat=True)}),
+    }
+
+    if request.method == 'POST':
+        f = PHPLibsForm(request.POST)
+        if f.is_valid():
+            service.php_libs = f.cleaned_data['php_libs']
+            service.save()
+            launch_ansible(service)
+
+    return render(request, 'mws/phplibs.html', parameters)
