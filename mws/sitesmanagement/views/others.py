@@ -412,17 +412,17 @@ def php_libs(request, service_id):
         2: dict(name='PHP Libraries', url=reverse(php_libs, kwargs={'service_id': service.id})),
     }
 
-    from apimws.forms import PHPLibsForm
+    from apimws.forms import PHPLibForm
 
     parameters = {
         'breadcrumbs': breadcrumbs,
         'service': service,
         'site': site,
-        'form': PHPLibsForm(initial={'php_libs': service.php_libs.values_list('name', flat=True)}),
+        'form': PHPLibForm(initial={'php_libs': service.php_libs.values_list('name', flat=True)}),
     }
 
     if request.method == 'POST':
-        f = PHPLibsForm(request.POST)
+        f = PHPLibForm(request.POST)
         if f.is_valid():
             service.php_libs = f.cleaned_data['php_libs']
             service.save()

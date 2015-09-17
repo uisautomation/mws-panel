@@ -24,7 +24,7 @@ class ApacheModules(models.Model):
         return self.name
 
 
-class PHPLibs(models.Model):
+class PHPLib(models.Model):
     name = models.CharField(max_length=150, primary_key=True)
     description = models.CharField(max_length=250)
     available = models.BooleanField(default=True)
