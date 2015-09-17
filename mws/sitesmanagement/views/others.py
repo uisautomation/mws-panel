@@ -9,7 +9,6 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from apimws.ansible import launch_ansible, ansible_change_mysql_root_pwd, restore_snapshot, delete_snapshot
-from apimws.forms import ApacheModulesForm
 from apimws.models import AnsibleConfiguration
 from apimws.vm import VMAPINotWorkingException, clone_vm, VMAPIFailure
 from mwsauth.utils import privileges_check
@@ -375,6 +374,8 @@ def apache_modules(request, service_id):
                 url=reverse(service_settings, kwargs={'service_id': service.id})),
         2: dict(name='Apache modules', url=reverse(apache_modules, kwargs={'service_id': service.id})),
     }
+    
+    from apimws.forms import ApacheModulesForm
 
     parameters = {
         'breadcrumbs': breadcrumbs,
