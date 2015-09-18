@@ -5,7 +5,7 @@
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
 
-            <h1>Unix Group of your "{{ service.site.name }}" {% if service.primary %}production{% else %}test{% endif %} server</h1>
+            <h1>Unix groups for your "{{ service.site.name }}" {% if service.primary %}production{% else %}test{% endif %} server</h1>
 
             {% if service.unix_groups.all %}
                 <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
@@ -38,10 +38,11 @@
                     </tbody>
                 </table>
             {% else %}
-                <p style="margin-top: 20px; margin-bottom: 20px">The server doesn't have Unix Groups configured</p>
+                <p style="margin-top: 20px; margin-bottom: 20px">This
+            server doesn't have any Unix groups configured</p>
             {% endif %}
 
-        <p><a href="{% url 'createunixgroup' service_id=service.id %}" class="campl-primary-cta">Add a new Unix Group</a></p>
+        <p><a href="{% url 'createunixgroup' service_id=service.id %}" class="campl-primary-cta">Add a new Unix group</a></p>
 
         </div>
     </div>
@@ -51,7 +52,7 @@
       <div class="modal-dialog modal-sm">
         <div class="modal-content">
           <div class="modal-body">
-            Are you sure do you want to delete the unix group?
+            Are you sure you want to delete the Unix group?
           </div>
           <div class="modal-footer" style="padding: 10px 20px 10px;">
             <button type="button" class="campl-btn campl-primary-cta" data-dismiss="modal">Cancel</button>
