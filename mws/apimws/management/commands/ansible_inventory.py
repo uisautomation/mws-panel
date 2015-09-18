@@ -3,8 +3,7 @@ from optparse import make_option
 import sys
 import json
 from apimws.models import ApacheModule, PHPLib
-from sitesmanagement.models import VirtualMachine, Site
-
+from sitesmanagement.models import VirtualMachine, Site, UnixGroup
 
 group = "mwsclients"
 
@@ -145,5 +144,10 @@ class Command(NoArgsCommand):
         # List of PHP libraries to be deleted
         v['mws_php_libs_disabled'] = list(PHPLib.objects.exclude(services__id=vm.service.id)
                                           .values_list('name', flat=True))
+
+        # List of Unix groups and their associated crsids
+        v['mws_unix_groups'] = []
+        for unix_group in UnixGroup.objects.filter(service=vm.service):
+            v['mws_unix_groups'].append({'name': unix_group.name, 'users': list(unix_group.users.all()})
 
         return v
