@@ -4,33 +4,33 @@
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
 
-            <p>This site allows members of the university to request a new server in the managed web service. We
-                provide to the user a server that they can use without having to worry about manual configuration
-                or operating system maintenance. A server in the managed web service has the following characteristics:
+            <p>This site allows members of the University to request a new <em>site</em> in the Managed Web Service. We
+                provide users with a web-server that they can use without having to worry about manual configuration
+                or operating system maintenance. A server in the Managed Web Service has the following characteristics:
             </p>
 
             <ul>
-                <li>A server with 1 Core CPU, 2 GB of RAM, and xxGb of disk space</li>
+                <li>A server with 1 Core CPU, 2 GB of RAM, and 20Gb of disk space</li>
                 <li>A public IPv4 and IPv6 addresses</li>
                 <li>A secondary test server for testing purposes (testing updates for example)</li>
-                <li>A simple web based control panel to control all the features of the Managed Web Service</li>
+                <li>A simple web-based control panel to control all the features of the Managed Web Service</li>
                 <li>A cost of only £xx/month</li>
             </ul>
 
-            <p>Warning: If you don't enter the billings details for your site in less than a month, it may be deleted.
+            <p>Warning: If you don't enter billing details for your site within a month, it may be deleted.
             </p>
 
             {% if deactivate_new %}
                 <p class="campl-notifications-icon campl-warning-icon" style="float:none; margin-bottom: 10px;">
-                    At this moment we cannot process any new request for the Managed Web Service,
+                    At this moment we cannot process any new requests for the Managed Web Service,
                     please try again later.
                 </p>
             {% else %}
-                <p><a href="{% url 'newsite' %}" class="campl-primary-cta">Register new server</a></p>
+                <p><a href="{% url 'newsite' %}" class="campl-primary-cta">Register new site</a></p>
             {% endif %}
 
             {% if sites_enabled %}
-                <h1>MWS servers where you are the administrator</h1>
+                <h1>MWS sites where you are the administrator</h1>
                 <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table clickable_rows">
                     <thead>
                         <tr>
@@ -48,7 +48,7 @@
                             <tr class="site_suspended" data-href="{% url 'showsite' site_id=site.id %}">
                                 <td>
                                     {{ site.name }} <br/>
-                                    This server has been administratively suspended
+                                    This site has been administratively suspended
                         {% else %}
                             <tr data-href="{% url 'showsite' site_id=site.id %}">
                                 <td>
@@ -90,7 +90,7 @@
 
             {% if sites_disabled %}
                 <div class="campl-theme-7">
-                    <h1>Disabled MWS servers where you are the administrator</h1>
+                    <h1>Disabled MWS sites where you are the administrator</h1>
                     <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
                         <thead>
                             <tr>
@@ -106,7 +106,7 @@
                                 <tr class="site_suspended">
                                     <td>
                                         {{ site.name }} <br/>
-                                        This server has been administratively suspended
+                                        This site has been administratively suspended
                             {% else %}
                                 <tr>
                                     <td>
@@ -138,7 +138,7 @@
 
             {% if sites_authorised %}
                 <div class="campl-theme-4">
-                    <h1>MWS servers where you are authorised as user</h1>
+                    <h1>MWS sites where you are authorised as a user</h1>
                     <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
                         <thead>
                             <tr>
@@ -154,7 +154,7 @@
                                 <tr class="site_suspended">
                                     <td>
                                         {{ site.name }} <br/>
-                                        This server has been administratively suspended
+                                        This site has been administratively suspended
                             {% else %}
                                 <tr>
                                     <td>
