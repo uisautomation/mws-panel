@@ -3,43 +3,43 @@
 {% block page_content %}
     <div class="campl-column12">
         <div class="campl-content-container">
-            <h1 id="page-title">Production and test servers management</h1>
+            <h1 id="page-title">Production and test server management</h1>
 
             <form action={% url 'sitesmanagement.views.clone_vm_view' site_id=site.id %} method="post">{% csrf_token %}
                 <fieldset>
                     {% if site.primary_vm %}
                         <div>
-                            <h3>Clone the production server into the test server</h3>
+                            <h3>Clone the production server onto the test server</h3>
 
                             {% if site.secondary_vm %}
                                 <p>
                                     <img src="{% static 'images/interface/icon-warning.png' %}">
                                     Warning:
                                 </p>
-                                <p>The contents of the test server will be lost when cloning the production server into the test server</p>
+                                <p>The contents of the test server will be lost when cloning the production server onto the test server</p>
                             {% endif %}
 
                             <p>
                                 <input type="hidden" name="primary_vm" value="true">
-                                <input type="submit" value="Clone Production server into Test server" class="campl-btn campl-primary-cta">
+                                <input type="submit" value="Clone Production server onto Test server" class="campl-btn campl-primary-cta">
                             </p>
                         </div>
                     {% endif %}
                     {% if site.secondary_vm %}
                         <div>
-                            <h3>Clone the test server into the production server</h3>
+                            <h3>Clone the test server onto the production server</h3>
 
                             {% if site.primary_vm %}
                                 <p>
                                     <img src="{% static 'images/interface/icon-warning.png' %}">
                                     Warning:
                                 </p>
-                                <p>The contents of the production server will be lost when cloning the test server into the production server</p>
+                                <p>The contents of the production server will be lost when cloning the test server onto the production server</p>
                             {% endif %}
 
                             <p>
                                 <input type="hidden" name="primary_vm" value="false">
-                                <input type="submit" value="Clone Test server into Production server" class="campl-btn campl-primary-cta">
+                                <input type="submit" value="Clone Test server onto Production server" class="campl-btn campl-primary-cta">
                             </p>
                         </div>
                     {% endif %}
