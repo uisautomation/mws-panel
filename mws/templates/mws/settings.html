@@ -378,7 +378,7 @@
       <div class="modal-dialog modal-sm">
         <div class="modal-content">
           <div class="modal-body">
-            Are you sure do you want to delete the test server?
+            Are you sure you want to delete the test server?
           </div>
           <div class="modal-footer" style="padding: 10px 20px 10px;">
             <button type="button" class="campl-btn campl-primary-cta" data-dismiss="modal">Cancel</button>
@@ -395,7 +395,7 @@
       <div class="modal-dialog modal-sm">
         <div class="modal-content">
           <div class="modal-body">
-            Are you sure do you want to update the operating system?
+            Are you sure you want to update the operating system?
           </div>
           <div class="modal-footer" style="padding: 10px 20px 10px;">
             <button type="button" class="campl-btn campl-primary-cta" data-dismiss="modal">Cancel</button>
@@ -415,7 +415,7 @@
             $.ajax({url: "{% url 'sitesmanagement.views.check_vm_status' service_id=service.id %}",
                 success:function(result){
                     if (result['service_is_on'] === undefined) {
-                        $("#vm_status_message").html("We are currently experimenting a problem. ");
+                        $("#vm_status_message").html("We are currently experiencing a problem. ");
                         $("#vm_status_message_link").html("Please try again later.");
                     } else {
                         if (result['service_is_on'] == true) {
@@ -429,7 +429,7 @@
                             $("#vm_status_message_link").html("Power it on");
                             $("#vm_status_link").attr("href", "{% url 'sitesmanagement.views.power_vm' service_id=service.id %}");
                         } else {
-                            $("#vm_status_message").html("We are currently experimenting a problem.");
+                            $("#vm_status_message").html("We are currently experiencing a problem.");
                             $("#vm_status_message_link").html("Please try again later.");
                         }
                     }
