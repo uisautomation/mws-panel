@@ -13,8 +13,8 @@
                   action={% url 'mwsauth.views.user_panel' %} method="post" enctype="multipart/form-data">
                 <fieldset>
                     {% csrf_token %}
-                    {% if not ssh_public_key %}<p>If you upload your public ssh key, you will be able to access to all
-                    the servers where you have been authorised through ssh using your private key</p>{% endif %}
+                    {% if not ssh_public_key %}<p>If you upload your ssh public key, you will be able to access every
+                    server where you have been authorised using ssh with your private key</p>{% endif %}
                     <div id="user_form">
                         Public SSH Key: <input type="file" name="ssh_public_key"></p>
                     </div>
