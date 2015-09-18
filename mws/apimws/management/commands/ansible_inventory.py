@@ -148,6 +148,7 @@ class Command(NoArgsCommand):
         # List of Unix groups and their associated crsids
         v['mws_unix_groups'] = []
         for unix_group in UnixGroup.objects.filter(service=vm.service):
-            v['mws_unix_groups'].append({'name': unix_group.name, 'users': list(unix_group.users.all()})
+            v['mws_unix_groups'].append({'name': unix_group.name,
+                                         'users': list(unix_group.users.all().values_list('username', flat=True))})
 
         return v
