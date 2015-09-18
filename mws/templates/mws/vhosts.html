@@ -4,14 +4,14 @@
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
 
-            <h1>Web sites for the MWS "{{ service.site.name }}"</h1>
+            <h1>Web sites for the MWS site "{{ service.site.name }}"</h1>
 
             {% if service.vhosts.all %}
                 <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
                     <thead>
                         <tr>
-                            <th>Web sites</th>
-                            <th>Domain Names associated</th>
+                            <th>Web site</th>
+                            <th>Associated domain name</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -47,7 +47,8 @@
                     </tbody>
                 </table>
             {% else %}
-                <p style="margin-top: 20px; margin-bottom: 20px">The server doesn't have web sites configured</p>
+                <p style="margin-top: 20px; margin-bottom: 20px">The
+            server doesn't have any web sites configured</p>
             {% endif %}
 
             <p><a id="add_vhost_button" href="#" class="campl-primary-cta">Add a new Web site</a></p>
@@ -71,7 +72,7 @@
       <div class="modal-dialog modal-sm">
         <div class="modal-content">
           <div class="modal-body">
-            Are you sure do you want to delete the web site?
+            Are you sure you want to delete the web site?
           </div>
           <div class="modal-footer" style="padding: 10px 20px 10px;">
             <button type="button" class="campl-btn campl-primary-cta" data-dismiss="modal">Cancel</button>
