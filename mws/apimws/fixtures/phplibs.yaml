@@ -112,10 +112,6 @@
     description: Provides a wrapper to the ImageMagick library
 - model: apimws.PHPLib
   fields:
-    name: php5-json
-    description: JSON module for php5
-- model: apimws.PHPLib
-  fields:
     name: php5-memcache
     description: memcache extension module for PHP5
 - model: apimws.PHPLib
@@ -212,24 +208,8 @@
     description: ZeroMQ messaging
 - model: apimws.PHPLib
   fields:
-    name: libapache2-mod-php5
-    description: server-side, HTML-embedded scripting language (Apache 2 module)
-- model: apimws.PHPLib
-  fields:
     name: php5-cgi
     description: server-side, HTML-embedded scripting language (CGI binary)
-- model: apimws.PHPLib
-  fields:
-    name: php5-cli
-    description: command-line interpreter for the php5 scripting language
-- model: apimws.PHPLib
-  fields:
-    name: php5-common
-    description: Common files for packages built from the php5 source
-- model: apimws.PHPLib
-  fields:
-    name: php5-curl
-    description: CURL module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-dbg
@@ -248,10 +228,6 @@
     description: server-side, HTML-embedded scripting language (FPM-CGI binary)
 - model: apimws.PHPLib
   fields:
-    name: php5-gd
-    description: GD module for php5
-- model: apimws.PHPLib
-  fields:
     name: php5-gmp
     description: GMP module for php5
 - model: apimws.PHPLib
@@ -266,22 +242,6 @@
   fields:
     name: php5-intl
     description: internationalisation module for php5
-- model: apimws.PHPLib
-  fields:
-    name: php5-ldap
-    description: LDAP module for php5
-- model: apimws.PHPLib
-  fields:
-    name: php5-mcrypt
-    description: MCrypt module for php5
-- model: apimws.PHPLib
-  fields:
-    name: php5-mysql
-    description: MySQL module for php5
-- model: apimws.PHPLib
-  fields:
-    name: php5-mysqlnd
-    description: MySQL module for php5 (Native Driver)
 - model: apimws.PHPLib
   fields:
     name: php5-odbc
@@ -300,20 +260,12 @@
     description: pspell module for php5
 - model: apimws.PHPLib
   fields:
-    name: php5-readline
-    description: Readline module for php5
-- model: apimws.PHPLib
-  fields:
     name: php5-recode
     description: recode module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-snmp
     description: SNMP module for php5
-- model: apimws.PHPLib
-  fields:
-    name: php5-sqlite
-    description: SQLite module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-sybase
