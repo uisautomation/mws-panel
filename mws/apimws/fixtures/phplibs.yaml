@@ -112,6 +112,10 @@
     description: Provides a wrapper to the ImageMagick library
 - model: apimws.PHPLib
   fields:
+    name: php5-mcrypt
+    description: MCrypt module for php5
+- model: apimws.PHPLib
+  fields:
     name: php5-memcache
     description: memcache extension module for PHP5
 - model: apimws.PHPLib
@@ -126,6 +130,10 @@
   fields:
     name: php5-msgpack
     description: PHP extension for interfacing with MessagePack
+- model: apimws.PHPLib
+  fields:
+    name: php5-mysql
+    description: MySQL module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-mysqlnd-ms
