@@ -3,7 +3,7 @@ from django.conf.urls.static import static
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from sitesmanagement.views.domains import DomainListView, DomainDelete
-from sitesmanagement.views.sites import SiteCreate, SiteShow, SiteList, SiteDisable, SiteDelete, SiteEdit
+from sitesmanagement.views.sites import SiteCreate, SiteShow, SiteList, SiteDisable, SiteDelete, SiteEdit, SiteEditEmail
 from sitesmanagement.views.snapshots import SnapshotCreate, SnapshotDelete
 from sitesmanagement.views.unixgroups import UnixGroupListView, UnixGroupCreate, UnixGroupDelete, UnixGroupUpdate
 from sitesmanagement.views.vhosts import VhostListView, VhostDelete, VhostCreate, VisitVhost
@@ -23,6 +23,7 @@ urlpatterns = patterns('',
     url(r'^new/$', SiteCreate.as_view(), name='newsite'),
     url(r'^show/(?P<site_id>[0-9]+)/$', SiteShow.as_view(), name='showsite'),
     url(r'^edit/(?P<site_id>[0-9]+)/$', SiteEdit.as_view(), name='editsite'),
+    url(r'^editsitemail/(?P<site_id>[0-9]+)/$', SiteEditEmail.as_view(), name='editsitemail'),
 
     # Service management
     url(r'^settings/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.service_settings'),

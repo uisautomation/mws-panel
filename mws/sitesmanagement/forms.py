@@ -25,6 +25,15 @@ class SiteForm(forms.ModelForm):
         }
 
 
+class SiteEmailForm(forms.ModelForm):
+    class Meta:
+        model = Site
+        fields = ('email', )
+        labels = {
+            'email': 'The webmaster email (please use a role email when possible)'
+        }
+
+
 class VhostForm(forms.ModelForm):
     class Meta:
         model = Vhost

@@ -14,7 +14,7 @@ from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in
 from apimws.vm import new_site_primary_vm
 from apimws.utils import email_confirmation
 from mwsauth.utils import get_or_create_group_by_groupid
-from sitesmanagement.forms import SiteForm
+from sitesmanagement.forms import SiteForm, SiteEmailForm
 from sitesmanagement.models import NetworkConfig, Service, EmailConfirmation, Site, DomainName, Billing
 from django.conf import settings as django_settings
 from sitesmanagement.utils import can_create_new_site
@@ -56,15 +56,6 @@ def warning_messages(site):
         warning_messages_list.append(
             format_html('No billing details are available, please <a href="%s" style="text-decoration: underline;">add '
                         'them</a>.' % reverse('sitesmanagement.views.billing_management', kwargs={'site_id': site.id})))
-
-    if site.email:
-        if EmailConfirmation.objects.filter(email=site.email, site_id=site.id, status='pending').exists():
-            from apimws.views import resend_email_confirmation_view
-            warning_messages_list.append(
-                format_html('Your email \'%s\' is still unconfirmed, please check your email inbox and click on '
-                            'the link of the email we sent you. <a id="resend_email_link" data-href="%s" href="#" '
-                            'style="text-decoration: underline;">Resend confirmation email</a>' %
-                            (site.email, reverse(resend_email_confirmation_view, kwargs={'site_id': site.id}))))
 
     return warning_messages_list
 
@@ -216,6 +207,26 @@ class SiteEdit(SitePriviledgeAndBusyCheck, UpdateView):
     def form_valid(self, form):
         form.user = self.request.user
         return_value = super(SiteEdit, self).form_valid(form)
+        if 'email' in form.changed_data:
+            if self.object.email:
+                email_confirmation(self.object)
+                # TODO launch ansible to update webmaster email address in host?
+        return return_value
+
+
+class SiteEditEmail(SitePriviledgeAndBusyCheck, UpdateView):
+    """View(Controller) to edit the email associated to a site"""
+    form_class = SiteEmailForm
+
+    def render_to_response(self, context, **response_kwargs):
+        redirect(self.get_object())
+
+    def get_success_url(self):
+        return reverse('showsite', kwargs={'site_id':self.get_object().id})
+
+    def form_valid(self, form):
+        form.user = self.request.user
+        return_value = super(SiteEditEmail, self).form_valid(form)
         if 'email' in form.changed_data:
             if self.object.email:
                 email_confirmation(self.object)
