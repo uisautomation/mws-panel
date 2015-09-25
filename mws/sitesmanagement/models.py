@@ -477,15 +477,15 @@ class VirtualMachine(models.Model):
 
     @property
     def ipv4(self):
-        return self.service.network_configuration.IPv4  # TODO this needs to be self.network_configuration.IPv4
+        return self.network_configuration.IPv4
 
     @property
     def ipv6(self):
-        return self.service.network_configuration.IPv6  # TODO this needs to be self.network_configuration.name
+        return self.network_configuration.IPv6
 
     @property
     def hostname(self):
-        return self.service.network_configuration.name  # TODO this needs to be self.network_configuration.name
+        return self.network_configuration.name
 
     def __unicode__(self):
         if self.name is None:

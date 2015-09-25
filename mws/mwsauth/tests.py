@@ -225,22 +225,29 @@ class AuthTestCases(TestCase):
         self.assertEqual(len(site_with_auth_groups.users.all()), 0)
         self.assertEqual(len(site_with_auth_groups.groups.all()), 1)
         self.assertEqual(site_with_auth_groups.groups.first(), information_systems_group)
-        response = self.client.post(reverse(views.auth_change, kwargs={'site_id': site_with_auth_groups.id}), {
-            'users_crsids': "amc203",
-            'groupids': "101888"
-            # we authorise amc203 user and 101888 group
-        })
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(site_with_auth_groups.get_absolute_url()))
-        self.assertEqual(self.client.get(response.url).status_code, 200)
+        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            mock_subprocess.check_output.return_value.returncode = 0
+            response = self.client.post(reverse(views.auth_change, kwargs={'site_id': site_with_auth_groups.id}), {
+                'users_crsids': "amc203",
+                'groupids': "101888"
+                # we authorise amc203 user and 101888 group
+            })
+            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
+                                                             site_with_auth_groups.production_service
+                                                            .virtual_machines.first().network_configuration.name])
+        self.assertRedirects(response, expected_url=site_with_auth_groups.get_absolute_url())
         self.assertEqual(len(site_with_auth_groups.users.all()), 1)
         self.assertEqual(site_with_auth_groups.users.first(), amc203_user)
         self.assertEqual(len(site_with_auth_groups.groups.all()), 1)
         self.assertEqual(site_with_auth_groups.groups.first(), information_systems_group)
 
-        response = self.client.post(reverse(views.auth_change, kwargs={'site_id': site_with_auth_groups.id}), {
-            # we remove all users and groups authorised, we do not send any crsids or groupids
-        })
+        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            mock_subprocess.check_output.return_value.returncode = 0
+            # remove all users and groups authorised, we do not send any crsids or groupids
+            response = self.client.post(reverse(views.auth_change, kwargs={'site_id': site_with_auth_groups.id}), {})
+            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
+                                                             site_with_auth_groups.production_service
+                                                            .virtual_machines.first().network_configuration.name])
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith(site_with_auth_groups.get_absolute_url()))
         self.assertEqual(self.client.get(response.url).status_code, 403)  # User is no longer authorised
