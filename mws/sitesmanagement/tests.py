@@ -58,8 +58,8 @@ class SiteManagementTests(TestCase):
 
         response = self.client.get(reverse('listsites'))
         self.assertInHTML("<p class=\"campl-notifications-icon campl-warning-icon\" style=\"float:none; margin-bottom: "
-                          "10px;\">At this moment we cannot process any new request for the Managed Web Service, please"
-                          " try again later.</p>", response.content)
+                          "10px;\">At this moment we cannot process any new requests for the Managed Web Service, "
+                          "please try again later.</p>", response.content)
 
         NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
                                      name="mws-66424.mws3.csx.cam.ac.uk")
@@ -70,7 +70,7 @@ class SiteManagementTests(TestCase):
         NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff4', name='mws-client1', type='ipv6')
 
         response = self.client.get(reverse('listsites'))
-        self.assertInHTML("<p><a href=\"%s\" class=\"campl-primary-cta\">Register new server</a></p>" %
+        self.assertInHTML("<p><a href=\"%s\" class=\"campl-primary-cta\">Register new site</a></p>" %
                           reverse('newsite'), response.content)
 
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
@@ -289,8 +289,8 @@ class SiteManagementTests(TestCase):
         self.assertEqual(site_changed.email, 'email@change.test')
 
         response = self.client.get(response.url)
-        self.assertContains(response, "Your email \'%s\' is unconfirmed, please check your email inbox and "
-                                      "click on the link of the email we sent you." % site_changed.email)
+        self.assertContains(response, "Your email %s is unconfirmed, please check your email inbox and click "
+                                      "on the link of the email we have sent you." % site_changed.email)
 
     def test_view_billing(self):
         response = self.client.get(reverse(views.billing_management, kwargs={'site_id': 1}))
