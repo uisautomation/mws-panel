@@ -9,7 +9,7 @@
                 the features of the control panel and can connect to the server via SSH. SSH-only users will only have
                 access to the server via SSH. They won't be able to access the web panel.</p>
             <p>You can search for other users using the text field below by typing their name or CRSid. It will let you
-                autocomplete by selecting their entry from the drop-down list.</p>
+                autocomplete by selecting their entry from the drop down list.</p>
             <p>You can also authorise users or administrators using
                 <a href="http://www.ucs.cam.ac.uk/lookup/">Lookup</a>
                 <a href="http://www.ucs.cam.ac.uk/lookup/groups">groups</a>.
@@ -19,20 +19,60 @@
                 <fieldset>
                     {% csrf_token %}
                     <p>
-                        Administrators:<br/>
-                        <input id="input-lookup-users-ajax" name="users_crsids">
+                        <label for="input-lookup-users-ajax">Administrators:</label>
+                        <select id="input-lookup-users-ajax" name="users_crsids" multiple="multiple">
+                            {% for user in authorised_users %}
+                                <option value="{{ user.username }}" selected="selected">
+                                    {% if user.last_name %}
+                                        {{ user.last_name }}
+                                    {% else %}
+                                        {{ user.username }}
+                                    {% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
                     </p>
                     <p>
-                        SSH-only users:<br/>
-                        <input id="input-lookup-sshusers-ajax" name="sshusers_crsids">
+                        <label for="input-lookup-sshusers-ajax">SSH-only users:</label>
+                        <select id="input-lookup-sshusers-ajax" name="sshusers_crsids" multiple="multiple">
+                            {% for user in sshuserlist %}
+                                <option value="{{ user.username }}" selected="selected">
+                                    {% if user.last_name %}
+                                        {{ user.last_name }}
+                                    {% else %}
+                                        {{ user.username }}
+                                    {% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
                     </p>
                     <p>
-                        Administrators lookup groups:<br/>
-                        <input id="input-lookup-groups-ajax" name="groupids">
+                        <label for="input-lookup-groups-ajax">Administrators lookup groups:</label>
+                        <select id="input-lookup-groups-ajax" name="groupids" multiple="multiple">
+                            {% for group in authorised_groups %}
+                                <option value="{{ group.lookup_id }}" selected="selected">
+                                    {% if group.name %}
+                                        {{ group.name }}
+                                    {% else %}
+                                        {{ group.lookup_id }}
+                                    {% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
                     </p>
                     <p>
-                        SSH-only lookup groups:<br/>
-                        <input id="input-lookup-sshgroups-ajax" name="sshgroupids">
+                        <label for="input-lookup-sshgroups-ajax">SSH-only lookup groups:</label>
+                        <select id="input-lookup-sshgroups-ajax" name="sshgroupids" multiple="multiple">
+                            {% for group in sshusers_groups %}
+                                <option value="{{ group.lookup_id }}" selected="selected">
+                                    {% if group.name %}
+                                        {{ group.name }}
+                                    {% else %}
+                                        {{ group.lookup_id }}
+                                    {% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
                     </p>
                     <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
                 </fieldset>

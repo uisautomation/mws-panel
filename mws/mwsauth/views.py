@@ -2,13 +2,12 @@ import subprocess
 from tempfile import NamedTemporaryFile
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
-from ucamlookup import validate_crsids
+from ucamlookup import validate_crsids_list, validate_groupids_list
 from apimws.ansible import launch_ansible_site, launch_ansible_by_user
 from mwsauth.models import MWSUser
 from mwsauth.utils import privileges_check
-from mwsauth.validators import validate_groupids
 
 
 @login_required
@@ -22,18 +21,11 @@ def auth_change(request, site_id):
             or site.production_service.is_busy:
         return redirect(site)
 
-    lookup_lists = {
-        'authorised_users': site.users.all(),
-        'sshuserlist': site.ssh_users.all(),
-        'authorised_groups': site.groups.all(),
-        'sshusers_groups': site.ssh_groups.all()
-    }
-
     if request.method == 'POST':
-        authuserlist = validate_crsids(request.POST.get('users_crsids'))
-        sshuserlist = validate_crsids(request.POST.get('sshusers_crsids'))
-        authgrouplist = validate_groupids(request.POST.get('groupids'))
-        sshauthgrouplist = validate_groupids(request.POST.get('sshgroupids'))
+        authuserlist = validate_crsids_list(request.POST.getlist('users_crsids'))
+        sshuserlist = validate_crsids_list(request.POST.getlist('sshusers_crsids'))
+        authgrouplist = validate_groupids_list(request.POST.getlist('groupids'))
+        sshauthgrouplist = validate_groupids_list(request.POST.getlist('sshgroupids'))
         # TODO If there are no users in the list return an Exception? No users authorised but maybe a group currently a
         # ValidationError is raised in validate_groupids
         site.users.clear()
@@ -53,7 +45,10 @@ def auth_change(request, site_id):
     }
 
     return render(request, 'mws/auth.html', {
-        'lookup_lists': lookup_lists,
+        'authorised_users': site.users.all(),
+        'sshuserlist': site.ssh_users.all(),
+        'authorised_groups': site.groups.all(),
+        'sshusers_groups': site.ssh_groups.all(),
         'breadcrumbs': breadcrumbs,
         'site': site
     })

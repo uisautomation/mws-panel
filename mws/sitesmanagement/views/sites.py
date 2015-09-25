@@ -10,10 +10,9 @@ from django.shortcuts import get_object_or_404, redirect
 from django.utils.html import format_html
 from django.views.generic import FormView, ListView, UpdateView
 from django.views.generic.detail import SingleObjectMixin, DetailView
-from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups
+from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups, get_or_create_group_by_groupid
 from apimws.vm import new_site_primary_vm
 from apimws.utils import email_confirmation
-from mwsauth.utils import get_or_create_group_by_groupid
 from sitesmanagement.forms import SiteForm, SiteEmailForm
 from sitesmanagement.models import NetworkConfig, Service, EmailConfirmation, Site, DomainName, Billing
 from django.conf import settings as django_settings

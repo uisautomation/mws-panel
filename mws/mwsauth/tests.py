@@ -8,9 +8,7 @@ from django.test import TestCase
 from ucamwebauth.tests import create_wls_response
 from mwsauth import views
 from mwsauth.models import MWSUser
-from mwsauth.utils import get_or_create_group_by_groupid
 from ucamlookup import user_in_groups, get_or_create_user_by_crsid, validate_crsids
-from mwsauth.validators import validate_groupids
 from sitesmanagement.models import Site, Suspension, VirtualMachine, NetworkConfig, Service
 from ucamlookup.models import LookupGroup
 
