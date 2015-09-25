@@ -83,3 +83,7 @@ PEP8_RCFILE = os.path.join(BASE_DIR, 'jenkins/pep8')
 PYLINT_RCFILE = os.path.join(BASE_DIR, 'jenkins/pylint')
 
 VM_END_POINT_COMMAND = ["vmmanager"]
+
+CELERY_EAGER_PROPAGATES_EXCEPTIONS=True
+CELERY_ALWAYS_EAGER=True
+BROKER_BACKEND='memory'
