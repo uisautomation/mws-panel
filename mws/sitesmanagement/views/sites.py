@@ -251,7 +251,7 @@ class SiteDelete(SitePriviledgeAndBusyCheck, UpdateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        super(SiteDelete, self).post(request, *args, **kwargs)
+        self.object = self.get_object()
         if request.POST.get('confirmation') == "yes":
             self.object.cancel()
             return redirect(reverse('listsites'))
@@ -275,8 +275,7 @@ class SiteDisable(SitePriviledgeAndBusyCheck, UpdateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        super(SiteDisable, self).post(request, *args, **kwargs)
-        self.object.disable()
+        self.get_object().disable()
         return redirect(reverse('listsites'))
 
 

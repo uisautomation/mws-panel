@@ -145,8 +145,17 @@ class SiteManagementTests(TestCase):
         self.assertContains(response, "This field is required.")  # Empty name, error
 
         with mock.patch("apimws.xen.subprocess") as mock_subprocess:
-            mock_subprocess.check_output.return_value.returncode = 0
-            mock_subprocess.check_output.return_value = '{"vmid": "mws-client1", "fingerprint": "22:22:22:22"}'
+            def fake_subprocess_output(*args, **kwargs):
+                if (set(args[0]) & set(['vmmanager', 'create'])) == set(['vmmanager', 'create']):
+                    return '{"vmid": "mws-client1"}'
+                elif (set(args[0]) & set(["ssh-keygen", "-lf"])) == set(["ssh-keygen", "-lf"]):
+                    return '2048 fa:ee:51:a2:3f:95:71:6a:2f:8c:e1:66:df:be:f1:2a id_rsa.pub (RSA)'
+                elif (set(args[0]) & set(["ssh-keygen", "-r", "replacehostname", "-f"])) == \
+                        set(["ssh-keygen", "-r", "replacehostname", "-f"]):
+                    return "replacehostname IN SSHFP 1 1 9ddc245c6cf86667e33fe3186b7226e9262eac16\n" \
+                           "replacehostname IN SSHFP 1 2 " \
+                           "2f27ce76295fdffb576d714fea586dd0a87a5a2ffa621b4064e225e36c8cf83c\n"
+            mock_subprocess.check_output.side_effect = fake_subprocess_output
             mock_subprocess.Popen().communicate.return_value = (
                 '{"pubkey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQClBKpj+/WXlxJMY2iYw1mB1qYLM8YDjFS6qSiT6UmNLLhXJ' \
                 'BEfd6vOMErM1IfDsYN+W3604hukxwC859TU4ZLQYD6wFI2D+qMhb2UTcoLlOYD7TG436RXKbxK4iAT7ll3XUT8VxZUq/AZKVs' \
@@ -179,8 +188,8 @@ class SiteManagementTests(TestCase):
 
         response = self.client.get(response.url)
 
-        self.assertContains(response, "Your email \'%s\' is unconfirmed, please check your email inbox and "
-                                      "click on the link of the email we sent you." % test_site.email)
+        self.assertContains(response, "Your email %s is unconfirmed, please check your email inbox and "
+                                      "click on the link of the email we have sent you." % test_site.email)
 
         self.assertEqual(len(test_site.production_vms), 1)
 
