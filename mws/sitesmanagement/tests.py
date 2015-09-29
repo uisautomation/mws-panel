@@ -785,31 +785,31 @@ class SiteManagement2Tests(TestCase):
     #     csrfile.close()
     #     certificatefile.close()
 
-    def test_backups(self):
-        site = self.create_site()
-
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
-            mock_subprocess.check_output.return_value.returncode = 0
-            response = self.client.post(reverse('createvhost', kwargs={'service_id': site.production_service.id}),
-                                        {'name': 'testVhost'})
-            self.assertIn(response.status_code, [200, 302])
-            vhost = Vhost.objects.get(name='testVhost')
-            response = self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}),
-                                        {'name': 'testDomain.cam.ac.uk'})
-            self.assertIn(response.status_code, [200, 302])
-            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
-                                                             site.production_service.virtual_machines.first()
-                                                                 .network_configuration.name])
-
-        restore_date = datetime.now()
-
-        with reversion.create_revision():
-            domain = DomainName.objects.get(name='testDomain.cam.ac.uk')
-            domain.name = "error"
-            domain.status = 'accepted'
-            domain.save()
-
-        self.client.post(reverse(views.backups, kwargs={'service_id': vhost.service.id}), {'backupdate': restore_date})
-        domain = DomainName.objects.get(name='testDomain.cam.ac.uk')
-        self.assertEqual(domain.status, 'accepted')
-        self.assertEqual(domain.name, 'testDomain.cam.ac.uk')
+    # def test_backups(self):
+    #     site = self.create_site()
+    #
+    #     with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+    #         mock_subprocess.check_output.return_value.returncode = 0
+    #         response = self.client.post(reverse('createvhost', kwargs={'service_id': site.production_service.id}),
+    #                                     {'name': 'testVhost'})
+    #         self.assertIn(response.status_code, [200, 302])
+    #         vhost = Vhost.objects.get(name='testVhost')
+    #         response = self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}),
+    #                                     {'name': 'testDomain.cam.ac.uk'})
+    #         self.assertIn(response.status_code, [200, 302])
+    #         mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
+    #                                                          site.production_service.virtual_machines.first()
+    #                                                              .network_configuration.name])
+    #
+    #     restore_date = datetime.now()
+    #
+    #     with reversion.create_revision():
+    #         domain = DomainName.objects.get(name='testDomain.cam.ac.uk')
+    #         domain.name = "error"
+    #         domain.status = 'accepted'
+    #         domain.save()
+    #
+    #     self.client.post(reverse(views.backups, kwargs={'service_id': vhost.service.id}), {'backupdate': restore_date})
+    #     domain = DomainName.objects.get(name='testDomain.cam.ac.uk')
+    #     self.assertEqual(domain.status, 'accepted')
+    #     self.assertEqual(domain.name, 'testDomain.cam.ac.uk')
