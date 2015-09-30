@@ -14,7 +14,10 @@ from ucamlookup import get_institutions, get_institution_name_by_id
 def recreate_vm(modeladmin, request, queryset):
     from apimws.vm import destroy_vm, recreate_vm
     for vm in queryset:
-        destroy_vm(vm)
+        try:
+            destroy_vm(vm)
+        except:
+            pass
         recreate_vm(vm)
 
 
