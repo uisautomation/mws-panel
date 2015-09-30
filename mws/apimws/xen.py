@@ -61,6 +61,59 @@ class TaskWithFailure(Task):
                      "The parameters passed to the task were: %s \n\n The traceback is: \n %s", task_id, args, einfo)
 
 
+def secrets_prealocation(vm):
+    # TODO move this to preallocation
+    # Gets all the keys generated for the site and generates the fingerprint and the SSHFP from them
+    # It sends the SSHFP record to ip-register
+    service = vm.service
+    servicesshfprecord = ""
+    hostsshfprecord = ""
+    sqlcommand = ""
+
+    for keytype in ["sshrsa", "sshdsa", "sshecdsa", "sshed25519"]:
+        p = subprocess.Popen(["userv", "mws-admin", "mws_pubkey"], stdin=subprocess.PIPE,
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = p.communicate(json.dumps({"id": service.site.id, "keytype": keytype}))
+        try:
+            result = json.loads(stdout)
+        except ValueError as e:
+            LOGGER.error("mws_pubkey response is not properly formated:\nstdout: %s\nstderr: %s" % (stdout, stderr))
+            raise e
+
+        pubkey = tempfile.NamedTemporaryFile()
+        pubkey.write(result["pubkey"])
+        pubkey.flush()
+        fingerprint = subprocess.check_output(["ssh-keygen", "-lf", pubkey.name])
+
+        SiteKeys.objects.create(site=service.site, type=keytype.replace("ssh","").upper(), public_key=result["pubkey"],
+                                fingerprint=re.search("([0-9a-f]{2}:)+[0-9a-f]{2}", fingerprint).group(0))
+
+        if keytype is not "sshed25519":  # "sshed25519" as of 2015 is not supported by jackdaw
+            sshkeygeno = subprocess.check_output(["ssh-keygen", "-r", "replacehostname", "-f", pubkey.name])
+            servicesshfprecord += sshkeygeno.replace('replacehostname', service.network_configuration.name)
+            hostsshfprecord += sshkeygeno.replace('replacehostname', vm.network_configuration.name)
+            sshkeygeno = sshkeygeno.split('\n')
+            for i in [0, 1]:
+                sshkglnout = sshkeygeno[i].split(' ')
+                sqlcommand += "INSERT INTO IPREG.MY_SSHFP (NAME, ALGORITHM, FPTYPE, FINGERPRINT) " \
+                              "VALUES ('%s', %i, %i, '%s');\n" % (service.network_configuration.name,
+                                                                  int(sshkglnout[3]), int(sshkglnout[4]), sshkglnout[5])
+                sqlcommand += "INSERT INTO IPREG.MY_SSHFP (NAME, ALGORITHM, FPTYPE, FINGERPRINT) " \
+                              "VALUES ('%s', %i, %i, '%s');\n" % (vm.network_configuration.name, int(sshkglnout[3]),
+                                                                  int(sshkglnout[4]), sshkglnout[5])
+        pubkey.close()
+
+    from apimws.utils import ip_register_api_sshfp
+    ip_register_api_sshfp("%s\n\n%s\n\n%s" % (hostsshfprecord, servicesshfprecord, sqlcommand))
+
+    # Create a default Vhost with the Service FQDN as main domain name
+    default_vhost = Vhost.objects.create(service=service, name="default")
+    default_vhost_dn = DomainName.objects.create(name=service.network_configuration.name,
+                                                 status="accepted", vhost=default_vhost)
+    default_vhost.main_domain = default_vhost_dn
+    default_vhost.save()
+
+
 @shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
 def new_site_primary_vm(service, host_network_configuration=None):
     parameters = {}
@@ -118,64 +171,66 @@ def new_site_primary_vm(service, host_network_configuration=None):
             vm.name = vm.network_configuration.name
     except Exception as e:
         vm.name = vm.network_configuration.name
-    
     vm.save()
-
     from apimws.models import AnsibleConfiguration
     AnsibleConfiguration.objects.update_or_create(service=service, key='os',
                                                   defaults={'value': json.dumps(settings.OS_VERSION)})
+    secrets_prealocation(vm)
 
-    # TODO move this to preallocation
-    # Gets all the keys generated for the site and generates the fingerprint and the SSHFP from them
-    # It sends the SSHFP record to ip-register
-    servicesshfprecord = ""
-    hostsshfprecord = ""
-    sqlcommand = ""
 
-    for keytype in ["sshrsa", "sshdsa", "sshecdsa", "sshed25519"]:
-        p = subprocess.Popen(["userv", "mws-admin", "mws_pubkey"], stdin=subprocess.PIPE,
-                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = p.communicate(json.dumps({"id": parameters["site-id"], "keytype": keytype}))
-        try:
-            result = json.loads(stdout)
-        except ValueError as e:
-            LOGGER.error("mws_pubkey response is not properly formated:\nstdout: %s\nstderr: %s" % (stdout, stderr))
-            raise e
+def recreate_vm(vm):
+    service = vm.service
+    network_configuration = vm.network_configuration
+    parameters = {}
+    parameters["site-id"] = "mwssite-%d" % service.site.id
+    netconf = {}
+    if network_configuration.IPv4:
+        netconf["IPv4"] = network_configuration.IPv4
+    if network_configuration.IPv6:
+        netconf["IPv6"] = network_configuration.IPv6
+    if network_configuration.name:
+        netconf["hostname"] = network_configuration.name
+    os = vm.service.ansible_configuration.filter(key='os')
+    if os:
+        parameters["os"] = json.loads(os[0].value)
+    parameters["netconf"] = netconf
+    parameters["callback"] = {
+        "endpoint": "%s%s" % (settings.MAIN_DOMAIN, reverse(post_installation)),
+        "vm_id": vm.id,
+        "secret": str(vm.token),
+    }
 
-        pubkey = tempfile.NamedTemporaryFile()
-        pubkey.write(result["pubkey"])
-        pubkey.flush()
-        fingerprint = subprocess.check_output(["ssh-keygen", "-lf", pubkey.name])
+    service.status = 'installing'
+    service.save()
 
-        SiteKeys.objects.create(site=service.site, type=keytype.replace("ssh","").upper(), public_key=result["pubkey"],
-                                fingerprint=re.search("([0-9a-f]{2}:)+[0-9a-f]{2}", fingerprint).group(0))
+    try:
+        response = vm_api_request(command='create', parameters=parameters)
+        # TODO this is temporal until we support service network configuration, then we will use
+        # host_network_configuration.ipv6 as a parameter for ip in vm_api_request and host_network_configuration.name
+        # for the parameter hostname in vm_api_request
+    except VMAPIFailure as e:
+        return on_vm_api_failure(*e.args)
+    except AttributeError:
+        return
+    except Exception as e:
+        raise new_site_primary_vm.retry(exc=e)
 
-        if keytype is not "sshed25519":  # "sshed25519" as of 2015 is not supported by jackdaw
-            sshkeygeno = subprocess.check_output(["ssh-keygen", "-r", "replacehostname", "-f", pubkey.name])
-            servicesshfprecord += sshkeygeno.replace('replacehostname', service.network_configuration.name)
-            hostsshfprecord += sshkeygeno.replace('replacehostname', vm.network_configuration.name)
-            sshkeygeno = sshkeygeno.split('\n')
-            for i in [0, 1]:
-                sshkglnout = sshkeygeno[i].split(' ')
-                sqlcommand += "INSERT INTO IPREG.MY_SSHFP (NAME, ALGORITHM, FPTYPE, FINGERPRINT) " \
-                              "VALUES ('%s', %i, %i, '%s');\n" % (service.network_configuration.name,
-                                                                  int(sshkglnout[3]), int(sshkglnout[4]), sshkglnout[5])
-                sqlcommand += "INSERT INTO IPREG.MY_SSHFP (NAME, ALGORITHM, FPTYPE, FINGERPRINT) " \
-                              "VALUES ('%s', %i, %i, '%s');\n" % (vm.network_configuration.name, int(sshkglnout[3]),
-                                                                  int(sshkglnout[4]), sshkglnout[5])
-        pubkey.close()
+    try:
+        jresponse = json.loads(response)
+    except ValueError as e:
+        LOGGER.error("VM API response is not properly formated: %s", response)
+        vm.name = vm.network_configuration.name
+        vm.save()
+        raise e
 
-    from apimws.utils import ip_register_api_sshfp
-    ip_register_api_sshfp("%s\n\n%s\n\n%s" % (hostsshfprecord, servicesshfprecord, sqlcommand))
-
-    # Create a default Vhost with the Service FQDN as main domain name
-    default_vhost = Vhost.objects.create(service=service, name="default")
-    default_vhost_dn = DomainName.objects.create(name=service.network_configuration.name,
-                                                 status="accepted", vhost=default_vhost)
-    default_vhost.main_domain = default_vhost_dn
-    default_vhost.save()
-
-    return True
+    try:
+        if 'vmid' in jresponse:
+            vm.name = jresponse['vmid']
+        else:
+            vm.name = vm.network_configuration.name
+    except Exception as e:
+        vm.name = vm.network_configuration.name
+    vm.save()
 
 
 def get_vm_power_state(vm):

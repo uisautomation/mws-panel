@@ -1,11 +1,24 @@
+import json
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
+from django.core.urlresolvers import reverse
 from django.forms import ModelForm
 from reversion import VersionAdmin
 from suit.widgets import LinkedSelect
 from .models import Site, Billing, DomainName, Suspension, VirtualMachine, EmailConfirmation, \
     Vhost, UnixGroup, NetworkConfig, SiteKeys, Service, Snapshot
 from ucamlookup import get_institutions, get_institution_name_by_id
+
+
+def recreate_vm(modeladmin, request, queryset):
+    from apimws.vm import destroy_vm, recreate_vm
+    for vm in queryset:
+        destroy_vm(vm)
+        recreate_vm(vm)
+
+
+recreate_vm.short_description = "Recreate VM"
 
 
 class SiteAdmin(ModelAdmin):
@@ -106,6 +119,8 @@ class VirtualMachineAdmin(VersionAdmin):
         return '<a href="/admin/sitesmanagement/service/%d/">%s</a>' % (obj.service.id, obj.service)
 
     services.allow_tags = True
+
+    actions = [recreate_vm]
 
 
 class EmailConfirmationAdmin(ModelAdmin):
