@@ -15,7 +15,7 @@ from apimws.vm import new_site_primary_vm
 from apimws.utils import email_confirmation
 from mwsauth.utils import get_or_create_group_by_groupid
 from sitesmanagement.forms import SiteForm, SiteEmailForm
-from sitesmanagement.models import NetworkConfig, Service, EmailConfirmation, Site, DomainName, Billing
+from sitesmanagement.models import NetworkConfig, Service, Site, DomainName, Billing
 from django.conf import settings as django_settings
 from sitesmanagement.utils import can_create_new_site
 
@@ -143,6 +143,13 @@ class SiteCreate(LoginRequiredMixin, FormView):
         context = super(SiteCreate, self).get_context_data(**kwargs)
         context['breadcrumbs'] = {0: dict(name='New Manage Web Service site', url=reverse_lazy('newsite'))}
         return context
+
+    def get_form_kwargs(self):
+        kwargs = super(SiteCreate, self).get_form_kwargs()
+        kwargs.update({
+            'user': self.request.user,
+        })
+        return kwargs
 
     def form_valid(self, form):
         # This method is called when valid form data has been POSTed.
