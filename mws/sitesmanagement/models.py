@@ -312,7 +312,7 @@ class Service(models.Model):
         from apimws.models import AnsibleConfiguration
         ansible_configuraton = get_object_or_None(AnsibleConfiguration, service=self, key="os")
         if ansible_configuraton:
-            return json.loads(ansible_configuraton.value)
+            return ansible_configuraton.value
         else:
             return None
 
