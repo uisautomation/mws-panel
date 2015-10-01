@@ -317,14 +317,10 @@ class Service(models.Model):
             return None
 
     def due_update(self):
-        operating_system_dict = self.operating_system
-        if operating_system_dict:
-            if settings.OS_VERSION[operating_system_dict.keys()[0]] > operating_system_dict.values()[0]:
-                return True
-            else:
-                return False
+        if self.operating_system in getattr(settings, 'OS_DUE_UPGRADE', []):
+            return True
         else:
-            return False  # TODO also raise an exception?
+            return False
 
     @property
     def is_busy(self):
