@@ -97,8 +97,7 @@ class Command(NoArgsCommand):
             v['mws_ipv6'] = vm.network_configuration.IPv6
         v['mws_tls_enabled'] = any(['certificate' in vhv
                                     for vhv in v['mws_vhosts']])
-        v['mws_os_type'] = vm.os_type
-        v['mws_os_version'] = vm.os_version
+        v['mws_os'] = vm.operating_system
 
         v['mws_with_pacemaker'] = False
 

@@ -42,10 +42,7 @@ def warning_messages(site):
             warning_messages_list.append("Your request in the Managed Web Service is being processed")
 
         if production_service.due_update():
-            warning_messages_list.append("Your server is due to an OS update. From %s %.2f to %s %.2f" %
-                                         (production_service.os_type, production_service.os_version,
-                                          production_service.os_type,
-                                          django_settings.OS_VERSION[production_service.os_type]))
+            warning_messages_list.append("Your server is due to an OS update.")
         for domain_name in DomainName.objects.filter(vhost__service=production_service, status='requested'):
             warning_messages_list.append("Your domain name %s has been requested and is under review." %
                                          domain_name.name)

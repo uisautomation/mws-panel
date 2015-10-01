@@ -311,33 +311,19 @@ class Service(models.Model):
     def operating_system(self):
         from apimws.models import AnsibleConfiguration
         ansible_configuraton = get_object_or_None(AnsibleConfiguration, service=self, key="os")
-        if ansible_configuraton:
-            return ansible_configuraton.value
-        else:
-            return None
+        return ansible_configuraton.value if ansible_configuraton else None
 
     def due_update(self):
-        if self.operating_system in getattr(settings, 'OS_DUE_UPGRADE', []):
-            return True
-        else:
-            return False
+        return self.operating_system in getattr(settings, 'OS_DUE_UPGRADE', [])
 
     @property
     def is_busy(self):
-        if self.virtual_machines.count() > 0 \
-                and self.status != 'ready' \
-                and self.status != 'ansible' \
-                and self.status != 'ansible_queued':
-            return True
-        else:
-            return False
+        return self.virtual_machines.count() > 0 and self.status != 'ready' \
+               and self.status != 'ansible' and self.status != 'ansible_queued'
 
     @property
     def is_ready(self):
-        if self.status is None or self.status == '' or self.status == 'ready':
-            return True
-        else:
-            return False
+        return self.status is None or self.status == '' or self.status == 'ready'
 
     @property
     def primary(self):
@@ -375,22 +361,6 @@ class Service(models.Model):
             for domain in vhost.domain_names.all():
                 domains.append(domain)
         return domains
-
-    @property
-    def os_type(self):
-        operating_system_dict = self.operating_system
-        if operating_system_dict:
-            return operating_system_dict.keys()[0]
-        else:
-            return ""
-
-    @property
-    def os_version(self):
-        operating_system_dict = self.operating_system
-        if operating_system_dict:
-            return operating_system_dict.values()[0]
-        else:
-            return ""
 
     def is_on(self):
         return self.virtual_machines.first().is_on()
@@ -435,6 +405,10 @@ class VirtualMachine(models.Model):
         else:
             return None
 
+    @property
+    def operating_system(self):
+        return self.service.operating_system
+
     def is_on(self):
         from apimws.vm import get_vm_power_state
         if get_vm_power_state(self) == "On":
@@ -455,16 +429,6 @@ class VirtualMachine(models.Model):
     def do_reset(self):
         from apimws.vm import reset_vm
         reset_vm.delay(self)
-
-    @property
-    def os_type(self):
-        if self.service:
-            return self.service.os_type
-
-    @property
-    def os_version(self):
-        if self.service:
-            return self.service.os_version
 
     @property
     def primary(self):
