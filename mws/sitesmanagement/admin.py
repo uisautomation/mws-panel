@@ -1,8 +1,5 @@
-import json
-from django.conf import settings
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
-from django.core.urlresolvers import reverse
 from django.forms import ModelForm
 from reversion import VersionAdmin
 from suit.widgets import LinkedSelect
