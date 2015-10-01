@@ -192,7 +192,7 @@ def recreate_vm(vm):
         netconf["hostname"] = network_configuration.name
     os = vm.service.ansible_configuration.filter(key='os')
     if os:
-        parameters["os"] = os[0]
+        parameters["os"] = os[0].value
     parameters["netconf"] = netconf
     parameters["callback"] = {
         "endpoint": "%s%s" % (settings.MAIN_DOMAIN, reverse(post_installation)),
