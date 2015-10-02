@@ -70,6 +70,9 @@ urlpatterns = patterns('',
     # bes++ api
     url(r'^bes/$', 'apimws.bes.bes'),
 
+    # update snapshots
+    url(r'^update_lv_list/$', 'apimws.lv.update_lv_list'),
+
     # apimws app
     url(r'^api/confirm_dns/(?P<dn_id>[0-9]+)/$', 'apimws.views.confirm_dns'),
     url(r'^api/finance/billing/(?P<year>20[0-9]{2})/$', 'apimws.views.billing_year'),
