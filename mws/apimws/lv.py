@@ -25,7 +25,8 @@ def update_lv_list(request):
         LOGGER.info("Machine with IP %s poked the web panel interface to update a VM's LV list" % ip)
         if 'hostname' in request.POST:
             vm = get_object_or_None(VirtualMachine, name=request.POST['hostname'])
-            if vm and (vm.network_configuration.IPv4 == ip or vm.network_configuration.IPv6 == ip):
+            if vm and (vm.network_configuration.IPv4 == ip or vm.network_configuration.IPv6 == ip or
+                       vm.service.network_configuration.IPv4 == ip or vm.service.network_configuration.IPv6 == ip):
                 result = subprocess.check_output(["userv", "mws-admin", "mws_extract_lv_info",
                                                   vm.network_configuration.name])
                 lvlist = []
