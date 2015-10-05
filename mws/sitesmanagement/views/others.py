@@ -321,7 +321,9 @@ def backups(request, service_id):
         2: dict(name='Restore backup', url=reverse(backups, kwargs={'service_id': service.id})),
     }
 
-    fromdate = datetime.date.today()-datetime.timedelta(days=30)
+
+    fromdate = get_object_or_None(AnsibleConfiguration, service=service, key="backup_first_date") \
+               or datetime.date.today()-datetime.timedelta(days=30)
     if fromdate < site.start_date+datetime.timedelta(days=1):
         fromdate = site.start_date+datetime.timedelta(days=1)
 
