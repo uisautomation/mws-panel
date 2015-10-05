@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 import logging
 from django.http import HttpResponse, HttpResponseNotFound
 from django.views.decorators.csrf import csrf_exempt
@@ -29,11 +29,11 @@ def update_lv_list(request):
                 result = subprocess.check_output(["userv", "mws-admin", "mws_extract_lv_info",
                                                   vm.network_configuration.name])
                 lvlist = []
-                first_date = datetime.today()
+                first_date = date.today()
                 for lv in result.splitlines():
                     lv = lv.strip()
                     if re.search("^mws-snapshot-[0-9]{4}-[0-9]{2}-[0-9]{2}$", lv):
-                        lvdate = datetime.strptime(lv.replace("mws-snapshot-", ""), '%Y-%m-%d')
+                        lvdate = datetime.strptime(lv.replace("mws-snapshot-", ""), '%Y-%m-%d').date()
                         if lvdate < first_date:
                             first_date = lvdate
                     elif re.search("^mws-snapshot-.+", lv):
