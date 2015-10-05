@@ -615,7 +615,8 @@ class SiteManagement2Tests(TestCase):
             self.assertIn(response.status_code, [200, 302])
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
                                                              site.production_service.virtual_machines.first()
-                                                                 .network_configuration.name])
+                                                                 .network_configuration.name],
+                                                            stderr=mock_subprocess.STDOUT)
 
         response = self.client.get(reverse('listdomains', kwargs={'vhost_id': vhost.id}))
         self.assertInHTML('<tbody><tr><td><p>test.mws3.csx.cam.ac.uk</p></td><td><p>Requested</p></td>'
@@ -638,7 +639,8 @@ class SiteManagement2Tests(TestCase):
             response = self.client.post(reverse(views.set_dn_as_main, kwargs={'domain_id': 1}))
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
                                                              site.production_service.virtual_machines.first()
-                                                                 .network_configuration.name])
+                                                                 .network_configuration.name],
+                                                            stderr=mock_subprocess.STDOUT)
         response = self.client.get(reverse('listdomains', kwargs={'vhost_id': vhost.id}))
         self.assertInHTML('<tbody><tr><td><p>test.mws3.csx.cam.ac.uk<br>This is the current main domain</p></td>'
                           '<td><p>Requested</p></td> <td><p>Managed domain name</p></td>'
@@ -652,7 +654,8 @@ class SiteManagement2Tests(TestCase):
             response = self.client.delete(reverse('deletedomain', kwargs={'domain_id': 1}))
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
                                                              site.production_service.virtual_machines.first()
-                                                                 .network_configuration.name])
+                                                                 .network_configuration.name],
+                                                            stderr=mock_subprocess.STDOUT)
         response = self.client.get(reverse('listdomains', kwargs={'vhost_id': vhost.id}))
         self.assertInHTML('<tbody><tr><td><p>test.mws3.csx.cam.ac.uk<br>This is the current main domain</p></td>'
                           '<td><p>Requested</p></td><td><p>Managed domain name</p></td>'
@@ -667,7 +670,8 @@ class SiteManagement2Tests(TestCase):
                                         {'name': 'externaldomain.com'})
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
                                                              site.production_service.virtual_machines.first()
-                                                                 .network_configuration.name])
+                                                                 .network_configuration.name],
+                                                            stderr=mock_subprocess.STDOUT)
         response = self.client.get(response.url)
         self.assertInHTML('<tr><td><p>externaldomain.com</p></td><td><p>Accepted</p></td>'
                           '<td><p><a class="setup_instructions" style="cursor: pointer;">Set up instructions</a></p>'

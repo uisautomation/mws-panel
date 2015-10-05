@@ -178,7 +178,8 @@ class AuthTestCases(TestCase):
             })
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
                                                              site_with_auth_users.production_service
-                                                            .virtual_machines.first().network_configuration.name])
+                                                            .virtual_machines.first().network_configuration.name],
+                                                            stderr=mock_subprocess.STDOUT)
         self.assertRedirects(response, expected_url=site_with_auth_users.get_absolute_url())
         self.assertEqual(len(site_with_auth_users.users.all()), 1)
         self.assertEqual(site_with_auth_users.users.first(), amc203_user)
@@ -191,7 +192,8 @@ class AuthTestCases(TestCase):
             response = self.client.post(reverse(views.auth_change, kwargs={'site_id': site_with_auth_users.id}), {})
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
                                                              site_with_auth_users.production_service
-                                                            .virtual_machines.first().network_configuration.name])
+                                                            .virtual_machines.first().network_configuration.name],
+                                                            stderr=mock_subprocess.STDOUT)
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith(site_with_auth_users.get_absolute_url()))
         self.assertEqual(self.client.get(response.url).status_code, 403)  # User is no longer authorised
@@ -234,7 +236,8 @@ class AuthTestCases(TestCase):
             })
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
                                                              site_with_auth_groups.production_service
-                                                            .virtual_machines.first().network_configuration.name])
+                                                            .virtual_machines.first().network_configuration.name],
+                                                            stderr=mock_subprocess.STDOUT)
         self.assertRedirects(response, expected_url=site_with_auth_groups.get_absolute_url())
         self.assertEqual(len(site_with_auth_groups.users.all()), 1)
         self.assertEqual(site_with_auth_groups.users.first(), amc203_user)
@@ -247,7 +250,8 @@ class AuthTestCases(TestCase):
             response = self.client.post(reverse(views.auth_change, kwargs={'site_id': site_with_auth_groups.id}), {})
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
                                                              site_with_auth_groups.production_service
-                                                            .virtual_machines.first().network_configuration.name])
+                                                            .virtual_machines.first().network_configuration.name],
+                                                            stderr=mock_subprocess.STDOUT)
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith(site_with_auth_groups.get_absolute_url()))
         self.assertEqual(self.client.get(response.url).status_code, 403)  # User is no longer authorised

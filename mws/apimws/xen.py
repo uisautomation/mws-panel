@@ -12,6 +12,7 @@ import subprocess
 from apimws.views import post_installation
 from sitesmanagement.models import VirtualMachine, NetworkConfig, Service, SiteKeys, Vhost, DomainName
 
+
 LOGGER = logging.getLogger('mws')
 
 
@@ -37,28 +38,22 @@ def vm_api_request(**json_object):
         response = subprocess.check_output(api_command, stderr=subprocess.STDOUT)
         LOGGER.info("VM API request: %s\nVM API response: %s", api_command, response)
     except subprocess.CalledProcessError as e:
-        response = e.output
-        LOGGER.error("VM API request: %s\nVM API response: %s", api_command, response)
-        raise VMAPIFailure(json_object, response)
+        LOGGER.error("VM API request: %s\nVM API response: %s", api_command, e.output)
+        raise VMAPIFailure()
     return response
 
 
-def on_vm_api_failure(request, response):
-    """ This function logs the error in the logger. The logger can be configured to send an email.
-    :param request: the VM API request
-    :param response: the VM API response
-    :return: False
-    """
-    LOGGER.error("VM API request: %s\nVM API response: %s", request, response)
-    raise VMAPIFailure(request, response)
-
-
-class TaskWithFailure(Task):
+class XenWithFailure(Task):
     abstract = True
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):
-        LOGGER.error("An error happened when trying to communicate with Xen's VM API.\n The task id is %s. \n\n "
-                     "The parameters passed to the task were: %s \n\n The traceback is: \n %s", task_id, args, einfo)
+        if type(exc) is subprocess.CalledProcessError:
+            LOGGER.error("An error happened when trying to communicate with Xen's VM API.\nThe task id is %s.\n\n"
+                         "The parameters passed to the task were: %s\n\nThe traceback is:\n%s\n\n"
+                         "The output from the command was: %s\n", task_id, args, einfo, exc.output)
+        else:
+            LOGGER.error("An error happened when trying to communicate with Xen's VM API.\nThe task id is %s.\n\n"
+                         "The parameters passed to the task were: %s\n\n The traceback is: \n %s", task_id, args, einfo)
 
 
 def secrets_prealocation(vm):
@@ -85,7 +80,7 @@ def secrets_prealocation(vm):
         pubkey.flush()
         fingerprint = subprocess.check_output(["ssh-keygen", "-lf", pubkey.name])
 
-        SiteKeys.objects.create(site=service.site, type=keytype.replace("ssh","").upper(), public_key=result["pubkey"],
+        SiteKeys.objects.create(site=service.site, type=keytype.replace("ssh", "").upper(), public_key=result["pubkey"],
                                 fingerprint=re.search("([0-9a-f]{2}:)+[0-9a-f]{2}", fingerprint).group(0))
 
         if keytype is not "sshed25519":  # "sshed25519" as of 2015 is not supported by jackdaw
@@ -114,7 +109,7 @@ def secrets_prealocation(vm):
     default_vhost.save()
 
 
-@shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
+@shared_task(base=XenWithFailure)
 def new_site_primary_vm(service, host_network_configuration=None):
     parameters = {}
     parameters["site-id"] = "mwssite-%d" % service.site.id
@@ -144,17 +139,7 @@ def new_site_primary_vm(service, host_network_configuration=None):
     service.status = 'installing'
     service.save()
 
-    try:
-        response = vm_api_request(command='create', parameters=parameters)
-        # TODO this is temporal until we support service network configuration, then we will use
-        # host_network_configuration.ipv6 as a parameter for ip in vm_api_request and host_network_configuration.name
-        # for the parameter hostname in vm_api_request
-    except VMAPIFailure as e:
-        return on_vm_api_failure(*e.args)
-    except AttributeError:
-        return
-    except Exception as e:
-        raise new_site_primary_vm.retry(exc=e)
+    response = vm_api_request(command='create', parameters=parameters)
 
     try:
         jresponse = json.loads(response)
@@ -203,17 +188,7 @@ def recreate_vm(vm):
     service.status = 'installing'
     service.save()
 
-    try:
-        response = vm_api_request(command='create', parameters=parameters)
-        # TODO this is temporal until we support service network configuration, then we will use
-        # host_network_configuration.ipv6 as a parameter for ip in vm_api_request and host_network_configuration.name
-        # for the parameter hostname in vm_api_request
-    except VMAPIFailure as e:
-        return on_vm_api_failure(*e.args)
-    except AttributeError:
-        return
-    except Exception as e:
-        raise new_site_primary_vm.retry(exc=e)
+    response = vm_api_request(command='create', parameters=parameters)
 
     try:
         jresponse = json.loads(response)
@@ -250,39 +225,23 @@ def get_vm_power_state(vm):
         raise VMAPIFailure(None, response)
 
 
-@shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
+@shared_task(base=XenWithFailure)
 def change_vm_power_state(vm, on):
     if on != 'on' and on != 'off':
         raise VMAPIInputException("passed wrong parameter power %s" % on)
-    try:
-        vm_api_request(command='button', parameters={"action": "power%s" % on, "vmid": vm.name})
-    except VMAPIFailure as e:
-        return on_vm_api_failure(*e.args)
-    except Exception as e:
-        raise change_vm_power_state.retry(exc=e)
+    vm_api_request(command='button', parameters={"action": "power%s" % on, "vmid": vm.name})
     return True
 
 
-@shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
+@shared_task(base=XenWithFailure)
 def reset_vm(vm):
-    try:
-        vm_api_request(command='button', parameters={"action": "reboot", "vmid": vm.name})
-    except VMAPIFailure as e:
-        return on_vm_api_failure(*e.args)
-    except Exception as e:
-        raise reset_vm.retry(exc=e)  # TODO are we sure we want to do that?
+    vm_api_request(command='button', parameters={"action": "reboot", "vmid": vm.name})
     return True
 
 
-@shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
+@shared_task(base=XenWithFailure)
 def destroy_vm(vm):
-    try:
-        vm_api_request(command='delete', parameters={'vmid': vm.name})
-    except VMAPIFailure as e:
-        return on_vm_api_failure(*e.args)
-    except Exception as e:
-        raise destroy_vm.retry(exc=e)
-
+    vm_api_request(command='delete', parameters={'vmid': vm.name})
     return True
 
 
@@ -311,7 +270,7 @@ def clone_vm(site, primary_vm):
     clone_vm_api_call.delay(original_service, destination_vm)
 
 
-@shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
+@shared_task(base=XenWithFailure)
 def clone_vm_api_call(original_service, destination_vm):
 
     original_vm = original_service.virtual_machines.first()
@@ -326,12 +285,7 @@ def clone_vm_api_call(original_service, destination_vm):
     if destination_vm.network_configuration.name:
         parameters["netconf"]["hostname"] = destination_vm.network_configuration.name
 
-    try:
-        response = vm_api_request(command='clone', vmid=original_vm.name, parameters=parameters)
-    except VMAPIFailure as e:
-        return on_vm_api_failure(*e.args)
-    except Exception as e:
-        raise clone_vm_api_call.retry(exc=e)
+    response = vm_api_request(command='clone', vmid=original_vm.name, parameters=parameters)
 
     response = json.loads(response)
 

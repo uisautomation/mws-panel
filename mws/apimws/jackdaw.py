@@ -1,17 +1,18 @@
 import logging
 import subprocess
-from celery import shared_task
+from celery import shared_task, Task
 from django.contrib.auth.models import User
 from mwsauth.models import MWSUser
 
-logger = logging.getLogger('mws')
+
+LOGGER = logging.getLogger('mws')
 
 
 def extract_crsid_and_uuid(text_to_be_parsed):
     text_parsed = text_to_be_parsed.split(',')
     crsid = text_parsed[0].lower().lower()
     if text_parsed[2] == '':
-        logger.warning("The user " + str(crsid) + " does not have UID in the Jackdaw feed")
+        LOGGER.warning("The user " + str(crsid) + " does not have UID in the Jackdaw feed")
         return (crsid, None)  # TODO temporal workaround for jackdaw users without uid
     uid = int(text_parsed[2])
     return (crsid, uid)
@@ -47,9 +48,23 @@ def reactivate_users(jackdaw_users_crsids, list_of_mws_users, jackdaw_users):
     map(lambda x: reactivate_or_create_mws_user(x, jackdaw_users), set(jackdaw_users_crsids) - set(list_of_mws_users))
 
 
-@shared_task()
+class SSHTaskWithFailure(Task):
+    abstract = True
+
+    def on_failure(self, exc, task_id, args, kwargs, einfo):
+        if type(exc) is subprocess.CalledProcessError:
+            LOGGER.error("An error happened when trying to execute SSH.\nThe task id is %s.\n\n"
+                         "The parameters passed to the task were: %s\n\nThe traceback is:\n%s\n\n"
+                         "The output from the command was: %s\n", task_id, args, einfo, exc.output)
+        else:
+            LOGGER.error("An error happened when trying to execute SSH.\nThe task id is %s.\n\n"
+                         "The parameters passed to the task were: %s\n\nThe traceback is:\n%s\n", task_id, args, einfo)
+
+
+@shared_task(base=SSHTaskWithFailure)
 def jackdaw_api():
-    jackdaw_response = subprocess.check_output(["ssh", "mwsv3@jackdaw.csi.cam.ac.uk", "p", "get_people"])
+    jackdaw_response = subprocess.check_output(["ssh", "mwsv3@jackdaw.csi.cam.ac.uk", "p", "get_people"],
+                                               stderr=subprocess.STDOUT)
     jackdaw_response_parsed = jackdaw_response.splitlines()  # TODO Raise a custom exception if response is empty
     jackdaw_users = map(extract_crsid_and_uuid, jackdaw_response_parsed)
     # Only take as valid users, users with uid

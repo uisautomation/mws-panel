@@ -1,14 +1,25 @@
 from __future__ import absolute_import
-from celery import shared_task
+import logging
+from celery import shared_task, Task
 from django.core.mail import EmailMessage
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from apimws.vm import TaskWithFailure
 from sitesmanagement.models import EmailConfirmation
 import uuid
 
 
-@shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
+LOGGER = logging.getLogger('mws')
+
+
+class EmailTaskWithFailure(Task):
+    abstract = True
+
+    def on_failure(self, exc, task_id, args, kwargs, einfo):
+        LOGGER.error("An error happened when trying to send an email.\nThe task id is %s.\n\n"
+                     "The parameters passed to the task were: %s\n\nThe traceback is:\n%s\n", task_id, args, einfo)
+
+
+@shared_task(base=EmailTaskWithFailure, default_retry_delay=5*60, max_retries=12)  # Retry each 5 minutes for 1 hours
 def ip_register_api_request(domain_name):
     EmailMessage(
         subject="New request of a Domain Name for the MWS",
@@ -23,7 +34,7 @@ def ip_register_api_request(domain_name):
     ).send()
 
 
-@shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
+@shared_task(base=EmailTaskWithFailure, default_retry_delay=5*60, max_retries=12)  # Retry each 5 minutes for 1 hours
 def ip_register_api_sshfp(sshfprecord):
     EmailMessage(
         subject="Managed Web Service: Please update the following DNS entries",
@@ -40,7 +51,7 @@ def email_confirmation(site):
     send_email_confirmation.delay(site)
 
 
-@shared_task(base=TaskWithFailure, default_retry_delay=5*60, max_retries=288)  # Retry each 5 minutes for 24 hours
+@shared_task(base=EmailTaskWithFailure, default_retry_delay=5*60, max_retries=12)  # Retry each 5 minutes for 1 hours
 def send_email_confirmation(site):
     email_conf = EmailConfirmation.objects.filter(site=site)
     if email_conf:
@@ -56,7 +67,7 @@ def send_email_confirmation(site):
         ).send()
 
 
-@shared_task(base=TaskWithFailure, default_retry_delay=60, max_retries=5)
+@shared_task(base=EmailTaskWithFailure, default_retry_delay=5*60, max_retries=12)  # Retry each 5 minutes for 1 hours
 def finished_installation_email_confirmation(site):
     EmailMessage(
         subject="University of Cambridge Managed Web Service: Your MWS3 site is available",

@@ -1,9 +1,9 @@
 import logging
 import subprocess
 from celery import shared_task, Task
-from django.conf import settings
 from django.utils import timezone
 from sitesmanagement.models import Site, Snapshot
+
 
 LOGGER = logging.getLogger('mws')
 
@@ -46,7 +46,7 @@ def launch_ansible_site(site):
         launch_ansible(site.test_service)
 
 
-class TaskWithFailure(Task):
+class AnsibleTaskWithFailure(Task):
     abstract = True
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):
@@ -59,16 +59,15 @@ class TaskWithFailure(Task):
                          "The parameters passed to the task were: %s\n\nThe traceback is:\n%s\n", task_id, args, einfo)
 
 
-@shared_task(base=TaskWithFailure, default_retry_delay=60, max_retries=5)  # Retry each minute for 5 minutes
+@shared_task(base=AnsibleTaskWithFailure, default_retry_delay=120, max_retries=2)
 def launch_ansible_async(service):
     while service.status != 'ready':
         try:
             for vm in service.virtual_machines.all():
-                subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name])
+                subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name],
+                                        stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
-            LOGGER.error("An error happened when trying to execute Ansible.\nThe error is %s.\n\n", str(e))
-            if not getattr(settings, 'DEMO', False):
-                raise launch_ansible_async.retry(exc=e)
+            raise launch_ansible_async.retry(exc=e)
         service = refresh_object(service)
         if service.status == 'ansible_queued':
             service.status = 'ansible'
@@ -78,24 +77,21 @@ def launch_ansible_async(service):
             service.save()
 
 
-@shared_task(base=TaskWithFailure, default_retry_delay=60, max_retries=5)  # Retry each minute for 5 minutes
+@shared_task(base=AnsibleTaskWithFailure)
 def ansible_change_mysql_root_pwd(service):
-    try:
-        for vm in service.virtual_machines.all():
-            subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name,
-                                     "--tags", "change_mysql_password", "-e", "change_mysql_root_pwd=true"])
-    except subprocess.CalledProcessError as e:
-        if not getattr(settings, 'DEMO', False):
-            raise launch_ansible_async.retry(exc=e)
+    for vm in service.virtual_machines.all():
+        subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name,
+                                 "--tags", "change_mysql_password", "-e", "change_mysql_root_pwd=true"],
+                                stderr=subprocess.STDOUT)
 
 
-@shared_task()
+@shared_task(base=AnsibleTaskWithFailure)
 def ansible_create_custom_snapshot(service, snapshot):
     try:
         for vm in service.virtual_machines.all():
             subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name,
                                      "--tags", "create_custom_snapshot", "-e",
-                                     'create_snapshot_name="%s"' % snapshot.name])
+                                     'create_snapshot_name="%s"' % snapshot.name], stderr=subprocess.STDOUT)
         snapshot.date = timezone.now()
         snapshot.save()
     except Exception as e:
@@ -103,17 +99,19 @@ def ansible_create_custom_snapshot(service, snapshot):
         raise e
 
 
-@shared_task()
+@shared_task(base=AnsibleTaskWithFailure)
 def restore_snapshot(service, snapshot_name):
     for vm in service.virtual_machines.all():
         subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name,
-                                 "--tags", "restore_snapshot", "-e", 'restore_snapshot_name="%s"' % snapshot_name])
+                                 "--tags", "restore_snapshot", "-e", 'restore_snapshot_name="%s"' % snapshot_name],
+                                stderr=subprocess.STDOUT)
 
 
-@shared_task()
+@shared_task(base=AnsibleTaskWithFailure)
 def delete_snapshot(snapshot_id):
     snapshot = Snapshot.objects.get(id=snapshot_id)
     for vm in snapshot.service.virtual_machines.all():
         subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name,
-                                 "--tags", "delete_snapshot", "-e", 'delete_snapshot_name="%s"' % snapshot.name])
+                                 "--tags", "delete_snapshot", "-e", 'delete_snapshot_name="%s"' % snapshot.name],
+                                stderr=subprocess.STDOUT)
     snapshot.delete()
