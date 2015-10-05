@@ -40,7 +40,8 @@ def update_lv_list(request):
                     elif re.search("^mws-snapshot-.+", lv):
                         lvlist.append(lv.replace("mws-snapshot-", ""))
                 # Store the first date of an available backup in the database to be used by the front end
-                backup_first_date = AnsibleConfiguration.objects.filter(service=vm.service, key="backup_first_date")
+                backup_first_date = get_object_or_None(AnsibleConfiguration,
+                                                       service=vm.service, key="backup_first_date")
                 if backup_first_date:
                     backup_first_date.value = first_date.isoformat()
                     backup_first_date.save()
