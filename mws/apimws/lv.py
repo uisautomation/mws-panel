@@ -32,7 +32,10 @@ def update_lv_list(request):
                     if re.search("^mws-snapshot-[0-9]{4}-[0-9]{2}-[0-9]{2}$", lv):
                         pass
                     elif re.search("^mws-snapshot-.+", lv):
-                        lvlist.append(lv)
+                        lvlist.append(lv.replace("mws-snapshot-", ""))
+                for lv in vm.service.snapshots.all():
+                    if lv.name not in lvlist:
+                        lv.delete()
                 LOGGER.info("VM %s LV list updated: %s" % (vm.name, lvlist))
                 return HttpResponse(ip + ' %s' % vm.name)
     return HttpResponseNotFound()
