@@ -43,6 +43,7 @@ def update_lv_list(request):
                 backup_first_date = AnsibleConfiguration.objects.filter(service=vm.service, key="backup_first_date")
                 if backup_first_date:
                     backup_first_date.value = first_date.isoformat()
+                    backup_first_date.save()
                 else:
                     AnsibleConfiguration.objects.create(service=vm.service, key="backup_first_date",
                                                         value=first_date.isoformat())
