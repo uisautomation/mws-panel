@@ -218,7 +218,7 @@ class SiteEdit(SitePriviledgeAndBusyCheck, UpdateView):
         return return_value
 
 
-class SiteEditEmail(SitePriviledgeAndBusyCheck, UpdateView):
+class SiteEditEmail(SitePriviledgeCheck, UpdateView):
     """View(Controller) to edit the email associated to a site"""
     form_class = SiteEmailForm
 
