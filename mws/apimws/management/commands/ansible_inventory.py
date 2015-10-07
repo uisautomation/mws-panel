@@ -85,6 +85,7 @@ class Command(NoArgsCommand):
                 vhv['tls_key_hash'] = vh.tls_key_hash
             vhv['tls_enabled'] = vh.tls_enabled
             vhv['generate_csr'] = 'tls_key_hash' in vhv and vh.tls_key_hash == "requested"
+            vhv['webapp'] = vh.webapp
             return vhv
 
         v['mws_vhosts'] = [vhost_vars(vh) for vh in vm.service.vhosts.all()]

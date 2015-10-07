@@ -455,6 +455,9 @@ class VirtualMachine(models.Model):
 
 
 class Vhost(models.Model):
+    WEBAPP_CHOICES = (
+        ('wordpress', 'Wordpress'),
+    )
     name = models.CharField(max_length=150, validators=[validate_slug])
     # main domain name for this vhost
     main_domain = models.ForeignKey('DomainName', related_name='+', null=True, blank=True, on_delete=models.SET_NULL)
@@ -463,6 +466,7 @@ class Vhost(models.Model):
     certificate = models.TextField(null=True, blank=True)
     tls_key_hash = models.TextField(null=True, blank=True)
     tls_enabled = models.BooleanField(default=False)
+    webapp = models.CharField(max_length=100, choices=WEBAPP_CHOICES, null=True, blank=True)
 
     def sorted_domain_names(self):
         return sorted(set(self.domain_names.all()))
