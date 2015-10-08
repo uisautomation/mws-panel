@@ -107,8 +107,21 @@ class SiteList(LoginRequiredMixin, ListView):
                                           self.object_list)
         context['sites_disabled'] = filter(lambda site: not site.is_canceled() and site.is_disabled(),
                                            self.object_list)
+
+        try:
+            groups_id = get_group_ids_of_a_user_in_lookup(self.request.user)
+        except IbisException:
+            groups_id = []
+
+        ssh_sites = []
+        for group_id in groups_id:
+            group = get_or_create_group_by_groupid(group_id)
+            ssh_sites += group.sites_auth_as_user.all()
+
+        ssh_sites += self.request.user.sites_auth_as_user.all()
+
         context['sites_authorised'] = filter(lambda site: not site.is_canceled() and not site.is_disabled(),
-                                             self.request.user.sites_auth_as_user.all())
+                                             list(set(ssh_sites)))
         context['deactivate_new'] = not can_create_new_site()
         return context
 
@@ -125,7 +138,7 @@ class SiteList(LoginRequiredMixin, ListView):
 
         sites += self.request.user.sites.all()
 
-        return sites
+        return list(set(sites))
 
 
 class SiteCreate(LoginRequiredMixin, FormView):
