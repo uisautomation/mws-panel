@@ -37,9 +37,10 @@ class SiteEmailForm(forms.ModelForm):
 class VhostForm(forms.ModelForm):
     class Meta:
         model = Vhost
-        fields = ('name', )
+        fields = ('name', 'webapp')
         labels = {
             'name': 'Web site name',
+            'webapp': 'Optional pre-installed web application',
         }
 
 
