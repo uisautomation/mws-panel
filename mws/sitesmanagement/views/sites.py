@@ -10,10 +10,10 @@ from django.shortcuts import get_object_or_404, redirect
 from django.utils.html import format_html
 from django.views.generic import FormView, ListView, UpdateView
 from django.views.generic.detail import SingleObjectMixin, DetailView
-from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups
+from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups, get_or_create_group_by_groupid, \
+    get_user_lookupgroups
 from apimws.vm import new_site_primary_vm
 from apimws.utils import email_confirmation
-from mwsauth.utils import get_or_create_group_by_groupid
 from sitesmanagement.forms import SiteForm, SiteEmailForm
 from sitesmanagement.models import NetworkConfig, Service, Site, DomainName, Billing
 from django.conf import settings as django_settings
@@ -108,37 +108,19 @@ class SiteList(LoginRequiredMixin, ListView):
         context['sites_disabled'] = filter(lambda site: not site.is_canceled() and site.is_disabled(),
                                            self.object_list)
 
-        try:
-            groups_id = get_group_ids_of_a_user_in_lookup(self.request.user)
-        except IbisException:
-            groups_id = []
-
-        ssh_sites = []
-        for group_id in groups_id:
-            group = get_or_create_group_by_groupid(group_id)
-            ssh_sites += group.sites_auth_as_user.all()
-
-        ssh_sites += self.request.user.sites_auth_as_user.all()
+        ssh_sites =  reduce(lambda grouplist, group: grouplist+list(group.sites_auth_as_user.all()),
+                            get_user_lookupgroups(self.request.user),
+                            list(self.request.user.sites_auth_as_user.all()))
 
         context['sites_authorised'] = filter(lambda site: not site.is_canceled() and not site.is_disabled(),
-                                             list(set(ssh_sites)))
+                                             ssh_sites)
         context['deactivate_new'] = not can_create_new_site()
         return context
 
     def get_queryset(self):
-        try:
-            groups_id = get_group_ids_of_a_user_in_lookup(self.request.user)
-        except IbisException:
-            groups_id = []
-
-        sites = []
-        for group_id in groups_id:
-            group = get_or_create_group_by_groupid(group_id)
-            sites += group.sites.all()
-
-        sites += self.request.user.sites.all()
-
-        return list(set(sites))
+        return reduce(lambda grouplist, group: grouplist+list(group.sites.all()),
+                      get_user_lookupgroups(self.request.user),
+                      list(self.request.user.sites.all()))
 
 
 class SiteCreate(LoginRequiredMixin, FormView):
