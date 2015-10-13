@@ -68,7 +68,7 @@ def secrets_prealocation(vm):
     for keytype in ["sshrsa", "sshdsa", "sshecdsa", "sshed25519"]:
         p = subprocess.Popen(["userv", "mws-admin", "mws_pubkey"], stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = p.communicate(json.dumps({"id": service.site.id, "keytype": keytype}))
+        stdout, stderr = p.communicate(json.dumps({"id": "mwssite-%d" % service.site.id, "keytype": keytype}))
         try:
             result = json.loads(stdout)
         except ValueError as e:
