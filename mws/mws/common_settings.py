@@ -125,3 +125,5 @@ OS_VERSION = "jessie"
 OS_VERSION_VMAPI = "Debian 8RC1 x86_64 preseed"
 OS_VERSION_VMXENAPI = "jessie"
 OS_DUE_UPGRADE = []
+
+YEAR_COST = 100.00

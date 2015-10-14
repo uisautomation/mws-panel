@@ -136,25 +136,26 @@ class Site(models.Model):
     def domain_names(self):
         return DomainName.objects.filter(vhost__service = self.production_service)
 
-    def calculate_billing(self, financial_year_start, financial_year_end):
+    def calculate_billing(self, financial_period_start, financial_period_end):
         start_date = end_date = None
         if self.end_date is None:
-            end_date = financial_year_end  # The site has not yet been deactivated
-        elif financial_year_start <= self.end_date <= financial_year_end:
+            end_date = financial_period_end  # The site has not yet been deactivated
+        elif financial_period_start <= self.end_date <= financial_period_end:
             end_date = self.end_date  # The site was deactivated this financial year
 
-        if financial_year_start <= self.start_date <= financial_year_end:
+        if financial_period_start <= self.start_date <= financial_period_end:
             start_date = self.start_date  # The site started this financial year
-        if self.start_date < financial_year_start:
-            start_date = financial_year_start  # The site started before this financial year
+        if self.start_date < financial_period_start:
+            start_date = financial_period_start  # The site started before this financial year
 
         if start_date is None or end_date is None:
             return None  # The site was deactivated before this financial year or started after this financial year
         else:
             if hasattr(self, 'billing'):
-                return [self.billing.group, self.billing.purchase_order_number, start_date, end_date]
+                return [self.id, self.name, self.institution_id, self.billing.group,
+                        self.billing.purchase_order_number, start_date, end_date, settings.YEAR_COST]
             else:
-                return ['Site ID: %d' % self.id, 'Pending', start_date, end_date]
+                return None
 
     def cancel(self):
         self.end_date = datetime.today()

@@ -46,8 +46,8 @@ def billing_year(request, year):
                           [get_or_create_group_by_groupid("101923"), get_or_create_group_by_groupid("101888")]):
         return HttpResponseForbidden()
 
-    billing_list = map(lambda x: x.calculate_billing(financial_year_start=date(int(year), 8, 1),
-                                                     financial_year_end=date(int(year)+1, 7, 31)),
+    billing_list = map(lambda x: x.calculate_billing(financial_period_start=date(int(year), 8, 1),
+                                                     financial_period_end=date(int(year)+1, 7, 31)),
                        Site.objects.all())
     billing_list = [x for x in billing_list if x is not None]
 
