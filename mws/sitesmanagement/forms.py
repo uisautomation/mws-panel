@@ -62,7 +62,7 @@ class BillingForm(forms.ModelForm):
         fields = ('purchase_order_number', 'group', 'purchase_order')
         labels = {
             'purchase_order_number': 'Purchase order number (PO)',
-            'group': 'Name or Reference of the group that raised the purchase order',
+            'group': 'Name of the team/group/department that raised the purchase order',
             'purchase_order': 'A PDF file with the purchase order'
         }
 

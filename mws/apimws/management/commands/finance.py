@@ -41,7 +41,7 @@ class Command(NoArgsCommand):
             subject="Monthly Report MWS3",
             body="Attached you can find the monthly report",
             from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
-            to=['amc203@cam.ac.uk'],
+            to=[settings.FINANCE_EMAIL],
             headers={'Return-Path': 'mws3-support@cam.ac.uk'},
             attachments=[('mws3report.csv', tempstream.getvalue(), 'application/vnd.ms-excel')]+billing_list_file
         ).send()
