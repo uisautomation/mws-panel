@@ -256,6 +256,8 @@ class Billing(models.Model):
     purchase_order = models.FileField(upload_to='billing')
     group = models.CharField(max_length=250)
     site = models.OneToOneField(Site, related_name='billing')
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateField(auto_now=True)
 
 
 def full_domain_validator(hostname):
