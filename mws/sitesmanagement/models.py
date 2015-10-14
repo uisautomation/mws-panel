@@ -1,6 +1,5 @@
 from datetime import datetime
 from itertools import chain
-import json
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError

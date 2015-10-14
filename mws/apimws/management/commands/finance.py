@@ -1,11 +1,10 @@
 import csv
-from datetime import date, timedelta
+from datetime import date
 from StringIO import StringIO
 from django.conf import settings
-from django.core.files.temp import NamedTemporaryFile
 from django.core.mail import EmailMessage
 from django.core.management.base import NoArgsCommand, CommandError
-from sitesmanagement.models import Site, Billing
+from sitesmanagement.models import Billing
 
 
 class Command(NoArgsCommand):
@@ -24,13 +23,16 @@ class Command(NoArgsCommand):
             enddate = date(year, month+1, 1)
 
         billing_list = Billing.objects.filter(date_modified__lt=enddate, date_modified__gte=inidate)
-        billing_list = map(lambda x: [x.site.id, x.site.name, x.site.institution_id, x.group, x.purchase_order_number,
-                                      x.site.start_date, settings.YEAR_COST], billing_list)
+        billing_list_file = map(lambda x: (x.purchase_order.name, x.purchase_order.read(), 'application/other'),
+                                billing_list)
+        billing_list_info = map(lambda x: [x.site.id, x.site.name, x.site.institution_id, x.group,
+                                           x.purchase_order_number, x.site.start_date, settings.YEAR_COST],
+                                billing_list)
 
         tempstream = StringIO()
         writer = csv.writer(tempstream)
 
-        for billing in billing_list:
+        for billing in billing_list_info:
             writer.writerow(billing)
 
         EmailMessage(
@@ -39,7 +41,7 @@ class Command(NoArgsCommand):
             from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
             to=['amc203@cam.ac.uk'],
             headers={'Return-Path': 'mws3-support@cam.ac.uk'},
-            attachments=[('mws3.csv', tempstream.getvalue(), 'application/vnd.ms-excel')]
+            attachments=[('mws3report.csv', tempstream.getvalue(), 'application/vnd.ms-excel')]+billing_list_file
         ).send()
 
         tempstream.close()
