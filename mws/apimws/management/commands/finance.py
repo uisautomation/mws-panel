@@ -24,7 +24,7 @@ class Command(NoArgsCommand):
             enddate = date(year, month+1, 1)
 
         billing_list = Billing.objects.filter(date_modified__lt=enddate, date_modified__gte=inidate)
-        billing_list_file = map(lambda x: ("%d.%s" % (x.site.id, splitext(x.purchase_order.name)[1]),
+        billing_list_file = map(lambda x: ("%d%s" % (x.site.id, splitext(x.purchase_order.name)[1]),
                                            x.purchase_order.read(), 'application/other'),
                                 billing_list)
         billing_list_info = map(lambda x: [x.site.id, x.site.name, x.site.institution_id, x.group,
