@@ -66,9 +66,9 @@ class Site(models.Model):
     # SSH only users of a site
     ssh_users = models.ManyToManyField(User, related_name='sites_auth_as_user', blank=True)
     # Administrator groups of a site
-    groups = models.ManyToManyField(LookupGroup, related_name='sites', null=True, blank=True)
+    groups = models.ManyToManyField(LookupGroup, related_name='sites', blank=True)
     # SSH only groups
-    ssh_groups = models.ManyToManyField(LookupGroup, related_name='sites_auth_as_user', null=True, blank=True)
+    ssh_groups = models.ManyToManyField(LookupGroup, related_name='sites_auth_as_user', blank=True)
 
     # Indicates if the site is disabled by the user
     disabled = models.BooleanField(default=False)
@@ -237,7 +237,7 @@ class EmailConfirmation(models.Model):
     email = models.EmailField(null=True, blank=True)
     token = models.CharField(max_length=50)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES)
-    site = models.ForeignKey(Site, related_name='+', unique=True)  # do not to create a backwards relation
+    site = models.OneToOneField(Site, related_name='+')  # do not to create a backwards relation
 
 
 class Suspension(models.Model):
