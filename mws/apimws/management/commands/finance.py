@@ -55,7 +55,7 @@ class Command(NoArgsCommand):
         ### SEND REPORT ###
         ###################
 
-        po_files = map(lambda x: ("%d%s" % (x.site.id, splitext(x.purchase_order.name)[1]),
+        po_files = map(lambda x: ("%d%s" % (x.purchase_order_number, splitext(x.purchase_order.name)[1]),
                                   x.purchase_order.read(), 'application/other'),
                        new_sites_billing | renewal_sites_billing)
         new_billing = map(lambda x: [x.site.id, x.site.name, x.site.institution_id, x.group,
@@ -64,6 +64,9 @@ class Command(NoArgsCommand):
         renewals_billing = map(lambda x: [x.site.id, x.site.name, x.site.institution_id, x.group,
                                           x.purchase_order_number, x.site.start_date, settings.YEAR_COST],
                                renewal_sites_billing)
+        header = ['id', 'Name', 'Institution', 'PO raised by', 'PO number', 'Created at', 'Cost']
+        new_billing = header + new_billing
+        renewals_billing = header + renewals_billing
 
         stream_new = StringIO()
         stream_renewal = StringIO()
