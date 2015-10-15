@@ -1,5 +1,5 @@
 import csv
-from datetime import date
+from datetime import date, timedelta
 from StringIO import StringIO
 import logging
 from django.conf import settings
@@ -38,52 +38,61 @@ class Command(NoArgsCommand):
             raise CommandError("You need to specify a month and a year of the financial report you want")
         month = int(args[0])
         year = int(args[1])
-        inidate = date(year, month, 1)
+        if month == 1:
+            inidate = date(year-1, 12, 1)
+        else:
+            inidate = date(year, month-1, 1)
+        enddate = date(year, month, 1) - timedelta(days=1)
 
-        if Site.objects.filter(start_date__lte=inidate, deleted=False, billing__isnull=True).exists():
+        if Site.objects.filter(start_date__lte=enddate, start_date__gte=inidate,
+                               deleted=False, billing__isnull=True).exists():
             LOGGER.error("Sites not cancelled were found without billing after a month")
 
-        pendingsitesbilling = Billing.objects.filter(site__start_date__lte=inidate, site__deleted=False,
-                                                     date_sent_to_finance__isnull=True)
+        pendingsitesbilling = Billing.objects.filter(site__start_date__lte=enddate, site__start_date__gte=inidate,
+                                                     site__deleted=False)
 
-        tempstream, billing_list_file = generateemail(pendingsitesbilling)
+        if pendingsitesbilling.exists():
+            tempstream, billing_list_file = generateemail(pendingsitesbilling)
 
-        EmailMessage(
-            subject="New Sites Monthly Report MWS3",
-            body="Attached you can find the monthly report spreadsheet file and the corresponding purchase orders.",
-            from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
-            to=[settings.FINANCE_EMAIL],
-            headers={'Return-Path': 'mws3-support@cam.ac.uk'},
-            attachments=[('mws3report.csv', tempstream.getvalue(), 'application/vnd.ms-excel')]+billing_list_file
-        ).send()
+            EmailMessage(
+                subject="New Sites Monthly Report MWS3",
+                body="Attached you can find the monthly report spreadsheet file and the corresponding purchase orders.",
+                from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
+                to=[settings.FINANCE_EMAIL],
+                headers={'Return-Path': 'mws3-support@cam.ac.uk'},
+                attachments=[('mws3report.csv', tempstream.getvalue(), 'application/vnd.ms-excel')]+billing_list_file
+            ).send()
 
-        tempstream.close()
+            tempstream.close()
 
-        pendingsitesbilling.update(date_sent_to_finance=timezone.now().date())
+            pendingsitesbilling.update(date_sent_to_finance=timezone.now().date())
 
         ################
         ### RENEWALS ###
         ################
 
         # Send renewal to finance if it the billing was sent to finance 1 year (or more) ago
+        inirenewaldate = date(year-1, month, 1)
         if month == 12:
-            renewaldate = date(year, 1, 1)
+            endrenewaldate = date(year, 1, 1) - timedelta(days=1)
         else:
-            renewaldate = date(year-1, month+1, 1)
+            endrenewaldate = date(year-1, month+1, 1) - timedelta(days=1)
 
-        renewalsitesbilling = Billing.objects.filter(site__deleted=False, date_sent_to_finance__lte=renewaldate)
+        renewalsitesbilling = Billing.objects.filter(site__start_date__lte=enddate, site__start_date__gte=inidate,
+                                                     site__deleted=False)
 
-        tempstream, billing_list_file = generateemail(renewalsitesbilling)
+        if renewalsitesbilling.exists():
+            tempstream, billing_list_file = generateemail(renewalsitesbilling)
 
-        EmailMessage(
-            subject="Renewal Sites Monthly Report MWS3",
-            body="Attached you can find the monthly report spreadsheet file and the corresponding purchase orders.",
-            from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
-            to=[settings.FINANCE_EMAIL],
-            headers={'Return-Path': 'mws3-support@cam.ac.uk'},
-            attachments=[('mws3report.csv', tempstream.getvalue(), 'application/vnd.ms-excel')]+billing_list_file
-        ).send()
+            EmailMessage(
+                subject="Renewal Sites Monthly Report MWS3",
+                body="Attached you can find the monthly report spreadsheet file and the corresponding purchase orders.",
+                from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
+                to=[settings.FINANCE_EMAIL],
+                headers={'Return-Path': 'mws3-support@cam.ac.uk'},
+                attachments=[('mws3report.csv', tempstream.getvalue(), 'application/vnd.ms-excel')]+billing_list_file
+            ).send()
 
-        tempstream.close()
+            tempstream.close()
 
-        renewalsitesbilling.update(date_sent_to_finance=timezone.now().date())
+            renewalsitesbilling.update(date_sent_to_finance=timezone.now().date())
