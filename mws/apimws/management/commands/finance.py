@@ -14,22 +14,6 @@ from sitesmanagement.models import Site, Billing
 LOGGER = logging.getLogger('mws')
 
 
-def generateemail(sitelist):
-    billing_list_file = map(lambda x: ("%d%s" % (x.site.id, splitext(x.purchase_order.name)[1]),
-                                       x.purchase_order.read(), 'application/other'),
-                            sitelist)
-    billing_list_info = map(lambda x: [x.site.id, x.site.name, x.site.institution_id, x.group,
-                                       x.purchase_order_number, x.site.start_date, settings.YEAR_COST],
-                            sitelist)
-
-    tempstream = StringIO()
-    writer = csv.writer(tempstream)
-
-    for billing in billing_list_info:
-        writer.writerow(billing)
-
-    return tempstream, billing_list_file
-
 class Command(NoArgsCommand):
     args = "{ <month> <year> }"
     help = "Generates a financial monthly report for the month and year specified"
@@ -39,58 +23,72 @@ class Command(NoArgsCommand):
             raise CommandError("You need to specify a month and a year of the financial report you want")
         month = int(args[0])
         year = int(args[1])
+
+        #################
+        ### NEW SITES ###
+        #################
+
         if month == 1:
             inidate = date(year-1, 12, 1)
         else:
             inidate = date(year, month-1, 1)
-        enddate = date(year, month, 1) - timedelta(days=1)
 
         if Site.objects.filter(start_date__month=inidate.month, start_date__year=inidate.year,
                                deleted=False, billing__isnull=True).exists():
             LOGGER.error("Sites not cancelled were found without billing after a month")
 
-        pendingsitesbilling = Billing.objects.filter(site__start_date__month=inidate.month,
-                                                     site__start_date__year=inidate.year, site__deleted=False)
-
-        if pendingsitesbilling.exists():
-            tempstream, billing_list_file = generateemail(pendingsitesbilling)
-
-            EmailMessage(
-                subject="New Sites Monthly Report MWS3 - Period from %s to %s." % (inidate.isoformat(),
-                                                                                   enddate.isoformat()),
-                body="Attached you can find the monthly report spreadsheet file and the corresponding purchase orders"
-                     "for the following period: from %s to %s." % (inidate.isoformat(), enddate.isoformat()),
-                from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
-                to=[settings.FINANCE_EMAIL],
-                headers={'Return-Path': 'mws3-support@cam.ac.uk'},
-                attachments=[('mws3report.csv', tempstream.getvalue(), 'application/vnd.ms-excel')]+billing_list_file
-            ).send()
-
-            tempstream.close()
-
-            pendingsitesbilling.update(date_sent_to_finance=timezone.now().date())
+        new_sites_billing = Billing.objects.filter(site__start_date__month=inidate.month,
+                                                   site__start_date__year=inidate.year, site__deleted=False)
 
         ################
         ### RENEWALS ###
         ################
 
         # Send renewal to finance if it the billing was sent to finance 1 year (or more) ago
-        renewalsitesbilling = Billing.objects.filter(site__start_date__month=month,
-                                                     site__start_date__lt=date(year, 1, 1), site__deleted=False)
+        renewal_sites_billing = Billing.objects.filter(site__start_date__month=month,
+                                                       site__start_date__lt=date(year, 1, 1), site__deleted=False)
 
-        if renewalsitesbilling.exists():
-            tempstream, billing_list_file = generateemail(renewalsitesbilling)
+        if not(new_sites_billing.exists() or renewal_sites_billing.exists()):
+            return  # Nothing to send
 
-            EmailMessage(
-                subject="Renewal Sites Monthly Report MWS3 - Period of %s of previous years" % month_name[month],
-                body="Attached you can find the monthly report spreadsheet file and the corresponding purchase orders"
-                     "for the following period: %s of previous year." % month_name[month],
-                from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
-                to=[settings.FINANCE_EMAIL],
-                headers={'Return-Path': 'mws3-support@cam.ac.uk'},
-                attachments=[('mws3report.csv', tempstream.getvalue(), 'application/vnd.ms-excel')]+billing_list_file
-            ).send()
+        ###################
+        ### SEND REPORT ###
+        ###################
 
-            tempstream.close()
+        po_files = map(lambda x: ("%d%s" % (x.site.id, splitext(x.purchase_order.name)[1]),
+                                  x.purchase_order.read(), 'application/other'),
+                       new_sites_billing | renewal_sites_billing)
+        new_billing = map(lambda x: [x.site.id, x.site.name, x.site.institution_id, x.group,
+                                     x.purchase_order_number, x.site.start_date, settings.YEAR_COST],
+                          new_sites_billing)
+        renewals_billing = map(lambda x: [x.site.id, x.site.name, x.site.institution_id, x.group,
+                                          x.purchase_order_number, x.site.start_date, settings.YEAR_COST],
+                               renewal_sites_billing)
 
-            renewalsitesbilling.update(date_sent_to_finance=timezone.now().date())
+        stream_new = StringIO()
+        stream_renewal = StringIO()
+        writer_new = csv.writer(stream_new)
+        writer_renewal = csv.writer(stream_renewal)
+
+        for billing in new_billing:
+            writer_new.writerow(billing)
+
+        for billing in renewals_billing:
+            writer_renewal.writerow(billing)
+
+        EmailMessage(
+            subject="Monthly Financial Report MWS3 - %s %i" % (month_name[month], year),
+            body="Attached you can find the monthly report spreadsheet for new sites and for renewals. You will "
+                 "also find all the the corresponding purchase orders",
+            from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
+            to=[settings.FINANCE_EMAIL],
+            headers={'Return-Path': 'mws3-support@cam.ac.uk'},
+            attachments=[('mws3sites_new.csv', stream_new.getvalue(), 'application/vnd.ms-excel'),
+                         ('mws3sites_renewals.csv', stream_renewal.getvalue(), 'application/vnd.ms-excel')] + po_files
+        ).send()
+
+        new_sites_billing.update(date_sent_to_finance=timezone.now().date())
+        renewal_sites_billing.update(date_sent_to_finance=timezone.now().date())
+
+        stream_new.close()
+        stream_renewal.close()
