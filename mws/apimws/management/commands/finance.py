@@ -1,10 +1,11 @@
 import csv
-from datetime import date, tzinfo, timedelta
+from datetime import date
 from StringIO import StringIO
 import logging
 from django.conf import settings
 from django.core.mail import EmailMessage
 from django.core.management.base import NoArgsCommand, CommandError
+from django.utils import timezone
 from os.path import splitext
 from sitesmanagement.models import Site
 
@@ -59,7 +60,7 @@ class Command(NoArgsCommand):
 
         tempstream.close()
 
-        pendingsites.update(date_sent_to_finance=tzinfo.now().date())
+        pendingsites.update(date_sent_to_finance=timezone.now().date())
 
         ################
         ### RENEWALS ###
@@ -86,4 +87,4 @@ class Command(NoArgsCommand):
 
         tempstream.close()
 
-        renewalsites.update(date_sent_to_finance=tzinfo.now().date())
+        renewalsites.update(date_sent_to_finance=timezone.now().date())
