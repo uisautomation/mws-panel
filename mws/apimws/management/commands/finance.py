@@ -1,12 +1,31 @@
 import csv
-from datetime import date
+from datetime import date, tzinfo, timedelta
 from StringIO import StringIO
+import logging
 from django.conf import settings
 from django.core.mail import EmailMessage
 from django.core.management.base import NoArgsCommand, CommandError
 from os.path import splitext
-from sitesmanagement.models import Billing
+from sitesmanagement.models import Site
 
+LOGGER = logging.getLogger('mws')
+
+
+def generateemail(sitelist):
+    billing_list_file = map(lambda x: ("%d%s" % (x.id, splitext(x.billing.purchase_order.name)[1]),
+                                       x.billing.purchase_order.read(), 'application/other'),
+                            sitelist)
+    billing_list_info = map(lambda x: [x.id, x.name, x.institution_id, x.billing.group,
+                                       x.billing.purchase_order_number, x.start_date, settings.YEAR_COST],
+                            sitelist)
+
+    tempstream = StringIO()
+    writer = csv.writer(tempstream)
+
+    for billing in billing_list_info:
+        writer.writerow(billing)
+
+    return tempstream, billing_list_file
 
 class Command(NoArgsCommand):
     args = "{ <month> <year> }"
@@ -18,28 +37,20 @@ class Command(NoArgsCommand):
         month = int(args[0])
         year = int(args[1])
         inidate = date(year, month, 1)
-        if month == 12:
-            enddate = date(year+1, 1, 1)
-        else:
-            enddate = date(year, month+1, 1)
 
-        billing_list = Billing.objects.filter(date_modified__lt=enddate, date_modified__gte=inidate)
-        billing_list_file = map(lambda x: ("%d%s" % (x.site.id, splitext(x.purchase_order.name)[1]),
-                                           x.purchase_order.read(), 'application/other'),
-                                billing_list)
-        billing_list_info = map(lambda x: [x.site.id, x.site.name, x.site.institution_id, x.group,
-                                           x.purchase_order_number, x.site.start_date, settings.YEAR_COST],
-                                billing_list)
+        pendingsites = Site.objects.filter(start_date__lte=inidate, deleted=False,
+                                           billing__date_sent_to_finance__isnull=True)
 
-        tempstream = StringIO()
-        writer = csv.writer(tempstream)
+        if pendingsites.filter(billing__isnull=True).exists():
+            LOGGER.error("Sites not cancelled were found without billing after a month")
 
-        for billing in billing_list_info:
-            writer.writerow(billing)
+        pendingsites = pendingsites.filter(billing__isnull=False)
+
+        tempstream, billing_list_file = generateemail(pendingsites)
 
         EmailMessage(
-            subject="Monthly Report MWS3",
-            body="Attached you can find the monthly report",
+            subject="New Sites Monthly Report MWS3",
+            body="Attached you can find the monthly report spreadsheet file and the corresponding purchase orders.",
             from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
             to=[settings.FINANCE_EMAIL],
             headers={'Return-Path': 'mws3-support@cam.ac.uk'},
@@ -47,3 +58,32 @@ class Command(NoArgsCommand):
         ).send()
 
         tempstream.close()
+
+        pendingsites.update(date_sent_to_finance=tzinfo.now().date())
+
+        ################
+        ### RENEWALS ###
+        ################
+
+        # Send renewal to finance if it the billing was sent to finance 1 year (or more) ago
+        if month == 12:
+            renewaldate = date(year, 1, 1)
+        else:
+            renewaldate = date(year-1, month+1, 1)
+
+        renewalsites = Site.objects.filter(deleted=False, billing__date_sent_to_finance__lte=renewaldate)
+
+        tempstream, billing_list_file = generateemail(renewalsites)
+
+        EmailMessage(
+            subject="Renewal Sites Monthly Report MWS3",
+            body="Attached you can find the monthly report spreadsheet file and the corresponding purchase orders.",
+            from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
+            to=[settings.FINANCE_EMAIL],
+            headers={'Return-Path': 'mws3-support@cam.ac.uk'},
+            attachments=[('mws3report.csv', tempstream.getvalue(), 'application/vnd.ms-excel')]+billing_list_file
+        ).send()
+
+        tempstream.close()
+
+        renewalsites.update(date_sent_to_finance=tzinfo.now().date())
