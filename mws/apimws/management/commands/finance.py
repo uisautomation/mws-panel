@@ -65,8 +65,8 @@ class Command(NoArgsCommand):
                                           x.purchase_order_number, x.site.start_date, settings.YEAR_COST],
                                renewal_sites_billing)
         header = ['id', 'Name', 'Institution', 'PO raised by', 'PO number', 'Created at', 'Cost']
-        new_billing = header + new_billing
-        renewals_billing = header + renewals_billing
+        new_billing = [header] + new_billing
+        renewals_billing = [header] + renewals_billing
 
         stream_new = StringIO()
         stream_renewal = StringIO()
