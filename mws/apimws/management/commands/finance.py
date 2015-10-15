@@ -60,7 +60,7 @@ class Command(NoArgsCommand):
 
         tempstream.close()
 
-        pendingsites.update(date_sent_to_finance=timezone.now().date())
+        pendingsites.update(billing__date_sent_to_finance=timezone.now().date())
 
         ################
         ### RENEWALS ###
@@ -87,4 +87,4 @@ class Command(NoArgsCommand):
 
         tempstream.close()
 
-        renewalsites.update(date_sent_to_finance=timezone.now().date())
+        renewalsites.update(billing__date_sent_to_finance=timezone.now().date())
