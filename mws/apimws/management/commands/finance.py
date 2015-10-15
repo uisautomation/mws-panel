@@ -1,3 +1,4 @@
+from calendar import month_name
 import csv
 from datetime import date, timedelta
 from StringIO import StringIO
@@ -44,19 +45,21 @@ class Command(NoArgsCommand):
             inidate = date(year, month-1, 1)
         enddate = date(year, month, 1) - timedelta(days=1)
 
-        if Site.objects.filter(start_date__lte=enddate, start_date__gte=inidate,
+        if Site.objects.filter(start_date__month=inidate.month, start_date__year=inidate.year,
                                deleted=False, billing__isnull=True).exists():
             LOGGER.error("Sites not cancelled were found without billing after a month")
 
-        pendingsitesbilling = Billing.objects.filter(site__start_date__lte=enddate, site__start_date__gte=inidate,
-                                                     site__deleted=False)
+        pendingsitesbilling = Billing.objects.filter(site__start_date__month=inidate.month,
+                                                     site__start_date__year=inidate.year, site__deleted=False)
 
         if pendingsitesbilling.exists():
             tempstream, billing_list_file = generateemail(pendingsitesbilling)
 
             EmailMessage(
-                subject="New Sites Monthly Report MWS3",
-                body="Attached you can find the monthly report spreadsheet file and the corresponding purchase orders.",
+                subject="New Sites Monthly Report MWS3 - Period from %s to %s." % (inidate.isoformat(),
+                                                                                   enddate.isoformat()),
+                body="Attached you can find the monthly report spreadsheet file and the corresponding purchase orders"
+                     "for the following period: from %s to %s." % (inidate.isoformat(), enddate.isoformat()),
                 from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
                 to=[settings.FINANCE_EMAIL],
                 headers={'Return-Path': 'mws3-support@cam.ac.uk'},
@@ -72,21 +75,17 @@ class Command(NoArgsCommand):
         ################
 
         # Send renewal to finance if it the billing was sent to finance 1 year (or more) ago
-        inirenewaldate = date(year-1, month, 1)
-        if month == 12:
-            endrenewaldate = date(year, 1, 1) - timedelta(days=1)
-        else:
-            endrenewaldate = date(year-1, month+1, 1) - timedelta(days=1)
-
-        renewalsitesbilling = Billing.objects.filter(site__start_date__lte=enddate, site__start_date__gte=inidate,
+        renewalsitesbilling = Billing.objects.filter(site__start_date__month=month,
+                                                     site__start_date__year__lt=year,
                                                      site__deleted=False)
 
         if renewalsitesbilling.exists():
             tempstream, billing_list_file = generateemail(renewalsitesbilling)
 
             EmailMessage(
-                subject="Renewal Sites Monthly Report MWS3",
-                body="Attached you can find the monthly report spreadsheet file and the corresponding purchase orders.",
+                subject="Renewal Sites Monthly Report MWS3 - Period of %s of previous years" % month_name[month],
+                body="Attached you can find the monthly report spreadsheet file and the corresponding purchase orders"
+                     "for the following period: %s of previous year." % month_name[month],
                 from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
                 to=[settings.FINANCE_EMAIL],
                 headers={'Return-Path': 'mws3-support@cam.ac.uk'},
