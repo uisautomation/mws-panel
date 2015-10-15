@@ -55,7 +55,7 @@ class Command(NoArgsCommand):
         ### SEND REPORT ###
         ###################
 
-        po_files = map(lambda x: ("%d%s" % (x.purchase_order_number, splitext(x.purchase_order.name)[1]),
+        po_files = map(lambda x: ("%s%s" % (x.purchase_order_number, splitext(x.purchase_order.name)[1]),
                                   x.purchase_order.read(), 'application/other'),
                        new_sites_billing | renewal_sites_billing)
         new_billing = map(lambda x: [x.site.id, x.site.name, x.site.institution_id, x.group,
