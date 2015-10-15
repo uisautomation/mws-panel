@@ -7,17 +7,18 @@ from django.core.mail import EmailMessage
 from django.core.management.base import NoArgsCommand, CommandError
 from django.utils import timezone
 from os.path import splitext
-from sitesmanagement.models import Site
+from sitesmanagement.models import Site, Billing
+
 
 LOGGER = logging.getLogger('mws')
 
 
 def generateemail(sitelist):
-    billing_list_file = map(lambda x: ("%d%s" % (x.id, splitext(x.billing.purchase_order.name)[1]),
-                                       x.billing.purchase_order.read(), 'application/other'),
+    billing_list_file = map(lambda x: ("%d%s" % (x.site.id, splitext(x.purchase_order.name)[1]),
+                                       x.purchase_order.read(), 'application/other'),
                             sitelist)
-    billing_list_info = map(lambda x: [x.id, x.name, x.institution_id, x.billing.group,
-                                       x.billing.purchase_order_number, x.start_date, settings.YEAR_COST],
+    billing_list_info = map(lambda x: [x.site.id, x.site.name, x.site.institution_id, x.group,
+                                       x.purchase_order_number, x.site.start_date, settings.YEAR_COST],
                             sitelist)
 
     tempstream = StringIO()
@@ -39,15 +40,13 @@ class Command(NoArgsCommand):
         year = int(args[1])
         inidate = date(year, month, 1)
 
-        pendingsites = Site.objects.filter(start_date__lte=inidate, deleted=False,
-                                           billing__date_sent_to_finance__isnull=True)
-
-        if pendingsites.filter(billing__isnull=True).exists():
+        if Site.objects.filter(start_date__lte=inidate, deleted=False, billing__isnull=True).exists():
             LOGGER.error("Sites not cancelled were found without billing after a month")
 
-        pendingsites = pendingsites.filter(billing__isnull=False)
+        pendingsitesbilling = Billing.objects.filter(site__start_date__lte=inidate, site__deleted=False,
+                                                     date_sent_to_finance__isnull=True)
 
-        tempstream, billing_list_file = generateemail(pendingsites)
+        tempstream, billing_list_file = generateemail(pendingsitesbilling)
 
         EmailMessage(
             subject="New Sites Monthly Report MWS3",
@@ -60,7 +59,7 @@ class Command(NoArgsCommand):
 
         tempstream.close()
 
-        pendingsites.update(billing__date_sent_to_finance=timezone.now().date())
+        pendingsitesbilling.update(date_sent_to_finance=timezone.now().date())
 
         ################
         ### RENEWALS ###
@@ -72,9 +71,9 @@ class Command(NoArgsCommand):
         else:
             renewaldate = date(year-1, month+1, 1)
 
-        renewalsites = Site.objects.filter(deleted=False, billing__date_sent_to_finance__lte=renewaldate)
+        renewalsitesbilling = Billing.objects.filter(site__deleted=False, date_sent_to_finance__lte=renewaldate)
 
-        tempstream, billing_list_file = generateemail(renewalsites)
+        tempstream, billing_list_file = generateemail(renewalsitesbilling)
 
         EmailMessage(
             subject="Renewal Sites Monthly Report MWS3",
@@ -87,4 +86,4 @@ class Command(NoArgsCommand):
 
         tempstream.close()
 
-        renewalsites.update(billing__date_sent_to_finance=timezone.now().date())
+        renewalsitesbilling.update(date_sent_to_finance=timezone.now().date())
