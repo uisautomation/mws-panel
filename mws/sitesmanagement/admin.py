@@ -93,7 +93,7 @@ class NetworkConfigAdmin(ModelAdmin):
 
 
 class BillingAdmin(VersionAdmin):
-    list_display = ('site', 'group', )
+    list_display = ('site', 'group', 'date_created', 'date_modified', 'date_sent_to_finance')
 
 
 class VhostAdmin(VersionAdmin):
