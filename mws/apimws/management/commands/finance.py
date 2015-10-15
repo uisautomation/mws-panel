@@ -75,9 +75,8 @@ class Command(NoArgsCommand):
         ################
 
         # Send renewal to finance if it the billing was sent to finance 1 year (or more) ago
-        renewalsitesbilling = Billing.objects.filter(site__start_date__month=month,
-                                                     site__start_date__year__lt=year,
-                                                     site__deleted=False)
+        renewalsitesbilling = Billing.objects.filter(site__start_date__month=month, site__deleted=False)\
+            .exclude(site__start_date__lt=date(year, 1, 1))
 
         if renewalsitesbilling.exists():
             tempstream, billing_list_file = generateemail(renewalsitesbilling)
