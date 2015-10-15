@@ -18,6 +18,8 @@
                 billing data.
             </p>
 
+            <p>The cost of MWS3 is £{{ cost|floatformat:2 }} a year (+VAT for those organisations that pay VAT)</p>
+
             <form enctype="multipart/form-data" action={% url 'sitesmanagement.views.billing_management' site_id=site.id %} method="post">
                 <fieldset>
                     {% csrf_token %}

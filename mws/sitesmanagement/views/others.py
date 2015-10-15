@@ -50,7 +50,8 @@ def billing_management(request, site_id):
     return render(request, 'mws/billing.html', {
         'breadcrumbs': breadcrumbs,
         'site': site,
-        'billing_form': billing_form
+        'billing_form': billing_form,
+        'cost': settings.YEAR_COST
     })
 
 
