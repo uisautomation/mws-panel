@@ -1,0 +1,93 @@
+{% extends 'project-light/campl-mws.html' %}
+{% load static %}
+{% load calcendperiod %}
+{% block all_breadcrumbs %}
+{% endblock %}
+{% block page_content %}
+    {{ block.super }}
+    <div class="campl-column12 campl-main-content">
+        <div class="campl-content-container">
+            <h1>Finance monthly view report</h1>
+            <p>{{ month }}/{{ year }}</p>
+            {%  if new_sites_billing %}
+                <h2>New sites</h2>
+                <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table clickable_rows">
+                    <thead>
+                        <tr>
+                            <th>id</th>
+                            <th>Name</th>
+                            <th>Institution</th>
+                            <th>PO raised by</th>
+                            <th>PO number</th>
+                            <th>Site start date</th>
+                            <th>Cost</th>
+                            <th>Start Period</th>
+                            <th>End Period</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                {% for billing in new_sites_billing %}
+                        <tr class="site_suspended">
+                            <td>{{ billing.site.id }}</td>
+                            <td>{{ billing.site.name }}</td>
+                            <td>{{ billing.site.institution_id }}</td>
+                            <td>{{ billing.group }}</td>
+                            <td>{{ billing.purchase_order_number }}</td>
+                            <td>{{ billing.site.start_date }}</td>
+                            <td>£ {{ year_cost }}</td>
+                            <td>{{ billing.site.start_date }}</td>
+                            <td>{{ billing.site.start_date|calcendperiod }}</td>
+                        </tr>
+                {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+            {%  if renewal_sites_billing %}
+                <h2>Renewal sites</h2>
+                <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table clickable_rows">
+                    <thead>
+                        <tr>
+                            <th>id</th>
+                            <th>Name</th>
+                            <th>Institution</th>
+                            <th>PO raised by</th>
+                            <th>PO number</th>
+                            <th>Site start date</th>
+                            <th>Cost</th>
+                            <th>Start Period</th>
+                            <th>End Period</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                {% for billing in renewal_sites_billing %}
+                        <tr class="site_suspended">
+                            <td>{{ billing.site.id }}</td>
+                            <td>{{ billing.site.name }}</td>
+                            <td>{{ billing.site.institution_id }}</td>
+                            <td>{{ billing.group }}</td>
+                            <td>{{ billing.purchase_order_number }}</td>
+                            <td>{{ billing.site.start_date }}</td>
+                            <td>£ {{ year_cost }}</td>
+                            <td>{{ billing.site.start_date|renewalsdate:year }}</td>
+                            <td>{{ billing.site.start_date|renewalsdate:year|calcendperiod }}</td>
+                        </tr>
+                {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+            <p>
+                {% if month == 1 %}
+                <a class="campl-btn campl-primary-cta" href="{% url 'apimws.views.billing_month' month=12 year=year|add:"-1" %}">Previous month</a>
+                {% else %}
+                <a class="campl-btn campl-primary-cta" href="{% url 'apimws.views.billing_month' month=month|add:"-1" year=year %}">Previous month</a>
+                {% endif %}
+
+                {% if month == 12 %}
+                <a class="campl-btn campl-primary-cta" href="{% url 'apimws.views.billing_month' month=1 year=year|add:"1" %}">Next month</a>
+                {% else %}
+                <a class="campl-btn campl-primary-cta" href="{% url 'apimws.views.billing_month' month=month|add:"1" year=year %}">Next month</a>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+{% endblock %}

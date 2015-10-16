@@ -2,6 +2,7 @@ import csv
 from datetime import date
 import json
 import logging
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
@@ -9,7 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 from stronghold.decorators import public
 from apimws.ansible import launch_ansible_async
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
-from sitesmanagement.models import DomainName, Site, EmailConfirmation, VirtualMachine
+from sitesmanagement.models import DomainName, Site, EmailConfirmation, VirtualMachine, Billing
 from ucamlookup import user_in_groups
 
 
@@ -61,6 +62,34 @@ def billing_year(request, year):
 
     return response
 
+
+@login_required
+def billing_month(request, year, month):
+    # Check if the request.user is authorised to do so: member of the uis-finance or UIS Information Systems groups
+    if not user_in_groups(request.user,
+                          [get_or_create_group_by_groupid("101923"), get_or_create_group_by_groupid("101888")]):
+        return HttpResponseForbidden()
+
+    month = int(month)
+    year = int(year)
+
+    if not (1 <= month <= 12):
+        return HttpResponseForbidden()
+
+    if month == 1:
+        inidate = date(year-1, 12, 1)
+    else:
+        inidate = date(year, month-1, 1)
+
+    return render(request, 'api/finance_month.html', {
+        'new_sites_billing': Billing.objects.filter(site__start_date__month=inidate.month,
+                                                    site__start_date__year=inidate.year, site__deleted=False),
+        'renewal_sites_billing': Billing.objects.filter(site__start_date__month=month,
+                                                        site__start_date__lt=date(year, 1, 1), site__deleted=False),
+        'year': year,
+        'month': month,
+        'year_cost': settings.YEAR_COST,
+    })
 
 @login_required
 def confirm_email(request, ec_id, token):
