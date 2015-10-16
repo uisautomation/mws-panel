@@ -41,26 +41,16 @@ def confirm_dns(request, dn_id):
 
 
 @login_required
-def billing_year(request, year):
+def billing_total(request):
     # Check if the request.user is authorised to do so: member of the uis-finance or UIS Information Systems groups
     if not user_in_groups(request.user,
                           [get_or_create_group_by_groupid("101923"), get_or_create_group_by_groupid("101888")]):
         return HttpResponseForbidden()
 
-    billing_list = map(lambda x: x.calculate_billing(financial_period_start=date(int(year), 8, 1),
-                                                     financial_period_end=date(int(year)+1, 7, 31)),
-                       Site.objects.all())
-    billing_list = [x for x in billing_list if x is not None]
-
-    # Create the HttpResponse object with the an excel header as a requirement of Finance
-    response = HttpResponse(content_type='application/vnd.ms-excel')
-    response['Content-Disposition'] = 'attachment; filename="mwsbilling%s.csv"' % year
-
-    writer = csv.writer(response)
-    for billing in billing_list:
-        writer.writerow(billing)
-
-    return response
+    return render(request, 'api/finance_total.html', {
+        'billings': Billing.objects.filter(site__deleted=False),
+        'year_cost': settings.YEAR_COST,
+    })
 
 
 @login_required

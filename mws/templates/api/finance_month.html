@@ -23,6 +23,7 @@
                             <th>Cost</th>
                             <th>Start Period</th>
                             <th>End Period</th>
+                            <th>PO file</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -37,6 +38,7 @@
                             <td>£ {{ year_cost }}</td>
                             <td>{{ billing.site.start_date }}</td>
                             <td>{{ billing.site.start_date|calcendperiod }}</td>
+                            <td><a href="{{ billing.purchase_order.url }}">{{ billing.purchase_order.name }}</a></td>
                         </tr>
                 {% endfor %}
                     </tbody>
@@ -56,6 +58,7 @@
                             <th>Cost</th>
                             <th>Start Period</th>
                             <th>End Period</th>
+                            <th>PO file</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -70,6 +73,7 @@
                             <td>£ {{ year_cost }}</td>
                             <td>{{ billing.site.start_date|renewalsdate:year }}</td>
                             <td>{{ billing.site.start_date|renewalsdate:year|calcendperiod }}</td>
+                            <td><a href="{{ billing.purchase_order.url }}">{{ billing.purchase_order.name }}</a></td>
                         </tr>
                 {% endfor %}
                     </tbody>
