@@ -92,4 +92,7 @@ urlpatterns = patterns('',
     # user panel
     url(r'^user_panel/$', 'mwsauth.views.user_panel'),
 
+    # file serve for purchase order files
+   url(r'^media/billing/(?P<filename>[^/]+)$', 'sitesmanagement.views.po_file_serve'),
+
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

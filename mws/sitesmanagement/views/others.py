@@ -6,15 +6,16 @@ from django.conf import settings
 from django.utils import dateparse
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse, HttpResponse, HttpResponseNotFound
 from django.shortcuts import render, get_object_or_404, redirect
+from django.utils.encoding import smart_str
 from apimws.ansible import launch_ansible, ansible_change_mysql_root_pwd, restore_snapshot
 from apimws.models import AnsibleConfiguration
 from apimws.vm import VMAPINotWorkingException, clone_vm, VMAPIFailure
 from mwsauth.utils import privileges_check
 from sitesmanagement.forms import BillingForm, SnapshotForm
 from sitesmanagement.utils import get_object_or_None
-from sitesmanagement.models import Service, Snapshot
+from sitesmanagement.models import Service, Snapshot, Billing
 
 
 @login_required
@@ -434,3 +435,15 @@ def php_libs(request, service_id):
             launch_ansible(service)
 
     return render(request, 'mws/phplibs.html', parameters)
+
+
+def po_file_serve(request, filename):
+    billing = Billing.objects.filter(purchase_order='billing/%s' % filename)
+    if billing.exists() and ((request.user in billing[0].site.list_of_admins()) or request.user.is_superuser):
+        pofile = billing[0].purchase_order
+        response = HttpResponse(pofile.read(), content_type='application/zip')
+        response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(filename)
+        response['Content-Length'] = pofile.tell()
+        return response
+    else:
+        return HttpResponseNotFound()
