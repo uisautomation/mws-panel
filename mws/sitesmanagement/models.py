@@ -231,12 +231,15 @@ class Suspension(models.Model):
     site = models.ForeignKey(Site, related_name="suspensions")
 
 
+
+def validate_file_extension(value):
+    if splitext(value.name)[1] != '.pdf':
+        raise ValidationError(u'Only PDF files are accepted.')
+
+
 class Billing(models.Model):
-    def validate_file_extension(value):
-        if splitext(value.name)[1] != '.pdf':
-            raise ValidationError(u'Only PDF files are accepted.')
     purchase_order_number = models.CharField(max_length=100)
-    purchase_order = models.FileField(upload_to='billing', valudator=[validate_file_extension])
+    purchase_order = models.FileField(upload_to='billing', validators=[validate_file_extension])
     group = models.CharField(max_length=250)
     site = models.OneToOneField(Site, related_name='billing')
     date_created = models.DateField(auto_now_add=True)
