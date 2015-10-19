@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_slug
 from django.db import models
 import re
+from os.path import splitext
 import reversion
 from ucamlookup.models import LookupGroup
 from mwsauth.utils import get_users_of_a_group
@@ -231,8 +232,11 @@ class Suspension(models.Model):
 
 
 class Billing(models.Model):
+    def validate_file_extension(value):
+        if splitext(value.name)[1] != '.pdf':
+            raise ValidationError(u'Only PDF files are accepted.')
     purchase_order_number = models.CharField(max_length=100)
-    purchase_order = models.FileField(upload_to='billing')
+    purchase_order = models.FileField(upload_to='billing', valudator=[validate_file_extension])
     group = models.CharField(max_length=250)
     site = models.OneToOneField(Site, related_name='billing')
     date_created = models.DateField(auto_now_add=True)
