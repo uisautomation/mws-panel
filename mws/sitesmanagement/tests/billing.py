@@ -1,11 +1,13 @@
-from datetime import datetime
+from datetime import datetime, timedelta, date
 import uuid
 from django.contrib.auth.models import User
+from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
 from mwsauth.tests import do_test_login
-from sitesmanagement.models import NetworkConfig, Site, VirtualMachine, Service
+from sitesmanagement.cronjobs import send_reminder_renewal
+from sitesmanagement.models import NetworkConfig, Site, VirtualMachine, Service, Billing
 from sitesmanagement.views import billing_management
 
 
@@ -91,3 +93,26 @@ class BillingTests(TestCase):
         response = self.client.get(response.url)
         self.assertNotContains(response, "No Billing, please add one.")
         site_changed.billing.purchase_order.delete()
+
+    def test_renewals_emails(self):
+        # 1 month for renewal warning
+        today = datetime.today()
+        site = Site.objects.create(name="testSite", institution_id="testInst", email='amc203@cam.ac.uk',
+                                   start_date=date(year=today.year-1, day=15,
+                                                   month=today.month-1 if today.month!=1 else 12))
+        pofile = SimpleUploadedFile("file.pdf", "file_content")
+        Billing.objects.create(site=site, purchase_order_number='0000', purchase_order=pofile, group='test')
+        send_reminder_renewal()
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].subject,
+                         'University of Cambridge Managed Web Service: Your MWS3 site is due to renew next month')
+        self.assertEqual(mail.outbox[0].to, ['amc203@cam.ac.uk'])
+
+        # same month renewal warning
+        site.start_date = site.start_date + timedelta(days=30)
+        site.save()
+        send_reminder_renewal()
+        self.assertEqual(len(mail.outbox), 2)
+        self.assertEqual(mail.outbox[1].subject,
+                         'University of Cambridge Managed Web Service: Your MWS3 site is due to renew this month')
+        self.assertEqual(mail.outbox[1].to, ['amc203@cam.ac.uk'])

@@ -1,4 +1,5 @@
 from datetime import timedelta
+from celery.schedules import crontab
 from common_settings import *
 # This file is generated when deploying
 from production_secrets import *
@@ -47,6 +48,11 @@ CELERYBEAT_SCHEDULE = {
     'jackdaw-api': {
         'task': 'apimws.jackdaw.jackdaw_api',
         'schedule': timedelta(hours=1, minutes=3),
+        'args': ()
+    },
+    'finance-renewals': {
+        'task': 'sitesmanagement.cronjobs.send_reminder_renewal',
+        'schedule': crontab(hour=3, minute=30, day_of_month=1),
         'args': ()
     },
 }
