@@ -138,6 +138,10 @@ class Site(models.Model):
 
     def cancel(self):
         self.end_date = datetime.today()
+        self.users = None
+        self.ssh_users = None
+        self.groups = None
+        self.ssh_groups = None
         self.save()
         if self.production_service:
             self.production_service.power_off()
@@ -229,7 +233,6 @@ class Suspension(models.Model):
     # end date of the suspension
     end_date = models.DateField(null=True, blank=True)
     site = models.ForeignKey(Site, related_name="suspensions")
-
 
 
 def validate_file_extension(value):
