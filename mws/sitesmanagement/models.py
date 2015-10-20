@@ -138,10 +138,10 @@ class Site(models.Model):
 
     def cancel(self):
         self.end_date = datetime.today()
-        self.users = None
-        self.ssh_users = None
-        self.groups = None
-        self.ssh_groups = None
+        self.users.clear()
+        self.ssh_users.clear()
+        self.groups.clear()
+        self.ssh_groups.clear()
         self.save()
         if self.production_service:
             self.production_service.power_off()
