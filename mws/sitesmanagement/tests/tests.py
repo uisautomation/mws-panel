@@ -1,4 +1,5 @@
 import uuid
+from django.core.files.uploadedfile import SimpleUploadedFile
 import mock
 import os
 import reversion
@@ -352,16 +353,16 @@ class SiteManagementTests(TestCase):
         self.assertContains(response, "Billing data")
 
         self.assertFalse(hasattr(site, 'billing'))
-        with open(os.path.join(settings.BASE_DIR, 'requirements.txt')) as fp:
-            response = self.client.post(reverse(views.billing_management, kwargs={'site_id': site.id}),
-                                        {'purchase_order_number': 'testOrderNumber', 'group': 'testGroup',
-                                         'purchase_order': fp})
+        pofile = SimpleUploadedFile("file.pdf", "file_content")
+        response = self.client.post(reverse(views.billing_management, kwargs={'site_id': site.id}),
+                                    {'purchase_order_number': 'testOrderNumber', 'group': 'testGroup',
+                                     'purchase_order': pofile})
         self.assertRedirects(response, expected_url=site.get_absolute_url())  # Changes done, redirecting
         site_changed = Site.objects.get(pk=site.id)
         self.assertEqual(site_changed.billing.purchase_order_number, 'testOrderNumber')
         self.assertEqual(site_changed.billing.group, 'testGroup')
-        self.assertEqual(site_changed.billing.purchase_order.name, 'billing/requirements.txt')
-        self.assertEqual(site_changed.billing.purchase_order.url, '/media/billing/requirements.txt')
+        self.assertEqual(site_changed.billing.purchase_order.name, 'billing/file.pdf')
+        self.assertEqual(site_changed.billing.purchase_order.url, '/media/billing/file.pdf')
         response = self.client.get(response.url)
         self.assertNotContains(response, "No Billing, please add one.")
         site_changed.billing.purchase_order.delete()
@@ -371,16 +372,16 @@ class SiteManagementTests(TestCase):
         self.assertContains(response, "testOrderNumber")
         self.assertContains(response, "testGroup")
         self.assertTrue(hasattr(site, 'billing'))
-        with open(os.path.join(settings.BASE_DIR, 'requirements.txt')) as fp:
-            response = self.client.post(reverse(views.billing_management, kwargs={'site_id': site.id}),
-                                        {'purchase_order_number': 'testOrderNumber1', 'group': 'testGroup1',
-                                         'purchase_order': fp})
+        pofile = SimpleUploadedFile("file.pdf", "file_content")
+        response = self.client.post(reverse(views.billing_management, kwargs={'site_id': site.id}),
+                                    {'purchase_order_number': 'testOrderNumber1', 'group': 'testGroup1',
+                                     'purchase_order': pofile})
         self.assertRedirects(response, expected_url=site.get_absolute_url())  # Changes done, redirecting
         site_changed = Site.objects.get(pk=site.id)
         self.assertEqual(site_changed.billing.purchase_order_number, 'testOrderNumber1')
         self.assertEqual(site_changed.billing.group, 'testGroup1')
-        self.assertEqual(site_changed.billing.purchase_order.name, 'billing/requirements.txt')
-        self.assertEqual(site_changed.billing.purchase_order.url, '/media/billing/requirements.txt')
+        self.assertEqual(site_changed.billing.purchase_order.name, 'billing/file.pdf')
+        self.assertEqual(site_changed.billing.purchase_order.url, '/media/billing/file.pdf')
         response = self.client.get(response.url)
         self.assertNotContains(response, "No Billing, please add one.")
         site_changed.billing.purchase_order.delete()
