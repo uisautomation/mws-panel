@@ -5,7 +5,7 @@ from reversion import VersionAdmin
 from suit.widgets import LinkedSelect
 from .models import Site, Billing, DomainName, Suspension, VirtualMachine, EmailConfirmation, \
     Vhost, UnixGroup, NetworkConfig, SiteKeys, Service, Snapshot
-from ucamlookup import get_institutions, get_institution_name_by_id
+from ucamlookup import get_institutions, get_institution_name_by_id, IbisException
 
 
 def recreate_vm(modeladmin, request, queryset):
@@ -21,8 +21,15 @@ def recreate_vm(modeladmin, request, queryset):
 recreate_vm.short_description = "Recreate VM"
 
 
+def get_institutions_no_exception():
+    try:
+        get_institutions()
+    except IbisException:
+        return []
+
+
 class SiteAdmin(ModelAdmin):
-    all_institutions = get_institutions()
+    all_institutions = get_institutions_no_exception()
 
     list_display = ('name', 'description', 'institution', 'primary_vm', 'secondary_vm', 'disabled', 'canceled')
     ordering = ('name', )
