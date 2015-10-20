@@ -6,7 +6,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
 from mwsauth.tests import do_test_login
-from sitesmanagement.cronjobs import send_reminder_renewal
+from sitesmanagement.cronjobs import send_reminder_renewal, check_has_paid
 from sitesmanagement.models import NetworkConfig, Site, VirtualMachine, Service, Billing
 from sitesmanagement.views import billing_management
 
@@ -106,7 +106,7 @@ class BillingTests(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject,
                          'University of Cambridge Managed Web Service: Your MWS3 site is due to renew next month')
-        self.assertEqual(mail.outbox[0].to, ['amc203@cam.ac.uk'])
+        self.assertEqual(mail.outbox[0].to, [site.email])
 
         # same month renewal warning
         site.start_date = site.start_date + timedelta(days=30)
@@ -115,4 +115,53 @@ class BillingTests(TestCase):
         self.assertEqual(len(mail.outbox), 2)
         self.assertEqual(mail.outbox[1].subject,
                          'University of Cambridge Managed Web Service: Your MWS3 site is due to renew this month')
-        self.assertEqual(mail.outbox[1].to, ['amc203@cam.ac.uk'])
+        self.assertEqual(mail.outbox[1].to, [site.email])
+
+    def test_check_paid(self):
+        # 1 month for renewal warning
+        today = datetime.today()
+        site = Site.objects.create(name="testSite", institution_id="testInst", email='amc203@cam.ac.uk',
+                                   start_date=today+timedelta(days=10))
+        User.objects.create(username="test0001")
+        site.users.add(User.objects.get(username="test0001"))
+        check_has_paid()
+        # Nothing should happen, only 10 days
+        self.assertEqual(len(mail.outbox), 0)
+
+        # 15 days reminder
+        site.start_date = today - timedelta(days=15)
+        site.save()
+        check_has_paid()
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].subject,
+                         'University of Cambridge Managed Web Service: Remember to upload your purchase order')
+        self.assertEqual(mail.outbox[0].to, [site.email])
+
+        # 20 days reminder (nothing)
+        site.start_date = today - timedelta(days=20)
+        site.save()
+        check_has_paid()
+        self.assertEqual(len(mail.outbox), 1)
+
+        # 25 days reminder, last week reminder
+        site.start_date = today - timedelta(days=25)
+        site.save()
+        check_has_paid()
+        self.assertEqual(len(mail.outbox), 2)
+        self.assertEqual(mail.outbox[1].subject,
+                         'University of Cambridge Managed Web Service: Remember to upload your purchase order')
+        self.assertEqual(mail.outbox[1].to, [site.email])
+
+        # More tha 30 days, cancel the site
+        site.start_date = today - timedelta(days=35)
+        site.save()
+        self.assertIsNone(site.end_date)
+        self.assertIn(User.objects.get(username='test0001'), site.users.all())
+        check_has_paid()
+        site = Site.objects.get(pk=site.id)
+        self.assertEqual(len(mail.outbox), 3)
+        self.assertEqual(mail.outbox[2].subject,
+                         'University of Cambridge Managed Web Service: Your site has been cancelled')
+        self.assertEqual(mail.outbox[2].to, [site.email])
+        self.assertEqual(site.end_date, today.date())
+        self.assertFalse(site.users.exists())

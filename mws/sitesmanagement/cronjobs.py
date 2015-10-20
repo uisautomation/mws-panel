@@ -1,10 +1,9 @@
-from datetime import date
+from datetime import date, timedelta
 import logging
 from celery import shared_task, Task
 from django.core.mail import EmailMessage
 from django.utils import timezone
-from sitesmanagement.models import Billing
-
+from sitesmanagement.models import Billing, Site
 
 LOGGER = logging.getLogger('mws')
 
@@ -49,3 +48,33 @@ def send_reminder_renewal():
             to=[billing.site.email],
             headers={'Return-Path': 'mws3-support@cam.ac.uk'}
         ).send()
+
+
+@shared_task(base=FinanceTaskWithFailure)
+def check_has_paid():
+    today = timezone.now().date()
+    sites = Site.objects.filter(billing__isnull=True, end_date__isnull=True)
+    for site in sites:
+        if (today - site.start_date) >= timedelta(days=31):
+            # Cancel site
+            EmailMessage(
+                subject="University of Cambridge Managed Web Service: Your site has been cancelled",
+                body="Dear MWS3 user,\n\n"
+                     "Your site '%s' has been cancelled due to the lack of payment for the service." % site.name,
+                from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
+                to=[site.email],
+                headers={'Return-Path': 'mws3-support@cam.ac.uk'}
+            ).send()
+            site.cancel()
+        elif ((today - site.start_date) == timedelta(days=15)) or ((today - site.start_date) >= timedelta(days=24)):
+            # Warning 15 days before and each day in the last week before deadline
+            EmailMessage(
+                subject="University of Cambridge Managed Web Service: Remember to upload your purchase order",
+                body="Dear MWS3 user,\n\n"
+                     "Please make sure to upload the purchase order using the control web panel to pay for the MWS3 "
+                     "site '%s'.\n\nIf you don't upload a valid purchase order before %s your site '%s' will be "
+                     "automatically deleted." % (site.name, site.start_date+timedelta(days=30), site.name),
+                from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
+                to=[site.email],
+                headers={'Return-Path': 'mws3-support@cam.ac.uk'}
+            ).send()

@@ -55,6 +55,11 @@ CELERYBEAT_SCHEDULE = {
         'schedule': crontab(hour=3, minute=30, day_of_month=1),
         'args': ()
     },
+    'check_has_paid': {
+        'task': 'sitesmanagement.cronjobs.check_has_paid',
+        'schedule': crontab(hour=3, minute=0),
+        'args': ()
+    },
 }
 
 MIDDLEWARE_CLASSES += (
