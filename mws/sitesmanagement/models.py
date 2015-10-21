@@ -60,6 +60,8 @@ class Site(models.Model):
     deleted = models.BooleanField(default=False)
     # webmaster email
     email = models.EmailField(null=False, blank=False)
+    # Indicates if the user wants to renew or not their MWS3 subscription
+    subscription = models.BooleanField(default=True)
 
     # Administrator users of a site
     users = models.ManyToManyField(User, related_name='sites')
