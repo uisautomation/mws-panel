@@ -20,7 +20,8 @@ class FinanceTaskWithFailure(Task):
 def send_reminder_renewal():
     today = timezone.now().date()
     renewal_sites_billing = Billing.objects.filter(site__start_date__month=today.month-1 if today.month != 1 else 12,
-                                                   site__start_date__lt=date(today.year, 1, 1), site__deleted=False)
+                                                   site__start_date__lt=date(today.year, 1, 1), site__deleted=False,
+                                                   site__subscription=True)
     for billing in renewal_sites_billing:
         EmailMessage(
             subject="University of Cambridge Managed Web Service: Your MWS3 site is due to renew next month",
@@ -34,7 +35,7 @@ def send_reminder_renewal():
             headers={'Return-Path': 'mws3-support@cam.ac.uk'}
         ).send()
 
-    renewal_sites_billing = Billing.objects.filter(site__start_date__month=today.month,
+    renewal_sites_billing = Billing.objects.filter(site__start_date__month=today.month, site__subscription=True,
                                                    site__start_date__lt=date(today.year, 1, 1), site__deleted=False)
     for billing in renewal_sites_billing:
         EmailMessage(
