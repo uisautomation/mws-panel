@@ -1,0 +1,28 @@
+{% extends 'project-light/campl-mws.html' %}
+{% load static %}
+{% load calcendperiod %}
+{% block page_content %}
+    {{ block.super }}
+    <div class="campl-column12">
+        <div class="campl-content-container">
+            <h1 id="page-title">Do not renew your MWS site subscription</h1>
+            <form action={% url 'donotrenew' site_id=site.id %} method="post">
+                <fieldset>
+                    {% csrf_token %}
+                    <div>
+                        <p>
+                            <img src="{% static 'images/interface/icon-warning.png' %}">
+                            Warning:
+                        </p>
+
+                        <p>
+                            Your subscription will be cancelled and your site will be deleted on {{ site.start_date|calcendperiod }}<br>
+                            You will still be able to use your MWS site until that moment.
+                        </p>
+                        <p><input type="submit" value="Cancel subscription" class="campl-btn campl-primary-cta"></p>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+{% endblock %}

@@ -10,8 +10,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.utils.html import format_html
 from django.views.generic import FormView, ListView, UpdateView
 from django.views.generic.detail import SingleObjectMixin, DetailView
-from ucamlookup import get_group_ids_of_a_user_in_lookup, IbisException, user_in_groups, get_or_create_group_by_groupid, \
-    get_user_lookupgroups
+from ucamlookup import user_in_groups, get_user_lookupgroups
 from apimws.vm import new_site_primary_vm
 from apimws.utils import email_confirmation
 from sitesmanagement.forms import SiteForm, SiteEmailForm
@@ -295,3 +294,24 @@ def site_enable(request, site_id):
             return redirect(site)
 
     return redirect(reverse('listsites'))
+
+
+class SiteDoNotRenew(SitePriviledgeCheck, UpdateView):
+    """Schedules cancellation of the site for the end of the current billing period"""
+    template_name = 'mws/donotrenew.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(SiteDoNotRenew, self).get_context_data(**kwargs)
+        context['breadcrumbs'] = {
+            0: dict(name='Manage Web Service site: ' + str(self.object.name), url=self.object.get_absolute_url()),
+            1: dict(name='Change information about your MWS',
+                    url=reverse('editsite', kwargs={'site_id': self.object.id})),
+            2: dict(name='Cancel subscription', url=reverse('donotrenew', kwargs={'site_id': self.object.id}))
+        }
+        return context
+
+    def post(self, request, *args, **kwargs):
+        site = self.get_object()
+        site.subscription = False
+        site.save()
+        return redirect(reverse('editsite', kwargs={'site_id': site.id}))

@@ -3,7 +3,8 @@ from django.conf.urls.static import static
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from sitesmanagement.views.domains import DomainListView, DomainDelete
-from sitesmanagement.views.sites import SiteCreate, SiteShow, SiteList, SiteDisable, SiteDelete, SiteEdit, SiteEditEmail
+from sitesmanagement.views.sites import SiteCreate, SiteShow, SiteList, SiteDisable, SiteDelete, SiteEdit, \
+    SiteEditEmail, SiteDoNotRenew
 from sitesmanagement.views.snapshots import SnapshotCreate, SnapshotDelete
 from sitesmanagement.views.unixgroups import UnixGroupListView, UnixGroupCreate, UnixGroupDelete, UnixGroupUpdate
 from sitesmanagement.views.vhosts import VhostListView, VhostDelete, VhostCreate, VisitVhost
@@ -20,16 +21,17 @@ urlpatterns = patterns('',
 
     # Site management
     url(r'^$', SiteList.as_view(), name='listsites'),
-    url(r'^new/$', SiteCreate.as_view(), name='newsite'),
-    url(r'^show/(?P<site_id>[0-9]+)/$', SiteShow.as_view(), name='showsite'),
-    url(r'^edit/(?P<site_id>[0-9]+)/$', SiteEdit.as_view(), name='editsite'),
-    url(r'^editsitemail/(?P<site_id>[0-9]+)/$', SiteEditEmail.as_view(), name='editsitemail'),
+    url(r'^site/new/$', SiteCreate.as_view(), name='newsite'),
+    url(r'^site/show/(?P<site_id>[0-9]+)/$', SiteShow.as_view(), name='showsite'),
+    url(r'^site/edit/(?P<site_id>[0-9]+)/$', SiteEdit.as_view(), name='editsite'),
+    url(r'^site/email/(?P<site_id>[0-9]+)/$', SiteEditEmail.as_view(), name='editsitemail'),
+    url(r'^site/delete/(?P<site_id>[0-9]+)/$', SiteDelete.as_view(), name='deletesite'),
+    url(r'^site/disable/(?P<site_id>[0-9]+)/$', SiteDisable.as_view(), name='disablesite'),
+    url(r'^site/donotrenew/(?P<site_id>[0-9]+)/$', SiteDoNotRenew.as_view(), name='donotrenew'),
 
     # Service management
     url(r'^settings/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.service_settings'),
     url(r'^billing/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.billing_management'),
-    url(r'^delete/(?P<site_id>[0-9]+)/$', SiteDelete.as_view(), name='deletesite'),
-    url(r'^disable/(?P<site_id>[0-9]+)/$', SiteDisable.as_view(), name='disablesite'),
     url(r'^enable/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.sites.site_enable', name='enablesite'),
     url(r'^privacy/$', 'sitesmanagement.views.privacy'),
     url(r'^vhosts/(?P<vhost_id>[0-9]+)/certificates/$', 'sitesmanagement.views.certificates'),
