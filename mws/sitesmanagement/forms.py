@@ -1,5 +1,5 @@
 from django import forms
-from ucamlookup import get_institutions
+from ucamlookup import get_institutions, IbisException
 from sitesmanagement.models import Site, Vhost, DomainName, Billing, UnixGroup, Snapshot
 
 
@@ -14,7 +14,10 @@ class SiteForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         super(SiteForm, self).__init__(*args, **kwargs)
-        self.fields['institution_id'].choices = get_institutions(user)
+        try:
+            self.fields['institution_id'].choices = get_institutions(user)
+        except IbisException:
+            self.fields['institution_id'].choices = []
 
     class Meta:
         model = Site
