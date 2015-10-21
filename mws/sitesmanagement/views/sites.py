@@ -232,7 +232,7 @@ class SiteEditEmail(SitePriviledgeCheck, UpdateView):
         return return_value
 
 
-class SiteDelete(SitePriviledgeAndBusyCheck, UpdateView):
+class SiteDelete(SitePriviledgeCheck, UpdateView):
     """View(Controller) to delete a site. The Site object is marked as cancelled but not deleted. The VMs associated
     to this Site are switched off but eventually they are deleted. We maintain the Site object to report and
     billing options."""
@@ -257,7 +257,7 @@ class SiteDelete(SitePriviledgeAndBusyCheck, UpdateView):
             return redirect(self.object)
 
 
-class SiteDisable(SitePriviledgeAndBusyCheck, UpdateView):
+class SiteDisable(SitePriviledgeCheck, UpdateView):
     """View(Controller) to disable a Site object. The VMs are switched off."""
     template_name = 'mws/disable.html'
 
