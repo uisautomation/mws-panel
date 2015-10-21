@@ -55,8 +55,8 @@ CELERYBEAT_SCHEDULE = {
         'schedule': crontab(hour=3, minute=30, day_of_month=1),
         'args': ()
     },
-    'check_has_paid': {
-        'task': 'sitesmanagement.cronjobs.check_has_paid',
+    'check_subscription': {
+        'task': 'sitesmanagement.cronjobs.check_subscription',
         'schedule': crontab(hour=3, minute=0),
         'args': ()
     },

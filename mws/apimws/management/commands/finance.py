@@ -33,10 +33,12 @@ class Command(NoArgsCommand):
         else:
             inidate = date(year, month-1, 1)
 
+        # Sites that haven't been canceled (end_date is null) and do not have a billing (PO) associated
         if Site.objects.filter(start_date__month=inidate.month, start_date__year=inidate.year,
                                end_date__isnull=True, billing__isnull=True).exists():
             LOGGER.error("Sites not cancelled were found without billing after a month")
 
+        # Billings of sites that haven't been canceled (end_date is null) and are new (start_date actual month/year)
         new_sites_billing = Billing.objects.filter(site__start_date__month=inidate.month,
                                                    site__start_date__year=inidate.year, site__end_date__isnull=True)
 
@@ -44,7 +46,8 @@ class Command(NoArgsCommand):
         ### RENEWALS ###
         ################
 
-        # Send renewal to finance if it the billing was sent to finance 1 year (or more) ago
+        # Billings of sites that haven't been canceled (end_date is null), that hasn't expressed to want to cancel
+        # their subscription, and that started in the actual month of a previous year
         renewal_sites_billing = Billing.objects.filter(site__start_date__month=month,
                                                        site__start_date__lt=date(year, 1, 1),
                                                        site__end_date__isnull=True)

@@ -19,6 +19,8 @@ class FinanceTaskWithFailure(Task):
 @shared_task(base=FinanceTaskWithFailure)
 def send_reminder_renewal():
     today = timezone.now().date()
+    # Billings of sites that haven't been canceled (end_date is null), that hasn't expressed to want to cancel
+    # their subscription, and that started in the previous month of the current one of a previous year
     renewal_sites_billing = Billing.objects.filter(site__start_date__month=today.month-1 if today.month != 1 else 12,
                                                    site__start_date__lt=date(today.year, 1, 1),
                                                    site__end_date__isnull=True,
@@ -54,8 +56,10 @@ def send_reminder_renewal():
 
 
 @shared_task(base=FinanceTaskWithFailure)
-def check_has_paid():
+def check_subscription():
     today = timezone.now().date()
+    # Check which sites still do not have a billing associated, warn or cancel them based on
+    # how many days ago they were created
     sites = Site.objects.filter(billing__isnull=True, end_date__isnull=True)
     for site in sites:
         if (today - site.start_date) >= timedelta(days=31):
@@ -81,3 +85,4 @@ def check_has_paid():
                 to=[site.email],
                 headers={'Return-Path': 'mws3-support@cam.ac.uk'}
             ).send()
+    # Cancel sites with suscription finished

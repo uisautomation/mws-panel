@@ -6,7 +6,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
 from mwsauth.tests import do_test_login
-from sitesmanagement.cronjobs import send_reminder_renewal, check_has_paid
+from sitesmanagement.cronjobs import send_reminder_renewal, check_subscription
 from sitesmanagement.models import NetworkConfig, Site, VirtualMachine, Service, Billing
 from sitesmanagement.views import billing_management
 
@@ -124,14 +124,14 @@ class BillingTests(TestCase):
                                    start_date=today+timedelta(days=10))
         User.objects.create(username="test0001")
         site.users.add(User.objects.get(username="test0001"))
-        check_has_paid()
+        check_subscription()
         # Nothing should happen, only 10 days
         self.assertEqual(len(mail.outbox), 0)
 
         # 15 days reminder
         site.start_date = today - timedelta(days=15)
         site.save()
-        check_has_paid()
+        check_subscription()
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject,
                          'University of Cambridge Managed Web Service: Remember to upload your purchase order')
@@ -140,13 +140,13 @@ class BillingTests(TestCase):
         # 20 days reminder (nothing)
         site.start_date = today - timedelta(days=20)
         site.save()
-        check_has_paid()
+        check_subscription()
         self.assertEqual(len(mail.outbox), 1)
 
         # 25 days reminder, last week reminder
         site.start_date = today - timedelta(days=25)
         site.save()
-        check_has_paid()
+        check_subscription()
         self.assertEqual(len(mail.outbox), 2)
         self.assertEqual(mail.outbox[1].subject,
                          'University of Cambridge Managed Web Service: Remember to upload your purchase order')
@@ -157,7 +157,7 @@ class BillingTests(TestCase):
         site.save()
         self.assertIsNone(site.end_date)
         self.assertIn(User.objects.get(username='test0001'), site.users.all())
-        check_has_paid()
+        check_subscription()
         site = Site.objects.get(pk=site.id)
         self.assertEqual(len(mail.outbox), 3)
         self.assertEqual(mail.outbox[2].subject,
