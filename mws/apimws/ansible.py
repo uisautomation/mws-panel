@@ -57,7 +57,7 @@ class AnsibleTaskWithFailure(Task):
         else:
             LOGGER.error("An error happened when trying to execute Ansible.\nThe task id is %s.\n\n"
                          "The parameters passed to the task were: %s\n\nThe traceback is:\n%s\n", task_id, args, einfo)
-        service = args['service']
+        service = kwargs['service']
         service.status = 'ready'
         service.save()
 
