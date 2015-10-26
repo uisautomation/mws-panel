@@ -132,10 +132,6 @@
     description: PHP extension for interfacing with MessagePack
 - model: apimws.PHPLib
   fields:
-    name: php5-mysql
-    description: MySQL module for php5
-- model: apimws.PHPLib
-  fields:
     name: php5-mysqlnd-ms
     description: MySQL replication and load balancing module for PHP
 - model: apimws.PHPLib
