@@ -117,7 +117,9 @@ class BillingTests(TestCase):
                          'University of Cambridge Managed Web Service: Your MWS3 site is due to renew this month')
         self.assertEqual(mail.outbox[1].to, [site.email])
 
-    def test_check_canel_if_not_paid(self):
+    def test_check_cacnel_if_not_paid(self):
+        ''' This test checks that if the user does not uploads a PO before 30 days, the site will be cancelled
+        automatically'''
         # 1 month for renewal warning
         today = datetime.today()
         site = Site.objects.create(name="testSite", institution_id="testInst", email='amc203@cam.ac.uk',
@@ -187,3 +189,32 @@ class BillingTests(TestCase):
         self.assertTrue(site.subscription)
         self.assertEqual(site.end_date, today.date())
         self.assertFalse(site.users.exists())
+
+    def test_check_not_cancel_if_paid(self):
+        ''' This test checks that if the user does not uploads a PO before 30 days, the site will be cancelled
+        automatically'''
+        today = datetime.today()
+        do_test_login(self, user="test0001")
+        # Create site (more than 30 days ago start date)
+        site = Site.objects.create(name="testSite", institution_id="testInst", email='amc203@cam.ac.uk',
+                                   start_date=today-timedelta(days=40))
+        site.users.add(User.objects.get(username="test0001"))
+
+        self.assertFalse(hasattr(site, 'billing'))
+        pofile = SimpleUploadedFile("file.pdf", "file_content")
+        service = self.client.post(reverse(billing_management, kwargs={'site_id': site.id}),
+                         {'purchase_order_number': 'testOrderNumber', 'group': 'testGroup', 'purchase_order': pofile})
+        # Retrieve object
+        site = Site.objects.get(pk=site.id)
+        self.assertTrue(hasattr(site, 'billing'))
+
+        # Check that the site is not cancelled, it has a PO attached
+        self.assertIsNone(site.end_date)
+        self.assertIn(User.objects.get(username='test0001'), site.users.all())
+        check_subscription()
+        self.assertEqual(len(mail.outbox), 0)
+        # Retrieve object
+        site = Site.objects.get(pk=site.id)
+        self.assertIsNone(site.end_date)
+        self.assertTrue(site.subscription)
+        self.assertTrue(site.users.exists())
