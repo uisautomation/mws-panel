@@ -117,16 +117,21 @@ class BillingTests(TestCase):
                          'University of Cambridge Managed Web Service: Your MWS3 site is due to renew this month')
         self.assertEqual(mail.outbox[1].to, [site.email])
 
-    def test_check_paid(self):
+    def test_check_canel_if_not_paid(self):
         # 1 month for renewal warning
         today = datetime.today()
         site = Site.objects.create(name="testSite", institution_id="testInst", email='amc203@cam.ac.uk',
-                                   start_date=today+timedelta(days=10))
+                                   start_date=today-timedelta(days=10))
         User.objects.create(username="test0001")
         site.users.add(User.objects.get(username="test0001"))
         check_subscription()
         # Nothing should happen, only 10 days
+        # Retrieve object
+        site = Site.objects.get(pk=site.id)
         self.assertEqual(len(mail.outbox), 0)
+        self.assertIsNone(site.end_date)
+        self.assertTrue(site.subscription)
+        self.assertTrue(site.users.exists())
 
         # 15 days reminder
         site.start_date = today - timedelta(days=15)
@@ -136,12 +141,22 @@ class BillingTests(TestCase):
         self.assertEqual(mail.outbox[0].subject,
                          'University of Cambridge Managed Web Service: Remember to upload your purchase order')
         self.assertEqual(mail.outbox[0].to, [site.email])
+        # Retrieve object
+        site = Site.objects.get(pk=site.id)
+        self.assertIsNone(site.end_date)
+        self.assertTrue(site.subscription)
+        self.assertTrue(site.users.exists())
 
         # 20 days reminder (nothing)
         site.start_date = today - timedelta(days=20)
         site.save()
         check_subscription()
         self.assertEqual(len(mail.outbox), 1)
+        # Retrieve object
+        site = Site.objects.get(pk=site.id)
+        self.assertIsNone(site.end_date)
+        self.assertTrue(site.subscription)
+        self.assertTrue(site.users.exists())
 
         # 25 days reminder, last week reminder
         site.start_date = today - timedelta(days=25)
@@ -151,6 +166,11 @@ class BillingTests(TestCase):
         self.assertEqual(mail.outbox[1].subject,
                          'University of Cambridge Managed Web Service: Remember to upload your purchase order')
         self.assertEqual(mail.outbox[1].to, [site.email])
+        # Retrieve object
+        site = Site.objects.get(pk=site.id)
+        self.assertIsNone(site.end_date)
+        self.assertTrue(site.subscription)
+        self.assertTrue(site.users.exists())
 
         # More tha 30 days, cancel the site
         site.start_date = today - timedelta(days=35)
@@ -158,10 +178,12 @@ class BillingTests(TestCase):
         self.assertIsNone(site.end_date)
         self.assertIn(User.objects.get(username='test0001'), site.users.all())
         check_subscription()
-        site = Site.objects.get(pk=site.id)
         self.assertEqual(len(mail.outbox), 3)
         self.assertEqual(mail.outbox[2].subject,
                          'University of Cambridge Managed Web Service: Your site has been cancelled')
         self.assertEqual(mail.outbox[2].to, [site.email])
+        # Retrieve object
+        site = Site.objects.get(pk=site.id)
+        self.assertTrue(site.subscription)
         self.assertEqual(site.end_date, today.date())
         self.assertFalse(site.users.exists())
