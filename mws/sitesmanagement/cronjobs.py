@@ -27,12 +27,15 @@ def send_reminder_renewal():
                                                    site__subscription=True)
     for billing in renewal_sites_billing:
         EmailMessage(
-            subject="University of Cambridge Managed Web Service: Your MWS3 site is due to renew next month",
-            body="Dear MWS3 user,\n\nYour MWS3 site '%s' is due to renew next month on %s. "
-                 "Please make sure the purchase order that you submitted as payment method is up to date and can be"
-                 "used as a valid payment method this year as well. If you want to amend your purchase order, you can"
-                 "upload a new one using the web control panel.\n\nIf the purchase order cannot be processed your site"
-                 "may be deleted automatically." % (billing.site.name, billing.site.start_date),
+            subject="The annual charge for your managed web site is due next month",
+            body="The annual charge for your managed web site '%s' is due next month on %s. Unless you tell us otherwise "
+                 "we will automatically issue an invoice for this at the end of next month based on information from the "
+                 "most recent purchase order you have given us. Please use the web control panel (under 'billing settings') "
+                 "to check that this information is still current. If you want to amend your purchase order you can upload "
+                 "a new one. Your site may be cancelled if we can't successfully invoice for it.\n\n"
+                 "If you no longer want you site then please either cancel it now (under 'edit the MWS profile'), or mark "
+                 "it 'Not for renewal' in which case it will be automatically cancelled on '%s'." 
+                 % (billing.site.name, billing.site.start_date, billing.site.start_date),
             from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
             to=[billing.site.email],
             headers={'Return-Path': 'mws3-support@cam.ac.uk'}
@@ -43,12 +46,15 @@ def send_reminder_renewal():
                                                    site__end_date__isnull=True)
     for billing in renewal_sites_billing:
         EmailMessage(
-            subject="University of Cambridge Managed Web Service: Your MWS3 site is due to renew this month",
-            body="Dear MWS3 user,\n\nYour MWS3 site '%s' is due to renew next month on %s. "
-                 "Please make sure the purchase order that you submitted as payment method is up to date and can be"
-                 "used as a valid payment method this year as well. If you want to amend your purchase order, you can"
-                 "upload a new one using the web control panel.\n\nIf the purchase order cannot be processed your site"
-                 "may be deleted automatically." % (billing.site.name, billing.site.start_date),
+            subject="REMINDER: the annual charge for your managed web site is due this month",
+            body="The annual charge for your managed web site '%s' is due this month on %s. Unless you tell us otherwise "
+                 "we will automatically issue an invoice for this at the end of this month based on information from the "
+                 "most recent purchase order you have given us. If you haven't already, please use the web control panel "
+                 "(under 'billing settings') to check that this information is still current. If you want to amend your "
+                 "purchase order you can upload a new one. Your site may be cancelled if we can't successfully invoice for it.\n\n"
+                 "If you no longer want you site then please either cancel it now (under 'edit the MWS profile'), or mark "
+                 "it 'Not for renewal' in which case it will be automatically cancelled on '%s'." 
+                 % (billing.site.name, billing.site.start_date, billing.site.start_date),
             from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
             to=[billing.site.email],
             headers={'Return-Path': 'mws3-support@cam.ac.uk'}
@@ -65,9 +71,8 @@ def check_subscription():
         if (today - site.start_date) >= timedelta(days=31):
             # Cancel site
             EmailMessage(
-                subject="University of Cambridge Managed Web Service: Your site has been cancelled",
-                body="Dear MWS3 user,\n\n"
-                     "Your site '%s' has been cancelled due to the lack of payment for the service." % site.name,
+                subject="Your managed web site has been cancelled",
+                body="Your managed web site '%s' has been cancelled because we haven't received payment information for it." % site.name,
                 from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
                 to=[site.email],
                 headers={'Return-Path': 'mws3-support@cam.ac.uk'}
@@ -76,11 +81,10 @@ def check_subscription():
         elif ((today - site.start_date) == timedelta(days=15)) or ((today - site.start_date) >= timedelta(days=24)):
             # Warning 15 days before and each day in the last week before deadline
             EmailMessage(
-                subject="University of Cambridge Managed Web Service: Remember to upload your purchase order",
-                body="Dear MWS3 user,\n\n"
-                     "Please make sure to upload the purchase order using the control web panel to pay for the MWS3 "
-                     "site '%s'.\n\nIf you don't upload a valid purchase order before %s your site '%s' will be "
-                     "automatically deleted." % (site.name, site.start_date+timedelta(days=30), site.name),
+                subject="Remember to upload a purchase order for your managed web site",
+                body="Please upload a purchase order using the control web panel to pay for your managed "
+                     "web site '%s'.\n\nIf you don't upload a valid purchase order before %s your site '%s' will be "
+                     "automatically cancelled." % (site.name, site.start_date+timedelta(days=30), site.name),
                 from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
                 to=[site.email],
                 headers={'Return-Path': 'mws3-support@cam.ac.uk'}
