@@ -17,8 +17,8 @@
                 </fieldset>
             </form>
             {% if site.subscription %}
-            <p>Your subscription will currently renewed on {{ site.start_date|calcendperiod }}</p>
-            <p><a href="{% url 'donotrenew' site_id=site.id %}" class="campl-btn campl-primary-cta campl-primary-red">Do not renew the service</a></p>
+            <p>Your subscription will currently be renewed on {{ site.start_date|calcendperiod }}</p>
+            <p><a href="{% url 'donotrenew' site_id=site.id %}" class="campl-btn campl-primary-cta campl-primary-red">Do not renew the subscription</a></p>
             {% else %}
             <p>Your site is scheduled to be cancelled on {{ site.start_date|calcendperiod }}</p>
             {% endif %}
