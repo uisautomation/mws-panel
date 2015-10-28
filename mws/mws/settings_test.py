@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 from datetime import timedelta
-from common_settings import *
+from mws.common_settings import *
 # This file is generated when deploying
 from mws.production_secrets import *
 
