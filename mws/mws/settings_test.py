@@ -1,7 +1,8 @@
+from __future__ import absolute_import
 from datetime import timedelta
 from common_settings import *
 # This file is generated when deploying
-from production_secrets import *
+from mws.production_secrets import *
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -61,4 +62,4 @@ VM_API = "xen"
 
 EMAIL_TIMEOUT = 60
 
-from logging_configuration import *
+from mws.logging_configuration import *
