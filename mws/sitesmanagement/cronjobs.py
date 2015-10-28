@@ -89,4 +89,16 @@ def check_subscription():
                 to=[site.email],
                 headers={'Return-Path': 'mws3-support@cam.ac.uk'}
             ).send()
-    # Cancel sites with suscription finished
+    # Cancel sites with subscription finished
+    sites = Site.objects.filter(end_date__isnull=True, start_date__lt=date(today.year-1, today.month, today.day),
+                                subscription=False)
+    for site in sites:
+        # Cancel site
+        EmailMessage(
+            subject="Your managed web site has been cancelled",
+            body="Your managed web site '%s' has been cancelled per your requested." % site.name,
+            from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
+            to=[site.email],
+            headers={'Return-Path': 'mws3-support@cam.ac.uk'}
+        ).send()
+        site.cancel()

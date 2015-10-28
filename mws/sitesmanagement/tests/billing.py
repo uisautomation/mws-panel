@@ -202,7 +202,7 @@ class BillingTests(TestCase):
 
         self.assertFalse(hasattr(site, 'billing'))
         pofile = SimpleUploadedFile("file.pdf", "file_content")
-        service = self.client.post(reverse(billing_management, kwargs={'site_id': site.id}),
+        self.client.post(reverse(billing_management, kwargs={'site_id': site.id}),
                          {'purchase_order_number': 'testOrderNumber', 'group': 'testGroup', 'purchase_order': pofile})
         # Retrieve object
         site = Site.objects.get(pk=site.id)
