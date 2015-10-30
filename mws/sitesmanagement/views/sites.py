@@ -114,6 +114,7 @@ class SiteList(LoginRequiredMixin, ListView):
         context['sites_authorised'] = filter(lambda site: not site.is_canceled() and not site.is_disabled(),
                                              ssh_sites)
         context['deactivate_new'] = not can_create_new_site()
+        context['cost'] = django_settings.YEAR_COST
         return context
 
     def get_queryset(self):
