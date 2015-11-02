@@ -42,7 +42,7 @@ class XenAPITests(TestCase):
         # We try that the switch on change of state works
         change_vm_power_state(vm, "on")
         # We try that the reset call works
-        reset_vm(vm)
+        reset_vm(vm.id)
         # We clone the production VM to a test VM
         site = vm.site
         clone_vm(site, vm)
