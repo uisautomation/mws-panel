@@ -239,7 +239,7 @@ def change_vm_power_state(vm, on):
 def reset_vm(vm):
     lock = filter(lambda x: x['name'] == u'apimws.xen.reset_vm' and x['args'] == u'(%s,)' % vm,
                   [item for sublist in app.control.inspect().active().values() for item in sublist])
-    if len(lock) != 0:
+    if len(lock) == 0:
         vm_api_request(command='button', parameters={"action": "reboot", "vmid": vm.name})
         return True
     else:
