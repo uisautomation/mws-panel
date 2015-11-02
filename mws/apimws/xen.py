@@ -10,6 +10,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 import subprocess
 from apimws.views import post_installation
+from mws.celery import app
 from sitesmanagement.models import VirtualMachine, NetworkConfig, Service, SiteKeys, Vhost, DomainName
 
 
@@ -236,8 +237,13 @@ def change_vm_power_state(vm, on):
 
 @shared_task(base=XenWithFailure)
 def reset_vm(vm):
-    vm_api_request(command='button', parameters={"action": "reboot", "vmid": vm.name})
-    return True
+    lock = filter(lambda x: x['name'] == u'apimws.xen.reset_vm' and x['args'] == u'(%s,)' % vm,
+                  [item for sublist in app.control.inspect().active().values() for item in sublist])
+    if len(lock) != 0:
+        vm_api_request(command='button', parameters={"action": "reboot", "vmid": vm.name})
+        return True
+    else:
+        return False
 
 
 @shared_task(base=XenWithFailure)
