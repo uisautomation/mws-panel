@@ -291,6 +291,7 @@ class Service(models.Model):
         ('accepted', 'Accepted'),
         ('denied', 'Denied'),
         ('installing', 'Installing OS'),
+        ('postinstall', 'Post Installing OS'),
         ('ansible', 'Running Ansible'),
         ('ansible_queued', 'Ansible queued'),
         ('ready', 'Ready'),

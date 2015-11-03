@@ -38,7 +38,7 @@ def warning_messages(site):
         if production_service.status == 'ansible':
             warning_messages_list.append("Your server is being configured.")
 
-        if production_service.status == 'installing':
+        if production_service.status in ['installing', 'postinstall']:
             warning_messages_list.append("Your server is being installed.")
 
         if production_service.status == 'requested':

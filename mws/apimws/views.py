@@ -2,6 +2,8 @@ import csv
 from datetime import date
 import json
 import logging
+
+from celery import shared_task
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseForbidden
@@ -144,6 +146,13 @@ def dns_entries(request, token):
     # TODO check aliases_deleted
 
 
+@shared_task(time_limit=7200)  # Time limit = 2 hours
+def post_installOS(service):
+    launch_ansible_async(service)
+    from apimws.utils import finished_installation_email_confirmation
+    finished_installation_email_confirmation(service.site)
+
+
 @public
 @csrf_exempt
 def post_installation(request):
@@ -159,12 +168,10 @@ def post_installation(request):
             service = vm.service
             if service.status != "installing":
                 raise Exception("The service wasn't in the OS installation process")  # TODO raise custom exception
-            service.status = 'ansible'
+            service.status = 'postinstall'
             service.save()
-            launch_ansible_async.apply_async((service, ), countdown=90)
+            post_installOS.apply_async((service, ), countdown=90)
             # Wait 90 seconds before launching ansible, this will allow the machine have time to complete the reboot
-            from apimws.utils import finished_installation_email_confirmation
-            finished_installation_email_confirmation.delay(service.site)  # Perhaps after ansible has finished?
             return HttpResponse()
 
     return HttpResponseForbidden()

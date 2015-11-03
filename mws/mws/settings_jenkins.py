@@ -69,7 +69,6 @@ wOq24EIbX5LquL9w+uvnfXw=
 
 BROKER_URL = 'django://'
 INSTALLED_APPS = INSTALLED_APPS+('kombu.transport.django', )
-CELERY_IMPORTS = ('apimws.platforms', 'apimws.xen', 'apimws.utils', 'apimws.jackdaw')
 
 JENKINS_TASKS = (
     'django_jenkins.tasks.run_pylint',

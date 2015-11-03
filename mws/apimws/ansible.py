@@ -27,7 +27,7 @@ def launch_ansible(service):
         service.save()
     elif service.status == 'ansible_queued':
         return
-    elif service.status == 'installing':
+    elif service.status in ['installing', 'postinstall']:
         return
     else:
         raise UnexpectedVMStatus()  # TODO pass the vm object?
