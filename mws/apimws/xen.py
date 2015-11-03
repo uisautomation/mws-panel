@@ -46,7 +46,6 @@ def vm_api_request(**json_object):
 
 class XenWithFailure(Task):
     abstract = True
-
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         if type(exc) is subprocess.CalledProcessError:
             LOGGER.error("An error happened when trying to communicate with Xen's VM API.\nThe task id is %s.\n\n"
@@ -238,7 +237,7 @@ def change_vm_power_state(vm, on):
 @shared_task(base=XenWithFailure)
 def reset_vm(vm_id):
     vm = VirtualMachine.objects.get(pk=vm_id)
-    lock = filter(lambda x: x['name'] == u'apimws.xen.reset_vm' and x['args'] == u'(%s,)' % vm_id,
+    lock = filter(lambda x: x and x['name'] == u'apimws.xen.reset_vm' and x['args'] == u'(%s,)' % vm_id,
                   [item for sublist in app.control.inspect().active().values() for item in sublist])
     if len(lock) == 0:
         vm_api_request(command='button', parameters={"action": "reboot", "vmid": vm.name})
