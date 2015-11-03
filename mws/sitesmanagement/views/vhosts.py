@@ -2,8 +2,10 @@
 from Crypto.Util import asn1
 import OpenSSL
 from django.conf import settings as django_settings
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
+from django.db import IntegrityError
 from django.http import HttpResponseForbidden, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import ListView, DeleteView, CreateView, DetailView
@@ -77,14 +79,18 @@ class VhostCreate(ServicePriviledgeCheck, CreateView):
     form_class = VhostForm
 
     def get(self, request, *args, **kwargs):
-        return redirect(reverse('listvhost', kwargs={'service_id': self.service.id}))
+        return redirect(self.get_success_url())
 
     def form_valid(self, form):
-        self.object = form.save(commit=False)
-        self.object.service = self.service
-        self.object.save()
-        launch_ansible(self.service)  # to create a new vhost configuration file
-        return super(VhostCreate, self).form_valid(form)
+        try:
+            self.object = form.save(commit=False)
+            self.object.service = self.service
+            self.object.save()
+            launch_ansible(self.service)  # to create a new vhost configuration file
+            return HttpResponseRedirect(self.get_success_url())
+        except IntegrityError:
+            messages.error(self.request, 'This website name already exists')
+            return redirect(self.get_success_url())
 
     def get_success_url(self):
         return reverse('listvhost', kwargs={'service_id': self.service.id})
