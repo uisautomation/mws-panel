@@ -239,7 +239,7 @@ def reset_vm(vm_id):
     vm = VirtualMachine.objects.get(pk=vm_id)
     lock = filter(lambda x: x and x['name'] == u'apimws.xen.reset_vm' and x['args'] == u'(%s,)' % vm_id,
                   [item for sublist in app.control.inspect().active().values() for item in sublist])
-    if len(lock) == 0:
+    if len(lock) > 1:
         vm_api_request(command='button', parameters={"action": "reboot", "vmid": vm.name})
         return True
     else:
