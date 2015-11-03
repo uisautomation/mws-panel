@@ -92,6 +92,10 @@ class VhostCreate(ServicePriviledgeCheck, CreateView):
             messages.error(self.request, 'This website name already exists')
             return redirect(self.get_success_url())
 
+    def form_invalid(self, form):
+        messages.error(self.request, 'There was an error with the form submitted')
+        return redirect(self.get_success_url())
+
     def get_success_url(self):
         return reverse('listvhost', kwargs={'service_id': self.service.id})
 
