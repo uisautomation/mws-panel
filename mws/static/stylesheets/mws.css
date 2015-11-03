@@ -157,6 +157,43 @@ ul#id_apache_modules, ul#id_php_libs {
     margin-bottom: 15px;
 }
 
+ul.messages {
+    margin-top: 10px;
+}
+
+ul.messages li {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 14px;
+    list-style-type: none;
+}
+
+ul.messages li.error {
+    color: #a94442;
+    background-color: #f2dede;
+    border-color: #ebccd1;
+}
+
+ul.messages li.success {
+    color: #3c763d;
+    background-color: #dff0d8;
+    border-color: #d6e9c6;
+}
+
+ul.messages li.info {
+    color: #31708f;
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+}
+
+ul.messages li.warning {
+    color: #8a6d3b;
+    background-color: #fcf8e3;
+    border-color: #faebcc;
+}
+
 /*! normalize.css v3.0.0 | MIT License | git.io/normalize */
 
 .btn {
