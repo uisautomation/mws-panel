@@ -2,6 +2,8 @@
 
 import datetime
 import logging
+
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse, reverse_lazy
@@ -11,6 +13,8 @@ from django.utils.html import format_html
 from django.views.generic import FormView, ListView, UpdateView
 from django.views.generic.detail import SingleObjectMixin, DetailView
 from ucamlookup import user_in_groups, get_user_lookupgroups
+
+from apimws.ansible import launch_ansible_site
 from apimws.vm import new_site_primary_vm
 from apimws.utils import email_confirmation
 from sitesmanagement.forms import SiteForm, SiteEmailForm
@@ -218,19 +222,22 @@ class SiteEditEmail(SitePriviledgeCheck, UpdateView):
     form_class = SiteEmailForm
 
     def render_to_response(self, context, **response_kwargs):
-        redirect(self.get_object())
+        return redirect(self.object)
 
     def get_success_url(self):
         return reverse('showsite', kwargs={'site_id':self.get_object().id})
 
     def form_valid(self, form):
         form.user = self.request.user
-        return_value = super(SiteEditEmail, self).form_valid(form)
-        if 'email' in form.changed_data:
-            if self.object.email:
-                email_confirmation(self.object)
-                # TODO launch ansible to update webmaster email address in host?
-        return return_value
+        super(SiteEditEmail, self).form_valid(form)
+        if 'email' in form.changed_data and self.object.email:
+            email_confirmation(self.object)
+            launch_ansible_site(self.object)
+        return redirect(self.object)
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'The email format is incorrect')
+        return self.render_to_response(self.get_context_data(form=form))
 
 
 class SiteDelete(SitePriviledgeCheck, UpdateView):
