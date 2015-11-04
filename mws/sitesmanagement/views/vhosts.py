@@ -93,7 +93,9 @@ class VhostCreate(ServicePriviledgeCheck, CreateView):
             return redirect(self.get_success_url())
 
     def form_invalid(self, form):
-        messages.error(self.request, 'There was an error with the form submitted')
+        messages.error(self.request, 'There was an error with the form submitted. Please check that the name of your'
+                                     'website is of less than 100 characters only contains alphabetical characters, '
+                                     'numbers, hyphens, or underscores. Spaces are not permitted.')
         return redirect(self.get_success_url())
 
     def get_success_url(self):
