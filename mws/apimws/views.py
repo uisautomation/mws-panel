@@ -10,7 +10,7 @@ from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from stronghold.decorators import public
-from apimws.ansible import launch_ansible_async
+from apimws.ansible import launch_ansible_async, AnsibleTaskWithFailure
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.models import DomainName, Site, EmailConfirmation, VirtualMachine, Billing
 from ucamlookup import user_in_groups
@@ -146,7 +146,7 @@ def dns_entries(request, token):
     # TODO check aliases_deleted
 
 
-@shared_task
+@shared_task(base=AnsibleTaskWithFailure)
 def post_installOS(service):
     launch_ansible_async(service)
     from apimws.utils import finished_installation_email_confirmation
