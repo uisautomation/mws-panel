@@ -146,7 +146,7 @@ def dns_entries(request, token):
     # TODO check aliases_deleted
 
 
-@shared_task(base=AnsibleTaskWithFailure)
+@shared_task(base=AnsibleTaskWithFailure, default_retry_delay=120, max_retries=2)
 def post_installOS(service):
     launch_ansible_async(service)
     from apimws.utils import finished_installation_email_confirmation
