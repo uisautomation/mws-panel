@@ -146,7 +146,7 @@ def dns_entries(request, token):
     # TODO check aliases_deleted
 
 
-@shared_task(time_limit=7200)  # Time limit = 2 hours
+@shared_task
 def post_installOS(service):
     launch_ansible_async(service)
     from apimws.utils import finished_installation_email_confirmation

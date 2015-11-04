@@ -41,8 +41,8 @@ hAM+a6/30F5fdkWpE1smPyrfASyXRfWE4Ccn1RVgYX9u
 """}
 
 BROKER_URL = 'redis://localhost:6379/0'
-CELERYD_TASK_SOFT_TIME_LIMIT = 120*60  # 2 hours
-CELERYD_TASK_TIME_LIMIT = 120*60  # 2 hours
+CELERYD_TASK_SOFT_TIME_LIMIT = 4*60*60  # 4 hours
+CELERYD_TASK_TIME_LIMIT = 4*60*60  # 4 hours
 CELERYBEAT_SCHEDULE = {
     'jackdaw-api': {
         'task': 'apimws.jackdaw.jackdaw_api',
