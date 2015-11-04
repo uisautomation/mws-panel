@@ -194,6 +194,10 @@ ul.messages li.warning {
     border-color: #faebcc;
 }
 
+h3.campl-teaser-title {
+    color: white;
+}
+
 /*! normalize.css v3.0.0 | MIT License | git.io/normalize */
 
 .btn {

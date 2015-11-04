@@ -34,10 +34,10 @@
             {% if site.production_service %}
             <div class="campl-column4">
                 <div class="campl-content-container campl-side-padding">
-                    <article class="node node-external-link view-mode-focus_on clearfix campl-horizontal-teaser campl-teaser campl-focus-teaser">
-                        <div class="campl-focus-teaser-img">
-                            <div class="campl-content-container campl-horizontal-teaser-img">
-                                <a href="{% url 'sitesmanagement.views.service_settings' service_id=site.production_service.id %}">
+                    <a href="{% url 'sitesmanagement.views.service_settings' service_id=site.production_service.id %}">
+                        <article class="node node-external-link view-mode-focus_on clearfix campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                            <div class="campl-focus-teaser-img">
+                                <div class="campl-content-container campl-horizontal-teaser-img">
                                     <div class="field field-name-field-external-url-image field-type-image field-label-hidden">
                                         <div class="field-items">
                                             <div class="field-item even">
@@ -45,60 +45,52 @@
                                             </div>
                                         </div>
                                     </div>
-                                </a>
+                                </div>
                             </div>
-                        </div>
-                        <div class="campl-focus-teaser-txt">
-                            <div class="campl-content-container campl-horizontal-teaser-txt">
-                                <h3 class="campl-teaser-title">
-                                    <a href="{% url 'sitesmanagement.views.service_settings' service_id=site.production_service.id %}">
-                                        MWS server settings
-                                    </a>
-                                </h3>
-                                <a href="{% url 'sitesmanagement.views.service_settings' service_id=site.production_service.id %}" class="ir campl-focus-link">MWS server settings</a>
+                            <div class="campl-focus-teaser-txt">
+                                <div class="campl-content-container campl-horizontal-teaser-txt">
+                                    <h3 class="campl-teaser-title">MWS server settings</h3>
+                                    <span class="ir campl-focus-link"></span>
+                                </div>
                             </div>
-                        </div>
-                    </article>
+                        </article>
+                    </a>
                 </div>
             </div>
             {% endif %}
 
             <div class="campl-column4">
                 <div class="campl-content-container campl-side-padding">
-                    <article class="node node-external-link view-mode-focus_on clearfix campl-horizontal-teaser campl-teaser campl-focus-teaser">
-                        <div class="campl-focus-teaser-img">
-                            <div class="campl-content-container campl-horizontal-teaser-img">
-                                <a href="{% url 'editsite' site_id=site.id %}">
-                                    <div class="field field-name-field-external-url-image field-type-image field-label-hidden">
-                                        <div class="field-items">
-                                            <div class="field-item even">
-                                                <img class="campl-scale-with-grid" src="{% static "icons/pencil.png" %}" height="128" style="margin: 10px;" alt="">
+                    <a href="{% url 'editsite' site_id=site.id %}">
+                        <article class="node node-external-link view-mode-focus_on clearfix campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                            <div class="campl-focus-teaser-img">
+                                <div class="campl-content-container campl-horizontal-teaser-img">
+                                        <div class="field field-name-field-external-url-image field-type-image field-label-hidden">
+                                            <div class="field-items">
+                                                <div class="field-item even">
+                                                    <img class="campl-scale-with-grid" src="{% static "icons/pencil.png" %}" height="128" style="margin: 10px;" alt="">
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </a>
+                                </div>
                             </div>
-                        </div>
-                        <div class="campl-focus-teaser-txt">
-                            <div class="campl-content-container campl-horizontal-teaser-txt">
-                                <h3 class="campl-teaser-title">
-                                    <a href="{% url 'editsite' site_id=site.id %}">
-                                        Account settings
-                                    </a>
-                                </h3>
-                                <a href="{% url 'editsite' site_id=site.id %}" class="ir campl-focus-link">Account settings</a>
+                            <div class="campl-focus-teaser-txt">
+                                <div class="campl-content-container campl-horizontal-teaser-txt">
+                                    <h3 class="campl-teaser-title">Account settings</h3>
+                                    <span class="ir campl-focus-link"></span>
+                                </div>
                             </div>
-                        </div>
-                    </article>
+                        </article>
+                    </a>
                 </div>
             </div>
 
             <div class="campl-column4">
                 <div class="campl-content-container campl-side-padding">
-                    <article class="node node-external-link view-mode-focus_on clearfix campl-horizontal-teaser campl-teaser campl-focus-teaser">
-                        <div class="campl-focus-teaser-img">
-                            <div class="campl-content-container campl-horizontal-teaser-img">
-                                <a href="{% url 'mwsauth.views.auth_change' site_id=site.id %}">
+                    <a href="{% url 'mwsauth.views.auth_change' site_id=site.id %}">
+                        <article class="node node-external-link view-mode-focus_on clearfix campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                            <div class="campl-focus-teaser-img">
+                                <div class="campl-content-container campl-horizontal-teaser-img">
                                     <div class="field field-name-field-external-url-image field-type-image field-label-hidden">
                                         <div class="field-items">
                                             <div class="field-item even">
@@ -106,21 +98,16 @@
                                             </div>
                                         </div>
                                     </div>
-                                </a>
+                                </div>
                             </div>
-                        </div>
-                        <div class="campl-focus-teaser-txt">
-                            <div class="campl-content-container campl-horizontal-teaser-txt">
-                                <h3 class="campl-teaser-title">
-                                    <a href="{% url 'mwsauth.views.auth_change' site_id=site.id %}">
-                                        Manage authorised users and groups
-                                    </a>
-                                </h3>
-                                <a href="{% url 'mwsauth.views.auth_change' site_id=site.id %}"
-                                   class="ir campl-focus-link">Manage authorised users and groups</a>
+                            <div class="campl-focus-teaser-txt">
+                                <div class="campl-content-container campl-horizontal-teaser-txt">
+                                    <h3 class="campl-teaser-title">Manage authorised users and groups</h3>
+                                    <span class="ir campl-focus-link"></span>
+                                </div>
                             </div>
-                        </div>
-                    </article>
+                        </article>
+                    </a>
                 </div>
             </div>
 
@@ -128,11 +115,11 @@
 
             <div class="campl-column4{% if DEMO %} not-active{% endif %}">
                 <div class="campl-content-container campl-side-padding">
-                    <article class="node node-external-link view-mode-focus_on clearfix
-                                    campl-horizontal-teaser campl-teaser campl-focus-teaser">
-                        <div class="campl-focus-teaser-img">
-                            <div class="campl-content-container campl-horizontal-teaser-img">
-                                <a href="{% url 'sitesmanagement.views.clone_vm_view' site_id=site.id %}">
+                    <a href="{% url 'sitesmanagement.views.clone_vm_view' site_id=site.id %}">
+                        <article class="node node-external-link view-mode-focus_on clearfix
+                                        campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                            <div class="campl-focus-teaser-img">
+                                <div class="campl-content-container campl-horizontal-teaser-img">
                                     <div class="field field-name-field-external-url-image field-type-image
                                                 field-label-hidden">
                                         <div class="field-items">
@@ -143,21 +130,16 @@
                                             </div>
                                         </div>
                                     </div>
-                                </a>
+                                </div>
                             </div>
-                        </div>
-                        <div class="campl-focus-teaser-txt">
-                            <div class="campl-content-container campl-horizontal-teaser-txt">
-                                <h3 class="campl-teaser-title">
-                                    <a href="{% url 'sitesmanagement.views.clone_vm_view' site_id=site.id %}">
-                                        Manage production and test servers
-                                    </a>
-                                </h3>
-                                <a href="{% url 'sitesmanagement.views.clone_vm_view' site_id=site.id %}"
-                                   class="ir campl-focus-link">Manage production and test servers</a>
+                            <div class="campl-focus-teaser-txt">
+                                <div class="campl-content-container campl-horizontal-teaser-txt">
+                                    <h3 class="campl-teaser-title">Manage production and test servers</h3>
+                                    <span class="ir campl-focus-link"></span>
+                                </div>
                             </div>
-                        </div>
-                    </article>
+                        </article>
+                    </a>
                 </div>
             </div>
 
@@ -199,11 +181,11 @@
         {% if site.test_service and site.test_service.active and not site.test_service.is_busy %}
             <div class="campl-column4 campl-theme-3">
                 <div class="campl-content-container campl-side-padding">
-                    <article class="node node-external-link view-mode-focus_on clearfix
-                                    campl-horizontal-teaser campl-teaser campl-focus-teaser">
-                        <div class="campl-focus-teaser-img">
-                            <div class="campl-content-container campl-horizontal-teaser-img">
-                                <a href="{% url 'sitesmanagement.views.service_settings' service_id=site.test_service.id %}">
+                    <a href="{% url 'sitesmanagement.views.service_settings' service_id=site.test_service.id %}">
+                        <article class="node node-external-link view-mode-focus_on clearfix
+                                        campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                            <div class="campl-focus-teaser-img">
+                                <div class="campl-content-container campl-horizontal-teaser-img">
                                     <div class="field field-name-field-external-url-image field-type-image
                                                 field-label-hidden">
                                         <div class="field-items">
@@ -214,31 +196,26 @@
                                             </div>
                                         </div>
                                     </div>
-                                </a>
+                                </div>
                             </div>
-                        </div>
-                        <div class="campl-focus-teaser-txt">
-                            <div class="campl-content-container campl-horizontal-teaser-txt">
-                                <h3 class="campl-teaser-title">
-                                    <a href="{% url 'sitesmanagement.views.service_settings' service_id=site.test_service.id %}">
-                                        MWS test server settings
-                                    </a>
-                                </h3>
-                                <a href="{% url 'sitesmanagement.views.service_settings' service_id=site.test_service.id %}"
-                                   class="ir campl-focus-link">MWS test server settings</a>
+                            <div class="campl-focus-teaser-txt">
+                                <div class="campl-content-container campl-horizontal-teaser-txt">
+                                    <h3 class="campl-teaser-title">MWS test server settings</h3>
+                                    <span class="ir campl-focus-link"></span>
+                                </div>
                             </div>
-                        </div>
-                    </article>
+                        </article>
+                    </a>
                 </div>
             </div>
         {% endif %}
 
             <div class="campl-column4">
                 <div class="campl-content-container campl-side-padding">
-                    <article class="node node-external-link view-mode-focus_on clearfix campl-horizontal-teaser campl-teaser campl-focus-teaser">
-                        <div class="campl-focus-teaser-img">
-                            <div class="campl-content-container campl-horizontal-teaser-img">
-                                <a href="https://demo.dev.mws3.csx.cam.ac.uk:3000/dashboard/script/mws3.js?name={{ stats_name }}">
+                    <a href="https://demo.dev.mws3.csx.cam.ac.uk:3000/dashboard/script/mws3.js?name={{ stats_name }}">
+                        <article class="node node-external-link view-mode-focus_on clearfix campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                            <div class="campl-focus-teaser-img">
+                                <div class="campl-content-container campl-horizontal-teaser-img">
                                     <div class="field field-name-field-external-url-image field-type-image field-label-hidden">
                                         <div class="field-items">
                                             <div class="field-item even">
@@ -246,27 +223,25 @@
                                             </div>
                                         </div>
                                     </div>
-                                </a>
+                                </div>
                             </div>
-                        </div>
-                        <div class="campl-focus-teaser-txt">
-                            <div class="campl-content-container campl-horizontal-teaser-txt">
-                                <h3 class="campl-teaser-title">
-                                    <a href="https://demo.dev.mws3.csx.cam.ac.uk:3000/dashboard/script/mws3.js?name={{ stats_name }}">System analytics</a>
-                                </h3>
-                                <a href="https://demo.dev.mws3.csx.cam.ac.uk:3000/dashboard/script/mws3.js?name={{ stats_name }}" class="ir campl-focus-link">System analytics</a>
+                            <div class="campl-focus-teaser-txt">
+                                <div class="campl-content-container campl-horizontal-teaser-txt">
+                                    <h3 class="campl-teaser-title">System analytics</h3>
+                                    <span class="ir campl-focus-link"></span>
+                                </div>
                             </div>
-                        </div>
-                    </article>
+                        </article>
+                    </a>
                 </div>
             </div>
 
             <div class="campl-column4">
                 <div class="campl-content-container campl-side-padding">
-                    <article class="node node-external-link view-mode-focus_on clearfix campl-horizontal-teaser campl-teaser campl-focus-teaser">
-                        <div class="campl-focus-teaser-img">
-                            <div class="campl-content-container campl-horizontal-teaser-img">
-                                <a href="{% url 'sitesmanagement.views.billing_management' site_id=site.id %}">
+                    <a href="{% url 'sitesmanagement.views.billing_management' site_id=site.id %}">
+                        <article class="node node-external-link view-mode-focus_on clearfix campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                            <div class="campl-focus-teaser-img">
+                                <div class="campl-content-container campl-horizontal-teaser-img">
                                     <div class="field field-name-field-external-url-image field-type-image field-label-hidden">
                                         <div class="field-items">
                                             <div class="field-item even">
@@ -274,18 +249,16 @@
                                             </div>
                                         </div>
                                     </div>
-                                </a>
+                                </div>
                             </div>
-                        </div>
-                        <div class="campl-focus-teaser-txt">
-                            <div class="campl-content-container campl-horizontal-teaser-txt">
-                                <h3 class="campl-teaser-title">
-                                    <a href="{% url 'sitesmanagement.views.billing_management' site_id=site.id %}">Billing settings</a>
-                                </h3>
-                                <a href="{% url 'sitesmanagement.views.billing_management' site_id=site.id %}" class="ir campl-focus-link">Billing settings</a>
+                            <div class="campl-focus-teaser-txt">
+                                <div class="campl-content-container campl-horizontal-teaser-txt">
+                                    <h3 class="campl-teaser-title">Billing settings</h3>
+                                    <span class="ir campl-focus-link"></span>
+                                </div>
                             </div>
-                        </div>
-                    </article>
+                        </article>
+                    </a>
                 </div>
             </div>
 
