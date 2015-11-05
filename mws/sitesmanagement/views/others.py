@@ -3,6 +3,7 @@
 import bisect
 import datetime
 from django.conf import settings
+from django.contrib import messages
 from django.utils import dateparse
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
@@ -235,8 +236,12 @@ def reset_vm(request, service_id):
     if not service or not service.active or service.is_busy:
         return redirect(site)
 
-    if service.do_reset() is False:
-        pass  # TODO add error messages in session if it is False
+    if request.method == 'POST':
+        result = service.do_reset() # TODO add error messages in session if it is False
+        if result:
+            messages.info(request, "Your site was restarted")
+        else:
+            messages.error(request, "Your site couldn't restart, a problem occurred")
 
     return redirect(service_settings, service_id=service.id)
 
