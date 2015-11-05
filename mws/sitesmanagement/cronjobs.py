@@ -5,6 +5,7 @@ from django.core.mail import EmailMessage
 from django.utils import timezone
 from sitesmanagement.models import Billing, Site
 
+
 LOGGER = logging.getLogger('mws')
 
 
@@ -90,8 +91,11 @@ def check_subscription():
                 headers={'Return-Path': 'mws3-support@cam.ac.uk'}
             ).send()
     # Cancel sites with subscription finished
-    sites = Site.objects.filter(end_date__isnull=True, start_date__lt=date(today.year-1, today.month, today.day),
-                                subscription=False)
+    if today.month == 2 and today.day == 29:
+        last_year = date(today.year-1, 3, 1)
+    else:
+        last_year = date(today.year-1, today.month, today.day)
+    sites = Site.objects.filter(end_date__isnull=True, start_date__lt=last_year, subscription=False)
     for site in sites:
         # Cancel site
         EmailMessage(
