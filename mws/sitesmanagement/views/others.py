@@ -239,7 +239,7 @@ def reset_vm(request, service_id):
     if request.method == 'POST':
         result = service.do_reset() # TODO add error messages in session if it is False
         if result:
-            messages.info(request, "Your site was restarted")
+            messages.success(request, "Your site was restarted")
         else:
             messages.error(request, "Your site couldn't restart, a problem occurred")
 

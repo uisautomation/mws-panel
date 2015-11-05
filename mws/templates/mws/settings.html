@@ -385,7 +385,9 @@
                 url: url,
                 type: type,
                 success: function(result) {
-                    window.location = "{% url 'showsite' site_id=site.id %}";
+                    document.open();
+                    document.write(result);
+                    document.close();
                 },
                 beforeSend: function(xhr, settings) {
                     xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
