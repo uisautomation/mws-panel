@@ -10,7 +10,9 @@ from sitesmanagement.models import Site, VirtualMachine
 @public
 def bes(request):
     json_all = []
-    for site in Site.objects.all():
+    for site in Site.objects.filter(canceled=False, service__status__in=('ansible', 'ansible_queued', 'ready')):
+        # Do not backup sites that have been cancelled or sites that are not ready
+        # Backups from sites that disappear from the bes API will still be kept during 14 days before getting deleted
         json_site = {}
         json_site['id'] = "mwssite-%s" % site.id
         for sitekey in site.keys.all():
@@ -19,6 +21,7 @@ def bes(request):
         for vm in VirtualMachine.objects.filter(service__site = site):
             json_vm = {}
             json_vm['name'] = vm.name
+            json_vm['disabled'] = vm.service.site.disabled
             json_vm['fqdn'] = vm.network_configuration.name
             json_vm['service_fqdn'] = vm.service.network_configuration.name
             json_vm['location'] = 'mws-cluster-1'  # TODO change it for a variable in the model
