@@ -225,7 +225,7 @@
             {% if service.due_update %}
             <div class="campl-column3{% if DEMO %} not-active{% endif %}">
                 <div class="campl-content-container campl-side-padding">
-                    <a class="update_os_vm" data-href="javascript:update_os_vm('{% url 'sitesmanagement.views.update_os' service_id=service.id %}')" href="#">
+                    <a class="update_os_vm" data-href="javascript:ajaxCallVM('{% url 'sitesmanagement.views.update_os' service_id=service.id %}', 'POST')" href="#">
                         <article class="node node-external-link view-mode-focus_on clearfix
                                         campl-horizontal-teaser campl-teaser campl-focus-teaser campl-focus-teaser-red">
                             <div class="campl-focus-teaser-img">
@@ -254,7 +254,7 @@
         {% else %}
             <div class="campl-column3">
                 <div class="campl-content-container campl-side-padding">
-                    <a class="delete_vm" data-href="javascript:delete_vm('{% url 'sitesmanagement.views.delete_vm' service_id=service.id %}')" href="#">
+                    <a class="delete_vm" data-href="javascript:ajaxCallVM('{% url 'sitesmanagement.views.delete_vm' service_id=service.id %}', 'DELETE')" href="#">
                         <article class="node node-external-link view-mode-focus_on clearfix
                                         campl-horizontal-teaser campl-teaser campl-focus-teaser campl-focus-teaser-red">
                             <div class="campl-focus-teaser-img">
@@ -279,19 +279,19 @@
                 </div>
             </div>
         {% endif %}
-
-        {% if service.is_ready %}
-            <div class="campl-column6">
-                <div class="campl-content-container campl-side-padding">
+        <div class="campl-column3">
+            <div class="campl-content-container campl-side-padding">
+                <a class="restart_vm" data-href="javascript:ajaxCallVM('{% url 'sitesmanagement.views.reset_vm' service_id=service.id %}', 'POST')" href="#">
                     <article class="node node-external-link view-mode-focus_on clearfix
                                     campl-horizontal-teaser campl-teaser campl-focus-teaser">
                         <div class="campl-focus-teaser-img">
-                            <div class="campl-content-container campl-horizontal-teaser-txt">
+                            <div class="campl-content-container campl-horizontal-teaser-img">
                                 <div class="field field-name-field-external-url-image field-type-image
                                             field-label-hidden">
                                     <div class="field-items">
-                                        <div id="vm_status_message" class="field-item even" style="color: #ffffff">
-                                            Checking the status of the {% if not service.primary %}test {% endif %} server
+                                        <div class="field-item even">
+                                            <img class="campl-scale-with-grid" src="{% static "icons/restart.png" %}"
+                                                 height="128" style="margin: 10px;" alt="">
                                         </div>
                                     </div>
                                 </div>
@@ -299,31 +299,14 @@
                         </div>
                         <div class="campl-focus-teaser-txt">
                             <div class="campl-content-container campl-horizontal-teaser-txt">
-                                <h3 class="campl-teaser-title">
-                                    <a id="vm_status_message_link" href="#"
-                                       onclick='$("#translucidframe")[0].style.visibility = "visible"'></a>
-                                </h3>
-                                <a id="vm_status_link" href="#" class="ir campl-focus-link"
-                                   onclick='$("#translucidframe")[0].style.visibility = "visible"'></a>
+                                <h3 class="campl-teaser-title">Restart</h3>
+                                <span class="ir campl-focus-link"></span>
                             </div>
                         </div>
                     </article>
-                </div>
+                </a>
             </div>
-        {% else %}
-            <div class="campl-column6">
-                <div class="campl-content-container campl-side-padding">
-                    <article class="node node-external-link view-mode-focus_on clearfix
-                                    campl-horizontal-teaser campl-teaser campl-focus-teaser">
-                            <div class="campl-content-container campl-horizontal-teaser-txt">
-                                <div id="vm_status_busy" class="field-item even" style="color: #ffffff">
-                                    The server is busy, we are configuring it
-                                </div>
-                            </div>
-                    </article>
-                </div>
-            </div>
-        {% endif %}
+        </div>
     </div>
 
     {% if not service.primary %}
@@ -360,36 +343,26 @@
     </div>
     {% endif %}
 
+    <!-- Modal update os -->
+    <div class="modal fade" id="restart_modal" tabindex="-1" role="dialog" aria-labelledby="restart_modal_label" aria-hidden="true">
+      <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+          <div class="modal-body">
+            Are you sure you want to restart your site?
+          </div>
+          <div class="modal-footer" style="padding: 10px 20px 10px;">
+            <button type="button" class="campl-btn campl-primary-cta" data-dismiss="modal">Cancel</button>
+            <a class="campl-btn campl-primary-cta campl-primary-red" id="update_os_modal_button">Restart</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
 {% endblock %}
 
 
 {% block campl_foot_js %}
     <script>
-        $(document).ready(
-            $.ajax({url: "{% url 'sitesmanagement.views.check_vm_status' service_id=service.id %}",
-                success:function(result){
-                    if (result['service_is_on'] === undefined) {
-                        $("#vm_status_message").html("We are currently experiencing a problem. ");
-                        $("#vm_status_message_link").html("Please try again later.");
-                    } else {
-                        if (result['service_is_on'] == true) {
-                            $("#vm_status_message").html("The {% if not service.primary %}test {% endif %} server is currently ON");
-                            $("#vm_status_message_link").attr("href", "{% url 'sitesmanagement.views.reset_vm' service_id=service.id %}");
-                            $("#vm_status_message_link").html("If it does not respond you can do a hard reset by clicking here");
-                            $("#vm_status_link").attr("href", "{% url 'sitesmanagement.views.reset_vm' service_id=service.id %}");
-                        } else if (result['service_is_on'] == false) {
-                            $("#vm_status_message").html("The {% if not service.primary %}test {% endif %} server is currently OFF");
-                            $("#vm_status_message_link").attr("href", "{% url 'sitesmanagement.views.power_vm' service_id=service.id %}");
-                            $("#vm_status_message_link").html("Power it on");
-                            $("#vm_status_link").attr("href", "{% url 'sitesmanagement.views.power_vm' service_id=service.id %}");
-                        } else {
-                            $("#vm_status_message").html("We are currently experiencing a problem.");
-                            $("#vm_status_message_link").html("Please try again later.");
-                        }
-                    }
-                }
-            })
-        );
 
         function getCookie(name) {
             var cookieValue = null;
@@ -407,11 +380,10 @@
             return cookieValue;
         }
 
-        {% if not service.primary %}
-        function delete_vm(url) {
+        function ajaxCallVM(url, type) {
             $.ajax({
                 url: url,
-                type: 'DELETE',
+                type: type,
                 success: function(result) {
                     window.location = "{% url 'showsite' site_id=site.id %}";
                 },
@@ -421,6 +393,8 @@
                 crossDomain: false
             });
         }
+
+        {% if not service.primary %}
 
         $('.delete_vm').click(function() {
             $("#delete_modal_button").attr("href", $( this ).attr('data-href'));
@@ -429,24 +403,15 @@
         {% endif %}
 
         {% if service.primary and service.due_update %}
-        function update_os_vm(url) {
-            $.ajax({
-                url: url,
-                type: 'POST',
-                success: function(result) {
-                    window.location = "{% url 'showsite' site_id=site.id %}";
-                },
-                beforeSend: function(xhr, settings) {
-                    xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
-                },
-                crossDomain: false
-            });
-        }
-
         $('.update_os_vm').click(function() {
             $("#update_os_modal_button").attr("href", $( this ).attr('data-href'));
             $('#update_os_modal').modal();
         });
         {% endif %}
+
+        $('.restart_vm').click(function() {
+            $("#restart_modal_button").attr("href", $( this ).attr('data-href'));
+            $('#restart_modal').modal();
+        });
     </script>
 {% endblock %}
