@@ -232,7 +232,7 @@ def change_vm_power_state(vm_id, on):
         raise VMAPIInputException("passed wrong parameter power %s" % on)
     vm = VirtualMachine.objects.get(pk=vm_id)
     lock = filter(lambda x: x and x['name'] == u'apimws.xen.change_vm_power_state' and
-                            x['args'] == u'(%s, %s)' % (vm_id, on),
+                            x['args'] == u"(%s, '%s')" % (vm_id, on),
                   [item for sublist in app.control.inspect().active().values() for item in sublist])
     if len(lock) == 1:
         vm_api_request(command='button', parameters={"action": "power%s" % on, "vmid": vm.name})
