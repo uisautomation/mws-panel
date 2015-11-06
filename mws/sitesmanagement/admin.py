@@ -15,7 +15,7 @@ def recreate_vm(modeladmin, request, queryset):
             destroy_vm(vm.id)
         except:
             pass
-        recreate_vm(vm)
+        recreate_vm(vm.id)
 
 
 recreate_vm.short_description = "Recreate VM"

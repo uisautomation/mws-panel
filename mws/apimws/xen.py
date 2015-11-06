@@ -164,7 +164,8 @@ def new_site_primary_vm(service, host_network_configuration=None):
     secrets_prealocation(vm)
 
 
-def recreate_vm(vm):
+def recreate_vm(vm_id):
+    vm = VirtualMachine.objects.get(pk=vm_id)
     service = vm.service
     network_configuration = vm.network_configuration
     parameters = {}
