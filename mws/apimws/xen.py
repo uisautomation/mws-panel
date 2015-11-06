@@ -209,23 +209,6 @@ def recreate_vm(vm):
     vm.save()
 
 
-def get_vm_power_state(vm):
-    try:
-        # TODO implement something sensible
-        response = {"powerState": "On"}
-    except VMAPIFailure:
-        raise
-    except Exception as e:
-        raise VMAPINotWorkingException(e.message)
-
-    if response['powerState'] == 'Off':
-        return "Off"
-    elif response['powerState'] == 'On':
-        return "On"
-    else:
-        raise VMAPIFailure(None, response)
-
-
 @shared_task(base=XenWithFailure)
 def change_vm_power_state(vm_id, on):
     if on != 'on' and on != 'off':
