@@ -361,8 +361,10 @@ class Service(models.Model):
         return self.virtual_machines.first().is_on()
 
     def do_reset(self):
+        result = True
         for vm in self.virtual_machines.all():
-            vm.do_reset()
+            result = result and vm.do_reset()
+        return result
 
     def power_on(self):
         for vm in self.virtual_machines.all():
@@ -423,7 +425,7 @@ class VirtualMachine(models.Model):
 
     def do_reset(self):
         from apimws.vm import reset_vm
-        reset_vm.delay(self.id)
+        return reset_vm(self.id)
 
     @property
     def primary(self):
