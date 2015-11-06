@@ -84,7 +84,7 @@ def launch_ansible_async(service):
 def ansible_change_mysql_root_pwd(service):
     for vm in service.virtual_machines.all():
         subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name,
-                                 "--tags", "change_mysql_password", "-e", "change_mysql_root_pwd=true"],
+                                 "--tags", "change_mysql_root_pwd", "-e", "change_mysql_root_pwd=true"],
                                 stderr=subprocess.STDOUT)
 
 
