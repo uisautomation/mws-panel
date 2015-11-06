@@ -226,19 +226,19 @@ def change_vm_power_state(vm_id, on):
 
 @shared_task(base=XenWithFailure)
 def reset_vm(vm_id):
-    vm = VirtualMachine.objects.get(pk=vm_id)
     lock = filter(lambda x: x and x['name'] == u'apimws.xen.reset_vm' and x['args'] == u'(%s,)' % vm_id,
                   [item for sublist in app.control.inspect().active().values() for item in sublist])
     if len(lock) == 1:
-        vm_api_request(command='button', parameters={"action": "reboot", "vmid": vm.name})
+        vm_api_request(command='button',
+                       parameters={"action": "reboot", "vmid": VirtualMachine.objects.get(pk=vm_id).name})
         return True
     else:
         return False
 
 
 @shared_task(base=XenWithFailure)
-def destroy_vm(vm):
-    vm_api_request(command='delete', parameters={'vmid': vm.name})
+def destroy_vm(vm_id):
+    vm_api_request(command='delete', parameters={'vmid': VirtualMachine.objects.get(pk=vm_id).name})
     return True
 
 

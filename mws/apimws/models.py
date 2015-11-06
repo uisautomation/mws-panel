@@ -38,6 +38,6 @@ class PHPLib(models.Model):
 def api_call_to_delete_vm(instance, **kwargs):
     if instance.name:
         if instance.site:
-            destroy_vm.delay(instance)
+            destroy_vm.delay(instance.id)
         else:
-            destroy_vm(instance)
+            destroy_vm(instance.id)

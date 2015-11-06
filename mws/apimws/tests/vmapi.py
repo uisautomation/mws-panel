@@ -47,5 +47,5 @@ class XenAPITests(TestCase):
         site = vm.site
         clone_vm(site, vm)
         # We try the deletion of both VMs through a Xen API call
-        destroy_vm(site.secondary_vm)
-        destroy_vm(site.primary_vm)
+        destroy_vm(site.secondary_vm.id)
+        destroy_vm(site.primary_vm.id)

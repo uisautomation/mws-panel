@@ -12,7 +12,7 @@ def recreate_vm(modeladmin, request, queryset):
     from apimws.vm import destroy_vm, recreate_vm
     for vm in queryset:
         try:
-            destroy_vm(vm)
+            destroy_vm(vm.id)
         except:
             pass
         recreate_vm(vm)
