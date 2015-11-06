@@ -362,8 +362,6 @@ class SiteManagement2Tests(TestCase):
                                                  kwargs={'service_id': service.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse('createunixgroup',
                                                  kwargs={'service_id': service.id})).status_code, 403)
-        self.assertEqual(self.client.get(reverse(views.check_vm_status,
-                                                 kwargs={'service_id': service.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse('listvhost', kwargs={'service_id': service.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse('listdomains',
                                                  kwargs={'vhost_id': vhost.id})).status_code, 403)
@@ -424,9 +422,6 @@ class SiteManagement2Tests(TestCase):
                              expected_url=site.get_absolute_url())
         self.assertRedirects(self.client.get(reverse('createunixgroup', kwargs={'service_id': service.id})),
                              expected_url=site.get_absolute_url())
-        self.assertEqual(self.client.get(reverse(views.check_vm_status,
-                                                 kwargs={'service_id': service.id})).status_code,
-                         200)  # The error is shown in JSON format
         self.assertRedirects(self.client.get(reverse('listvhost', kwargs={'service_id': service.id})),
                              expected_url=site.get_absolute_url())
         self.assertRedirects(self.client.get(reverse('listdomains', kwargs={'vhost_id': vhost.id})),

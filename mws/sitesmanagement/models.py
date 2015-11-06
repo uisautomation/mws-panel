@@ -357,9 +357,6 @@ class Service(models.Model):
                 domains.append(domain)
         return domains
 
-    def is_on(self):
-        return self.virtual_machines.first().is_on()
-
     def do_reset(self):
         result = True
         for vm in self.virtual_machines.all():
@@ -406,22 +403,13 @@ class VirtualMachine(models.Model):
     def operating_system(self):
         return self.service.operating_system
 
-    def is_on(self):
-        from apimws.vm import get_vm_power_state
-        if get_vm_power_state(self) == "On":
-            return True
-        else:
-            return False
-
     def power_on(self):
         from apimws.vm import change_vm_power_state
-        if not self.is_on():
-            change_vm_power_state(self, 'on')
+        change_vm_power_state(self, 'on')
 
     def power_off(self):
         from apimws.vm import change_vm_power_state
-        if self.is_on():
-            change_vm_power_state.delay(self, 'off')
+        change_vm_power_state.delay(self, 'off')
 
     def do_reset(self):
         from apimws.vm import reset_vm

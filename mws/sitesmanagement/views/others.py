@@ -118,29 +118,6 @@ def service_settings(request, service_id):
 
 
 @login_required
-def check_vm_status(request, service_id):
-    service = get_object_or_404(Service, pk=service_id)
-    site = privileges_check(service.site.id, request.user)
-
-    if site is None:
-        return HttpResponseForbidden()
-
-    if not service or not service.active or service.is_busy:
-        return JsonResponse({'error': 'VMNotReady'})
-        # return JsonResponse({'error': 'VMNotReady'}, status_code=403) # TODO status_code in JsonResponse doesn't work
-
-    try:
-        return JsonResponse({'service_is_on': service.is_on()})
-    except VMAPINotWorkingException:
-        return JsonResponse({'error': 'VMAPINotWorking'})
-        # return JsonResponse({'error': 'VMAPINotWorking'}, status_code=500) # TODO status_code doesn't work
-    except VMAPIFailure:
-        return JsonResponse({'error': 'VMAPIFailure'})
-    except Exception:
-        return JsonResponse({'error': 'Exception'})
-
-
-@login_required
 def system_packages(request, service_id):
     if getattr(settings, 'DEMO', False):
         return HttpResponseRedirect(reverse('listsites'))

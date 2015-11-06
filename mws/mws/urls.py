@@ -84,9 +84,6 @@ urlpatterns = patterns('',
     url(r'^api/post_installation/$', 'apimws.views.post_installation'),
     url(r'^api/resend_email_confirmation/(?P<site_id>[0-9]+)/$', 'apimws.views.resend_email_confirmation_view'),
 
-    # settings site
-    url(r'^settings/vm/(?P<service_id>[0-9]+)/status/$', 'sitesmanagement.views.check_vm_status'),
-
     # mwsauth app
     url(r'^auth/(?P<site_id>[0-9]+)/$', 'mwsauth.views.auth_change'),
     url(r'^auth/(?P<site_id>[0-9]+)/force_update/$', 'mwsauth.views.force_update'),
