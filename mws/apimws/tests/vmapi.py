@@ -38,9 +38,9 @@ class XenAPITests(TestCase):
         vm = VirtualMachine.objects.first()
         self.assertEqual(vm.service, service)
         # We try that the switch off change of state works
-        change_vm_power_state(vm, "off")
+        change_vm_power_state(vm.id, "off")
         # We try that the switch on change of state works
-        change_vm_power_state(vm, "on")
+        change_vm_power_state(vm.id, "on")
         # We try that the reset call works
         reset_vm(vm.id)
         # We clone the production VM to a test VM

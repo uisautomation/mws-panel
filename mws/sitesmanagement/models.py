@@ -405,11 +405,11 @@ class VirtualMachine(models.Model):
 
     def power_on(self):
         from apimws.vm import change_vm_power_state
-        change_vm_power_state(self, 'on')
+        change_vm_power_state.delay(self.id, 'on')
 
     def power_off(self):
         from apimws.vm import change_vm_power_state
-        change_vm_power_state.delay(self, 'off')
+        change_vm_power_state.delay(self.id, 'off')
 
     def do_reset(self):
         from apimws.vm import reset_vm

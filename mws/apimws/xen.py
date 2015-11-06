@@ -227,11 +227,18 @@ def get_vm_power_state(vm):
 
 
 @shared_task(base=XenWithFailure)
-def change_vm_power_state(vm, on):
+def change_vm_power_state(vm_id, on):
     if on != 'on' and on != 'off':
         raise VMAPIInputException("passed wrong parameter power %s" % on)
-    vm_api_request(command='button', parameters={"action": "power%s" % on, "vmid": vm.name})
-    return True
+    vm = VirtualMachine.objects.get(pk=vm_id)
+    lock = filter(lambda x: x and x['name'] == u'apimws.xen.change_vm_power_state' and
+                            x['args'] == u'(%s, %s)' % (vm_id, on),
+                  [item for sublist in app.control.inspect().active().values() for item in sublist])
+    if len(lock) == 1:
+        vm_api_request(command='button', parameters={"action": "power%s" % on, "vmid": vm.name})
+        return True
+    else:
+        return False
 
 
 @shared_task(base=XenWithFailure)
