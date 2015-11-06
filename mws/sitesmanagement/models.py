@@ -425,7 +425,7 @@ class VirtualMachine(models.Model):
 
     def do_reset(self):
         from apimws.vm import reset_vm
-        return reset_vm(self.id)
+        return not reset_vm.delay(self.id).failed()
 
     @property
     def primary(self):
