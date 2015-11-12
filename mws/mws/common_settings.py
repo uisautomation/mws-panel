@@ -130,4 +130,4 @@ YEAR_COST = 100.00
 FINANCE_EMAIL = 'amc203@cam.ac.uk'
 
 CELERY_IMPORTS = ('apimws.platforms', 'apimws.xen', 'apimws.utils', 'apimws.jackdaw', 'apimws.ansible')
-IP_REG_API_END_POINT = ['ssh', '-i', 'jackdawmwsuser-api', 'mwsuser@ssh.jackdaw', 'ipreg_api']
+IP_REG_API_END_POINT = ['mws_ipreg']
