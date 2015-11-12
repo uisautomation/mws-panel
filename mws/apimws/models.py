@@ -37,7 +37,4 @@ class PHPLib(models.Model):
 @receiver(pre_delete, sender=VirtualMachine)
 def api_call_to_delete_vm(instance, **kwargs):
     if instance.name:
-        if instance.site:
-            destroy_vm.delay(instance.id)
-        else:
-            destroy_vm(instance.id)
+        destroy_vm(instance.id)
