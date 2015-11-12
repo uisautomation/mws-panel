@@ -9,6 +9,8 @@ from celery import shared_task, Task
 from django.conf import settings
 from django.core.urlresolvers import reverse
 import subprocess
+
+from apimws.ipreg import set_sshfp
 from apimws.views import post_installation
 from mws.celery import app
 from sitesmanagement.models import VirtualMachine, NetworkConfig, Service, SiteKeys, Vhost, DomainName
@@ -61,9 +63,6 @@ def secrets_prealocation(vm):
     # Gets all the keys generated for the site and generates the fingerprint and the SSHFP from them
     # It sends the SSHFP record to ip-register
     service = vm.service
-    servicesshfprecord = ""
-    hostsshfprecord = ""
-    sqlcommand = ""
 
     for keytype in ["sshrsa", "sshdsa", "sshecdsa", "sshed25519"]:
         p = subprocess.Popen(["userv", "mws-admin", "mws_pubkey"], stdin=subprocess.PIPE,
@@ -84,22 +83,15 @@ def secrets_prealocation(vm):
                                 fingerprint=re.search("([0-9a-f]{2}:)+[0-9a-f]{2}", fingerprint).group(0))
 
         if keytype is not "sshed25519":  # "sshed25519" as of 2015 is not supported by jackdaw
-            sshkeygeno = subprocess.check_output(["ssh-keygen", "-r", "replacehostname", "-f", pubkey.name])
-            servicesshfprecord += sshkeygeno.replace('replacehostname', service.network_configuration.name)
-            hostsshfprecord += sshkeygeno.replace('replacehostname', vm.network_configuration.name)
-            sshkeygeno = sshkeygeno.split('\n')
+            sshkeygeno = subprocess.check_output(["ssh-keygen", "-r", "replacehostname", "-f", pubkey.name]).split('\n')
             for i in [0, 1]:
                 sshkglnout = sshkeygeno[i].split(' ')
-                sqlcommand += "INSERT INTO IPREG.MY_SSHFP (NAME, ALGORITHM, FPTYPE, FINGERPRINT) " \
-                              "VALUES ('%s', %i, %i, '%s');\n" % (service.network_configuration.name,
-                                                                  int(sshkglnout[3]), int(sshkglnout[4]), sshkglnout[5])
-                sqlcommand += "INSERT INTO IPREG.MY_SSHFP (NAME, ALGORITHM, FPTYPE, FINGERPRINT) " \
-                              "VALUES ('%s', %i, %i, '%s');\n" % (vm.network_configuration.name, int(sshkglnout[3]),
-                                                                  int(sshkglnout[4]), sshkglnout[5])
+                try:
+                    set_sshfp(service.network_configuration.name, int(sshkglnout[3]), int(sshkglnout[4]), sshkglnout[5])
+                    set_sshfp(vm.network_configuration.name, int(sshkglnout[3]), int(sshkglnout[4]), sshkglnout[5])
+                except Exception as e:
+                    pass
         pubkey.close()
-
-    from apimws.utils import ip_register_api_sshfp
-    ip_register_api_sshfp("%s\n\n%s\n\n%s" % (hostsshfprecord, servicesshfprecord, sqlcommand))
 
     # Create a default Vhost with the Service FQDN as main domain name
     default_vhost = Vhost.objects.create(service=service, name="default")
