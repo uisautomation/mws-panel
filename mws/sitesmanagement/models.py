@@ -493,6 +493,16 @@ class UnixGroup(models.Model):
 
 
 class SiteKey(models.Model):
+    ALGORITHMS = {
+        'RSA': 1,
+        'DSA': 2,
+        'ECDSA': 3,
+        'ED25519': 4
+    }
+    FP_TYPES = {
+        'SHA-1': 1,
+        'SHA-256': 2
+    }
     type = models.CharField(max_length=100)
     public_key = models.TextField()
     fingerprint = models.CharField(max_length=250, null=True)
