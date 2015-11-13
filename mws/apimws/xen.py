@@ -13,7 +13,7 @@ import subprocess
 from apimws.ipreg import set_sshfp
 from apimws.views import post_installation
 from mws.celery import app
-from sitesmanagement.models import VirtualMachine, NetworkConfig, Service, SiteKeys, Vhost, DomainName
+from sitesmanagement.models import VirtualMachine, NetworkConfig, Service, SiteKey, Vhost, DomainName
 
 
 LOGGER = logging.getLogger('mws')
@@ -79,7 +79,7 @@ def secrets_prealocation(vm):
         pubkey.flush()
         fingerprint = subprocess.check_output(["ssh-keygen", "-lf", pubkey.name])
 
-        SiteKeys.objects.create(site=service.site, type=keytype.replace("ssh", "").upper(), public_key=result["pubkey"],
+        SiteKey.objects.create(site=service.site, type=keytype.replace("ssh", "").upper(), public_key=result["pubkey"],
                                 fingerprint=re.search("([0-9a-f]{2}:)+[0-9a-f]{2}", fingerprint).group(0))
 
         if keytype is not "sshed25519":  # "sshed25519" as of 2015 is not supported by jackdaw
