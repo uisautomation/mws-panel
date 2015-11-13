@@ -4,7 +4,7 @@ from django.forms import ModelForm
 from reversion import VersionAdmin
 from suit.widgets import LinkedSelect
 from .models import Site, Billing, DomainName, Suspension, VirtualMachine, EmailConfirmation, \
-    Vhost, UnixGroup, NetworkConfig, SiteKeys, Service, Snapshot
+    Vhost, UnixGroup, NetworkConfig, SiteKey, Service, Snapshot
 from ucamlookup import get_institutions, get_institution_name_by_id, IbisException
 
 
@@ -64,6 +64,12 @@ class ServiceAdmin(VersionAdmin):
 
     def fqdn(self, obj):
         return str(obj)
+
+
+class SiteKeyAdmin(VersionAdmin):
+    list_display = ('type', 'site')
+    ordering = ('site', 'type')
+    search_fields = ('site__name')
 
 
 class DomainNameAdmin(VersionAdmin):
@@ -144,5 +150,5 @@ admin.site.register(EmailConfirmation, EmailConfirmationAdmin)
 admin.site.register(UnixGroup, VersionAdmin)
 admin.site.register(NetworkConfig, NetworkConfigAdmin)
 admin.site.register(Service, ServiceAdmin)
-admin.site.register(SiteKeys, VersionAdmin)
+admin.site.register(SiteKey, SiteKeyAdmin)
 admin.site.register(Snapshot, SnapshotAdmin)

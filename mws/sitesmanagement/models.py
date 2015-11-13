@@ -136,7 +136,7 @@ class Site(models.Model):
 
     @property
     def domain_names(self):
-        return DomainName.objects.filter(vhost__service = self.production_service)
+        return DomainName.objects.filter(vhost__service=self.production_service)
 
     def cancel(self):
         self.end_date = datetime.today()
@@ -326,7 +326,7 @@ class Service(models.Model):
 
     @property
     def active(self):
-        return (self.virtual_machines.count() > 0)
+        return self.virtual_machines.count() > 0
 
     @property
     def ipv4(self):
@@ -492,11 +492,14 @@ class UnixGroup(models.Model):
         return self.name
 
 
-class SiteKeys(models.Model):
+class SiteKey(models.Model):
     type = models.CharField(max_length=100)
     public_key = models.TextField()
     fingerprint = models.CharField(max_length=250, null=True)
     site = models.ForeignKey(Site, related_name="keys")
+
+    class Meta:
+        unique_together = (("site", "type"), )
 
 
 def no_date_validator(name):
