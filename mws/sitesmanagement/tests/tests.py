@@ -37,10 +37,7 @@ class SiteManagementTests(TestCase):
         return site
 
     def test_is_camacuk_helper(self):
-        # TODO When we have the IPREG API:
-        # self.assertTrue(is_camacuk("www.cam.ac.uk"))
-        # self.assertFalse(is_camacuk("www.com.ac.uk"))
-        self.assertFalse(is_camacuk("www.cam.ac.uk"))
+        self.assertTrue(is_camacuk("www.cam.ac.uk"))
         self.assertFalse(is_camacuk("www.com.ac.uk"))
 
     def test_get_object_or_none(self):
@@ -540,27 +537,17 @@ class SiteManagement2Tests(TestCase):
                                                             stderr=mock_subprocess.STDOUT)
 
         response = self.client.get(reverse('listdomains', kwargs={'vhost_id': vhost.id}))
-        # TODO When we have the IPREG API:
-        # self.assertInHTML('<tbody><tr><td><p>test.mws3.csx.cam.ac.uk</p></td><td><p>Requested</p></td>'
-        #                   '<td><p>Managed domain name</p></td><td style="width: 155px; cursor: pointer"><p>'
-        #                   '<a onclick="javascript:ajax_call(\'/set_dn_as_main/1/\', \'POST\')">Set as main domain</a>'
-        #                   '<a class="delete_domain" data-href="javascript:ajax_call(\'/delete_domain/1/\', \'DELETE\')"'
-        #                   '> <i title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i></a></p></td>'
-        #                   '</tr></tbody>',
-        #                   response.content, count=1)
         self.assertInHTML(
             '''<tbody>
                     <tr>
                         <td>
-                            <p>test.mws3.csx.cam.ac.uk
-                                <br/>This is the current main domain
-                            </p>
+                            <p>test.mws3.csx.cam.ac.uk</p>
                         </td>
                         <td>
-                            <p>Accepted</p>
+                            <p>Requested</p>
                         </td>
                         <td>
-                            <p><a class="setup_instructions" style="cursor: pointer;">Set up instructions</a></p>
+                            <p>Managed domain name</p>
                         </td>
                         <td style="width: 155px; cursor: pointer">
                             <p>
@@ -579,15 +566,13 @@ class SiteManagement2Tests(TestCase):
             '''<tbody>
                     <tr>
                         <td>
-                            <p>test.mws3.csx.cam.ac.uk
-                                <br/>This is the current main domain
-                            </p>
+                            <p>test.mws3.csx.cam.ac.uk</p>
                         </td>
                         <td>
-                            <p>Accepted</p>
+                            <p>Requested</p>
                         </td>
                         <td>
-                            <p><a class="setup_instructions" style="cursor: pointer;">Set up instructions</a></p>
+                            <p>Managed domain name</p>
                         </td>
                         <td style="width: 155px; cursor: pointer">
                             <p>
@@ -601,14 +586,6 @@ class SiteManagement2Tests(TestCase):
                         </td>
                     </tr>
                 </tbody>''', response.content, count=1)
-        # TODO When we have the IPREG API:
-        # self.assertInHTML('<tbody><tr><td><p>test.mws3.csx.cam.ac.uk</p></td><td><p>Requested</p></td>'
-        #                   '<td><p>Managed domain name</p></td>'
-        #                   '<td style="width: 155px; cursor: pointer"><p><a onclick="javascript:ajax_call'
-        #                   '(\'/set_dn_as_main/1/\', \'POST\')">Set as main domain</a><a class="delete_domain" '
-        #                   'data-href="javascript:ajax_call(\'/delete_domain/1/\', \'DELETE\')"> <i '
-        #                   'title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i></a></p></td></tr>'
-        #                   '</tbody>', response.content, count=1)
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse(views.set_dn_as_main, kwargs={'domain_id': 1}))
@@ -626,10 +603,10 @@ class SiteManagement2Tests(TestCase):
                             </p>
                         </td>
                         <td>
-                            <p>Accepted</p>
+                            <p>Requested</p>
                         </td>
                         <td>
-                            <p><a class="setup_instructions" style="cursor: pointer;">Set up instructions</a></p>
+                            <p>Managed domain name</p>
                         </td>
                         <td style="width: 155px; cursor: pointer">
                             <p>
@@ -643,14 +620,6 @@ class SiteManagement2Tests(TestCase):
                         </td>
                     </tr>
                 </tbody>''', response.content, count=1)
-        # TODO When we have the IPREG API:
-        # self.assertInHTML('<tbody><tr><td><p>test.mws3.csx.cam.ac.uk<br>This is the current main domain</p></td>'
-        #                   '<td><p>Requested</p></td> <td><p>Managed domain name</p></td>'
-        #                   '<td style="width: 155px; cursor: pointer"><p><a onclick="javascript:ajax_call'
-        #                   '(\'/set_dn_as_main/1/\', \'POST\')">Set as main domain</a><a class="delete_domain" '
-        #                   'data-href="javascript:ajax_call(\'/delete_domain/1/\', \'DELETE\')"> <i '
-        #                   'title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i></a></p></td></tr>'
-        #                   '</tbody>', response.content, count=1)
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.delete(reverse('deletedomain', kwargs={'domain_id': 1}))
@@ -659,13 +628,26 @@ class SiteManagement2Tests(TestCase):
                                                                  .network_configuration.name],
                                                             stderr=mock_subprocess.STDOUT)
         response = self.client.get(reverse('listdomains', kwargs={'vhost_id': vhost.id}))
-        self.assertInHTML('<tbody><tr><td><p>test.mws3.csx.cam.ac.uk<br>This is the current main domain</p></td>'
-                          '<td><p>Requested</p></td><td><p>Managed domain name</p></td>'
-                          '<td style="width: 155px; cursor: pointer"><p><a onclick="javascript:ajax_call'
-                          '(\'/set_dn_as_main/1/\', \'POST\')">Set as main domain</a><a class="delete_domain" '
-                          'data-href="javascript:ajax_call(\'/delete_domain/1/\', \'DELETE\')"> <i '
-                          'title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i></a></p></td></tr>'
-                          '</tbody>', response.content, count=0)
+        self.assertInHTML(
+            '''<tbody>
+                    <tr>
+                        <td>
+                            <p>test.mws3.csx.cam.ac.uk
+                                <br/>This is the current main domain
+                            </p>
+                        </td>
+                        <td>
+                            <p>Removing...</p>
+                        </td>
+                        <td>
+                            <p>Managed domain name</p>
+                        </td>
+                        <td style="width: 155px; cursor: pointer">
+                            <p>
+                            </p>
+                        </td>
+                    </tr>
+                </tbody>''', response.content, count=1)
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}),
@@ -676,11 +658,26 @@ class SiteManagement2Tests(TestCase):
                                                             stderr=mock_subprocess.STDOUT)
         response = self.client.get(response.url)
         self.assertInHTML(
-            '''<tbody>
+            ''' <tbody>
+                    <tr>
+                        <td>
+                            <p>test.mws3.csx.cam.ac.uk
+                                <br/>This is the current main domain
+                            </p>
+                        </td>
+                        <td>
+                            <p>Removing...</p>
+                        </td>
+                        <td>
+                            <p>Managed domain name</p>
+                        </td>
+                        <td style="width: 155px; cursor: pointer">
+                            <p></p>
+                        </td>
+                    </tr>
                     <tr>
                         <td>
                             <p>externaldomain.com
-                                <br/>This is the current main domain
                             </p>
                         </td>
                         <td>
@@ -691,24 +688,16 @@ class SiteManagement2Tests(TestCase):
                         </td>
                         <td style="width: 155px; cursor: pointer">
                             <p>
-                            <a onclick="javascript:ajax_call('/set_dn_as_main/2/', 'POST')">
-                                Set as main domain
-                            </a>
-                            <a class="delete_domain" data-href="javascript:ajax_call('/delete_domain/2/', 'DELETE')">
-                                <i title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i>
-                            </a>
+                                <a onclick="javascript:ajax_call('/set_dn_as_main/2/', 'POST')">
+                                    Set as main domain
+                                </a>
+                                <a class="delete_domain" data-href="javascript:ajax_call('/delete_domain/2/', 'DELETE')">
+                                    <i title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i>
+                                </a>
                             </p>
                         </td>
                     </tr>
                 </tbody>''', response.content, count=1)
-        # TODO When we have the IPREG API:
-        # self.assertInHTML('<tr><td><p>externaldomain.com</p></td><td><p>Accepted</p></td>'
-        #                   '<td><p><a class="setup_instructions" style="cursor: pointer;">Set up instructions</a></p>'
-        #                   '</td><td style="width: 155px; cursor: pointer"><p><a onclick="javascript:ajax_call'
-        #                   '(\'/set_dn_as_main/2/\', \'POST\')">Set as main domain</a><a class="delete_domain" '
-        #                   'data-href="javascript:ajax_call(\'/delete_domain/2/\', \'DELETE\')"> <i '
-        #                   'title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i></a></p></td></tr>',
-        #                   response.content, count=1)
 
     def test_system_packages(self):
         site = self.create_site()
