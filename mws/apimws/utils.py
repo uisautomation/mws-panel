@@ -19,30 +19,9 @@ class EmailTaskWithFailure(Task):
                      "The parameters passed to the task were: %s\n\nThe traceback is:\n%s\n", task_id, args, einfo)
 
 
-@shared_task(base=EmailTaskWithFailure, default_retry_delay=5*60, max_retries=12)  # Retry each 5 minutes for 1 hours
+@shared_task(base=EmailTaskWithFailure, default_retry_delay=15*60, max_retries=12)  # Retry each 15 minutes for 12 times
 def ip_register_api_request(domain_name):
-    EmailMessage(
-        subject="New request of a Domain Name for the MWS",
-        body="Domain Name requested: " + domain_name.name + "\n"
-             "IPv4: " + domain_name.vhost.service.network_configuration.IPv4 + "\n"
-             "IPv6: " + domain_name.vhost.service.network_configuration.IPv6 + "\n"
-             "Please, when ready click here: %s%s" % (settings.MAIN_DOMAIN, reverse('apimws.views.confirm_dns',
-                                                                                    kwargs={'dn_id': domain_name.id})),
-        from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
-        to=['amc203@cam.ac.uk'],
-        headers={'Return-Path': 'mws3-support@cam.ac.uk'}
-    ).send()
-
-
-@shared_task(base=EmailTaskWithFailure, default_retry_delay=5*60, max_retries=12)  # Retry each 5 minutes for 1 hours
-def ip_register_api_sshfp(sshfprecord):
-    EmailMessage(
-        subject="Managed Web Service: Please update the following DNS entries",
-        body=sshfprecord,
-        from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
-        to=['amc203@cam.ac.uk'],
-        headers={'Return-Path': 'mws3-support@cam.ac.uk'}
-    ).send()
+    pass
 
 
 def email_confirmation(site):
