@@ -69,7 +69,7 @@ class ServiceAdmin(VersionAdmin):
 class SiteKeyAdmin(VersionAdmin):
     list_display = ('type', 'site')
     ordering = ('site', 'type')
-    search_fields = ('site__name')
+    search_fields = ('site__name', )
 
 
 class DomainNameAdmin(VersionAdmin):
