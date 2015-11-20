@@ -22,7 +22,6 @@ def ip_reg_call(call):
     return result
 
 
-
 def get_nameinfo(hostname):
     try:
         result = ip_reg_call(['get', 'nameinfo', str(hostname)])

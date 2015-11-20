@@ -1,11 +1,13 @@
 from __future__ import absolute_import
+import json
 import logging
+import uuid
 from celery import shared_task, Task
 from django.core.mail import EmailMessage
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from apimws.ipreg import get_nameinfo
 from sitesmanagement.models import EmailConfirmation
-import uuid
 
 
 LOGGER = logging.getLogger('mws')
@@ -21,7 +23,22 @@ class EmailTaskWithFailure(Task):
 
 @shared_task(base=EmailTaskWithFailure, default_retry_delay=15*60, max_retries=12)  # Retry each 15 minutes for 12 times
 def ip_register_api_request(domain_name):
-    pass
+    nameinfo = get_nameinfo(domain_name)
+    if nameinfo['emails']:
+        emails = nameinfo['emails']
+    elif nameinfo['crsids']:
+        emails = map(lambda crsid: crsid+"@cam.ac.uk", nameinfo['crsids'])
+    else:
+        LOGGER.error("Domain name %s do not have emails or crsids associated in IPREG database.\n"
+                     "Received: %s", domain_name, json.dumps(nameinfo))
+        raise Exception("Domain name %s do not have emails or crsids associated in IPREG database" % domain_name)
+    EmailMessage(
+        subject="University of Cambridge Managed Web Service: Domain name authorisation request",
+        body="This is an email example to request permission for the following domain name %s" % (domain_name),
+        from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
+        to=emails,
+        headers={'Return-Path': 'mws3-support@cam.ac.uk'}
+    ).send()
 
 
 def email_confirmation(site):
