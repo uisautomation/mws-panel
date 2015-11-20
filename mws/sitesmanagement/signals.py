@@ -14,7 +14,7 @@ def add_name_to_user(instance, **kwargs):
 
 
 @receiver(pre_delete, sender=SiteKey)
-def delete_from_dns(instance, **kwargs):
+def delete_sshfp_from_dns(instance, **kwargs):
     if instance.type != "ED25519":
         for service in instance.site.services.all():
             delete_sshfp(service.network_configuration.name, SiteKey.ALGORITHMS[instance.type], 1)
@@ -22,3 +22,9 @@ def delete_from_dns(instance, **kwargs):
             for vm in service.virtual_machines.all():
                 delete_sshfp(vm.network_configuration.name, SiteKey.ALGORITHMS[instance.type], 1)
                 delete_sshfp(vm.network_configuration.name, SiteKey.ALGORITHMS[instance.type], 2)
+
+
+@receiver(pre_delete, sender=DomainName)
+def delete_cname_from_dns(instance, **kwargs):
+    if instance.status == "accepted":
+        pass  # TODO: Write call to IPREG API

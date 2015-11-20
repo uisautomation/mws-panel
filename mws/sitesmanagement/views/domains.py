@@ -136,11 +136,7 @@ class DomainDelete(DomainPriviledgeCheck, DeleteView):
 
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if is_camacuk(self.object.name):
-            self.object.status = 'to_be_deleted'
-            self.object.save()
-        else:
-            self.object.delete()
+        self.object.delete()
         launch_ansible(self.service)
         return HttpResponse()
 

@@ -38,14 +38,12 @@
                             </td>
                             <td style="width: 155px; cursor: pointer">
                                 <p>
-                                {% if domain.status != 'to_be_deleted' %}
-                                <a onclick="javascript:ajax_call('{% url 'sitesmanagement.views.set_dn_as_main' domain_id=domain.id %}', 'POST')">
-                                    Set as main domain
-                                </a>
-                                <a class="delete_domain" data-href="javascript:ajax_call('{% url 'deletedomain' domain_id=domain.id %}', 'DELETE')">
-                                    <i title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i>
-                                </a>
-                                {% endif %}
+                                    <a onclick="javascript:ajax_call('{% url 'sitesmanagement.views.set_dn_as_main' domain_id=domain.id %}', 'POST')">
+                                        Set as main domain
+                                    </a>
+                                    <a class="delete_domain" data-href="javascript:ajax_call('{% url 'deletedomain' domain_id=domain.id %}', 'DELETE')">
+                                        <i title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i>
+                                    </a>
                                 </p>
                             </td>
                         </tr>
