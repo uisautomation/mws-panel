@@ -1,9 +1,11 @@
-from django.core.management.base import NoArgsCommand, CommandError
-from optparse import make_option
 import sys
 import json
+from django.core.management.base import NoArgsCommand, CommandError
+from optparse import make_option
+from django.db.models import Q
 from apimws.models import ApacheModule, PHPLib
 from sitesmanagement.models import VirtualMachine, Site, UnixGroup
+
 
 group = "mwsclients"
 
@@ -27,8 +29,7 @@ class Command(NoArgsCommand):
             vms = VirtualMachine.objects.filter(
                 service__status__in=('ansible', 'ansible_queued', 'ready', 'postinstall'),
                 service__site__disabled=False, service__site__deleted=False)
-            result = {'_meta': {'hostvars': {}}}
-            result[group] = [self.hostid(vm) for vm in vms]
+            result = {'_meta': {'hostvars': {}}, group: [self.hostid(vm) for vm in vms]}
             for site in Site.objects.all():
                 if not site.is_canceled():
                     result[self.sitegroup(site)] = [
@@ -77,7 +78,7 @@ class Command(NoArgsCommand):
             vhv['id'] = vh.id
             vhv['name'] = vh.name
             vhv['domains'] = [dom.name for dom in
-                              vh.domain_names.filter(status='accepted')]
+                              vh.domain_names.filter(Q(status='accepted') | Q(status='external'))]
             if vh.main_domain:
                 vhv['main_domain'] = vh.main_domain.name
             if vh.certificate:

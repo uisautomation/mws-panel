@@ -341,15 +341,6 @@ class Service(models.Model):
         return self.network_configuration.name
 
     @property
-    def ip_register_domains(self):
-        domains = []
-        for vhost in self.vhosts.all():
-            for domain in vhost.domain_names.all():
-                if is_camacuk(domain.name) and domain.status == 'accepted':
-                    domains.append(domain)
-        return sorted(set(domains))
-
-    @property
     def all_domain_names(self):
         domains = []
         for vhost in self.vhosts.all():
@@ -476,10 +467,6 @@ class DomainName(models.Model):
     vhost = models.ForeignKey(Vhost, related_name='domain_names')
     requested_by = models.ForeignKey(User, related_name='domain_names_requested', blank=True, null=True)
     reject_reason = models.CharField(max_length=250, blank=True, null=True)
-
-    @property
-    def is_external(self):
-        return not is_camacuk(self.name)
 
     def __unicode__(self):
         return self.name

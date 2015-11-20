@@ -75,7 +75,7 @@ def add_domain(request, vhost_id, socket_error=None):
                     new_domain = DomainName.objects.create(name=domain_requested.name, status='requested', vhost=vhost)
                     ip_register_api_request.delay(new_domain, request.user)
                 else:
-                    new_domain = DomainName.objects.create(name=domain_requested.name, status='accepted', vhost=vhost)
+                    new_domain = DomainName.objects.create(name=domain_requested.name, status='external', vhost=vhost)
                     if vhost.main_domain is None:
                         vhost.main_domain = new_domain
                         vhost.save()

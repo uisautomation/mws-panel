@@ -47,7 +47,7 @@ class TestsWithData(TestCase):
             network_configuration=NetworkConfig.get_free_host_config())
         self.vhost1 = self.service.vhosts.create(name="vhost1")
         self.vhost2 = self.service.vhosts.create(name="vhost2")
-        self.dom1 = self.vhost1.domain_names.create(name="foo.example", status='accepted')
+        self.dom1 = self.vhost1.domain_names.create(name="foo.example", status='external')
 
     def test_list(self):
         s = StringIO()

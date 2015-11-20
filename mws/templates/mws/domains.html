@@ -30,7 +30,7 @@
                                 <p>{{ domain.get_status_display }}</p>
                             </td>
                             <td>
-                                {% if domain.is_external %}
+                                {% if domain.status == 'external' %}
                                     <p><a class="setup_instructions" style="cursor: pointer;">Set up instructions</a></p>
                                 {% else %}
                                     <p>Managed domain name</p>
