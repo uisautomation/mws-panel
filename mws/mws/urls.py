@@ -80,7 +80,6 @@ urlpatterns = patterns('',
     url(r'^api/finance/billing/$', 'apimws.views.billing_total'),
     url(r'^api/finance/billing/(?P<year>20[0-9]{2})/(?P<month>[0-9]{1,2})/$', 'apimws.views.billing_month'),
     url(r'^confirm_email/(?P<ec_id>[0-9]+)/(?P<token>(\w|\-)+)/$', 'apimws.views.confirm_email'),
-    url(r'^api/dns/(?P<token>(\w|\-)+)/entries.json$', 'apimws.views.dns_entries'),
     url(r'^api/post_installation/$', 'apimws.views.post_installation'),
     url(r'^api/resend_email_confirmation/(?P<site_id>[0-9]+)/$', 'apimws.views.resend_email_confirmation_view'),
 

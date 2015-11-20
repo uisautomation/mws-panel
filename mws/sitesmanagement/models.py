@@ -467,13 +467,15 @@ class DomainName(models.Model):
     STATUS_CHOICES = (
         ('requested', 'Requested'),
         ('accepted', 'Accepted'),
+        ('external', 'External'),
         ('denied', 'Denied'),
-        ('to_be_deleted', 'Removing...'),
     )
 
     name = models.CharField(max_length=250, unique=True, validators=[full_domain_validator])
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='requested')
     vhost = models.ForeignKey(Vhost, related_name='domain_names')
+    requested_by = models.ForeignKey(User, related_name='domain_names_requested', blank=True, null=True)
+    reject_reason = models.CharField(max_length=250, blank=True, null=True)
 
     @property
     def is_external(self):
