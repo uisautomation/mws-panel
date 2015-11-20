@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 from itertools import chain
 from django.conf import settings
@@ -467,6 +468,8 @@ class DomainName(models.Model):
     vhost = models.ForeignKey(Vhost, related_name='domain_names')
     requested_by = models.ForeignKey(User, related_name='domain_names_requested', blank=True, null=True)
     reject_reason = models.CharField(max_length=250, blank=True, null=True)
+    token = models.CharField(max_length=32, default=uuid.uuid4)
+    authorised_by = models.ForeignKey(User, related_name='domain_names_authorised', blank=True, null=True)
 
     def __unicode__(self):
         return self.name

@@ -20,22 +20,17 @@ logger = logging.getLogger('mws')
 
 
 @login_required
-def confirm_dns(request, dn_id):
-    # Check if the request.user is authorised to do so: member of the UIS ip-register or UIS Information Systems groups
-    # TODO change ip-register group == first groupid
-    if not user_in_groups(request.user,
-                          [get_or_create_group_by_groupid("101927"), get_or_create_group_by_groupid("101888")]):
-        return HttpResponseForbidden()
-
-    dn = get_object_or_404(DomainName, pk=dn_id)
+def confirm_dns(request, dn_id, token):
+    dn = get_object_or_404(DomainName, pk=dn_id, token=token)
 
     if request.method == 'POST':
         if request.POST.get('accepted') == '1':
             dn.status = 'accepted'
         else:
             dn.status = 'denied'
+            dn.reject_reason = request.POST.get('reason')
+        dn.authorised_by = request.user
         dn.save()
-        return render(request, 'api/success.html')
 
     return render(request, 'api/confirm_dns.html', {
         'dn': dn,

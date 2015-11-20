@@ -3,17 +3,25 @@
 {% block page_content %}
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
-            <h1>Confirm acceptance for domain name {{ dn.name }}</h1>
-
-            <form action={% url 'apimws.views.confirm_dns' dn_id=dn.id %} method="post">{% csrf_token %}
-                <fieldset>
-                    <select name="accepted">
-                      <option value="1" selected>Accept</option>
-                      <option value="0">Deny</option>
-                    </select>
-                    <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
-                </fieldset>
-            </form>
+            {% if dn.status == "requested" %}
+                <h1>Confirm acceptance for domain name {{ dn.name }}</h1>
+                <form action={% url 'apimws.views.confirm_dns' dn_id=dn.id %} method="post">{% csrf_token %}
+                    <fieldset>
+                        <select name="accepted">
+                          <option value="1" selected>Accept</option>
+                          <option value="0">Deny</option>
+                        </select>
+                        <p><label to="reason">Reason: </label><input type="text" name="reason" title="Reason"/></p>
+                        <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
+                    </fieldset>
+                </form>
+            {% else %}
+                <h2>Authorisation status for domain name {{ dn.name }}</h2>
+                <p>The domain was {{ dn.status }} by {{ dn.authorised_by }}.</p>
+                {% if dn.reject_reason %}
+                    <p>Reason: {{ dn.reject_reason }}</p>
+                {% endif %}
+            {% endif %}
         </div>
     </div>
 {% endblock %}

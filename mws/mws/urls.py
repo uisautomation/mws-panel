@@ -76,7 +76,7 @@ urlpatterns = patterns('',
     url(r'^update_lv_list/$', 'apimws.lv.update_lv_list'),
 
     # apimws app
-    url(r'^api/confirm_dns/(?P<dn_id>[0-9]+)/$', 'apimws.views.confirm_dns'),
+    url(r'^api/confirm_dns/(?P<dn_id>[0-9]+)/(?P<token>.+)/$', 'apimws.views.confirm_dns'),
     url(r'^api/finance/billing/$', 'apimws.views.billing_total'),
     url(r'^api/finance/billing/(?P<year>20[0-9]{2})/(?P<month>[0-9]{1,2})/$', 'apimws.views.billing_month'),
     url(r'^confirm_email/(?P<ec_id>[0-9]+)/(?P<token>(\w|\-)+)/$', 'apimws.views.confirm_email'),
