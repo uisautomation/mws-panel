@@ -7,7 +7,7 @@ from sitesmanagement.models import DomainName, SiteKey
 @receiver(post_save, sender=DomainName)
 def add_name_to_user(instance, **kwargs):
     dn = instance
-    site = dn.site
+    site = dn.vhost.service.site
     if not site.main_domain:
         site.main_domain = dn
         site.save()
