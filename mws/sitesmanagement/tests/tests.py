@@ -634,26 +634,7 @@ class SiteManagement2Tests(TestCase):
                                                                  .network_configuration.name],
                                                             stderr=mock_subprocess.STDOUT)
         response = self.client.get(reverse('listdomains', kwargs={'vhost_id': vhost.id}))
-        self.assertInHTML(
-            '''<tbody>
-                    <tr>
-                        <td>
-                            <p>test.mws3.csx.cam.ac.uk
-                                <br/>This is the current main domain
-                            </p>
-                        </td>
-                        <td>
-                            <p>Removing...</p>
-                        </td>
-                        <td>
-                            <p>Managed domain name</p>
-                        </td>
-                        <td style="width: 155px; cursor: pointer">
-                            <p>
-                            </p>
-                        </td>
-                    </tr>
-                </tbody>''', response.content, count=1)
+        self.assertInHTML('''test.mws3.csx.cam.ac.uk''', response.content, count=0)
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}),
@@ -667,27 +648,12 @@ class SiteManagement2Tests(TestCase):
             ''' <tbody>
                     <tr>
                         <td>
-                            <p>test.mws3.csx.cam.ac.uk
+                            <p>externaldomain.com
                                 <br/>This is the current main domain
                             </p>
                         </td>
                         <td>
-                            <p>Removing...</p>
-                        </td>
-                        <td>
-                            <p>Managed domain name</p>
-                        </td>
-                        <td style="width: 155px; cursor: pointer">
-                            <p></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <p>externaldomain.com
-                            </p>
-                        </td>
-                        <td>
-                            <p>Accepted</p>
+                            <p>External</p>
                         </td>
                         <td>
                             <p><a class="setup_instructions" style="cursor: pointer;">Set up instructions</a></p>
