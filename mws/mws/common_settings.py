@@ -129,4 +129,5 @@ OS_DUE_UPGRADE = []
 YEAR_COST = 100.00
 FINANCE_EMAIL = 'amc203@cam.ac.uk'
 
-CELERY_IMPORTS = ('apimws.platforms', 'apimws.xen', 'apimws.utils', 'apimws.jackdaw', 'apimws.ansible')
+CELERY_IMPORTS = ('apimws.platforms', 'apimws.xen', 'apimws.utils', 'apimws.jackdaw', 'apimws.ansible',
+                  'sitesmanagement.cronjobs')
