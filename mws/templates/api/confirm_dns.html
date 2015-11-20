@@ -5,7 +5,8 @@
         <div class="campl-content-container">
             {% if dn.status == "requested" %}
                 <h1>Confirm acceptance for domain name {{ dn.name }}</h1>
-                <form action={% url 'apimws.views.confirm_dns' dn_id=dn.id %} method="post">{% csrf_token %}
+                <form action={% url 'apimws.views.confirm_dns' dn_id=dn.id token=dn.token %} method="post">
+                    {% csrf_token %}
                     <fieldset>
                         <select name="accepted">
                           <option value="1" selected>Accept</option>
