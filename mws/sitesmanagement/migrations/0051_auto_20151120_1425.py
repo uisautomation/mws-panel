@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='domainname',
             name='token',
-            field=models.CharField(default=uuid.uuid4, max_length=32),
+            field=models.CharField(default=uuid.uuid4, max_length=50),
             preserve_default=True,
         ),
     ]

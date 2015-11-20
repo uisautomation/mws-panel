@@ -17,7 +17,7 @@
                 </form>
             {% else %}
                 <h2>Authorisation status for domain name {{ dn.name }}</h2>
-                <p>The domain was {{ dn.status }} by {{ dn.authorised_by }}.</p>
+                <p>The domain, requested by {{ dn.requested_by }}, was {{ dn.status }} by {{ dn.authorised_by }}.</p>
                 {% if dn.reject_reason %}
                     <p>Reason: {{ dn.reject_reason }}</p>
                 {% endif %}
