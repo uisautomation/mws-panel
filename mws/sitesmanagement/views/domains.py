@@ -73,7 +73,7 @@ def add_domain(request, vhost_id, socket_error=None):
             if domain_requested.name != '':  # TODO do it after saving a domain request
                 if is_camacuk(domain_requested.name):
                     new_domain = DomainName.objects.create(name=domain_requested.name, status='requested', vhost=vhost)
-                    ip_register_api_request.delay(new_domain)
+                    ip_register_api_request.delay(new_domain, request)
                 else:
                     new_domain = DomainName.objects.create(name=domain_requested.name, status='accepted', vhost=vhost)
                     if vhost.main_domain is None:

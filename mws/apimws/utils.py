@@ -22,7 +22,7 @@ class EmailTaskWithFailure(Task):
 
 
 @shared_task(base=EmailTaskWithFailure, default_retry_delay=15*60, max_retries=12)  # Retry each 15 minutes for 12 times
-def ip_register_api_request(domain_name):
+def ip_register_api_request(domain_name, request):
     nameinfo = get_nameinfo(domain_name)
     if nameinfo['emails']:
         emails = nameinfo['emails']
@@ -30,11 +30,15 @@ def ip_register_api_request(domain_name):
         emails = map(lambda crsid: crsid+"@cam.ac.uk", nameinfo['crsids'])
     else:
         LOGGER.error("Domain name %s do not have emails or crsids associated in IPREG database.\n"
-                     "Received: %s", domain_name, json.dumps(nameinfo))
-        raise Exception("Domain name %s do not have emails or crsids associated in IPREG database" % domain_name)
+                     "Received: %s", domain_name.name, json.dumps(nameinfo))
+        raise Exception("Domain name %s do not have emails or crsids associated in IPREG database" % domain_name.name)
     EmailMessage(
         subject="University of Cambridge Managed Web Service: Domain name authorisation request",
-        body="This is an email example to request permission for the following domain name %s" % (domain_name),
+        body="You are getting this email because you are the administrator of the following domain %s.\n"
+             "The user %s has requested permission to use the domain name %s for a MWS3 website.\n"
+             "To authorise or reject this request please visit the following URL %s%s"
+             % (nameinfo['hostname'], request.user, domain_name.name, settings.MAIN_DOMAIN,
+                reverse('apimws.views.confirm_dns', kwargs={'dn_id': domain_name.id})),
         from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
         to=emails,
         headers={'Return-Path': 'mws3-support@cam.ac.uk'}
