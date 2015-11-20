@@ -1,8 +1,6 @@
 import json
 import subprocess
-
 from django.conf import settings
-
 from apimws.ansible import LOGGER
 
 

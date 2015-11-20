@@ -528,8 +528,14 @@ class SiteManagement2Tests(TestCase):
             vhost = Vhost.objects.get(name='testVhost')
 
             self.client.get(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}))  # TODO check it
-            response = self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}),
-                                        {'name': 'test.mws3.csx.cam.ac.uk'})
+
+            with mock.patch("apimws.ipreg.subprocess") as api_ipreg:
+                api_ipreg.check_output.return_value.returncode = 0
+                def fake_subprocess_output(*args, **kwargs):
+                    return '{"emails":["mws3-support@ucs.cam.ac.uk"],"domain":"mws3.csx.cam.ac.uk"}'
+                api_ipreg.check_output.side_effect = fake_subprocess_output
+                response = self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}),
+                                            {'name': 'test.mws3.csx.cam.ac.uk'})
             self.assertIn(response.status_code, [200, 302])
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
                                                              site.production_service.virtual_machines.first()

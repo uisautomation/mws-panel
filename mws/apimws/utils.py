@@ -37,7 +37,7 @@ def ip_register_api_request(domain_name, request):
         body="You are getting this email because you are the administrator of the following domain %s.\n"
              "The user %s has requested permission to use the domain name %s for a MWS3 website.\n"
              "To authorise or reject this request please visit the following URL %s%s"
-             % (nameinfo['hostname'], request.user, domain_name.name, settings.MAIN_DOMAIN,
+             % (nameinfo['domain'], request.user, domain_name.name, settings.MAIN_DOMAIN,
                 reverse('apimws.views.confirm_dns', kwargs={'dn_id': domain_name.id})),
         from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
         to=emails,
