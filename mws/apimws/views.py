@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from stronghold.decorators import public
 from apimws.ansible import launch_ansible_async, AnsibleTaskWithFailure
+from apimws.ipreg import set_cname
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.models import DomainName, Site, EmailConfirmation, VirtualMachine, Billing
 from ucamlookup import user_in_groups
@@ -24,13 +25,15 @@ def confirm_dns(request, dn_id, token):
     dn = get_object_or_404(DomainName, pk=dn_id, token=token)
 
     if request.method == 'POST':
+        dn.authorised_by = request.user
         if request.POST.get('accepted') == '1':
             dn.status = 'accepted'
+            dn.save()
+            set_cname(dn.name, dn.vhost.service.network_configuration.name)
         else:
             dn.status = 'denied'
             dn.reject_reason = request.POST.get('reason')
-        dn.authorised_by = request.user
-        dn.save()
+            dn.save()
 
     return render(request, 'api/confirm_dns.html', {
         'dn': dn,

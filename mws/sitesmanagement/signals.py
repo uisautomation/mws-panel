@@ -1,6 +1,6 @@
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
-from apimws.ipreg import delete_sshfp
+from apimws.ipreg import delete_sshfp, delete_cname
 from sitesmanagement.models import DomainName, SiteKey
 
 
@@ -27,4 +27,4 @@ def delete_sshfp_from_dns(instance, **kwargs):
 @receiver(pre_delete, sender=DomainName)
 def delete_cname_from_dns(instance, **kwargs):
     if instance.status == "accepted":
-        pass  # TODO: Write call to IPREG API
+        delete_cname(instance.name)
