@@ -88,6 +88,8 @@ def secrets_prealocation(vm):
                 sshkglnout = sshkeygeno[i].split(' ')
                 try:
                     set_sshfp(service.network_configuration.name, int(sshkglnout[3]), int(sshkglnout[4]), sshkglnout[5])
+                    set_sshfp(service.site.test_service.network_configuration.name, int(sshkglnout[3]),
+                              int(sshkglnout[4]), sshkglnout[5])
                     set_sshfp(vm.network_configuration.name, int(sshkglnout[3]), int(sshkglnout[4]), sshkglnout[5])
                 except Exception as e:
                     pass
