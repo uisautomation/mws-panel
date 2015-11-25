@@ -73,13 +73,14 @@ def add_domain(request, vhost_id, socket_error=None):
             domain_requested = domain_form.save(commit=False)
             if domain_requested.name != '':  # TODO do it after saving a domain request
                 if is_camacuk(domain_requested.name):
-                    new_domain = DomainName.objects.create(name=domain_requested.name, status='requested', vhost=vhost,
-                                                           requested_by=request.user)
-                    if new_domain.name.endswith(".usertest.mws3.csx.cam.ac.uk"):
-                        new_domain.status = 'accepted'
-                        new_domain.save() # TODO: Remove when we launch to production
+                    if domain_requested.name.endswith(".usertest.mws3.csx.cam.ac.uk"):
+                        new_domain = DomainName.objects.create(name=domain_requested.name, status='accepted',
+                                                               vhost=vhost, requested_by=request.user)
+                        # TODO: Remove when we launch to production
                         set_cname(new_domain.name, new_domain.vhost.service.network_configuration.name)
                     else:
+                        new_domain = DomainName.objects.create(name=domain_requested.name, status='requested',
+                                                               vhost=vhost, requested_by=request.user)
                         ip_register_api_request.delay(new_domain)
                 else:
                     new_domain = DomainName.objects.create(name=domain_requested.name, status='external', vhost=vhost,
