@@ -33,7 +33,6 @@ urlpatterns = patterns('',
     url(r'^settings/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.service_settings'),
     url(r'^billing/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.billing_management'),
     url(r'^enable/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.sites.site_enable', name='enablesite'),
-    url(r'^privacy/$', 'sitesmanagement.views.privacy'),
     url(r'^vhosts/(?P<vhost_id>[0-9]+)/certificates/$', 'sitesmanagement.views.certificates'),
     url(r'^vhosts/(?P<vhost_id>[0-9]+)/generate_csr/$', 'sitesmanagement.views.generate_csr'),
     url(r'^add_domain/(?P<vhost_id>[0-9]+)/$', 'sitesmanagement.views.add_domain'),
@@ -92,5 +91,9 @@ urlpatterns = patterns('',
 
     # file serve for purchase order files
    url(r'^media/billing/(?P<filename>[^/]+)$', 'sitesmanagement.views.po_file_serve'),
+
+    # Global
+    url(r'^privacy/$', 'sitesmanagement.views.privacy'),
+    url(r'^termsandconditions/$', 'sitesmanagement.views.termsconds'),
 
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

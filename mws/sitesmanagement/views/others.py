@@ -92,6 +92,10 @@ def privacy(request):
     return render(request, 'privacy.html', {})
 
 
+def termsconds(request):
+    return render(request, 'tcs.html', {})
+
+
 @login_required
 def service_settings(request, service_id):
     service = get_object_or_404(Service, pk=service_id)
