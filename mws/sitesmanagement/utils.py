@@ -12,7 +12,10 @@ def get_object_or_None(klass, *args, **kwargs):
 
 
 def is_camacuk(domain_name):
-    return domain_name.endswith(".cam.ac.uk")
+    if getattr(settings, 'DEMO', False):
+        return domain_name.endswith(".usertest.mws3.csx.cam.ac.uk")
+    else:
+        return domain_name.endswith(".cam.ac.uk")
 
 
 def deprecated(func):

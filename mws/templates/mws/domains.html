@@ -7,6 +7,11 @@
             <h1>Domain Names for the web site "{{ vhost.name }}" of
             the MWS site "{{ vhost.service.site.name }}"</h1>
 
+            <p>
+                For demo purposes you can only requests domain names of the format *.usertest.mws3.csx.cam.ac.uk<br>
+                All these domain names will be deleted when the demo period finishes and the production service is launched.
+            </p>
+
             {% if vhost.domain_names.all %}
                 <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
                     <thead>
