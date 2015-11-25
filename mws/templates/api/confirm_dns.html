@@ -4,13 +4,15 @@
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
             {% if dn.status == "requested" %}
-                <h1>Confirm acceptance for domain name {{ dn.name }}</h1>
+                <h1>Request for domain name {{ dn.name }}</h1>
+                {% if changeable %}<p>Warning: You can't accept the request of this domain name until you delete the
+                    previous record or change it to a CNAME</p>{% endif %}
                 <form action={% url 'apimws.views.confirm_dns' dn_id=dn.id token=dn.token %} method="post">
-                    {% csrf_token %}
                     <fieldset>
+                        {% csrf_token %}
                         <select name="accepted">
-                          <option value="1" selected>Accept</option>
-                          <option value="0">Deny</option>
+                            {% if changeable %}<option value="1" selected>Accept</option>{% endif %}
+                            <option value="0">Deny</option>
                         </select>
                         <p><label to="reason">Reason: </label><input type="text" name="reason" title="Reason"/></p>
                         <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
