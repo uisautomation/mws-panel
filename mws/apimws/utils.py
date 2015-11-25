@@ -33,12 +33,19 @@ def ip_register_api_request(domain_name):
                      "Received: %s", domain_name.name, json.dumps(nameinfo))
         raise Exception("Domain name %s do not have emails or crsids associated in IPREG database" % domain_name.name)
     EmailMessage(
-        subject="University of Cambridge Managed Web Service: Domain name authorisation request",
-        body="You are getting this email because you are the administrator of the following domain %s.\n"
-             "The user %s has requested permission to use the domain name %s for a MWS3 website.\n"
-             "To authorise or reject this request please visit the following URL %s%s"
+        subject="Domain name authorisation request for %s" % nameinfo['domain'],
+        body="You are receiving this email because you are the administrator of the domain %s.\n\n"
+             "The user %s  has requested permission to use the domain name %s for a "
+             "UIS Managed Web Server website (see http://www.ucs.cam.ac.uk/managed-web-service/).\n\n"
+             "To authorise or reject this request please visit the following URL %s%s. If we don't hear from you "
+             "in three working days the request will be automatically %s.\n\n%s"
+             "Questions about this message can be referred to mws3-support@uis.cam.ac.uk."
              % (nameinfo['domain'], domain_name.requested_by, domain_name.name, settings.MAIN_DOMAIN,
-                reverse('apimws.views.confirm_dns', kwargs={'dn_id': domain_name.id, 'token': domain_name.token})),
+                reverse('apimws.views.confirm_dns', kwargs={'dn_id': domain_name.id, 'token': domain_name.token}),
+                "rejected" if nameinfo['exists'] else "accepted",
+                "We have detected that this domain name already exists in the DNS. In order to accept the request "
+                "you will have to change the domain name to a CNAME or delete it.\n\n"
+                if nameinfo['exists'] and "C" not in nameinfo['exists'] else ""),
         from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
         to=emails,
         headers={'Return-Path': 'mws3-support@cam.ac.uk'}
