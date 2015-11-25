@@ -6,6 +6,7 @@ from django.http import HttpResponseForbidden, HttpResponseRedirect, HttpRespons
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import ListView, DeleteView
 from apimws.ansible import launch_ansible
+from apimws.ipreg import set_cname
 from apimws.utils import ip_register_api_request
 from mwsauth.utils import privileges_check
 from sitesmanagement.forms import DomainNameFormNew
@@ -74,7 +75,12 @@ def add_domain(request, vhost_id, socket_error=None):
                 if is_camacuk(domain_requested.name):
                     new_domain = DomainName.objects.create(name=domain_requested.name, status='requested', vhost=vhost,
                                                            requested_by=request.user)
-                    ip_register_api_request.delay(new_domain)
+                    if new_domain.name.endswith(".usertest.mws3.csx.cam.ac.uk"):
+                        new_domain.status = 'accepted'
+                        new_domain.save() # TODO: Remove when we launch to production
+                        set_cname(new_domain.name, new_domain.vhost.service.network_configuration.name)
+                    else:
+                        ip_register_api_request.delay(new_domain)
                 else:
                     new_domain = DomainName.objects.create(name=domain_requested.name, status='external', vhost=vhost,
                                                            requested_by=request.user)
