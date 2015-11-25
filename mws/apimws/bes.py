@@ -10,7 +10,7 @@ from sitesmanagement.models import Site, VirtualMachine
 @public
 def bes(request):
     json_all = []
-    for site in Site.objects.filter(deleted=False, service__status__in=('ansible', 'ansible_queued', 'ready')):
+    for site in Site.objects.filter(deleted=False, services__status__in=('ansible', 'ansible_queued', 'ready')):
         # Do not backup sites that have been cancelled or sites that are not ready
         # Backups from sites that disappear from the bes API will still be kept during 14 days before getting deleted
         json_site = {}
