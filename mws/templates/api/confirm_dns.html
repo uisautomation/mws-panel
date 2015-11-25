@@ -20,7 +20,10 @@
                 </form>
             {% else %}
                 <h2>Authorisation status for domain name {{ dn.name }}</h2>
-                <p>The domain, requested by {{ dn.requested_by }}, was {{ dn.status }} by {{ dn.authorised_by }}.</p>
+                <p>The domain, requested by
+                    <a href="https://www.lookup.cam.ac.uk/person/crsid/{{ dn.requested_by.username }}"> {{ dn.requested_by.last_name }}</a>, was {{ dn.status }} by
+                    <a href="https://www.lookup.cam.ac.uk/person/crsid/{{ dn.authorised_by.username }}">{{ dn.authorised_by.last_name }}</a>.
+                </p>
                 {% if dn.reject_reason %}
                     <p>Reason: {{ dn.reject_reason }}</p>
                 {% endif %}
