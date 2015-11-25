@@ -5,9 +5,9 @@ from sitesmanagement.models import DomainName, SiteKey
 
 
 @receiver(post_save, sender=DomainName)
-def add_name_to_user(instance, **kwargs):
+def check_main_domain_name(instance, **kwargs):
     vhost = instance.vhost
-    if not vhost.main_domain:
+    if not vhost.main_domain and instance.status in ['external', 'accepted']:
         vhost.main_domain = instance
         vhost.save()
 
