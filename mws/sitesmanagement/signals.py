@@ -26,4 +26,4 @@ def delete_sshfp_from_dns(instance, **kwargs):
 @receiver(pre_delete, sender=DomainName)
 def delete_cname_from_dns(instance, **kwargs):
     if instance.status == "accepted":
-        delete_cname(instance.name)
+        delete_cname.delay(instance.name)

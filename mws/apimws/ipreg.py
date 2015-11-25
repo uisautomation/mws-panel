@@ -1,7 +1,10 @@
 import json
 import subprocess
+
+from celery import shared_task
 from django.conf import settings
 from apimws.ansible import LOGGER
+from apimws.jackdaw import SSHTaskWithFailure
 
 
 def ip_reg_call(call):
@@ -44,6 +47,7 @@ def set_cname(hostname, target):
     return result
 
 
+@shared_task(base=SSHTaskWithFailure)
 def delete_cname(hostname):
     try:
         result = ip_reg_call(['delete', 'cname', str(hostname)])

@@ -12,7 +12,6 @@ def get_object_or_None(klass, *args, **kwargs):
 
 
 def is_camacuk(domain_name):
-    # Treat all the *.cam.ac.uk domain name requests as external until we have the ip-reg API
     return domain_name.endswith(".cam.ac.uk")
 
 
