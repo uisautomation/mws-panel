@@ -5,7 +5,7 @@
         <div class="campl-content-container">
 
             <h1>Domain Names for the web site "{{ vhost.name }}" of
-            the MWS site "{{ vhost.vm.site.name }}"</h1>
+            the MWS site "{{ vhost.service.site.name }}"</h1>
 
             {% if vhost.domain_names.all %}
                 <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
@@ -28,6 +28,7 @@
                             </td>
                             <td>
                                 <p>{{ domain.get_status_display }}</p>
+                                {% if domain.reject_reason %}<p>{{ domain.reject_reason }}</p>{% endif %}
                             </td>
                             <td>
                                 {% if domain.status == 'external' %}
