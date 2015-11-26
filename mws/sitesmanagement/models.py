@@ -11,7 +11,7 @@ from os.path import splitext
 import reversion
 from ucamlookup.models import LookupGroup
 from mwsauth.utils import get_users_of_a_group
-from sitesmanagement.utils import is_camacuk, get_object_or_None, deprecated
+from sitesmanagement.utils import get_object_or_None, deprecated
 
 
 class NetworkConfig(models.Model):
@@ -436,7 +436,7 @@ class Vhost(models.Model):
     WEBAPP_CHOICES = (
         ('wordpress', 'Wordpress'),
     )
-    name = models.CharField(max_length=150, validators=[validate_slug])
+    name = models.CharField(max_length=60, validators=[validate_slug])
     # main domain name for this vhost
     main_domain = models.ForeignKey('DomainName', related_name='+', null=True, blank=True, on_delete=models.SET_NULL)
     service = models.ForeignKey(Service, related_name='vhosts')
