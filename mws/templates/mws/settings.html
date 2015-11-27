@@ -279,7 +279,8 @@
                 </div>
             </div>
         {% endif %}
-        <div class="campl-column3">
+
+        <div class="campl-column3{% if site.is_ready %} not-active{% endif %}">
             <div class="campl-content-container campl-side-padding">
                 <a class="restart_vm" data-href="javascript:ajaxCallVM('{% url 'sitesmanagement.views.reset_vm' service_id=service.id %}', 'POST')" href="#">
                     <article class="node node-external-link view-mode-focus_on clearfix
@@ -299,7 +300,7 @@
                         </div>
                         <div class="campl-focus-teaser-txt">
                             <div class="campl-content-container campl-horizontal-teaser-txt">
-                                <h3 class="campl-teaser-title">Restart</h3>
+                                <h3 class="campl-teaser-title"{% if site.is_ready %} style="color: orangered"{% endif %}>Restart</h3>
                                 <span class="ir campl-focus-link"></span>
                             </div>
                         </div>
