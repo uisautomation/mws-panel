@@ -1,10 +1,12 @@
-from datetime import date, timedelta
+import json
 import logging
+import subprocess
+from datetime import date, timedelta
 from celery import shared_task, Task
 from django.core.mail import EmailMessage
 from django.utils import timezone
-from sitesmanagement.models import Billing, Site
-
+from apimws.jackdaw import SSHTaskWithFailure
+from sitesmanagement.models import Billing, Site, VirtualMachine
 
 LOGGER = logging.getLogger('mws')
 
@@ -106,3 +108,31 @@ def check_subscription():
             headers={'Return-Path': 'mws3-support@cam.ac.uk'}
         ).send()
         site.cancel()
+
+
+@shared_task
+def check_backups():
+    try:
+        result = subprocess.check_output(["userv", "mws-admin", "mws_ansible_host"], stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        LOGGER.error("An error happened when checking ook backups in ent.\n\n"
+                     "The output from the command was: %s\n", e.output)
+        raise e
+    except Exception as e:
+        LOGGER.error("An error happened when checking ook backups in ent.\n\n"
+                     "The output from the command was: %s\n", e)
+        raise e
+    try:
+        result = json.loads(result)
+    except Exception as e:
+        LOGGER.error("An error happened when checking ook backups in ent.\n\n"
+                     "Result is not in json format: %s\n", result)
+        raise e
+    for failed_backup in result['failed']:
+        LOGGER.error("A backup for the host %s did not complete last night", failed_backup)
+
+    for vm in VirtualMachine.objects.filter(service__site__deleted=False,
+                                            service__site__start_date__lt=(date.today() - timedelta(days=1)),
+                                            service__status__in=('ansible', 'ansible_queued', 'ready')):
+        if not filter(lambda host: host.startswith(vm.name), result['ok']+result['failed']):
+            LOGGER.error("A backup for the host %s did not complete last night", vm.name)
