@@ -95,11 +95,8 @@ def secrets_prealocation(vm):
                     pass
         pubkey.close()
 
-    # Create a default Vhost with the Service FQDN as main domain name
+    # Create a default Vhost
     default_vhost = Vhost.objects.create(service=service, name="default")
-    default_vhost_dn = DomainName.objects.create(name=service.network_configuration.name,
-                                                 status="accepted", vhost=default_vhost)
-    default_vhost.main_domain = default_vhost_dn
     default_vhost.save()
 
 
