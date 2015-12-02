@@ -113,7 +113,7 @@ def check_subscription():
 @shared_task
 def check_backups():
     try:
-        result = subprocess.check_output(["userv", "mws-admin", "mws_ansible_host"], stderr=subprocess.STDOUT)
+        result = subprocess.check_output(["userv", "mws-admin", "mws_check_backups"], stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
         LOGGER.error("An error happened when checking ook backups in ent.\n\n"
                      "The output from the command was: %s\n", e.output)
