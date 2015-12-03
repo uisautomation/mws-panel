@@ -11,6 +11,7 @@
                     <div id="site_form">
                         {{ form.as_p }}
                     </div>
+                    <p>When requesting a MWS site you accept our <a href="{% url 'sitesmanagement.views.termsconds' %}">terms and conditions.</a></p>
                     <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
                 </fieldset>
             </form>
