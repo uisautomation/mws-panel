@@ -4,8 +4,8 @@ import subprocess
 from datetime import date, timedelta
 from celery import shared_task, Task
 from django.core.mail import EmailMessage
+from django.db.models import Q
 from django.utils import timezone
-from apimws.jackdaw import SSHTaskWithFailure
 from sitesmanagement.models import Billing, Site, VirtualMachine
 
 LOGGER = logging.getLogger('mws')
@@ -131,9 +131,10 @@ def check_backups():
     for failed_backup in result['failed']:
         LOGGER.error("A backup for the host %s did not complete last night", failed_backup)
 
-    for vm in VirtualMachine.objects.filter(service__site__deleted=False,
-                                            service__site__start_date__lt=(date.today() - timedelta(days=1)),
-                                            service__status__in=('ansible', 'ansible_queued', 'ready'),
-                                            service__site__end_date__lte=date.today()):
+    for vm in VirtualMachine.objects.filter(Q(service__site__deleted=False,
+                                              service__site__start_date__lt=(date.today() - timedelta(days=1)),
+                                              service__status__in=('ansible', 'ansible_queued', 'ready'))
+                                                & (Q(service__site__end_date__isnull=True) |
+                                                   Q(service__site__end_date__gt=date.today()))):
         if not filter(lambda host: host.startswith(vm.name), result['ok']+result['failed']):
             LOGGER.error("A backup for the host %s did not complete last night", vm.name)

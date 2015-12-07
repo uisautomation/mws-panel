@@ -62,7 +62,7 @@ CELERYBEAT_SCHEDULE = {
     },
     'check_backups': {
         'task': 'sitesmanagement.cronjobs.check_backups',
-        'schedule': crontab(hour=12, minute=0),
+        'schedule': crontab(hour=12, minute=0, day_of_week='tue,wed,thu,fri,sat'),
         'args': ()
     }
 }
