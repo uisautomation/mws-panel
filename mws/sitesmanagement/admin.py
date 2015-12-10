@@ -31,8 +31,8 @@ def get_institutions_no_exception():
 class SiteAdmin(ModelAdmin):
     all_institutions = get_institutions_no_exception()
 
-    list_display = ('name', 'description', 'institution', 'primary_vm', 'secondary_vm', 'disabled', 'canceled')
-    ordering = ('name', )
+    list_display = ('name', 'institution', 'primary_vm', 'secondary_vm', 'start_date', 'disabled', 'canceled')
+    ordering = ('name', 'start_date')
     search_fields = ('name', )
     list_filter = ('institution_id', 'disabled', )
 
@@ -53,6 +53,7 @@ class SiteAdmin(ModelAdmin):
 
     def canceled(self, obj):
         return obj.is_canceled()
+    canceled.boolean = True
 
     institution.admin_order_field = 'institution_id'
 
