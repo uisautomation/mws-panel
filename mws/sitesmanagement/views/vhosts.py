@@ -10,7 +10,7 @@ from django.http import HttpResponseForbidden, HttpResponse, HttpResponseRedirec
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import ListView, DeleteView, CreateView, DetailView
 from ucamlookup import user_in_groups
-from apimws.ansible import launch_ansible
+from apimws.ansible import launch_ansible, delete_vhost_ansible
 from mwsauth.utils import privileges_check
 from sitesmanagement.forms import VhostForm
 from sitesmanagement.models import Service, Vhost
@@ -121,8 +121,8 @@ class VhostDelete(VhostPriviledgeCheck, DeleteView):
         return HttpResponseRedirect(reverse('listvhost', kwargs={'service_id': self.service.id}))
 
     def delete(self, request, *args, **kwargs):
+        delete_vhost_ansible.delay(self.vhost.name, self.vhost.service.id)
         super(VhostDelete, self).delete(request, *args, **kwargs)
-        launch_ansible(self.service)
         return HttpResponse()
 
     def get_success_url(self):

@@ -2,8 +2,7 @@ import logging
 import subprocess
 from celery import shared_task, Task
 from django.utils import timezone
-from sitesmanagement.models import Site, Snapshot
-
+from sitesmanagement.models import Site, Snapshot, Service
 
 LOGGER = logging.getLogger('mws')
 
@@ -118,3 +117,14 @@ def delete_snapshot(snapshot_id):
                                  "--tags", "delete_snapshot", "-e", 'delete_snapshot_name="%s"' % snapshot.name],
                                 stderr=subprocess.STDOUT)
     snapshot.delete()
+
+
+@shared_task(base=AnsibleTaskWithFailure)
+def delete_vhost_ansible(vhost_name, service_id):
+    service = Service.objects.get(id=service_id)
+    for vm in service.virtual_machines.all():
+        subprocess.check_output(["userv", "mws-admin", "mws_delete_vhost", vm.network_configuration.name,
+                                 "--tags", "delete_vhost", "-e", 'delete_vhost_name="%s"' % vhost_name],
+                                stderr=subprocess.STDOUT)
+    launch_ansible(service)
+    return
