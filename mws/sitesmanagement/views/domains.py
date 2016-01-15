@@ -76,7 +76,6 @@ def add_domain(request, vhost_id, socket_error=None):
                     if domain_requested.name.endswith(".usertest.mws3.csx.cam.ac.uk"):
                         new_domain = DomainName.objects.create(name=domain_requested.name, status='accepted',
                                                                vhost=vhost, requested_by=request.user)
-                        # TODO: Remove when we launch to production
                         set_cname(new_domain.name, new_domain.vhost.service.network_configuration.name)
                     else:
                         new_domain = DomainName.objects.create(name=domain_requested.name, status='requested',
