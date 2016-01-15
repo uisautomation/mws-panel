@@ -62,16 +62,17 @@
                                     {{ site.domain_names|join:"<br/>" }}
                                 </td>
                                 <td>
-                                    {% if site.primary_vm %}
-                                        IPv4: {{ site.primary_vm.ipv4 }}<br/>
-                                        IPv6: {{ site.primary_vm.ipv6 }}<br/>
-                                        hostname: {{ site.primary_vm.hostname }}<br/>
+                                    {% if site.production_service %}
+                                        IPv4: {{ site.production_service.ipv4 }}<br/>
+                                        IPv6: {{ site.production_service.ipv6 }}<br/>
+                                        hostname: {{ site.production_service.hostname }}<br/>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    {% if site.secondary_vm %}
-                                        IPv4: {{ site.secondary_vm.ipv4 }}<br/>
-                                        hostname: {{ site.secondary_vm.hostname }}<br/>
+                                    {% if site.test_service %}
+                                        IPv4: {{ site.test_service.ipv4 }}<br/>
+                                        IPv6: {{ site.test_service.ipv6 }}<br/>
+                                        hostname: {{ site.test_service.hostname }}<br/>
                                     {% endif %}
                                 </td>
                                 <td style="width: 30px; padding-left: 0px; padding-right: 0px;">
@@ -165,18 +166,17 @@
                                         {{ site.description }}
                                     </td>
                                     <td>
-                                        {% if site.primary_vm %}
-                                            IPv4: {{ site.primary_vm.ipv4 }}<br/>
-                                            IPv6: {{ site.primary_vm.ipv6 }}<br/>
-                                            hostname: {{ site.primary_vm.hostname }}<br/>
-                                            hostkey fingerprint: {{ site.primary_vm.sshfp }}<br/>
+                                        {% if site.production_service %}
+                                            IPv4: {{ site.production_service.ipv4 }}<br/>
+                                            IPv6: {{ site.production_service.ipv6 }}<br/>
+                                            hostname: {{ site.production_service.hostname }}<br/>
                                         {% endif %}
                                     </td>
                                     <td>
-                                        {% if site.secondary_vm %}
-                                            IPv4: {{ site.secondary_vm.ipv4 }}<br/>
-                                            hostname: {{ site.secondary_vm.hostname }}<br/>
-                                            hostkey fingerprint: {{ site.secondary_vm.sshfp }}<br/>
+                                        {% if site.test_service %}
+                                            IPv4: {{ site.test_service.ipv4 }}<br/>
+                                            IPv6: {{ site.test_service.ipv6 }}<br/>
+                                            hostname: {{ site.test_service.hostname }}<br/>
                                         {% endif %}
                                     </td>
                                 </tr>
