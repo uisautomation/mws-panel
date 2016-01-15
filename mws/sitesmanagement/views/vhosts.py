@@ -131,6 +131,9 @@ class VhostDelete(VhostPriviledgeCheck, DeleteView):
 
 @login_required
 def generate_csr(request, vhost_id):
+    #Deprecated function, replace
+    return HttpResponseForbidden()
+
     vhost = get_object_or_404(Vhost, pk=vhost_id)
     site = privileges_check(vhost.service.site.id, request.user)
 
@@ -165,6 +168,9 @@ def generate_csr(request, vhost_id):
 
 @login_required
 def certificates(request, vhost_id):
+    #Deprecated function, replace
+    return HttpResponseForbidden()
+
     vhost = get_object_or_404(Vhost, pk=vhost_id)
     site = privileges_check(vhost.service.site.id, request.user)
     service = vhost.service
