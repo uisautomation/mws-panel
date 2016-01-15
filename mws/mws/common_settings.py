@@ -16,7 +16,7 @@ PROJECT_APPS = (
 
 INSTALLED_APPS = (
     # Customization for the grappelli admin system
-    'suit',
+    'grappelli',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
