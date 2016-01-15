@@ -125,18 +125,18 @@ class SnapshotAdmin(ModelAdmin):
 #         }
 #
 #
-# class VirtualMachineAdmin(VersionAdmin):
-#     form = VirtualMachineForm
-#     list_display = ('name', 'site', 'services')
-#
-#     def services(self, obj):
-#         return '<a href="/admin/sitesmanagement/service/%d/">%s</a>' % (obj.service.id, obj.service)
-#
-#     services.allow_tags = True
-#
-#     actions = [recreate_vm]
-#
-#
+class VirtualMachineAdmin(VersionAdmin):
+    # form = VirtualMachineForm
+    list_display = ('name', 'site', 'services')
+
+    def services(self, obj):
+        return '<a href="/admin/sitesmanagement/service/%d/">%s</a>' % (obj.service.id, obj.service)
+
+    services.allow_tags = True
+
+    actions = [recreate_vm]
+
+
 class EmailConfirmationAdmin(ModelAdmin):
     list_display = ('email', 'site', 'status')
 
