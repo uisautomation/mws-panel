@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.admin import ModelAdmin
 from django.forms import ModelForm
 from reversion import VersionAdmin
-from suit.widgets import LinkedSelect
+#from suit.widgets import LinkedSelect
 from .models import Site, Billing, DomainName, Suspension, VirtualMachine, EmailConfirmation, \
     Vhost, UnixGroup, NetworkConfig, SiteKey, Service, Snapshot
 from ucamlookup import get_institutions, get_institution_name_by_id, IbisException
@@ -118,25 +118,25 @@ class SnapshotAdmin(ModelAdmin):
     list_display = ('name', 'date', 'service', )
 
 
-class VirtualMachineForm(ModelForm):
-    class Meta:
-        widgets = {
-            'service': LinkedSelect
-        }
-
-
-class VirtualMachineAdmin(VersionAdmin):
-    form = VirtualMachineForm
-    list_display = ('name', 'site', 'services')
-
-    def services(self, obj):
-        return '<a href="/admin/sitesmanagement/service/%d/">%s</a>' % (obj.service.id, obj.service)
-
-    services.allow_tags = True
-
-    actions = [recreate_vm]
-
-
+# class VirtualMachineForm(ModelForm):
+#     class Meta:
+#         widgets = {
+#             'service': LinkedSelect
+#         }
+#
+#
+# class VirtualMachineAdmin(VersionAdmin):
+#     form = VirtualMachineForm
+#     list_display = ('name', 'site', 'services')
+#
+#     def services(self, obj):
+#         return '<a href="/admin/sitesmanagement/service/%d/">%s</a>' % (obj.service.id, obj.service)
+#
+#     services.allow_tags = True
+#
+#     actions = [recreate_vm]
+#
+#
 class EmailConfirmationAdmin(ModelAdmin):
     list_display = ('email', 'site', 'status')
 
