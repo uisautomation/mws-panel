@@ -1,8 +1,6 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
-from django.forms import ModelForm
 from reversion import VersionAdmin
-#from suit.widgets import LinkedSelect
 from .models import Site, Billing, DomainName, Suspension, VirtualMachine, EmailConfirmation, \
     Vhost, UnixGroup, NetworkConfig, SiteKey, Service, Snapshot
 from ucamlookup import get_institutions, get_institution_name_by_id, IbisException

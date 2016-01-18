@@ -2,7 +2,6 @@
 
 import datetime
 import logging
-
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
@@ -13,7 +12,6 @@ from django.utils.html import format_html
 from django.views.generic import FormView, ListView, UpdateView
 from django.views.generic.detail import SingleObjectMixin, DetailView
 from ucamlookup import user_in_groups, get_user_lookupgroups
-
 from apimws.ansible import launch_ansible_site
 from apimws.vm import new_site_primary_vm
 from apimws.utils import email_confirmation

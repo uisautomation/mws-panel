@@ -425,8 +425,9 @@ class SiteManagement2Tests(TestCase):
                              expected_url=site.get_absolute_url())
         self.assertRedirects(self.client.get(reverse('deletevhost', kwargs={'vhost_id': vhost.id})),
                              expected_url=site.get_absolute_url())
-        self.assertRedirects(self.client.get(reverse(views.certificates, kwargs={'vhost_id': vhost.id})),
-                             expected_url=site.get_absolute_url())
+        # TODO: Certificates actually suppressed until R2
+        # self.assertRedirects(self.client.get(reverse(views.certificates, kwargs={'vhost_id': vhost.id})),
+        #                      expected_url=site.get_absolute_url())
         self.assertRedirects(self.client.get(reverse(views.add_domain, kwargs={'vhost_id': vhost.id})),
                              expected_url=site.get_absolute_url())
         self.assertRedirects(self.client.get(reverse('deletedomain', kwargs={'domain_id': dn.id})),

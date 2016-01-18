@@ -7,12 +7,12 @@ from django.contrib import messages
 from django.utils import dateparse
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse, HttpResponse, HttpResponseNotFound
+from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponse, HttpResponseNotFound
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.encoding import smart_str
 from apimws.ansible import launch_ansible, ansible_change_mysql_root_pwd, restore_snapshot
 from apimws.models import AnsibleConfiguration
-from apimws.vm import VMAPINotWorkingException, clone_vm, VMAPIFailure
+from apimws.vm import clone_vm
 from mwsauth.utils import privileges_check
 from sitesmanagement.forms import BillingForm, SnapshotForm
 from sitesmanagement.utils import get_object_or_None
