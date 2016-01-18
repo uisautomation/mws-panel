@@ -245,7 +245,7 @@ class SiteDelete(SitePriviledgeCheck, UpdateView):
     """View(Controller) to delete a site. The Site object is marked as cancelled but not deleted. The VMs associated
     to this Site are switched off but eventually they are deleted. We maintain the Site object to report and
     billing options."""
-    template_name = 'mws/disable.html'
+    template_name = 'mws/delete.html'
 
     def get_context_data(self, **kwargs):
         context = super(SiteDelete, self).get_context_data(**kwargs)
