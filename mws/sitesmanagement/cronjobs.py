@@ -143,4 +143,4 @@ def check_backups():
 @shared_task
 def delete_cancelled():
     """Delete sites that were cancelled 4 weeks ago"""
-    Site.objects.filter(end_date__lt=(datetime.datetime.today()-datetime.timedelta(weeks=4)).date()).delete()
+    Site.objects.filter(end_date__lt=(datetime.today()-timedelta(weeks=4)).date()).delete()
