@@ -1,7 +1,7 @@
 import json
 import logging
 import subprocess
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from celery import shared_task, Task
 from django.core.mail import EmailMessage
 from django.db.models import Q
@@ -138,3 +138,9 @@ def check_backups():
                                                    Q(service__site__end_date__gt=date.today()))):
         if not filter(lambda host: host.startswith(vm.name), result['ok']+result['failed']):
             LOGGER.error("A backup for the host %s did not complete last night", vm.name)
+
+
+@shared_task
+def delete_cancelled():
+    """Delete sites that were cancelled 4 weeks ago"""
+    Site.object.filter(end_date__lt=(datetime.datetime.today()-datetime.timedelta(weeks=4)).date()).delete()

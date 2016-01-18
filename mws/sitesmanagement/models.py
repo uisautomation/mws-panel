@@ -55,7 +55,7 @@ class Site(models.Model):
     institution_id = models.CharField(max_length=100)
     # Start date of the site
     start_date = models.DateField()
-    # End date of the site (when user decides to delete the site)
+    # End date of the site (when the site will be cancelled, scheduled by the user or other reasons)
     end_date = models.DateField(null=True, blank=True)
     # is the site deleted?
     deleted = models.BooleanField(default=False)

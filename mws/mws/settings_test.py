@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 from datetime import timedelta
+from celery.schedules import crontab
 from mws.common_settings import *
 # This file is generated when deploying
 from mws.production_secrets import *
@@ -49,6 +50,11 @@ CELERYBEAT_SCHEDULE = {
         'schedule': timedelta(hours=1, minutes=3),
         'args': ()
     },
+    'delete_cancelled': {
+        'task': 'sitesmanagement.cronjobs.delete_cancelled',
+        'schedule': crontab(hour=0, minute=5),
+        'args': ()
+    }
 }
 
 MIDDLEWARE_CLASSES += (

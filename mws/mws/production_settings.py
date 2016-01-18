@@ -64,6 +64,11 @@ CELERYBEAT_SCHEDULE = {
         'task': 'sitesmanagement.cronjobs.check_backups',
         'schedule': crontab(hour=12, minute=0, day_of_week='tue,wed,thu,fri,sat'),
         'args': ()
+    },
+    'delete_cancelled': {
+        'task': 'sitesmanagement.cronjobs.delete_cancelled',
+        'schedule': crontab(hour=0, minute=5),
+        'args': ()
     }
 }
 
