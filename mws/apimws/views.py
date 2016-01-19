@@ -52,7 +52,7 @@ def billing_total(request):
         return HttpResponseForbidden()
 
     return render(request, 'api/finance_total.html', {
-        'billings': Billing.objects.filter(site__deleted=False),
+        'billings': Billing.objects.exclude(site__status='deleted'),
         'year_cost': settings.YEAR_COST,
     })
 
@@ -77,9 +77,11 @@ def billing_month(request, year, month):
 
     return render(request, 'api/finance_month.html', {
         'new_sites_billing': Billing.objects.filter(site__start_date__month=inidate.month,
-                                                    site__start_date__year=inidate.year, site__deleted=False),
+                                                    site__start_date__year=inidate.year)
+                  .exclude(site__status='deleted'),
         'renewal_sites_billing': Billing.objects.filter(site__start_date__month=month,
-                                                        site__start_date__lt=date(year, 1, 1), site__deleted=False),
+                                                        site__start_date__lt=date(year, 1, 1))
+                  .exclude(site__status='deleted'),
         'year': year,
         'month': month,
         'year_cost': settings.YEAR_COST,
