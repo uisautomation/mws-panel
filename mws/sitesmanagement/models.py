@@ -47,12 +47,6 @@ class NetworkConfig(models.Model):
 
 
 class Site(models.Model):
-    STATUS_CHOICES = (
-        ('normal', 'Normal'),
-        ('deleted', 'Deleted'),
-        ('disabled', 'Disabled'),
-    )
-
     # Name of the site
     name = models.CharField(max_length=100, unique=True)
     # Description of the site
@@ -63,8 +57,8 @@ class Site(models.Model):
     start_date = models.DateField()
     # End date of the site (when the site will be cancelled, scheduled by the user or other reasons)
     end_date = models.DateField(null=True, blank=True)
-    # Status of the site
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='normal')
+    # is the site deleted?
+    deleted = models.BooleanField(default=False)
     # webmaster email
     email = models.EmailField(null=False, blank=False)
     # Indicates if the user wants to renew or not their MWS3 subscription
@@ -79,6 +73,9 @@ class Site(models.Model):
     # SSH only groups
     ssh_groups = models.ManyToManyField(LookupGroup, related_name='sites_auth_as_user', blank=True)
 
+    # Indicates if the site is disabled by the user
+    disabled = models.BooleanField(default=False)
+
     class Meta:
         ordering = ["-id"]
 
@@ -88,16 +85,6 @@ class Site(models.Model):
 
     def __unicode__(self):
         return self.name
-
-    @property
-    def deleted(self):
-        '''is the site deleted?'''
-        return self.status == 'deleted'
-
-    @property
-    def disabled(self):
-        '''Indicates if the site is disabled by the user'''
-        return self.status == 'disabled'
 
     # @property
     # def virtual_machines(self):
@@ -111,6 +98,9 @@ class Site(models.Model):
 
     def is_canceled(self):
         return self.end_date is not None
+
+    def is_disabled(self):
+        return self.disabled
 
     def suspend_now(self, input_reason):
         return Suspension.objects.create(reason=input_reason, start_date=datetime.today(), site=self)

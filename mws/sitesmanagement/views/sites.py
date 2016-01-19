@@ -76,7 +76,7 @@ class SitePriviledgeCheck(LoginRequiredMixin, SingleObjectMixin):
         # the site is suspended or canceled return None
         try:
             if (site not in request.user.sites.all() and not user_in_groups(request.user, site.groups.all())) \
-                    or site.is_admin_suspended() or site.is_canceled() or site.disabled:
+                    or site.is_admin_suspended() or site.is_canceled() or site.is_disabled():
                 return HttpResponseForbidden()
             if site.production_service is None:
                 return redirect(reverse('listsites'))
@@ -104,16 +104,16 @@ class SiteList(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super(SiteList, self).get_context_data(**kwargs)
-        context['sites_enabled'] = filter(lambda site: not site.is_canceled() and not site.disabled,
+        context['sites_enabled'] = filter(lambda site: not site.is_canceled() and not site.is_disabled(),
                                           self.object_list)
-        context['sites_disabled'] = filter(lambda site: not site.is_canceled() and site.disabled,
+        context['sites_disabled'] = filter(lambda site: not site.is_canceled() and site.is_disabled(),
                                            self.object_list)
 
         ssh_sites =  reduce(lambda grouplist, group: grouplist+list(group.sites_auth_as_user.all()),
                             get_user_lookupgroups(self.request.user),
                             list(self.request.user.sites_auth_as_user.all()))
 
-        context['sites_authorised'] = filter(lambda site: not site.is_canceled() and not site.disabled,
+        context['sites_authorised'] = filter(lambda site: not site.is_canceled() and not site.is_disabled(),
                                              ssh_sites)
         context['deactivate_new'] = not can_create_new_site()
         context['cost'] = django_settings.YEAR_COST

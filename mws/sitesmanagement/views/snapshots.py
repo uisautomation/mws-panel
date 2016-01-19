@@ -22,7 +22,7 @@ class ServicePriviledgeCheck(LoginRequiredMixin):
         # the site is suspended or canceled return None
         try:
             if (site not in request.user.sites.all() and not user_in_groups(request.user, site.groups.all())) \
-                    or site.is_admin_suspended() or site.is_canceled() or site.disabled:
+                    or site.is_admin_suspended() or site.is_canceled() or site.is_disabled():
                 return HttpResponseForbidden()
         except Exception:
             return HttpResponseForbidden()

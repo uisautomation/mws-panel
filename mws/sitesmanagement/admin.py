@@ -32,7 +32,7 @@ class SiteAdmin(ModelAdmin):
     list_display = ('name', 'institution', 'primary_vm', 'secondary_vm', 'start_date', 'disabled', 'canceled')
     ordering = ('name', 'start_date')
     search_fields = ('name', )
-    list_filter = ('institution_id', )
+    list_filter = ('institution_id', 'disabled', )
 
     def institution(self, obj):
         return get_institution_name_by_id(obj.institution_id, self.all_institutions)
@@ -52,10 +52,6 @@ class SiteAdmin(ModelAdmin):
     def canceled(self, obj):
         return obj.is_canceled()
     canceled.boolean = True
-
-    def disabled(self, obj):
-        return obj.disabled
-    disabled.boolean = True
 
     institution.admin_order_field = 'institution_id'
 

@@ -25,7 +25,7 @@ def privileges_check(site_id, user):
     # the site is suspended or canceled return None
     try:
         if (site not in user.sites.all() and not user_in_groups(user, site.groups.all())) or site.is_admin_suspended()\
-                or site.is_canceled() or site.disabled:
+                or site.is_canceled() or site.is_disabled():
             return None
     except Exception:
         return None
