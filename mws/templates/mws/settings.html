@@ -11,6 +11,7 @@
             </div>
         </div>
 
+        {% if service.quarantined %}
         <div class="campl-notifications-panel campl-warning-panel campl-notifications-container clearfix">
             <div class="campl-column4">
                 <p class="campl-notifications-icon campl-warning-icon">Warning:</p>
@@ -19,6 +20,7 @@
                 <p>Your server is currently under quarantine</p>
             </div>
         </div>
+        {% endif %}
 
         <div class="campl-column12">
             <div class="campl-column3">

@@ -5,7 +5,7 @@
     <div class="campl-column12">
         <div class="campl-content-container">
             <h1 id="page-title">Quarantine your MWS service</h1>
-            <form action={% url 'quarantine' service_id=service.id %} method="post">
+            <form action={% url 'sitesmanagement.views.quarantine' service_id=service.id %} method="post">
                 <fieldset>
                     {% csrf_token %}
                     <div>
