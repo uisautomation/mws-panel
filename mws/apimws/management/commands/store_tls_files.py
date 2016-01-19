@@ -1,5 +1,4 @@
 from django.core.management.base import NoArgsCommand, CommandError
-from apimws.ansible import launch_ansible
 from sitesmanagement.models import Vhost
 
 
@@ -23,10 +22,4 @@ class Command(NoArgsCommand):
         vhost.csr = csr_file.read()
         csr_file.close()
 
-        # certificate_file = open("/home/mws-admin/files_repo/vhost_tls/%d/certificate.crt" % vhost.id, "r")
-        # vhost.certificate = certificate_file.read()
-        # certificate_file.close()
-
-        # vhost.tls_enabled = True
         vhost.save()
-        # launch_ansible(vhost.service)

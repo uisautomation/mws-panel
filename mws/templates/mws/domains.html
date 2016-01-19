@@ -61,6 +61,16 @@
             server doesn't have any web sites configured</p>
             {% endif %}
 
+            {% if vhost.csr or vhost.tls_enabled %}
+                <div>
+                    <p>
+                        <img src="/static/images/interface/icon-warning.png">
+                        Warning: Adding a new domain name to your vhost will require you to generate a new
+                        Certificate Request (CSR) and get a new TLS certificate.
+                    </p>
+                </div>
+            {% endif %}
+
             <p><a id="add_domain_button" href="#" class="campl-primary-cta">Add a new domain</a></p>
 
             <div id="add_domain_div" style="{% if not error %}display: none; {% endif %}margin-top: 20px">
