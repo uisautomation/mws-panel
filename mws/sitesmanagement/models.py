@@ -162,7 +162,7 @@ class Site(models.Model):
             self.test_service.power_off()
 
     def disable(self):
-        self.disabled = True
+        self.status = 'disabled'
         self.save()
         if self.production_service:
             self.production_service.power_off()
@@ -170,7 +170,7 @@ class Site(models.Model):
             self.test_service.power_off()
 
     def enable(self):
-        self.disabled = False
+        self.status = 'normal'
         self.save()
         if self.production_service:
             self.production_service.power_on()
