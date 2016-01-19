@@ -233,7 +233,9 @@ def certificates(request, vhost_id):
 
         if 'cert' in request.FILES and not error_message:
             vhost.certificate = certificates_str
+            vhost.tls_enabled = True
             vhost.save()
+            launch_ansible(service)
 
     return render(request, 'mws/certificates.html', {
         'breadcrumbs': breadcrumbs,
