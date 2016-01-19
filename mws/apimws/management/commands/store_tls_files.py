@@ -5,7 +5,7 @@ from sitesmanagement.models import Vhost
 
 class Command(NoArgsCommand):
     args = "{ <vhost_id> <hash> }"
-    help = "Stores the TLS key hash in the database"
+    help = "Stores the TLS key hash and the CSR in the database"
 
     def handle(self, *args, **options):
         if len(args) != 1:
@@ -23,10 +23,10 @@ class Command(NoArgsCommand):
         vhost.csr = csr_file.read()
         csr_file.close()
 
-        certificate_file = open("/home/mws-admin/files_repo/vhost_tls/%d/certificate.crt" % vhost.id, "r")
-        vhost.certificate = certificate_file.read()
-        certificate_file.close()
+        # certificate_file = open("/home/mws-admin/files_repo/vhost_tls/%d/certificate.crt" % vhost.id, "r")
+        # vhost.certificate = certificate_file.read()
+        # certificate_file.close()
 
-        vhost.tls_enabled = True
+        # vhost.tls_enabled = True
         vhost.save()
-        launch_ansible(vhost.service)
+        # launch_ansible(vhost.service)

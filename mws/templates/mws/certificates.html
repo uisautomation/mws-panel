@@ -19,7 +19,7 @@
                 <form action="{% url 'sitesmanagement.views.generate_csr' vhost_id=vhost.id %}" method="post">
                     <fieldset>
                         {% csrf_token %}
-                        <p><input type="submit" value="Generate {% if vhost.csr or vhost.certificate %}new {% endif %}Certificate" class="campl-btn campl-primary-cta campl-primary-blue"/></p>
+                        <p><input type="submit" value="Generate {% if vhost.csr or vhost.certificate %}new {% endif %}TLS Certificate request (CSR)" class="campl-btn campl-primary-cta campl-primary-blue"/></p>
                     </fieldset>
                 </form>
                     {% if vhost.certificate %}
@@ -27,7 +27,7 @@
                         <pre>{{ vhost.certificate }}</pre>
                     {% endif %}
             {% else %}
-                <p>The TLS certificate is being generated</p>
+                <p>The TLS certificate request (CSR) is being generated</p>
             {% endif %}
             {% if vhost.csr and not vhost.certificate %}
                 <h3>TLS CSR</h3>
