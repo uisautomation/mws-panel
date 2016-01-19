@@ -1,9 +1,10 @@
 """Views(Controllers) for managing Vhosts"""
 from Crypto.Util import asn1
-import OpenSSL
+from OpenSSL import crypto
 from django.conf import settings as django_settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 from django.http import HttpResponseForbidden, HttpResponse, HttpResponseRedirect
@@ -163,6 +164,16 @@ def generate_csr(request, vhost_id):
     return redirect(reverse(certificates, kwargs={'vhost_id': vhost.id}))
 
 
+def csr_match_crt(csr, crt):
+    try:
+        x509 = crypto.load_certificate(crypto.FILETYPE_ASN1, crt)
+    except crypto.Error:
+        x509 = crypto.load_certificate(crypto.FILETYPE_PEM, crt)
+    x509req = crypto.load_certificate_request(crypto.FILETYPE_PEM, csr)
+    return crypto.dump_privatekey(crypto.FILETYPE_PEM, x509.get_pubkey()) == \
+           crypto.dump_privatekey(crypto.FILETYPE_PEM, x509req.get_pubkey())
+
+
 @login_required
 def certificates(request, vhost_id):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
@@ -190,48 +201,19 @@ def certificates(request, vhost_id):
     error_message = None
 
     if request.method == 'POST':
-        c = OpenSSL.crypto
-
         if 'cert' in request.FILES:
             try:
                 certificates_str = request.FILES['cert'].file.read()
-                cert = c.load_certificate(c.FILETYPE_PEM, certificates_str)
+                cert = crypto.load_certificate(crypto.FILETYPE_PEM, certificates_str)
             except Exception as e:
-                error_message = "The certificate file is invalid"
-                # raise ValidationError(e)
+                raise ValidationError("The certificate file is invalid")
 
-        if 'key' in request.FILES and error_message is None:
-            try:
-                key_str = request.FILES['key'].file.read()
-                priv = c.load_privatekey(c.FILETYPE_PEM, key_str)
-            except Exception as e:
-                error_message = "The key file is invalid"
-                # raise ValidationError(e)
+            if vhost.csr is None:
+                raise ValidationError("CSR does not exists")
 
-        if 'cert' in request.FILES and 'key' in request.FILES and error_message is None:
-            try:
-                pub = cert.get_pubkey()
+            if not csr_match_crt(vhost.csr, certificates_str):
+                raise ValidationError("The certificate doesn't match the CSR")
 
-                pub_asn1 = c.dump_privatekey(c.FILETYPE_ASN1, pub)
-                priv_asn1 = c.dump_privatekey(c.FILETYPE_ASN1, priv)
-
-                pub_der = asn1.DerSequence()
-                pub_der.decode(pub_asn1)
-                priv_der = asn1.DerSequence()
-                priv_der.decode(priv_asn1)
-
-                pub_modulus = pub_der[1]
-                priv_modulus = priv_der[1]
-
-                if pub_modulus != priv_modulus:
-                    error_message = "The key doesn't match the certificate"
-                    # raise ValidationError(e)
-
-            except Exception as e:
-                error_message = "The key doesn't match the certificate"
-                # raise ValidationError(e)
-
-        if 'cert' in request.FILES and not error_message:
             vhost.certificate = certificates_str
             vhost.tls_enabled = True
             vhost.save()

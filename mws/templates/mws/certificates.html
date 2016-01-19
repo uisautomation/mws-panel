@@ -30,7 +30,7 @@
                 <p>The TLS certificate request (CSR) is being generated</p>
             {% endif %}
             {% if vhost.csr and not vhost.certificate %}
-                <h3>TLS CSR</h3>
+                <h3>TLS Certificate Request (CSR)</h3>
                 <pre>{{ vhost.csr }}</pre>
                 <form id="key_cert_form" enctype="multipart/form-data" action="{% url 'sitesmanagement.views.certificates' vhost_id=vhost.id %}" method="post">
                     {% if error_message %}<p style="color: red">Error: {{ error_message }}</p>{% endif %}
