@@ -201,23 +201,26 @@ def certificates(request, vhost_id):
     error_message = None
 
     if request.method == 'POST':
-        if 'cert' in request.FILES:
-            try:
-                certificates_str = request.FILES['cert'].file.read()
-                cert = crypto.load_certificate(crypto.FILETYPE_PEM, certificates_str)
-            except Exception as e:
-                raise ValidationError("The certificate file is invalid")
+        try:
+            if 'cert' in request.FILES:
+                try:
+                    certificates_str = request.FILES['cert'].file.read()
+                    cert = crypto.load_certificate(crypto.FILETYPE_PEM, certificates_str)
+                except Exception as e:
+                    raise ValidationError("The certificate file is invalid")
 
-            if vhost.csr is None:
-                raise ValidationError("CSR does not exists")
+                if vhost.csr is None:
+                    raise ValidationError("CSR does not exists")
 
-            if not csr_match_crt(vhost.csr, certificates_str):
-                raise ValidationError("The certificate doesn't match the CSR")
+                if not csr_match_crt(vhost.csr, certificates_str):
+                    raise ValidationError("The certificate doesn't match the CSR")
 
-            vhost.certificate = certificates_str
-            vhost.tls_enabled = True
-            vhost.save()
-            launch_ansible(service)
+                vhost.certificate = certificates_str
+                vhost.tls_enabled = True
+                vhost.save()
+                launch_ansible(service)
+        except ValidationError as e:
+            error_message = e.message
 
     return render(request, 'mws/certificates.html', {
         'breadcrumbs': breadcrumbs,
