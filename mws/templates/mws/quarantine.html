@@ -9,17 +9,13 @@
                 <fieldset>
                     {% csrf_token %}
                     <div>
-                        <p>
-                            <img src="{% static 'images/interface/icon-warning.png' %}">
-                            Warning:
-                        </p>
-
-                        <p>
-                            The web server and email server will stop. This will allow you to debug, detect, and fix
-                            current problems with those services or your web application
-                            <input type="submit" name="quarantine" value="Quarantine" class="campl-btn campl-primary-cta">
-                            <input type="submit" name="quarantine" value="DeQuarantine" class="campl-btn campl-primary-cta">
-                        </p>
+                        <p><img src="{% static 'images/interface/icon-warning.png' %}">Warning:</p>
+                        <p>The web server and email server will stop. This will allow you to debug, detect, and fix
+                            current problems with those services or your web application</p>
+                    </div>
+                    <div>
+                        <p><input type="submit" name="quarantine" value="Quarantine" class="campl-btn campl-primary-cta"></p>
+                        <p><input type="submit" name="quarantine" value="DeQuarantine" class="campl-btn campl-primary-cta"></p>
                     </div>
                 </fieldset>
             </form>
