@@ -90,7 +90,6 @@ class SuspensionAdmin(ModelAdmin):
 
 class NetworkConfigAdmin(ModelAdmin):
     list_display = ('IPv4', 'IPv6', 'name', 'service')
-    # list_filter = ('used', )
 
     def used(self, obj):
         if obj.service:
@@ -116,13 +115,6 @@ class SnapshotAdmin(ModelAdmin):
     list_display = ('name', 'date', 'service', )
 
 
-# class VirtualMachineForm(ModelForm):
-#     class Meta:
-#         widgets = {
-#             'service': LinkedSelect
-#         }
-#
-#
 class VirtualMachineAdmin(VersionAdmin):
     # form = VirtualMachineForm
     list_display = ('name', 'site', 'services')
@@ -131,7 +123,6 @@ class VirtualMachineAdmin(VersionAdmin):
         return '<a href="/admin/sitesmanagement/service/%d/">%s</a>' % (obj.service.id, obj.service)
 
     services.allow_tags = True
-
     actions = [recreate_vm]
 
 
