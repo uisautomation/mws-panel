@@ -50,6 +50,7 @@ urlpatterns = patterns('',
     url(r'^backups/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.backups'),
     url(r'^apache/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.apache_modules'),
     url(r'^phplibs/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.php_libs'),
+    url(r'^quarantine/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.quarantine'),
 
     # Vhosts management
     url(r'^vhosts/(?P<service_id>[0-9]+)/$', VhostListView.as_view(), name='listvhost'),

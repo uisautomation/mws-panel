@@ -153,4 +153,7 @@ class Command(NoArgsCommand):
             v['mws_unix_groups'].append({'name': unix_group.name,
                                          'users': list(unix_group.users.all().values_list('username', flat=True))})
 
+        # Let ansible know if the VM should be quarantined (apache and exim services disabled)
+        v['mws_quarantined'] = vm.service.quarantined
+
         return v

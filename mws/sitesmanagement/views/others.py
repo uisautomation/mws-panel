@@ -432,3 +432,39 @@ def po_file_serve(request, filename):
         return response
     else:
         return HttpResponseNotFound()
+
+
+@login_required
+def quarantine(request, service_id):
+    service = get_object_or_404(Service, pk=service_id)
+    site = privileges_check(service.site.id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if not service or not service.active or service.is_busy:
+        return redirect(site)
+
+    breadcrumbs = {
+        0: dict(name='Manage Web Service site: ' + str(site.name), url=site.get_absolute_url()),
+        1: dict(name='Server settings' if service.primary else 'Test server settings',
+                url=reverse(service_settings, kwargs={'service_id': service.id})),
+        2: dict(name='Quarantine', url=reverse(quarantine, kwargs={'service_id': service.id})),
+    }
+
+    parameters = {
+        'breadcrumbs': breadcrumbs,
+        'service': service,
+        'site': site,
+    }
+
+    if request.method == 'POST':
+        if request.POST['quarantine'] == "Quarantine":
+            service.quarantined = True
+        else:
+            service.quarantined = False
+        service.save()
+        launch_ansible(service)
+        return redirect(site)
+
+    return render(request, 'mws/quarantine.html', parameters)

@@ -302,6 +302,7 @@ class Service(models.Model):
     site = models.ForeignKey(Site, null=True, blank=True, related_name="services")
     type = models.CharField(max_length=50, choices=SERVICE_TYPES)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES)
+    quarantined = models.BooleanField(default=False)
 
     @property
     def operating_system(self):

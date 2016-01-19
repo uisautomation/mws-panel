@@ -1,0 +1,28 @@
+{% extends 'project-light/campl-mws.html' %}
+{% load static %}
+{% block page_content %}
+    {{ block.super }}
+    <div class="campl-column12">
+        <div class="campl-content-container">
+            <h1 id="page-title">Quarantine your MWS service</h1>
+            <form action={% url 'quarantine' service_id=service.id %} method="post">
+                <fieldset>
+                    {% csrf_token %}
+                    <div>
+                        <p>
+                            <img src="{% static 'images/interface/icon-warning.png' %}">
+                            Warning:
+                        </p>
+
+                        <p>
+                            The web server and email server will stop. This will allow you to debug, detect, and fix
+                            current problems with those services or your web application
+                            <input type="submit" name="quarantine" value="Quarantine" class="campl-btn campl-primary-cta">
+                            <input type="submit" name="quarantine" value="DeQuarantine" class="campl-btn campl-primary-cta">
+                        </p>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+{% endblock %}
