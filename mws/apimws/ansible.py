@@ -46,6 +46,7 @@ def launch_ansible_site(site):
 
 
 class AnsibleTaskWithFailure(Task):
+    ''' If you want to use this task with failure be sure that the first argument is the Service'''
     abstract = True
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):
@@ -57,8 +58,8 @@ class AnsibleTaskWithFailure(Task):
             LOGGER.error("An error happened when trying to execute Ansible.\nThe task id is %s.\n\n"
                          "The parameters passed to the task were: \nargs: %s\nkwargs: %s\n\nThe traceback is:\n%s\n",
                          task_id, args, kwargs, einfo)
-        if 'service' in kwargs:
-            service = kwargs['service']
+        if args[0].__class__ == Service:
+            service = args[0]
             service.status = 'ready'
             service.save()
 
@@ -112,7 +113,7 @@ def restore_snapshot(service, snapshot_name):
 
 
 @shared_task(base=AnsibleTaskWithFailure)
-def delete_snapshot(snapshot_id):
+def delete_snapshot(service, snapshot_id):
     snapshot = Snapshot.objects.get(id=snapshot_id)
     for vm in snapshot.service.virtual_machines.all():
         subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name,
@@ -122,8 +123,7 @@ def delete_snapshot(snapshot_id):
 
 
 @shared_task(base=AnsibleTaskWithFailure)
-def delete_vhost_ansible(vhost_name, vhost_webapp, service_id):
-    service = Service.objects.get(id=service_id)
+def delete_vhost_ansible(service, vhost_name, vhost_webapp):
     for vm in service.virtual_machines.all():
         subprocess.check_output(["userv", "mws-admin", "mws_delete_vhost", vm.network_configuration.name,
                                  "--tags", "delete_vhost", "-e", '"delete_vhost_name=%s delete_vhost_webapp=%s"' %

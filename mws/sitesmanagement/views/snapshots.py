@@ -78,7 +78,7 @@ class SnapshotDelete(SnapshotPriviledgeCheck, DeleteView):
         self.object = self.get_object()
         self.object.pending_delete = True
         self.object.save()
-        delete_snapshot.delay(self.object.id)
+        delete_snapshot.delay(self.object.service, self.object.id)
         return redirect(self.get_success_url())
 
     def get_success_url(self):
