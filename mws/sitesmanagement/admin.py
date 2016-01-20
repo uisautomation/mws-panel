@@ -44,7 +44,7 @@ class SiteAdmin(ModelAdmin):
     list_filter = ('institution_id', 'disabled', )
 
     def institution(self, obj):
-        return get_institution_name_by_id(obj.institution_id, self.all_institutions)
+        return get_institution_name_by_id(obj.institution_id, self.all_institutions) if obj.institution_id else ''
 
     def primary_vm_name(self, obj):
         if obj.primary_vm:
