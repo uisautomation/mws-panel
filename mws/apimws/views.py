@@ -106,7 +106,8 @@ def confirm_email(request, ec_id, token):
 @shared_task(base=AnsibleTaskWithFailure, default_retry_delay=120, max_retries=2)
 def post_installOS(service):
     launch_ansible_async(service)
-    service.power_off()
+    if service.site.disabled or service.site.preallocated:
+        service.power_off()
 
 
 @public
