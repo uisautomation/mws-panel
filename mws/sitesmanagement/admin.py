@@ -19,6 +19,15 @@ def recreate_vm(modeladmin, request, queryset):
 recreate_vm.short_description = "Recreate VM"
 
 
+def execute_ansible(modeladmin, request, queryset):
+    from apimws.ansible import launch_ansible
+    for service in queryset:
+        launch_ansible(service)
+
+
+execute_ansible.short_description = "Launch Ansible"
+
+
 def get_institutions_no_exception():
     try:
         get_institutions()
@@ -63,6 +72,8 @@ class ServiceAdmin(VersionAdmin):
 
     def fqdn(self, obj):
         return str(obj)
+
+    actions = [execute_ansible]
 
 
 class SiteKeyAdmin(VersionAdmin):
