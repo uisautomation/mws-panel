@@ -51,14 +51,16 @@ class AnsibleTaskWithFailure(Task):
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         if type(exc) is subprocess.CalledProcessError:
             LOGGER.error("An error happened when trying to execute Ansible.\nThe task id is %s.\n\n"
-                         "The parameters passed to the task were: %s\n\nThe traceback is:\n%s\n\n"
-                         "The output from the command was: %s\n", task_id, args, einfo, exc.output)
+                         "The parameters passed to the task were: \nargs: %s\nkwargs: %s\n\nThe traceback is:\n%s\n\n"
+                         "The output from the command was: %s\n", task_id, args, kwargs, einfo, exc.output)
         else:
             LOGGER.error("An error happened when trying to execute Ansible.\nThe task id is %s.\n\n"
-                         "The parameters passed to the task were: %s\n\nThe traceback is:\n%s\n", task_id, args, einfo)
-        service = kwargs['service']
-        service.status = 'ready'
-        service.save()
+                         "The parameters passed to the task were: \nargs: %s\nkwargs: %s\n\nThe traceback is:\n%s\n",
+                         task_id, args, kwargs, einfo)
+        if 'service' in kwargs:
+            service = kwargs['service']
+            service.status = 'ready'
+            service.save()
 
 
 @shared_task(base=AnsibleTaskWithFailure, default_retry_delay=120, max_retries=2)
