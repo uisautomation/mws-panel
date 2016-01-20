@@ -59,7 +59,6 @@ class XenWithFailure(Task):
 
 
 def secrets_prealocation(vm):
-    # TODO move this to preallocation
     # Gets all the keys generated for the site and generates the fingerprint and the SSHFP from them
     # It sends the SSHFP record to ip-register
     service = vm.service

@@ -7,8 +7,8 @@ from django.core.mail import EmailMessage
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from apimws.ipreg import get_nameinfo
-from sitesmanagement.models import EmailConfirmation
-
+from apimws.vm import new_site_primary_vm
+from sitesmanagement.models import EmailConfirmation, NetworkConfig, Site, Service
 
 LOGGER = logging.getLogger('mws')
 
@@ -85,3 +85,16 @@ def finished_installation_email_confirmation(site):
         to=[site.email],
         headers={'Return-Path': 'mws3-support@cam.ac.uk'}
     ).send()
+
+
+def preallocate_new_site():
+    site = Site.objects.create(name=uuid.uuid4(), disabled=True, preallocated=True)
+    prod_service_netconf = NetworkConfig.get_free_prod_service_config()
+    test_service_netconf = NetworkConfig.get_free_test_service_config()
+    host_netconf = NetworkConfig.get_free_host_config()
+    if not prod_service_netconf or not test_service_netconf or not host_netconf:
+        raise Exception('A MWS site cannot be created at this moment because there are no network addresses available')
+    prod_service = Service.objects.create(site=site, type='production', network_configuration=prod_service_netconf)
+    Service.objects.create(site=site, type='test', network_configuration=test_service_netconf)
+    new_site_primary_vm(prod_service, host_netconf)
+    LOGGER.info("Preallocated MWS site created '" + str(site.name) + "' with id " + str(site.id))
