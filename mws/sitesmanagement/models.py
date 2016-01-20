@@ -47,6 +47,8 @@ class NetworkConfig(models.Model):
 
 
 class Site(models.Model):
+    # Mark if the Site is preallocated or not
+    preallocated = models.BooleanField(default=False)
     # Name of the site
     name = models.CharField(max_length=100, unique=True)
     # Description of the site
