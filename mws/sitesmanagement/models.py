@@ -56,7 +56,7 @@ class Site(models.Model):
     # The institution (retrieved using lookup)
     institution_id = models.CharField(max_length=100)
     # Start date of the site
-    start_date = models.DateField()
+    start_date = models.DateField(null=True, blank=True)
     # End date of the site (when the site will be cancelled, scheduled by the user or other reasons)
     end_date = models.DateField(null=True, blank=True)
     # is the site deleted?
@@ -80,6 +80,11 @@ class Site(models.Model):
 
     class Meta:
         ordering = ["-id"]
+
+    def clean(self):
+        # Don't allow empty start_date for a non preallocated site (already on production)
+        if not self.preallocated and self.start_date is None:
+            raise ValidationError('start date cannot be null if the site is not a preallocated one')
 
     def get_absolute_url(self):
         from django.core.urlresolvers import reverse
