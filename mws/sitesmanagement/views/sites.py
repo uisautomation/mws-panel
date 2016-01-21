@@ -157,6 +157,7 @@ class SiteCreate(LoginRequiredMixin, FormView):
         preallocated_site.institution_id = siteform.institution_id
         preallocated_site.email = siteform.email
         preallocated_site.disabled = False
+        preallocated_site.preallocated = False
         preallocated_site.full_clean()
         preallocated_site.save()
         # Save user that requested the site
