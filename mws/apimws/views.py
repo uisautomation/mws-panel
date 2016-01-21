@@ -107,8 +107,8 @@ def confirm_email(request, ec_id, token):
 @shared_task(base=AnsibleTaskWithFailure, default_retry_delay=120, max_retries=2)
 def post_installOS(service):
     launch_ansible_async(service)
-    if service.site.disabled or service.site.preallocated:
-        service.power_off()
+    if service.site.preallocated:
+        service.site.disable()
 
 
 @public
@@ -150,8 +150,7 @@ def post_recreate(request):
             EmailMessage(
                 subject="MWS3 VM Restore %s" % vm.network_configuration.name,
                 body="VM finished restoring. Please restore the backup and execute ansible. "
-                     "You can access to the web panel of this MWS3 site by "
-                     "clicking the following link: %s%s" % (settings.MAIN_DOMAIN, vm.service.site.get_absolute_url()),
+                     "VM part of the MWS3 site id %s" % vm.service.site.id,
                 from_email="Managed Web Service Support <%s>"
                            % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk'),
                 to=[getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')],

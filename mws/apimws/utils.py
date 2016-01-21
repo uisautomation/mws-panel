@@ -89,7 +89,7 @@ def finished_installation_email_confirmation(site):
 
 
 def preallocate_new_site():
-    site = Site.objects.create(name=uuid.uuid4(), disabled=True, preallocated=True)
+    site = Site.objects.create(name=uuid.uuid4(), disabled=False, preallocated=True)
     prod_service_netconf = NetworkConfig.get_free_prod_service_config()
     test_service_netconf = NetworkConfig.get_free_test_service_config()
     host_netconf = NetworkConfig.get_free_host_config()
