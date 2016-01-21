@@ -3,9 +3,11 @@ import logging
 import subprocess
 from datetime import date, timedelta, datetime
 from celery import shared_task, Task
+from django.conf import settings
 from django.core.mail import EmailMessage
 from django.db.models import Q
 from django.utils import timezone
+from apimws.utils import preallocate_new_site
 from sitesmanagement.models import Billing, Site, VirtualMachine
 
 
@@ -145,3 +147,10 @@ def check_backups():
 def delete_cancelled():
     """Delete sites that were cancelled 4 weeks ago"""
     Site.objects.filter(end_date__lt=(datetime.today()-timedelta(weeks=4)).date()).delete()
+
+
+@shared_task
+def check_num_preallocated_sites():
+    desired_num_preallocated_sites = getattr(settings, 'NUM_PREALLOCATED_SITES', 0)
+    while Site.objects.filter(preallocated=True).count() < desired_num_preallocated_sites:
+        preallocate_new_site()

@@ -69,6 +69,11 @@ CELERYBEAT_SCHEDULE = {
         'task': 'sitesmanagement.cronjobs.delete_cancelled',
         'schedule': crontab(hour=0, minute=5),
         'args': ()
+    },
+    'check_num_preallocated_sites': {
+        'task': 'sitesmanagement.cronjobs.check_num_preallocated_sites',
+        'schedule': crontab(hour=3, minute=25),
+        'args': ()
     }
 }
 
@@ -83,5 +88,7 @@ VM_API = "xen"
 EMAIL_TIMEOUT = 60
 
 IP_REG_API_END_POINT = IP_REG_API_END_POINT + ['live']
+
+NUM_PREALLOCATED_SITES = 10
 
 from mws.logging_configuration import *
