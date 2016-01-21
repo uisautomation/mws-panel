@@ -149,25 +149,22 @@ class SiteCreate(LoginRequiredMixin, FormView):
         # This method is called when valid form data has been POSTed.
         # It should return an HttpResponse.
         site = form.save(commit=False)
-        site.start_date = datetime.date.today()
-        prod_service_network_configuration = NetworkConfig.get_free_prod_service_config()
-        test_service_network_configuration = NetworkConfig.get_free_test_service_config()
-        host_network_configuration = NetworkConfig.get_free_host_config()
-        if not prod_service_network_configuration or not test_service_network_configuration \
-                or not host_network_configuration:
-            raise ValidationError('A MWS site cannot be created at this moment')
-        site.save()
+        preallocated_site = Site.objects.filter(preallocated=True).first()
+        if not preallocated_site:
+            raise ValidationError("No MWS Sites available at this moment")
+        preallocated_site.start_date = datetime.date.today()
+        preallocated_site.name = site.name
+        preallocated_site.description = site.description
+        preallocated_site.institution_id = site.institution_id
+        preallocated_site.email = site.email
+        preallocated_site.full_clean()
+        preallocated_site.save()
         # Save user that requested the site
-        site.users.add(self.request.user)
-        prod_service = Service.objects.create(site=site, type='production',
-                                              network_configuration=prod_service_network_configuration)
-        test_service = Service.objects.create(site=site, type='test',
-                                              network_configuration=test_service_network_configuration)
-        new_site_primary_vm.delay(prod_service, host_network_configuration)
+        preallocated_site.users.add(self.request.user)
+        preallocated_site.enable()
         if site.email:
             email_confirmation(site)
-        LOGGER.info(str(self.request.user.username) + " created a new site '" + str(site.name) + "'")
-        super(SiteCreate, self).form_valid(form)
+        LOGGER.info(str(self.request.user.username) + " requested a new site '" + str(preallocated_site.name) + "'")
         return redirect(site)
 
     def dispatch(self, *args, **kwargs):

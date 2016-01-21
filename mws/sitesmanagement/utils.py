@@ -28,7 +28,5 @@ def deprecated(func):
 
 
 def can_create_new_site():
-    from sitesmanagement.models import NetworkConfig
-    return (NetworkConfig.objects.filter(service=None, type='ipvxpub').count() > 0 and
-            NetworkConfig.objects.filter(service=None, type='ipv4priv').count() > 0 and
-            NetworkConfig.objects.filter(vm=None, type='ipv6').count() > 0)
+    from sitesmanagement.models import Site
+    return Site.objects.filter(preallocated=True).count() > 0
