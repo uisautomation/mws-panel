@@ -148,24 +148,23 @@ class SiteCreate(LoginRequiredMixin, FormView):
     def form_valid(self, form):
         # This method is called when valid form data has been POSTed.
         # It should return an HttpResponse.
-        site = form.save(commit=False)
         preallocated_site = Site.objects.filter(preallocated=True).first()
         if not preallocated_site:
             raise ValidationError("No MWS Sites available at this moment")
         preallocated_site.start_date = datetime.date.today()
-        preallocated_site.name = site.name
-        preallocated_site.description = site.description
-        preallocated_site.institution_id = site.institution_id
-        preallocated_site.email = site.email
+        preallocated_site.name = form.name
+        preallocated_site.description = form.description
+        preallocated_site.institution_id = form.institution_id
+        preallocated_site.email = form.email
         preallocated_site.full_clean()
         preallocated_site.save()
         # Save user that requested the site
         preallocated_site.users.add(self.request.user)
         preallocated_site.enable()
-        if site.email:
-            email_confirmation(site)
+        if preallocated_site.email:
+            email_confirmation(preallocated_site)
         LOGGER.info(str(self.request.user.username) + " requested a new site '" + str(preallocated_site.name) + "'")
-        return redirect(site)
+        return redirect(preallocated_site)
 
     def dispatch(self, *args, **kwargs):
         if not can_create_new_site():  # TODO add prealocated HostNetworkConfigs
