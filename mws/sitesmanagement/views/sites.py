@@ -13,10 +13,9 @@ from django.views.generic import FormView, ListView, UpdateView
 from django.views.generic.detail import SingleObjectMixin, DetailView
 from ucamlookup import user_in_groups, get_user_lookupgroups
 from apimws.ansible import launch_ansible_site
-from apimws.vm import new_site_primary_vm
 from apimws.utils import email_confirmation
 from sitesmanagement.forms import SiteForm, SiteEmailForm
-from sitesmanagement.models import NetworkConfig, Service, Site, DomainName, Billing
+from sitesmanagement.models import Site, DomainName, Billing
 from django.conf import settings as django_settings
 from sitesmanagement.utils import can_create_new_site
 
@@ -157,14 +156,15 @@ class SiteCreate(LoginRequiredMixin, FormView):
         preallocated_site.description = siteform.description
         preallocated_site.institution_id = siteform.institution_id
         preallocated_site.email = siteform.email
+        preallocated_site.disabled = False
         preallocated_site.full_clean()
         preallocated_site.save()
         # Save user that requested the site
         preallocated_site.users.add(self.request.user)
-        preallocated_site.enable()
         if preallocated_site.email:
             email_confirmation(preallocated_site)
         LOGGER.info(str(self.request.user.username) + " requested a new site '" + str(preallocated_site.name) + "'")
+        preallocated_site.production_service.power_on()
         return redirect(preallocated_site)
 
     def dispatch(self, *args, **kwargs):
