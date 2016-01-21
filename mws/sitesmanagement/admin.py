@@ -1,5 +1,10 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
+from django.contrib.admin.utils import model_ngettext
+from django.core.checks import messages
+from django.contrib.admin import helpers
+from django.template.response import TemplateResponse
+from django.utils.encoding import force_text
 from reversion import VersionAdmin
 from .models import Site, Billing, DomainName, Suspension, VirtualMachine, EmailConfirmation, \
     Vhost, UnixGroup, NetworkConfig, SiteKey, Service, Snapshot
@@ -7,13 +12,48 @@ from ucamlookup import get_institutions, get_institution_name_by_id, IbisExcepti
 
 
 def recreate_vm(modeladmin, request, queryset):
-    from apimws.vm import destroy_vm, recreate_vm
-    for vm in queryset:
-        try:
-            destroy_vm(vm.id)
-        except:
-            pass
-        recreate_vm(vm.id)
+    opts = modeladmin.model._meta
+
+    # The user has already confirmed the deletion.
+    # Do the deletion and return a None to display the change list view again.
+    if request.POST.get('post'):
+        n = queryset.count()
+        if n:
+            for vm in queryset:
+                from apimws.vm import destroy_vm, recreate_vm
+                try:
+                    destroy_vm(vm.id)
+                except:
+                    pass
+                recreate_vm(vm.id)
+
+            modeladmin.message_user(request, "Successfully recreated %(count)d %(items)s." % {
+                "count": n, "items": model_ngettext(modeladmin.opts, n)
+            }, messages.INFO)
+        # Return None to display the change list page again.
+        return None
+
+    if len(queryset) == 1:
+        objects_name = force_text(opts.verbose_name)
+    else:
+        objects_name = force_text(opts.verbose_name_plural)
+
+    context = dict(
+        # modeladmin.admin_site.each_context(request), TODO Only Django 1.8
+        modeladmin.admin_site.each_context(),
+        title="Are you sure?",
+        objects_name=objects_name,
+        list_objects=[queryset],
+        queryset=queryset,
+        opts=opts,
+        action_checkbox_name=helpers.ACTION_CHECKBOX_NAME,
+        media=modeladmin.media,
+    )
+
+    request.current_app = modeladmin.admin_site.name
+
+    # Display the confirmation page
+    return TemplateResponse(request, "admin/recreate_confirmation.html", context)
 
 
 recreate_vm.short_description = "Recreate VM"
