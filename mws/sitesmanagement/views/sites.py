@@ -149,13 +149,14 @@ class SiteCreate(LoginRequiredMixin, FormView):
         # This method is called when valid form data has been POSTed.
         # It should return an HttpResponse.
         preallocated_site = Site.objects.filter(preallocated=True).first()
+        siteform = form.save(commit=False)
         if not preallocated_site:
             raise ValidationError("No MWS Sites available at this moment")
         preallocated_site.start_date = datetime.date.today()
-        preallocated_site.name = form.name
-        preallocated_site.description = form.description
-        preallocated_site.institution_id = form.institution_id
-        preallocated_site.email = form.email
+        preallocated_site.name = siteform.name
+        preallocated_site.description = siteform.description
+        preallocated_site.institution_id = siteform.institution_id
+        preallocated_site.email = siteform.email
         preallocated_site.full_clean()
         preallocated_site.save()
         # Save user that requested the site

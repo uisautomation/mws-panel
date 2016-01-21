@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, date
 from itertools import chain
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -56,7 +56,7 @@ class Site(models.Model):
     # The institution (retrieved using lookup)
     institution_id = models.CharField(max_length=100)
     # Start date of the site
-    start_date = models.DateField(null=True, blank=True)
+    start_date = models.DateField(null=True, blank=True, auto_now_add=True)
     # End date of the site (when the site will be cancelled, scheduled by the user or other reasons)
     end_date = models.DateField(null=True, blank=True)
     # is the site deleted?
