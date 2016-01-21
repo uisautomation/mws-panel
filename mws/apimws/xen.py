@@ -11,7 +11,7 @@ from django.core.urlresolvers import reverse
 import subprocess
 
 from apimws.ipreg import set_sshfp
-from apimws.views import post_installation
+from apimws.views import post_installation, post_recreate
 from mws.celery import app
 from sitesmanagement.models import VirtualMachine, NetworkConfig, Service, SiteKey, Vhost, DomainName
 
@@ -172,7 +172,7 @@ def recreate_vm(vm_id):
         parameters["os"] = os[0].value
     parameters["netconf"] = netconf
     parameters["callback"] = {
-        "endpoint": "%s%s" % (settings.MAIN_DOMAIN, reverse(post_installation)),
+        "endpoint": "%s%s" % (settings.MAIN_DOMAIN, reverse(post_recreate)),
         "vm_id": vm.id,
         "secret": str(vm.token),
     }

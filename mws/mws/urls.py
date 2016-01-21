@@ -84,6 +84,7 @@ urlpatterns = patterns('',
     url(r'^api/finance/billing/(?P<year>20[0-9]{2})/(?P<month>[0-9]{1,2})/$', 'apimws.views.billing_month'),
     url(r'^confirm_email/(?P<ec_id>[0-9]+)/(?P<token>(\w|\-)+)/$', 'apimws.views.confirm_email'),
     url(r'^api/post_installation/$', 'apimws.views.post_installation'),
+    url(r'^api/post_recreate/$', 'apimws.views.post_recreate'),
     url(r'^api/resend_email_confirmation/(?P<site_id>[0-9]+)/$', 'apimws.views.resend_email_confirmation_view'),
 
     # mwsauth app

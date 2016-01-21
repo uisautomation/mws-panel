@@ -6,6 +6,7 @@ import logging
 from celery import shared_task
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.core.mail import EmailMessage
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.decorators.csrf import csrf_exempt
@@ -130,6 +131,32 @@ def post_installation(request):
             post_installOS.apply_async((service, ), countdown=90)
             # Wait 90 seconds before launching ansible, this will allow the machine have time to complete the reboot
             return HttpResponse()
+
+    return HttpResponseForbidden()
+
+
+@public
+@csrf_exempt
+def post_recreate(request):
+    if request.method == 'POST':
+        vm_id = request.POST['vm']
+        token = request.POST['token']
+        if not vm_id or not token:
+            return HttpResponseForbidden()
+
+        vm = VirtualMachine.objects.get(id=vm_id)
+
+        if vm.token == token:
+            EmailMessage(
+                subject="MWS3 VM Restore %s" % vm.network_configuration.name,
+                body="VM finished restoring. Please restore the backup and execute ansible. "
+                     "You can access to the web panel of this MWS3 site by "
+                     "clicking the following link: %s%s" % (settings.MAIN_DOMAIN, vm.service.site.get_absolute_url()),
+                from_email="Managed Web Service Support <%s>"
+                           % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk'),
+                to=[getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')],
+                headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
+            ).send()
 
     return HttpResponseForbidden()
 
