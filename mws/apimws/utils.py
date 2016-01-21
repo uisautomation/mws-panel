@@ -47,9 +47,10 @@ def ip_register_api_request(domain_name):
                 "We have detected that this domain name already exists in the DNS. In order to accept the request "
                 "you will have to change the domain name to a CNAME or delete it.\n\n"
                 if nameinfo['exists'] and "C" not in nameinfo['exists'] else ""),
-        from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
+        from_email="Managed Web Service Support <%s>"
+                   % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk'),
         to=emails,
-        headers={'Return-Path': 'mws3-support@cam.ac.uk'}
+        headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
     ).send()
 
 
@@ -71,7 +72,7 @@ def send_email_confirmation(site):
                                                   kwargs={'ec_id': email_conf.id, 'token': email_conf.token})),
             from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
             to=[site.email],
-            headers={'Return-Path': 'mws3-support@cam.ac.uk'}
+            headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
         ).send()
 
 
@@ -83,7 +84,7 @@ def finished_installation_email_confirmation(site):
              "following link: %s%s" % (settings.MAIN_DOMAIN, site.get_absolute_url()),
         from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
         to=[site.email],
-        headers={'Return-Path': 'mws3-support@cam.ac.uk'}
+        headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
     ).send()
 
 

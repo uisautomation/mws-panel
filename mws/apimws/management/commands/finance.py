@@ -91,9 +91,10 @@ class Command(NoArgsCommand):
             subject="Monthly Financial Report MWS3 - %s %i" % (month_name[month], year),
             body="Attached you can find the monthly report spreadsheet for new sites and for renewals. You will "
                  "also find all the the corresponding purchase orders",
-            from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
+            from_email="Managed Web Service Support <%s>"
+                       % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk'),
             to=[settings.FINANCE_EMAIL],
-            headers={'Return-Path': 'mws3-support@cam.ac.uk'},
+            headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')},
             attachments=[('mws3sites_new.csv', stream_new.getvalue(), 'application/vnd.ms-excel'),
                          ('mws3sites_renewals.csv', stream_renewal.getvalue(), 'application/vnd.ms-excel')] + po_files
         ).send()

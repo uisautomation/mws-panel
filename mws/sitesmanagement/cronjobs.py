@@ -42,9 +42,10 @@ def send_reminder_renewal():
                  "If you no longer want you site then please either cancel it now (under 'edit the MWS profile'), or mark "
                  "it 'Not for renewal' in which case it will be automatically cancelled on '%s'." 
                  % (billing.site.name, billing.site.start_date, billing.site.start_date),
-            from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
+            from_email="Managed Web Service Support <%s>"
+                       % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk'),
             to=[billing.site.email],
-            headers={'Return-Path': 'mws3-support@cam.ac.uk'}
+            headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
         ).send()
 
     renewal_sites_billing = Billing.objects.filter(site__start_date__month=today.month, site__subscription=True,
@@ -63,7 +64,7 @@ def send_reminder_renewal():
                  % (billing.site.name, billing.site.start_date, billing.site.start_date),
             from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
             to=[billing.site.email],
-            headers={'Return-Path': 'mws3-support@cam.ac.uk'}
+            headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
         ).send()
 
 
@@ -81,7 +82,7 @@ def check_subscription():
                 body="Your managed web site '%s' has been cancelled because we haven't received payment information for it." % site.name,
                 from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
                 to=[site.email],
-                headers={'Return-Path': 'mws3-support@cam.ac.uk'}
+                headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
             ).send()
             site.cancel()
         elif ((today - site.start_date) == timedelta(days=15)) or ((today - site.start_date) >= timedelta(days=24)):
@@ -93,7 +94,7 @@ def check_subscription():
                      "automatically cancelled." % (site.name, site.start_date+timedelta(days=30), site.name),
                 from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
                 to=[site.email],
-                headers={'Return-Path': 'mws3-support@cam.ac.uk'}
+                headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
             ).send()
     # Cancel sites with subscription finished
     if today.month == 2 and today.day == 29:
@@ -108,7 +109,7 @@ def check_subscription():
             body="Your managed web site '%s' has been cancelled per your requested." % site.name,
             from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
             to=[site.email],
-            headers={'Return-Path': 'mws3-support@cam.ac.uk'}
+            headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
         ).send()
         site.cancel()
 

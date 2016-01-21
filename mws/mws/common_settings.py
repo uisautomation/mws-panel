@@ -111,7 +111,7 @@ SUIT_CONFIG = {
 }
 
 # email address where all the error messages will be sent to
-EMAIL_MWS3_SUPPORT = "mws3-support@cam.ac.uk"
+EMAIL_MWS3_SUPPORT = "mws3-support@uis.cam.ac.uk"
 
 # ucamwebauth configuration
 UCAMWEBAUTH_CREATE_USER = True
