@@ -73,7 +73,7 @@ def check_subscription():
     today = timezone.now().date()
     # Check which sites still do not have a billing associated, warn or cancel them based on
     # how many days ago they were created
-    sites = Site.objects.filter(billing__isnull=True, end_date__isnull=True)
+    sites = Site.objects.filter(billing__isnull=True, end_date__isnull=True, start_date__isnull=False)
     for site in sites:
         if (today - site.start_date) >= timedelta(days=31):
             # Cancel site
