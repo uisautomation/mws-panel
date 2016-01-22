@@ -29,4 +29,4 @@ def deprecated(func):
 
 def can_create_new_site():
     from sitesmanagement.models import Site
-    return Site.objects.filter(preallocated=True).count() > 0
+    return Site.objects.filter(preallocated=True, disabled=True).count() > 0

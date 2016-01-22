@@ -147,7 +147,7 @@ class SiteCreate(LoginRequiredMixin, FormView):
     def form_valid(self, form):
         # This method is called when valid form data has been POSTed.
         # It should return an HttpResponse.
-        preallocated_site = Site.objects.filter(preallocated=True).first()
+        preallocated_site = Site.objects.filter(preallocated=True, disabled=True).first()
         siteform = form.save(commit=False)
         if not preallocated_site:
             raise ValidationError("No MWS Sites available at this moment")
