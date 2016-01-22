@@ -367,6 +367,7 @@ class Service(models.Model):
         for vm in self.virtual_machines.all():
             vm.power_on()
         self.status = 'ansible'
+        self.save()
         from apimws.ansible import launch_ansible_async
         launch_ansible_async.apply_async((self, ), countdown=120)
 
