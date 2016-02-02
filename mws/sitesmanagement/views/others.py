@@ -250,8 +250,6 @@ def update_os(request, service_id):
 
 @login_required
 def change_db_root_password(request, service_id):
-    if getattr(settings, 'DEMO', False):
-        return HttpResponseRedirect(reverse('listsites'))
     service = get_object_or_404(Service, pk=service_id)
     site = privileges_check(service.site.id, request.user)
 
@@ -277,7 +275,7 @@ def change_db_root_password(request, service_id):
             ansibleconf.value = "Resetting"
             ansibleconf.save()
             ansible_change_mysql_root_pwd.delay(service)
-            return HttpResponseRedirect(reverse(service_settings, kwargs={'service_id': service.id}))
+            return HttpResponseRedirect(reverse(change_db_root_password, kwargs={'service_id': service.id}))
 
     ansibleconf = AnsibleConfiguration.objects.filter(service=service, key="mysql_root_password")
     ansibleconf = ansibleconf[0].value if ansibleconf else None
