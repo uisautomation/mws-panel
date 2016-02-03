@@ -16,6 +16,45 @@ from sitesmanagement.utils import is_camacuk, get_object_or_None
 @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
 class SiteManagementTests(TestCase):
 
+    def pre_create_site(self):
+        NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
+                                                   name="mws-66424.mws3.csx.cam.ac.uk")
+        NetworkConfig.objects.create(IPv4='172.28.18.253', type='ipv4priv',
+                                     name='mws-46250.mws3.csx.private.cam.ac.uk')
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff4', name='mws-client1', type='ipv6')
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff3', name='mws-client2', type='ipv6')
+
+        with mock.patch("apimws.xen.subprocess") as mock_subprocess:
+            def fake_subprocess_output(*args, **kwargs):
+                if (set(args[0]) & set(['vmmanager', 'create'])) == set(['vmmanager', 'create']):
+                    return '{"vmid": "mws-client1"}'
+                elif (set(args[0]) & set(["ssh-keygen", "-lf"])) == set(["ssh-keygen", "-lf"]):
+                    return '2048 fa:ee:51:a2:3f:95:71:6a:2f:8c:e1:66:df:be:f1:2a id_rsa.pub (RSA)'
+                elif (set(args[0]) & set(["ssh-keygen", "-r", "replacehostname", "-f"])) == \
+                        set(["ssh-keygen", "-r", "replacehostname", "-f"]):
+                    return "replacehostname IN SSHFP 1 1 9ddc245c6cf86667e33fe3186b7226e9262eac16\n" \
+                           "replacehostname IN SSHFP 1 2 " \
+                           "2f27ce76295fdffb576d714fea586dd0a87a5a2ffa621b4064e225e36c8cf83c\n"
+            mock_subprocess.check_output.side_effect = fake_subprocess_output
+            mock_subprocess.Popen().communicate.return_value = (
+                '{"pubkey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQClBKpj+/WXlxJMY2iYw1mB1qYLM8YDjFS6qSiT6UmNLLhXJ' \
+                'BEfd6vOMErM1IfDsYN+W3604hukxwC859TU4ZLQYD6wFI2D+qMhb2UTcoLlOYD7TG436RXKbxK4iAT7ll3XUT8VxZUq/AZKVs' \
+                'vmH309l5LcW6UPO0PVYoafpo4+Fmv5c/CRTvp5X0eaoXtgT49h58/GwNlD2RrVPInjI9isa8/k8qiNaWEHYOGKC343BQIR9Sx' \
+                '+5HQ16wf3x3fUFeMTOYfsbvwQ9T5pkKpFoiUYRxjsz7bXdPQPT4A1UrfgmGnTLJGSUh+uvHYLe7izWoMCCDCV0+Zyn0Ilrlfm' \
+                'N+cD"}', '')
+
+            # We create a new site that will be used in the preallocation list
+            preallocate_new_site()
+
+        # We simulate the VM finishing installing
+        vm = VirtualMachine.objects.first()
+        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            with mock.patch("apimws.vm.change_vm_power_state") as mock_change_vm_power_state:
+                mock_subprocess.check_output.return_value.returncode = 0
+                mock_change_vm_power_state.return_value = True
+                mock_change_vm_power_state.delay.return_value = True
+                self.client.post(reverse(post_installation), {'vm': vm.id, 'token': vm.token})
+
     def create_site(self):
         NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
                                      name="mws-66424.mws3.csx.cam.ac.uk")
@@ -59,15 +98,7 @@ class SiteManagementTests(TestCase):
                           "10px;\">At this moment we cannot process any new requests for the Managed Web Service, "
                           "please try again later.</p>", response.content)
 
-        NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
-                                     name="mws-66424.mws3.csx.cam.ac.uk")
-
-        NetworkConfig.objects.create(IPv4='172.28.18.253', type='ipv4priv',
-                                     name='mws-46250.mws3.csx.private.cam.ac.uk')
-
-        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff4', name='mws-client1', type='ipv6')
-
-        Site.objects.create(name="testSite1", institution_id="testInst", preallocated=True)
+        self.pre_create_site()
 
         response = self.client.get(reverse('listsites'))
         self.assertInHTML("<p><a href=\"%s\" class=\"campl-primary-cta\">Register new site</a></p>" %
@@ -125,47 +156,7 @@ class SiteManagementTests(TestCase):
         response = self.client.get(reverse('newsite'))
         self.assertRedirects(response, expected_url=reverse('listsites'))
 
-        service_net = NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
-                                                   name="mws-66424.mws3.csx.cam.ac.uk")
-
-        NetworkConfig.objects.create(IPv4='172.28.18.253', type='ipv4priv',
-                                     name='mws-46250.mws3.csx.private.cam.ac.uk')
-
-        vm_netconf = NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff4', name='mws-client1', type='ipv6')
-        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff3', name='mws-client2', type='ipv6')
-        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff2', name='mws-client3', type='ipv6')
-        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff1', name='mws-client4', type='ipv6')
-
-        with mock.patch("apimws.xen.subprocess") as mock_subprocess:
-            def fake_subprocess_output(*args, **kwargs):
-                if (set(args[0]) & set(['vmmanager', 'create'])) == set(['vmmanager', 'create']):
-                    return '{"vmid": "mws-client1"}'
-                elif (set(args[0]) & set(["ssh-keygen", "-lf"])) == set(["ssh-keygen", "-lf"]):
-                    return '2048 fa:ee:51:a2:3f:95:71:6a:2f:8c:e1:66:df:be:f1:2a id_rsa.pub (RSA)'
-                elif (set(args[0]) & set(["ssh-keygen", "-r", "replacehostname", "-f"])) == \
-                        set(["ssh-keygen", "-r", "replacehostname", "-f"]):
-                    return "replacehostname IN SSHFP 1 1 9ddc245c6cf86667e33fe3186b7226e9262eac16\n" \
-                           "replacehostname IN SSHFP 1 2 " \
-                           "2f27ce76295fdffb576d714fea586dd0a87a5a2ffa621b4064e225e36c8cf83c\n"
-            mock_subprocess.check_output.side_effect = fake_subprocess_output
-            mock_subprocess.Popen().communicate.return_value = (
-                '{"pubkey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQClBKpj+/WXlxJMY2iYw1mB1qYLM8YDjFS6qSiT6UmNLLhXJ' \
-                'BEfd6vOMErM1IfDsYN+W3604hukxwC859TU4ZLQYD6wFI2D+qMhb2UTcoLlOYD7TG436RXKbxK4iAT7ll3XUT8VxZUq/AZKVs' \
-                'vmH309l5LcW6UPO0PVYoafpo4+Fmv5c/CRTvp5X0eaoXtgT49h58/GwNlD2RrVPInjI9isa8/k8qiNaWEHYOGKC343BQIR9Sx' \
-                '+5HQ16wf3x3fUFeMTOYfsbvwQ9T5pkKpFoiUYRxjsz7bXdPQPT4A1UrfgmGnTLJGSUh+uvHYLe7izWoMCCDCV0+Zyn0Ilrlfm' \
-                'N+cD"}', '')
-
-            # We create a new site that will be used in the preallocation list
-            preallocate_new_site()
-
-        # We simulate the VM finishing installing
-        vm = VirtualMachine.objects.first()
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
-            with mock.patch("apimws.xen.change_vm_power_state") as mock_change_vm_power_state:
-                mock_subprocess.check_output.return_value.returncode = 0
-                mock_change_vm_power_state.return_value = True
-                mock_change_vm_power_state.delay.return_value = True
-                self.client.post(reverse(post_installation), {'vm': vm.id, 'token': vm.token})
+        self.pre_create_site()
 
         response = self.client.get(reverse('newsite'))
         self.assertContains(response, "Request new site")
@@ -199,7 +190,7 @@ class SiteManagementTests(TestCase):
                 mock_subprocess2.side_effect = fake_output_api
 
                 with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
-                    with mock.patch("apimws.xen.change_vm_power_state") as mock_change_vm_power_state:
+                    with mock.patch("apimws.vm.change_vm_power_state") as mock_change_vm_power_state:
                         mock_subprocess.check_output.return_value.returncode = 0
                         mock_change_vm_power_state.return_value = True
                         mock_change_vm_power_state.delay.return_value = True
@@ -234,7 +225,7 @@ class SiteManagementTests(TestCase):
 
         # Disable site
         self.assertFalse(test_site.disabled)
-        with mock.patch("apimws.xen.change_vm_power_state") as mock_change_vm_power_state:
+        with mock.patch("apimws.vm.change_vm_power_state") as mock_change_vm_power_state:
             mock_change_vm_power_state.return_value = True
             mock_change_vm_power_state.delay.return_value = True
             self.client.post(reverse('disablesite', kwargs={'site_id': test_site.id}))
@@ -242,7 +233,7 @@ class SiteManagementTests(TestCase):
         self.assertTrue(Site.objects.get(pk=test_site.id).disabled)
         # Enable site
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
-            with mock.patch("apimws.xen.change_vm_power_state") as mock_change_vm_power_state:
+            with mock.patch("apimws.vm.change_vm_power_state") as mock_change_vm_power_state:
                 mock_subprocess.check_output.return_value.returncode = 0
                 mock_change_vm_power_state.return_value = True
                 mock_change_vm_power_state.delay.return_value = True
@@ -259,13 +250,13 @@ class SiteManagementTests(TestCase):
         #
         # self.client.delete(reverse(views.delete_vm, kwargs={'service_id': test_site.secondary_vm.service.id}))
 
-        with mock.patch("apimws.xen.change_vm_power_state") as mock_vm_api:
+        with mock.patch("apimws.vm.change_vm_power_state") as mock_vm_api:
             mock_vm_api.return_value = True
             mock_vm_api.delay.return_value = True
             self.client.post(reverse('deletesite', kwargs={'site_id': test_site.id}))
         self.assertIsNone(Site.objects.get(pk=test_site.id).end_date)
 
-        with mock.patch("apimws.xen.change_vm_power_state") as mock_vm_api:
+        with mock.patch("apimws.vm.change_vm_power_state") as mock_vm_api:
             mock_vm_api.return_value = True
             mock_vm_api.delay.return_value = True
             self.client.post(reverse('deletesite', kwargs={'site_id': test_site.id}), {'confirmation': 'yes'})
