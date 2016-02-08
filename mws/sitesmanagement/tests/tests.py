@@ -13,100 +13,101 @@ from sitesmanagement.models import Site, VirtualMachine, UnixGroup, Vhost, Domai
 from sitesmanagement.utils import is_camacuk, get_object_or_None
 
 
+def pre_create_site(test_interface):
+    NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
+                                               name="mws-66424.mws3.csx.cam.ac.uk")
+    NetworkConfig.objects.create(IPv4='172.28.18.253', type='ipv4priv',
+                                 name='mws-46250.mws3.csx.private.cam.ac.uk')
+    NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff4', name='mws-client1', type='ipv6')
+    NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff3', name='mws-client2', type='ipv6')
+
+    with mock.patch("apimws.xen.subprocess") as mock_subprocess:
+        def fake_subprocess_output(*args, **kwargs):
+            if (set(args[0]) & set(['vmmanager', 'create'])) == set(['vmmanager', 'create']):
+                return '{"vmid": "mws-client1"}'
+            elif (set(args[0]) & set(["ssh-keygen", "-lf"])) == set(["ssh-keygen", "-lf"]):
+                return '2048 fa:ee:51:a2:3f:95:71:6a:2f:8c:e1:66:df:be:f1:2a id_rsa.pub (RSA)'
+            elif (set(args[0]) & set(["ssh-keygen", "-r", "replacehostname", "-f"])) == \
+                    set(["ssh-keygen", "-r", "replacehostname", "-f"]):
+                return "replacehostname IN SSHFP 1 1 9ddc245c6cf86667e33fe3186b7226e9262eac16\n" \
+                       "replacehostname IN SSHFP 1 2 " \
+                       "2f27ce76295fdffb576d714fea586dd0a87a5a2ffa621b4064e225e36c8cf83c\n"
+        mock_subprocess.check_output.side_effect = fake_subprocess_output
+        mock_subprocess.Popen().communicate.return_value = (
+            '{"pubkey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQClBKpj+/WXlxJMY2iYw1mB1qYLM8YDjFS6qSiT6UmNLLhXJ' \
+            'BEfd6vOMErM1IfDsYN+W3604hukxwC859TU4ZLQYD6wFI2D+qMhb2UTcoLlOYD7TG436RXKbxK4iAT7ll3XUT8VxZUq/AZKVs' \
+            'vmH309l5LcW6UPO0PVYoafpo4+Fmv5c/CRTvp5X0eaoXtgT49h58/GwNlD2RrVPInjI9isa8/k8qiNaWEHYOGKC343BQIR9Sx' \
+            '+5HQ16wf3x3fUFeMTOYfsbvwQ9T5pkKpFoiUYRxjsz7bXdPQPT4A1UrfgmGnTLJGSUh+uvHYLe7izWoMCCDCV0+Zyn0Ilrlfm' \
+            'N+cD"}', '')
+
+        # We create a new site that will be used in the preallocation list
+        preallocate_new_site()
+
+    # We simulate the VM finishing installing
+    vm = VirtualMachine.objects.first()
+    with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.vm.change_vm_power_state") as mock_change_vm_power_state:
+            mock_subprocess.check_output.return_value.returncode = 0
+            mock_change_vm_power_state.return_value = True
+            mock_change_vm_power_state.delay.return_value = True
+            test_interface.client.post(reverse(post_installation), {'vm': vm.id, 'token': vm.token})
+
+
+def assign_a_site(test_interface, pre_create=True):
+    if pre_create:
+        pre_create_site(test_interface)
+    response = test_interface.client.get(reverse('listsites'))
+    test_interface.assertInHTML("<p><a href=\"%s\" class=\"campl-primary-cta\">Register new site</a></p>" %
+                                reverse('newsite'), response.content)
+    with mock.patch("apimws.xen.subprocess") as mock_subprocess:
+        def fake_subprocess_output(*args, **kwargs):
+            if (set(args[0]) & set(['vmmanager', 'create'])) == set(['vmmanager', 'create']):
+                return '{"vmid": "mws-client1"}'
+            elif (set(args[0]) & set(["ssh-keygen", "-lf"])) == set(["ssh-keygen", "-lf"]):
+                return '2048 fa:ee:51:a2:3f:95:71:6a:2f:8c:e1:66:df:be:f1:2a id_rsa.pub (RSA)'
+            elif (set(args[0]) & set(["ssh-keygen", "-r", "replacehostname", "-f"])) == \
+                    set(["ssh-keygen", "-r", "replacehostname", "-f"]):
+                return "replacehostname IN SSHFP 1 1 9ddc245c6cf86667e33fe3186b7226e9262eac16\n" \
+                       "replacehostname IN SSHFP 1 2 " \
+                       "2f27ce76295fdffb576d714fea586dd0a87a5a2ffa621b4064e225e36c8cf83c\n"
+        mock_subprocess.check_output.side_effect = fake_subprocess_output
+        mock_subprocess.Popen().communicate.return_value = (
+            '{"pubkey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQClBKpj+/WXlxJMY2iYw1mB1qYLM8YDjFS6qSiT6UmNLLhXJ' \
+            'BEfd6vOMErM1IfDsYN+W3604hukxwC859TU4ZLQYD6wFI2D+qMhb2UTcoLlOYD7TG436RXKbxK4iAT7ll3XUT8VxZUq/AZKVs' \
+            'vmH309l5LcW6UPO0PVYoafpo4+Fmv5c/CRTvp5X0eaoXtgT49h58/GwNlD2RrVPInjI9isa8/k8qiNaWEHYOGKC343BQIR9Sx' \
+            '+5HQ16wf3x3fUFeMTOYfsbvwQ9T5pkKpFoiUYRxjsz7bXdPQPT4A1UrfgmGnTLJGSUh+uvHYLe7izWoMCCDCV0+Zyn0Ilrlfm' \
+            'N+cD"}', '')
+        with mock.patch("apimws.xen.change_vm_power_state") as mock_subprocess2:
+            def fake_output_api(*args, **kwargs):
+                return True
+            mock_subprocess2.side_effect = fake_output_api
+
+            with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+                with mock.patch("apimws.vm.change_vm_power_state") as mock_change_vm_power_state:
+                    mock_subprocess.check_output.return_value.returncode = 0
+                    mock_change_vm_power_state.return_value = True
+                    mock_change_vm_power_state.delay.return_value = True
+                    response = test_interface.client.post(reverse('newsite'), {'siteform-name': 'Test Site',
+                                                                               'siteform-description': 'Desc',
+                                                                               'siteform-institution_id': 'UIS',
+                                                                               'siteform-email': 'amc203@cam.ac.uk'})
+                    test_interface.assertIn(response.status_code, [200, 302])
+                # TODO create the checks of how the mock was called
+                # mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_xen_vm_api",
+                #                                                  settings.VM_END_POINT[0],
+                #                                                  "create",
+                #                                                  "{}"])
+
+    site = Site.objects.first()
+    test_interface.assertEqual(site.name, 'Test Site')
+    test_interface.assertEqual(site.email, 'amc203@cam.ac.uk')
+    test_interface.assertEqual(site.institution_id, 'UIS')
+    test_interface.assertEqual(site.description, 'Desc')
+    return site
+
+
 @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
 class SiteManagementTests(TestCase):
-
-    def pre_create_site(self):
-        NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
-                                                   name="mws-66424.mws3.csx.cam.ac.uk")
-        NetworkConfig.objects.create(IPv4='172.28.18.253', type='ipv4priv',
-                                     name='mws-46250.mws3.csx.private.cam.ac.uk')
-        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff4', name='mws-client1', type='ipv6')
-        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff3', name='mws-client2', type='ipv6')
-
-        with mock.patch("apimws.xen.subprocess") as mock_subprocess:
-            def fake_subprocess_output(*args, **kwargs):
-                if (set(args[0]) & set(['vmmanager', 'create'])) == set(['vmmanager', 'create']):
-                    return '{"vmid": "mws-client1"}'
-                elif (set(args[0]) & set(["ssh-keygen", "-lf"])) == set(["ssh-keygen", "-lf"]):
-                    return '2048 fa:ee:51:a2:3f:95:71:6a:2f:8c:e1:66:df:be:f1:2a id_rsa.pub (RSA)'
-                elif (set(args[0]) & set(["ssh-keygen", "-r", "replacehostname", "-f"])) == \
-                        set(["ssh-keygen", "-r", "replacehostname", "-f"]):
-                    return "replacehostname IN SSHFP 1 1 9ddc245c6cf86667e33fe3186b7226e9262eac16\n" \
-                           "replacehostname IN SSHFP 1 2 " \
-                           "2f27ce76295fdffb576d714fea586dd0a87a5a2ffa621b4064e225e36c8cf83c\n"
-            mock_subprocess.check_output.side_effect = fake_subprocess_output
-            mock_subprocess.Popen().communicate.return_value = (
-                '{"pubkey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQClBKpj+/WXlxJMY2iYw1mB1qYLM8YDjFS6qSiT6UmNLLhXJ' \
-                'BEfd6vOMErM1IfDsYN+W3604hukxwC859TU4ZLQYD6wFI2D+qMhb2UTcoLlOYD7TG436RXKbxK4iAT7ll3XUT8VxZUq/AZKVs' \
-                'vmH309l5LcW6UPO0PVYoafpo4+Fmv5c/CRTvp5X0eaoXtgT49h58/GwNlD2RrVPInjI9isa8/k8qiNaWEHYOGKC343BQIR9Sx' \
-                '+5HQ16wf3x3fUFeMTOYfsbvwQ9T5pkKpFoiUYRxjsz7bXdPQPT4A1UrfgmGnTLJGSUh+uvHYLe7izWoMCCDCV0+Zyn0Ilrlfm' \
-                'N+cD"}', '')
-
-            # We create a new site that will be used in the preallocation list
-            preallocate_new_site()
-
-        # We simulate the VM finishing installing
-        vm = VirtualMachine.objects.first()
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
-            with mock.patch("apimws.vm.change_vm_power_state") as mock_change_vm_power_state:
-                mock_subprocess.check_output.return_value.returncode = 0
-                mock_change_vm_power_state.return_value = True
-                mock_change_vm_power_state.delay.return_value = True
-                self.client.post(reverse(post_installation), {'vm': vm.id, 'token': vm.token})
-
-
-    def assign_a_site(self, pre_create=True):
-        if pre_create:
-            self.pre_create_site()
-        response = self.client.get(reverse('listsites'))
-        self.assertInHTML("<p><a href=\"%s\" class=\"campl-primary-cta\">Register new site</a></p>" %
-                          reverse('newsite'), response.content)
-        with mock.patch("apimws.xen.subprocess") as mock_subprocess:
-            def fake_subprocess_output(*args, **kwargs):
-                if (set(args[0]) & set(['vmmanager', 'create'])) == set(['vmmanager', 'create']):
-                    return '{"vmid": "mws-client1"}'
-                elif (set(args[0]) & set(["ssh-keygen", "-lf"])) == set(["ssh-keygen", "-lf"]):
-                    return '2048 fa:ee:51:a2:3f:95:71:6a:2f:8c:e1:66:df:be:f1:2a id_rsa.pub (RSA)'
-                elif (set(args[0]) & set(["ssh-keygen", "-r", "replacehostname", "-f"])) == \
-                        set(["ssh-keygen", "-r", "replacehostname", "-f"]):
-                    return "replacehostname IN SSHFP 1 1 9ddc245c6cf86667e33fe3186b7226e9262eac16\n" \
-                           "replacehostname IN SSHFP 1 2 " \
-                           "2f27ce76295fdffb576d714fea586dd0a87a5a2ffa621b4064e225e36c8cf83c\n"
-            mock_subprocess.check_output.side_effect = fake_subprocess_output
-            mock_subprocess.Popen().communicate.return_value = (
-                '{"pubkey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQClBKpj+/WXlxJMY2iYw1mB1qYLM8YDjFS6qSiT6UmNLLhXJ' \
-                'BEfd6vOMErM1IfDsYN+W3604hukxwC859TU4ZLQYD6wFI2D+qMhb2UTcoLlOYD7TG436RXKbxK4iAT7ll3XUT8VxZUq/AZKVs' \
-                'vmH309l5LcW6UPO0PVYoafpo4+Fmv5c/CRTvp5X0eaoXtgT49h58/GwNlD2RrVPInjI9isa8/k8qiNaWEHYOGKC343BQIR9Sx' \
-                '+5HQ16wf3x3fUFeMTOYfsbvwQ9T5pkKpFoiUYRxjsz7bXdPQPT4A1UrfgmGnTLJGSUh+uvHYLe7izWoMCCDCV0+Zyn0Ilrlfm' \
-                'N+cD"}', '')
-            with mock.patch("apimws.xen.change_vm_power_state") as mock_subprocess2:
-                def fake_output_api(*args, **kwargs):
-                    return True
-                mock_subprocess2.side_effect = fake_output_api
-
-                with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
-                    with mock.patch("apimws.vm.change_vm_power_state") as mock_change_vm_power_state:
-                        mock_subprocess.check_output.return_value.returncode = 0
-                        mock_change_vm_power_state.return_value = True
-                        mock_change_vm_power_state.delay.return_value = True
-                        response = self.client.post(reverse('newsite'), {'siteform-name': 'Test Site',
-                                                                         'siteform-description': 'Desc',
-                                                                         'siteform-institution_id': 'UIS',
-                                                                         'siteform-email': 'amc203@cam.ac.uk'})
-                        self.assertIn(response.status_code, [200, 302])
-                    # TODO create the checks of how the mock was called
-                    # mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_xen_vm_api",
-                    #                                                  settings.VM_END_POINT[0],
-                    #                                                  "create",
-                    #                                                  "{}"])
-
-        site = Site.objects.first()
-        self.assertEqual(site.name, 'Test Site')
-        self.assertEqual(site.email, 'amc203@cam.ac.uk')
-        self.assertEqual(site.institution_id, 'UIS')
-        self.assertEqual(site.description, 'Desc')
-        return site
 
     def test_is_camacuk_helper(self):
         self.assertTrue(is_camacuk("www.cam.ac.uk"))
@@ -130,7 +131,7 @@ class SiteManagementTests(TestCase):
                           "10px;\">At this moment we cannot process any new requests for the Managed Web Service, "
                           "please try again later.</p>", response.content)
 
-        site = self.assign_a_site()
+        site = assign_a_site(self)
         response = self.client.get(reverse('listsites'))
         self.assertContains(response, site.name)
 
@@ -176,7 +177,7 @@ class SiteManagementTests(TestCase):
         response = self.client.get(reverse('newsite'))
         self.assertRedirects(response, expected_url=reverse('listsites'))
 
-        self.pre_create_site()
+        pre_create_site(self)
 
         response = self.client.get(reverse('newsite'))
         self.assertContains(response, "Request new site")
@@ -186,7 +187,7 @@ class SiteManagementTests(TestCase):
                                                          'siteform-email': 'amc203@cam.ac.uk'})
         self.assertContains(response, "This field is required.")  # Empty name, error
 
-        test_site= self.assign_a_site(pre_create=False)
+        test_site= assign_a_site(self, pre_create=False)
 
         # TODO test email check
         # TODO test dns api
@@ -251,7 +252,7 @@ class SiteManagementTests(TestCase):
         response = self.client.get(reverse('editsite', kwargs={'site_id': 1}))
         self.assertEqual(response.status_code, 404)  # The Site does not exist
 
-        site = self.assign_a_site()
+        site = assign_a_site(self)
 
         # response = self.client.get(reverse('editsite', kwargs={'site_id': site.id}))
         # self.assertEqual(response.status_code, 403)  # The User is not in the list of auth users
