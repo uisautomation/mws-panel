@@ -105,7 +105,7 @@ class BillingTests(TestCase):
         send_reminder_renewal()
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject,
-                         'University of Cambridge Managed Web Service: Your MWS3 site is due to renew next month')
+                         'The annual charge for your managed web site is due next month')
         self.assertEqual(mail.outbox[0].to, [site.email])
 
         # same month renewal warning
@@ -114,7 +114,7 @@ class BillingTests(TestCase):
         send_reminder_renewal()
         self.assertEqual(len(mail.outbox), 2)
         self.assertEqual(mail.outbox[1].subject,
-                         'University of Cambridge Managed Web Service: Your MWS3 site is due to renew this month')
+                         'REMINDER: the annual charge for your managed web site is due this month')
         self.assertEqual(mail.outbox[1].to, [site.email])
 
     def test_check_cacnel_if_not_paid(self):
@@ -141,7 +141,7 @@ class BillingTests(TestCase):
         check_subscription()
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject,
-                         'University of Cambridge Managed Web Service: Remember to upload your purchase order')
+                         'Remember to upload a purchase order for your managed web site')
         self.assertEqual(mail.outbox[0].to, [site.email])
         # Retrieve object
         site = Site.objects.get(pk=site.id)
@@ -166,7 +166,7 @@ class BillingTests(TestCase):
         check_subscription()
         self.assertEqual(len(mail.outbox), 2)
         self.assertEqual(mail.outbox[1].subject,
-                         'University of Cambridge Managed Web Service: Remember to upload your purchase order')
+                         'Remember to upload a purchase order for your managed web site')
         self.assertEqual(mail.outbox[1].to, [site.email])
         # Retrieve object
         site = Site.objects.get(pk=site.id)
@@ -182,7 +182,7 @@ class BillingTests(TestCase):
         check_subscription()
         self.assertEqual(len(mail.outbox), 3)
         self.assertEqual(mail.outbox[2].subject,
-                         'University of Cambridge Managed Web Service: Your site has been cancelled')
+                         'Your managed web site has been cancelled')
         self.assertEqual(mail.outbox[2].to, [site.email])
         # Retrieve object
         site = Site.objects.get(pk=site.id)
