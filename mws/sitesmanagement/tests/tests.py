@@ -254,19 +254,9 @@ class SiteManagementTests(TestCase):
 
         site = assign_a_site(self)
 
-        # response = self.client.get(reverse('editsite', kwargs={'site_id': site.id}))
-        # self.assertEqual(response.status_code, 403)  # The User is not in the list of auth users
-        #
-        # site.users.add(User.objects.get(username="test0001"))
         response = self.client.get(reverse('editsite', kwargs={'site_id': site.id}))
         self.assertContains(response, "Managed Web Service account settings")
 
-        suspension = site.suspend_now(input_reason="test suspension")
-        response = self.client.get(reverse('editsite', kwargs={'site_id': site.id}))
-        self.assertEqual(response.status_code, 403)  # The site is suspended
-
-        suspension.active = False
-        suspension.save()
         response = self.client.get(reverse('editsite', kwargs={'site_id': site.id}))
         self.assertContains(response, "Managed Web Service account settings")
 
@@ -278,15 +268,32 @@ class SiteManagementTests(TestCase):
                                     {'name': 'testSiteChange', 'description': 'testDescChange',
                                      'institution_id': 'CL', 'email': 'email@change.test'})
         self.assertRedirects(response, expected_url=site.get_absolute_url())  # Changes done, redirecting
+
         site_changed = Site.objects.get(pk=site.id)
         self.assertEqual(site_changed.name, 'testSiteChange')
         self.assertEqual(site_changed.description, 'testDescChange')
         self.assertEqual(site_changed.institution_id, 'CL')
         self.assertEqual(site_changed.email, 'email@change.test')
 
-        response = self.client.get(response.url)
+        response = self.client.post(reverse('editsite', kwargs={'site_id': site.id}),
+                                    {'name': 'testSiteChange', 'description': 'testDescChange',
+                                     'institution_id': 'CL', 'email': 'emailchangetest'})
+        self.assertContains(response, '<ul class="errorlist"><li>Enter a valid email address.</li></ul>')
+        site_changed = Site.objects.get(pk=site.id)  # Refresh site from DB
+        self.assertEqual(site_changed.email, 'email@change.test')
+
+        response = self.client.get(reverse('showsite', kwargs={'site_id': site_changed.id}))
         self.assertContains(response, "Your email %s is unconfirmed, please check your email inbox and click "
                                       "on the link of the email we have sent you." % site_changed.email)
+
+        site_changed.users.remove(User.objects.get(username="test0001"))
+        response = self.client.get(reverse('editsite', kwargs={'site_id': site_changed.id}))
+        self.assertEqual(response.status_code, 403)  # The User is not in the list of auth users
+
+        site_changed.users.add(User.objects.get(username="test0001"))
+        site.suspend_now(input_reason="test suspension")
+        response = self.client.get(reverse('editsite', kwargs={'site_id': site.id}))
+        self.assertEqual(response.status_code, 403)  # The site is suspended
 
 
 @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
