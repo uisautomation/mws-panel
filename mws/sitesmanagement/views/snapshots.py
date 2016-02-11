@@ -1,6 +1,7 @@
 """Views(Controllers) for managing Snapshots"""
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
+from django.db import IntegrityError
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import CreateView, DeleteView
@@ -50,10 +51,15 @@ class SnapshotCreate(ServicePriviledgeCheck, CreateView):
 
     def form_valid(self, form):
         if Snapshot.objects.filter(service=self.service).count() >= 2:
-            raise ValidationError("You can only create two snapshots")
+            form.add_error(None, "You can only create two snapshots")
+            return self.form_invalid(form)
         self.object = form.save(commit=False)
         self.object.service = self.service
-        self.object.save()
+        try:
+            self.object.save()
+        except IntegrityError:
+            form.add_error("name", "Name for that snapshot already exists")
+            return self.form_invalid(form)
         ansible_create_custom_snapshot.delay(self.service, self.object)
         return redirect(reverse('sitesmanagement.views.backups', kwargs={'service_id': self.service.id}))
 
