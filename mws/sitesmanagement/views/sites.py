@@ -108,9 +108,9 @@ class SiteList(LoginRequiredMixin, ListView):
         context['sites_disabled'] = filter(lambda site: not site.is_canceled() and site.is_disabled(),
                                            self.object_list)
 
-        ssh_sites =  reduce(lambda grouplist, group: grouplist+list(group.sites_auth_as_user.all()),
-                            get_user_lookupgroups(self.request.user),
-                            list(self.request.user.sites_auth_as_user.all()))
+        ssh_sites =  list(set(reduce(lambda grouplist, group: grouplist+list(group.sites_auth_as_user.all()),
+                                     get_user_lookupgroups(self.request.user),
+                                     list(self.request.user.sites_auth_as_user.all()))))
 
         context['sites_authorised'] = filter(lambda site: not site.is_canceled() and not site.is_disabled(),
                                              ssh_sites)
@@ -119,9 +119,8 @@ class SiteList(LoginRequiredMixin, ListView):
         return context
 
     def get_queryset(self):
-        return reduce(lambda grouplist, group: grouplist+list(group.sites.all()),
-                      get_user_lookupgroups(self.request.user),
-                      list(self.request.user.sites.all()))
+        return list(set(reduce(lambda grouplist, group: grouplist+list(group.sites.all()),
+                               get_user_lookupgroups(self.request.user), list(self.request.user.sites.all()))))
 
 
 class SiteCreate(LoginRequiredMixin, FormView):
