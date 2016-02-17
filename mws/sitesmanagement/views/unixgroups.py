@@ -79,7 +79,13 @@ class UnixGroupCreate(ServicePriviledgeCheck, CreateView):
         self.object.save()
 
         unix_users = validate_crsids(self.request.POST.get('unix_users'))
-        # TODO If there are no users in the list return an Exception?
+
+        site_users = self.object.service.site.users.all() + self.object.service.site.ssh_users.all()
+
+        if not all(user in site_users for user in unix_users):
+            form.add_error(None, "You have added users to this group that are not in the authorisation user list.")
+            return self.form_invalid(form)
+
         self.object.users.add(*unix_users)
 
         launch_ansible(self.service)  # to apply these changes to the vm
@@ -124,7 +130,13 @@ class UnixGroupUpdate(UnixGroupPriviledgeCheck, UpdateView):
         self.object = form.save()
 
         unix_users = validate_crsids(self.request.POST.get('unix_users'))
-        # TODO If there are no users in the list return an Exception?
+
+        site_users = self.object.service.site.users.all() + self.object.service.site.ssh_users.all()
+
+        if not all(user in site_users for user in unix_users):
+            form.add_error(None, "You have added users to this group that are not in the authorisation user list.")
+            return self.form_invalid(form)
+
         self.object.users.clear()
         self.object.users.add(*unix_users)
 
