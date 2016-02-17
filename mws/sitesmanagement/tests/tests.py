@@ -437,6 +437,8 @@ class SiteManagement2Tests(TestCase):
 
     def test_unix_groups(self):
         site = self.create_site()
+        site.users.add(User.objects.create(username='amc203'))
+        site.users.add(User.objects.create(username='jw35'))
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse('createunixgroup',
