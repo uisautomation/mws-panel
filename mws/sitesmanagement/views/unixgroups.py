@@ -80,9 +80,7 @@ class UnixGroupCreate(ServicePriviledgeCheck, CreateView):
 
         unix_users = validate_crsids(self.request.POST.get('unix_users'))
 
-        site_users = self.object.service.site.users.all() + self.object.service.site.ssh_users.all()
-
-        if not all(user in site_users for user in unix_users):
+        if not all(user in self.object.service.site.list_of_all_type_of_users() for user in unix_users):
             form.add_error(None, "You have added users to this group that are not in the authorisation user list.")
             return self.form_invalid(form)
 
@@ -131,9 +129,7 @@ class UnixGroupUpdate(UnixGroupPriviledgeCheck, UpdateView):
 
         unix_users = validate_crsids(self.request.POST.get('unix_users'))
 
-        site_users = self.object.service.site.users.all() + self.object.service.site.ssh_users.all()
-
-        if not all(user in site_users for user in unix_users):
+        if not all(user in self.object.service.site.list_of_all_type_of_users() for user in unix_users):
             form.add_error(None, "You have added users to this group that are not in the authorisation user list.")
             return self.form_invalid(form)
 
