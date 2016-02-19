@@ -4,7 +4,7 @@
     {{ block.super }}
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
-            <h1>Edit the Unix Group "{{ unix_group.name }}"</h1>
+            <h1>Edit the Unix Group "{{ form.instance.name }}"</h1>
             <form action={% url 'updateunixgroup' ug_id=form.instance.id %} method="post">
                 <fieldset>
                     {% csrf_token %}
