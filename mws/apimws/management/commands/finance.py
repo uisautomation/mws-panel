@@ -8,6 +8,8 @@ from django.core.mail import EmailMessage
 from django.core.management.base import NoArgsCommand, CommandError
 from django.utils import timezone
 from os.path import splitext
+from ucamlookup import get_institutions, get_institution_name_by_id
+
 from sitesmanagement.models import Site, Billing
 from sitesmanagement.templatetags.calcendperiod import calcendperiod
 
@@ -60,14 +62,18 @@ class Command(NoArgsCommand):
         ### SEND REPORT ###
         ###################
 
+        all_institutitons = get_institutions() # We catch all institutions to avoid hitting lookup several times
+
         po_files = map(lambda x: ("%s%s" % (x.purchase_order_number, splitext(x.purchase_order.name)[1]),
                                   x.purchase_order.read(), 'application/other'),
                        new_sites_billing | renewal_sites_billing)
-        new_billing = map(lambda x: [x.site.id, x.site.name, x.site.institution_id, x.group,
+        new_billing = map(lambda x: [x.site.id, x.site.name,
+                                     get_institution_name_by_id(x.site.institution_id, all_institutitons), x.group,
                                      x.purchase_order_number, x.site.start_date, settings.YEAR_COST, x.site.start_date,
                                      calcendperiod(x.site.start_date)],
                           new_sites_billing)
-        renewals_billing = map(lambda x: [x.site.id, x.site.name, x.site.institution_id, x.group,
+        renewals_billing = map(lambda x: [x.site.id, x.site.name,
+                                          get_institution_name_by_id(x.site.institution_id, all_institutitons), x.group,
                                           x.purchase_order_number, x.site.start_date, settings.YEAR_COST,
                                           x.site.start_date.replace(year = year), calcendperiod(x.site.start_date)],
                                renewal_sites_billing)
