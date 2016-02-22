@@ -239,7 +239,7 @@ class Suspension(models.Model):
     # is the suspension active?
     active = models.BooleanField(default=True)
     # start date of the suspension
-    start_date = models.DateField()
+    start_date = models.DateField(auto_now_add=True)
     # end date of the suspension
     end_date = models.DateField(null=True, blank=True)
     site = models.ForeignKey(Site, related_name="suspensions")
