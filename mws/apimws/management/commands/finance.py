@@ -7,6 +7,7 @@ from django.conf import settings
 from django.core.mail import EmailMessage
 from django.core.management.base import NoArgsCommand, CommandError
 from django.utils import timezone
+from django.utils.text import slugify
 from os.path import splitext
 from ucamlookup import get_institutions, get_institution_name_by_id
 
@@ -64,7 +65,7 @@ class Command(NoArgsCommand):
 
         all_institutitons = get_institutions() # We catch all institutions to avoid hitting lookup several times
 
-        po_files = map(lambda x: ("%s%s" % (x.purchase_order_number, splitext(x.purchase_order.name)[1]),
+        po_files = map(lambda x: ("%s%s" % (slugify(x.purchase_order_number), splitext(x.purchase_order.name)[1]),
                                   x.purchase_order.read(), 'application/other'),
                        new_sites_billing | renewal_sites_billing)
         new_billing = map(lambda x: [x.site.id, x.site.name,
