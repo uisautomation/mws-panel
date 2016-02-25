@@ -80,6 +80,8 @@ def launch_ansible_async(service):
         else:
             service.status = 'ready'
             service.save()
+        # Delete Unix Groups marked to be deleted after ansible has finished deleting them from the system
+        service.unix_groups.filter(to_be_deleted=True).delete()
 
 
 @shared_task(base=AnsibleTaskWithFailure)
