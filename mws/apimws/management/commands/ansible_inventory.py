@@ -67,7 +67,7 @@ class Command(NoArgsCommand):
         def user_vars(user, service):
             uv = {}
             uv['username'] = user.username
-            uv['groups'] = list(UnixGroup.objects.filter(service=service, users__in=[user])
+            uv['groups'] = list(UnixGroup.objects.filter(service=service, users__in=[user], to_be_deleted=False)
                                 .values_list('name', flat=True))
             if hasattr(user, "mws_user") and user.mws_user.uid is not None:
                 uv['uid'] = user.mws_user.uid

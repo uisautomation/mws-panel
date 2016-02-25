@@ -45,8 +45,6 @@ class UnixGroupListView(ServicePriviledgeCheck, ListView):
         return self.service.unix_groups.filter(to_be_deleted=False)
 
     def dispatch(self, request, *args, **kwargs):
-        if getattr(settings, 'DEMO', False):
-            return HttpResponseRedirect(reverse('listsites'))
         return super(UnixGroupListView, self).dispatch(request, *args, **kwargs)
 
 
