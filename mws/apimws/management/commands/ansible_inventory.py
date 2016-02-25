@@ -8,6 +8,7 @@ from sitesmanagement.models import VirtualMachine, Site, UnixGroup
 
 
 group = "mwsclients"
+# We start Unix Group IDs by the 2^16-2 which is the last one free in Debian and assign them to groups in decrease order
 INITIAL_GID = 4294967293
 
 
@@ -63,15 +64,16 @@ class Command(NoArgsCommand):
         v['mws_name'] = vm.site.name
         v['mws_webmaster_email'] = vm.site.email
 
-        def user_vars(user):
+        def user_vars(user, service):
             uv = {}
             uv['username'] = user.username
+            uv['groups'] = UnixGroup.objects.filter(service=service, users__in=[user])
             if hasattr(user, "mws_user") and user.mws_user.uid is not None:
                 uv['uid'] = user.mws_user.uid
                 if user.mws_user.ssh_public_key:
                     uv['ssh_key'] = user.mws_user.ssh_public_key
             return uv
-        v['mws_users'] = [user_vars(u) for u in
+        v['mws_users'] = [user_vars(u, vm.service) for u in
                           vm.site.list_of_all_type_of_active_users()]
 
         def vhost_vars(vh):
@@ -150,10 +152,15 @@ class Command(NoArgsCommand):
 
         # List of Unix groups and their associated crsids
         v['mws_unix_groups'] = []
-        for unix_group in UnixGroup.objects.filter(service=vm.service):
+        for unix_group in UnixGroup.objects.filter(service=vm.service, to_be_deleted=False):
             v['mws_unix_groups'].append({'name': unix_group.name,
                                          'gid': INITIAL_GID-unix_group.id,
                                          'users': list(unix_group.users.all().values_list('username', flat=True))})
+
+        # List of Unix Groups to be deleted
+        v['mws_delete_unix_groups'] = []
+        for unix_group in UnixGroup.objects.filter(service=vm.service, to_be_deleted=True):
+            v['mws_delete_unix_groups'].append({'name': unix_group.name})
 
         # Let ansible know if the VM should be quarantined (apache and exim services disabled)
         v['mws_quarantined'] = vm.service.quarantined
