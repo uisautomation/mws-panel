@@ -1,7 +1,7 @@
 """Views(Controllers) for managing Unix Groups"""
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.views.generic import ListView, CreateView, DeleteView, UpdateView
 from ucamlookup import validate_crsids
@@ -14,6 +14,8 @@ from sitesmanagement.views.vhosts import ServicePriviledgeCheck
 class UnixGroupPriviledgeCheck(ServicePriviledgeCheck):
     def dispatch(self, request, *args, **kwargs):
         unix_group = get_object_or_404(UnixGroup, pk=self.kwargs['ug_id'])
+        if unix_group.to_be_deleted:
+            return HttpResponseForbidden()
         self.unix_group = unix_group
         self.kwargs['service_id'] = unix_group.service.id
         return super(UnixGroupPriviledgeCheck, self).dispatch(request, *args, **kwargs)
@@ -23,6 +25,7 @@ class UnixGroupListView(ServicePriviledgeCheck, ListView):
     """View that shows the list of unix groups associated to a service with service id passed by url kwargs"""
     model = UnixGroup
     template_name = 'mws/unix_groups.html'
+    queryset = UnixGroup.objects.filter(to_be_deleted=False)
 
     def get_context_data(self, **kwargs):
         context = super(UnixGroupListView, self).get_context_data(**kwargs)
@@ -157,9 +160,10 @@ class UnixGroupDelete(UnixGroupPriviledgeCheck, DeleteView):
         return HttpResponseRedirect(reverse('listunixgroups', kwargs={'service_id': self.service.id}))
 
     def delete(self, request, *args, **kwargs):
-        super(UnixGroupDelete, self).delete(request, *args, **kwargs)
-        launch_ansible(self.service)
-        return HttpResponse()
+        self.object = self.get_object()
+        self.object.to_be_deleted = True
+        self.object.save()
+        return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
         return reverse('listunixgroups', kwargs={'service_id': self.service.id})
