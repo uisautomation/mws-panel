@@ -67,7 +67,8 @@ class Command(NoArgsCommand):
         def user_vars(user, service):
             uv = {}
             uv['username'] = user.username
-            uv['groups'] = UnixGroup.objects.filter(service=service, users__in=[user])
+            uv['groups'] = list(UnixGroup.objects.filter(service=service, users__in=[user])
+                                .values_list('name', flat=True))
             if hasattr(user, "mws_user") and user.mws_user.uid is not None:
                 uv['uid'] = user.mws_user.uid
                 if user.mws_user.ssh_public_key:
@@ -150,12 +151,10 @@ class Command(NoArgsCommand):
         v['mws_php_libs_disabled'] = list(PHPLib.objects.exclude(services__id=vm.service.id)
                                           .values_list('name', flat=True))
 
-        # List of Unix groups and their associated crsids
+        # List of Unix groups and their associated gids
         v['mws_unix_groups'] = []
         for unix_group in UnixGroup.objects.filter(service=vm.service, to_be_deleted=False):
-            v['mws_unix_groups'].append({'name': unix_group.name,
-                                         'gid': INITIAL_GID-unix_group.id,
-                                         'users': list(unix_group.users.all().values_list('username', flat=True))})
+            v['mws_unix_groups'].append({'name': unix_group.name, 'gid': INITIAL_GID-unix_group.id})
 
         # List of Unix Groups to be deleted
         v['mws_delete_unix_groups'] = []
