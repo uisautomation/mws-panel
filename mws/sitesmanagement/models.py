@@ -489,7 +489,7 @@ class DomainName(models.Model):
 
 
 def unix_group_name_validator(group_name):
-    GROUP_NAME_PATTERN = re.compile(r'^[A-Z\d]+$')
+    GROUP_NAME_PATTERN = re.compile(r'^[A-Z]+$')
     if len(group_name) < 3:
         raise ValidationError("Unix Group names need to be between 3 and 16 characters")
     if not GROUP_NAME_PATTERN.match(group_name):
