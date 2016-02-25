@@ -66,7 +66,7 @@ MIDDLEWARE_CLASSES += (
     'mwsauth.middleware.CheckBannedUsers',
 )
 
-VM_END_POINT = ["ophon.csi.cam.ac.uk", "opus.csi.cam.ac.uk"]
+VM_END_POINT = ["opus.csi.cam.ac.uk", "ophon.csi.cam.ac.uk"]
 VM_END_POINT_COMMAND = ["userv", "mws-admin", "mws_xen_vm_api", VM_END_POINT[0]]
 VM_API = "xen"
 
