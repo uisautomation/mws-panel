@@ -8,6 +8,7 @@ from sitesmanagement.models import VirtualMachine, Site, UnixGroup
 
 
 group = "mwsclients"
+INITIAL_GID = 4294967293
 
 
 class Command(NoArgsCommand):
@@ -151,6 +152,7 @@ class Command(NoArgsCommand):
         v['mws_unix_groups'] = []
         for unix_group in UnixGroup.objects.filter(service=vm.service):
             v['mws_unix_groups'].append({'name': unix_group.name,
+                                         'gid': INITIAL_GID-unix_group.id,
                                          'users': list(unix_group.users.all().values_list('username', flat=True))})
 
         # Let ansible know if the VM should be quarantined (apache and exim services disabled)
