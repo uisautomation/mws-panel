@@ -198,6 +198,18 @@ h3.campl-teaser-title {
     color: white;
 }
 
+.separator-tab {
+    background: #0c5963;
+    border-right: 1px solid #106470;
+    border-bottom: 1px solid #106470;
+    border-top: 1px solid #106470;
+    padding: 10px 20px;
+    color: #fff;
+    text-decoration: none;
+    outline: none;
+    display: block;
+}
+
 /*! normalize.css v3.0.0 | MIT License | git.io/normalize */
 
 .btn {

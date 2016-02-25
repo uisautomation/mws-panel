@@ -41,7 +41,7 @@
                 <ul class="campl-unstyled-list">
                     <li><a href="{% url 'listsites' %}">List of MWS Sites</a></li>
                     {% if site %}
-                    <li><a>Panels for MWS "{{ site.name }}": </a></li>
+                    <li><span class="separator-tab">Panels for MWS "{{ site.name }}": </span></li>
                     <li><a href="{% url 'showsite' site_id=site.id %}">Main Panel</a></li>
                     {% if site.production_service and site.production_service.virtual_machines.count != 0 and not site.production_service.is_busy %}
                     <li><a href="{% url 'mwsauth.views.auth_change' site_id=site.id %}">Auth Panel</a></li>
