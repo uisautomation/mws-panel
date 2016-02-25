@@ -7,7 +7,7 @@
 
             <h1>Unix groups for your "{{ service.site.name }}" {% if service.primary %}production{% else %}test{% endif %} server</h1>
 
-            {% if service.unix_groups.all %}
+            {% if object_list %}
                 <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
                     <thead>
                         <tr>
@@ -17,7 +17,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                    {% for unix_group in service.unix_groups.all %}
+                    {% for unix_group in object_list %}
                         <tr>
                             <td>
                                 {{ unix_group.name }}
