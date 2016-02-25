@@ -443,21 +443,21 @@ class SiteManagement2Tests(TestCase):
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse('createunixgroup',
                                                 kwargs={'service_id': site.production_service.id}),
-                                        {'unix_users': 'amc203,jw35', 'name': 'testUnixGroup'})
+                                        {'unix_users': 'amc203,jw35', 'name': 'TESTUNIXGROUP'})
             self.assertIn(response.status_code, [200, 302])
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
                                                              site.production_service.virtual_machines.first()
                                                                  .network_configuration.name],
                                                             stderr=mock_subprocess.STDOUT)
         response = self.client.get(response.url)
-        self.assertInHTML('<td>testUnixGroup</td>', response.content)
+        self.assertInHTML('<td>TESTUNIXGROUP</td>', response.content)
         self.assertInHTML('<td>amc203, jw35</td>', response.content)
-        unix_group = UnixGroup.objects.get(name='testUnixGroup')
+        unix_group = UnixGroup.objects.get(name='TESTUNIXGROUP')
         self.assertSequenceEqual([User.objects.get(username='amc203'), User.objects.get(username='jw35')],
                                  unix_group.users.all())
 
         response = self.client.get(reverse('updateunixgroup', kwargs={'ug_id': unix_group.id}))
-        self.assertInHTML('<input id="id_name" maxlength="16" name="name" type="text" value="testUnixGroup" />',
+        self.assertInHTML('<input id="id_name" maxlength="16" name="name" type="text" value="TESTUNIXGROUP" />',
                           response.content)
         self.assertContains(response, 'crsid: "amc203"')
         self.assertContains(response, 'crsid: "jw35"')
@@ -465,14 +465,14 @@ class SiteManagement2Tests(TestCase):
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse('updateunixgroup', kwargs={'ug_id': unix_group.id}),
-                                        {'unix_users': 'jw35', 'name': 'testUnixGroup2'})
+                                        {'unix_users': 'jw35', 'name': 'NEWTEST'})
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
                                                              site.production_service.virtual_machines.first()
                                                                  .network_configuration.name],
                                                             stderr=mock_subprocess.STDOUT)
         response = self.client.get(response.url)
-        self.assertInHTML('<td>testUnixGroup2</td>', response.content, count=1)
-        self.assertInHTML('<td>testUnixGroup</td>', response.content, count=0)
+        self.assertInHTML('<td>NEWTEST</td>', response.content, count=1)
+        self.assertInHTML('<td>TESTUNIXGROUP</td>', response.content, count=0)
         self.assertInHTML('<td>jw35</td>', response.content, count=1)
         self.assertInHTML('<td>amc203</td>', response.content, count=0)
 
@@ -484,7 +484,7 @@ class SiteManagement2Tests(TestCase):
                                                                  .network_configuration.name],
                                                             stderr=mock_subprocess.STDOUT)
         response = self.client.get(reverse('listunixgroups', kwargs={'service_id': site.production_service.id}))
-        self.assertInHTML('<td>testUnixGroup2</td>', response.content, count=0)
+        self.assertInHTML('<td>NEWTEST</td>', response.content, count=0)
         self.assertInHTML('<td>jw35</td>', response.content, count=0)
 
     def test_vhosts_list(self):

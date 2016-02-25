@@ -160,6 +160,7 @@ class UnixGroupDelete(UnixGroupPriviledgeCheck, DeleteView):
         self.object = self.get_object()
         self.object.to_be_deleted = True
         self.object.save()
+        launch_ansible(self.service)
         return HttpResponse()
 
     def get_success_url(self):
