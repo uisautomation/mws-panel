@@ -488,13 +488,25 @@ class DomainName(models.Model):
         return self.name
 
 
+def unix_group_name_validator(group_name):
+    GROUP_NAME_PATTERN = re.compile(r'^[A-Z\d]+$')
+    if len(group_name) < 3:
+        raise ValidationError("Unix Group names need to be between 3 and 16 characters")
+    if not GROUP_NAME_PATTERN.match(group_name):
+        raise ValidationError("Unix Group names can only contain letters written in capital letters")
+
+
 class UnixGroup(models.Model):
-    name = models.CharField(max_length=16)  # TODO add validator to comply with Debian guidelines of Unix group names
+    name = models.CharField(max_length=16, validators=[unix_group_name_validator])
     service = models.ForeignKey(Service, related_name='unix_groups')
+    to_be_deleted = models.BooleanField(default=False)
     users = models.ManyToManyField(User)
 
     def __unicode__(self):
         return self.name
+
+    class Meta:
+        unique_together = (("name", "service"), )
 
 
 class SiteKey(models.Model):
