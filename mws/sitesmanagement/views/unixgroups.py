@@ -25,7 +25,6 @@ class UnixGroupListView(ServicePriviledgeCheck, ListView):
     """View that shows the list of unix groups associated to a service with service id passed by url kwargs"""
     model = UnixGroup
     template_name = 'mws/unix_groups.html'
-    queryset = UnixGroup.objects.filter(to_be_deleted=False)
 
     def get_context_data(self, **kwargs):
         context = super(UnixGroupListView, self).get_context_data(**kwargs)
@@ -43,7 +42,7 @@ class UnixGroupListView(ServicePriviledgeCheck, ListView):
         return context
 
     def get_queryset(self):
-        return self.service.unix_groups
+        return self.service.unix_groups.filter(to_be_deleted=False)
 
     def dispatch(self, request, *args, **kwargs):
         if getattr(settings, 'DEMO', False):
@@ -163,7 +162,7 @@ class UnixGroupDelete(UnixGroupPriviledgeCheck, DeleteView):
         self.object = self.get_object()
         self.object.to_be_deleted = True
         self.object.save()
-        return HttpResponseRedirect(self.get_success_url())
+        return HttpResponse()
 
     def get_success_url(self):
         return reverse('listunixgroups', kwargs={'service_id': self.service.id})
