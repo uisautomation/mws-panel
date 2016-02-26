@@ -41,31 +41,50 @@
                 <ul class="campl-unstyled-list">
                     <li><a href="{% url 'listsites' %}">List of MWS Sites</a></li>
                     {% if site %}
-                    <li><span class="separator-tab">Panels for MWS "{{ site.name }}": </span></li>
-                    <li><a href="{% url 'showsite' site_id=site.id %}">Main Panel</a></li>
-                    {% if site.production_service and site.production_service.virtual_machines.count != 0 and not site.production_service.is_busy %}
-                    <li><a href="{% url 'mwsauth.views.auth_change' site_id=site.id %}">Auth Panel</a></li>
-                    <li>
-                        <a>Production Server</a>
-                        <ul class="campl-unstyled-list">
-                            <li><a href="{% url 'sitesmanagement.views.service_settings' service_id=site.production_service.id %}">Settings</a></li>
-                            <li><a href="{% url 'listvhost' service_id=site.production_service.id %}">Web Sites</a></li>
-                            <li><a href="{% url 'sitesmanagement.views.system_packages' service_id=site.production_service.id %}">System Packages</a></li>
-                            <li><a href="{% url 'listunixgroups' service_id=site.production_service.id %}">Unix Groups</a></li>
-                        </ul>
-                    </li>
-                    {% endif %}
-                    {% if site.test_service and site.test_service.active %}
-                    <li>
-                        <a>Test Server</a>
-                        <ul class="campl-unstyled-list">
-                            <li><a href="{% url 'sitesmanagement.views.service_settings' service_id=site.test_service.id %}">Settings</a></li>
-                            <li><a href="{% url 'listvhost' service_id=site.test_service.id %}">Web Sites</a></li>
-                            <li><a href="{% url 'sitesmanagement.views.system_packages' service_id=site.test_service.id %}">System Packages</a></li>
-                            <li><a href="{% url 'listunixgroups' service_id=site.test_service.id %}">Unix Groups</a></li>
-                        </ul>
-                    </li>
-                    {% endif %}
+                        <li><span class="separator-tab">Panels for MWS "{{ site.name }}": </span></li>
+                        <li><a href="{% url 'showsite' site_id=site.id %}">Main Panel</a></li>
+                        {% if site.production_service and site.production_service.virtual_machines.count != 0 and not site.production_service.is_busy %}
+                            <li><a href="{% url 'mwsauth.views.auth_change' site_id=site.id %}">Auth Panel</a></li>
+                            <li>
+                                <a>Production Server</a>
+                                <ul class="campl-unstyled-list">
+                                    <li><a href="{% url 'sitesmanagement.views.service_settings' service_id=site.production_service.id %}">Settings</a></li>
+                                    <li><a href="{% url 'listvhost' service_id=site.production_service.id %}">Web Sites</a></li>
+                                    <li><a href="{% url 'listunixgroups' service_id=site.production_service.id %}">Unix Groups</a></li>
+                                </ul>
+                            </li>
+                        {% endif %}
+                        {% if site.test_service and site.test_service.active %}
+                            <li>
+                                <a>Test Server</a>
+                                <ul class="campl-unstyled-list">
+                                    <li><a href="{% url 'sitesmanagement.views.service_settings' service_id=site.test_service.id %}">Settings</a></li>
+                                    <li><a href="{% url 'listvhost' service_id=site.test_service.id %}">Web Sites</a></li>
+                                    <li><a href="{% url 'listunixgroups' service_id=site.test_service.id %}">Unix Groups</a></li>
+                                </ul>
+                            </li>
+                        {% endif %}
+                        {% if site.production_service and site.production_service.virtual_machines.count != 0 and not site.production_service.is_busy %}
+                            <script type="application/javascript">
+                            (function poll(){
+                                $.ajax({
+                                    url: "{% url 'sitesmanagement.views.service_status' service_id=site.production_service.id %}",
+                                    success: function(data, textStatus, jqXHR){
+                                        if (data['status'] == 'ready') {
+                                            $("#site_status").text("Your server is ready").css("background-color", "green");
+                                        } else if  (data['status'] == 'busy') {
+                                            $("#site_status").text("Your server is being configured").css("background-color", "yellow");
+                                        } else {
+                                            $("#site_status").text("Error while checking status of your server").css("background-color", "red");
+                                        }
+                                    },
+                                    dataType: "json",
+                                    complete: setTimeout(function() {poll()}, 15000)
+                                });
+                            })();
+                            </script>
+                            <li id="site_status">Checking status...</li>
+                        {% endif %}
                     {% endif %}
                 </ul>
             </div>

@@ -25,29 +25,14 @@ LOGGER = logging.getLogger('mws')
 
 def warning_messages(site):
     production_service = site.production_service
-    test_service = site.test_service
     warning_messages_list = []
 
-    if test_service is not None and test_service.status == 'ansible':
-        warning_messages_list.append("Your test server is being configured.")
-
     if production_service is not None:
-        if production_service.status == 'ansible':
-            warning_messages_list.append("Your server is being configured.")
-
-        if production_service.status in ['installing', 'postinstall']:
-            warning_messages_list.append("Your server is being installed.")
-
-        if production_service.status == 'requested':
-            warning_messages_list.append("Your request in the Managed Web Service is being processed")
-
         if production_service.due_update():
             warning_messages_list.append("Your server is due to an OS update.")
         for domain_name in DomainName.objects.filter(vhost__service=production_service, status='requested'):
             warning_messages_list.append("Your domain name %s has been requested and is under review." %
                                          domain_name.name)
-    else:
-        warning_messages_list.append("Your request in the Managed Web Service is being processed")
 
     if not Billing.objects.filter(site=site).exists():
         warning_messages_list.append(

@@ -2,6 +2,7 @@
 
 import bisect
 import datetime
+import json
 from django.conf import settings
 from django.contrib import messages
 from django.utils import dateparse
@@ -94,6 +95,20 @@ def privacy(request):
 
 def termsconds(request):
     return render(request, 'tcs.html', {})
+
+
+@login_required
+def service_status(request, service_id):
+    service = get_object_or_404(Service, pk=service_id)
+    site = privileges_check(service.site.id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if service.is_busy:
+        return HttpResponse(json.dumps({'status': 'busy'}), content_type='application/json')
+    else:
+        return HttpResponse(json.dumps({'status': 'ready'}), content_type='application/json')
 
 
 @login_required
