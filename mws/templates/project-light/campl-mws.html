@@ -71,11 +71,11 @@
                                     url: "{% url 'sitesmanagement.views.service_status' service_id=site.production_service.id %}",
                                     success: function(data, textStatus, jqXHR){
                                         if (data['status'] == 'ready') {
-                                            $("#site_status").text("Your server is ready").css("background-color", "green");
+                                            $("#site_status").text("Your server is ready").css("background-color", "#0F8E00");
                                         } else if (data['status'] == 'busy') {
-                                            $("#site_status").text("Your server is being configured").css("background-color", "yellow");
+                                            $("#site_status").text("Your server is being configured").css("background-color", "#A09B00");
                                         } else {
-                                            $("#site_status").text("Error while checking status of your server").css("background-color", "red");
+                                            $("#site_status").text("Error while checking status of your server").css("background-color", "#920101");
                                         }
                                     },
                                     dataType: "json",
