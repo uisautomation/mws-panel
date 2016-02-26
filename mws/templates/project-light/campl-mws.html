@@ -72,7 +72,7 @@
                                     success: function(data, textStatus, jqXHR){
                                         if (data['status'] == 'ready') {
                                             $("#site_status").text("Your server is ready").css("background-color", "green");
-                                        } else if  (data['status'] == 'busy') {
+                                        } else if (data['status'] == 'busy') {
                                             $("#site_status").text("Your server is being configured").css("background-color", "yellow");
                                         } else {
                                             $("#site_status").text("Error while checking status of your server").css("background-color", "red");

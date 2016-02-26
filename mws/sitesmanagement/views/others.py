@@ -105,10 +105,10 @@ def service_status(request, service_id):
     if site is None:
         return HttpResponseForbidden()
 
-    if service.is_busy:
-        return HttpResponse(json.dumps({'status': 'busy'}), content_type='application/json')
-    else:
+    if service.is_ready:
         return HttpResponse(json.dumps({'status': 'ready'}), content_type='application/json')
+    else:
+        return HttpResponse(json.dumps({'status': 'busy'}), content_type='application/json')
 
 
 @login_required
