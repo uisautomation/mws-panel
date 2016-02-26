@@ -223,6 +223,10 @@ h3.campl-teaser-title {
     float: right;
 }
 
+#unix_group_form #id_name {
+    text-transform: uppercase;
+}
+
 /*! normalize.css v3.0.0 | MIT License | git.io/normalize */
 
 .btn {
