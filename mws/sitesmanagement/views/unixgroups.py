@@ -93,8 +93,6 @@ class UnixGroupCreate(ServicePriviledgeCheck, CreateView):
         return reverse('listunixgroups', kwargs={'service_id': self.service.id})
 
     def dispatch(self, request, *args, **kwargs):
-        if getattr(settings, 'DEMO', False):
-            return HttpResponseRedirect(reverse('listsites'))
         return super(UnixGroupCreate, self).dispatch(request, *args, **kwargs)
 
 
@@ -143,8 +141,6 @@ class UnixGroupUpdate(UnixGroupPriviledgeCheck, UpdateView):
         return reverse('listunixgroups', kwargs={'service_id': self.service.id})
 
     def dispatch(self, request, *args, **kwargs):
-        if getattr(settings, 'DEMO', False):
-            return HttpResponseRedirect(reverse('listsites'))
         return super(UnixGroupUpdate, self).dispatch(request, *args, **kwargs)
 
 
