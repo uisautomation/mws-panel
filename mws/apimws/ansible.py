@@ -65,13 +65,20 @@ class AnsibleTaskWithFailure(Task):
 
 
 @shared_task(base=AnsibleTaskWithFailure, default_retry_delay=120, max_retries=2)
-def launch_ansible_async(service):
+def launch_ansible_async(service, ignore_host_key=False):
     while service.status != 'ready':
         try:
             for vm in service.virtual_machines.all():
-                subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name],
+                if ignore_host_key:
+                    subprocess.check_output(["export", "ANSIBLE_HOST_KEY_CHECKING=False"], stderr=subprocess.STDOUT)
+                    subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name],
+                                        stderr=subprocess.STDOUT)
+                    subprocess.check_output(["export", "ANSIBLE_HOST_KEY_CHECKING=True"], stderr=subprocess.STDOUT)
+                else:
+                    subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name],
                                         stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
+            subprocess.check_output(["export", "ANSIBLE_HOST_KEY_CHECKING=True"], stderr=subprocess.STDOUT)
             raise launch_ansible_async.retry(exc=e)
         service = refresh_object(service)
         if service.status == 'ansible_queued':
