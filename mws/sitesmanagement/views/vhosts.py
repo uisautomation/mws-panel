@@ -1,5 +1,4 @@
 """Views(Controllers) for managing Vhosts"""
-from Crypto.Util import asn1
 from OpenSSL import crypto
 from django.conf import settings as django_settings
 from django.contrib import messages

@@ -1,37 +1,12 @@
 """Views(Controllers) for managing Snapshots"""
-from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
-from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import CreateView, DeleteView
-from ucamlookup import user_in_groups
 from apimws.ansible import ansible_create_custom_snapshot, delete_snapshot
 from sitesmanagement.forms import SnapshotForm
-from sitesmanagement.models import Service, Snapshot
-from sitesmanagement.views.sites import LoginRequiredMixin
-
-
-class ServicePriviledgeCheck(LoginRequiredMixin):
-    def dispatch(self, request, *args, **kwargs):
-        service = get_object_or_404(Service, pk=self.kwargs['service_id'])
-        site = service.site
-        self.site = site
-        self.service = service
-
-        # If the user is not in the user auth list of the site and neither belongs to a group in the group auth list or
-        # the site is suspended or canceled return None
-        try:
-            if (site not in request.user.sites.all() and not user_in_groups(request.user, site.groups.all())) \
-                    or site.is_admin_suspended() or site.is_canceled() or site.is_disabled():
-                return HttpResponseForbidden()
-        except Exception:
-            return HttpResponseForbidden()
-
-        if not service or not service.active or service.is_busy:
-            return redirect(site)
-
-        return super(ServicePriviledgeCheck, self).dispatch(request, *args, **kwargs)
+from sitesmanagement.models import Snapshot
+from sitesmanagement.views.vhosts import ServicePriviledgeCheck
 
 
 class SnapshotPriviledgeCheck(ServicePriviledgeCheck):
