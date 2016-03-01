@@ -14,8 +14,15 @@
                             current problems with those services or your web application</p>
                     </div>
                     <div>
+                        {% if service.quarantined %}
+                            {% if site.is_admin_suspended %}
+                                <p style="color: red">The site is administrativelly suspended, you cannot DeQuarantine it. Contact support.</p>
+                            {% else %}
+                                <p><input type="submit" name="quarantine" value="DeQuarantine" class="campl-btn campl-primary-cta"></p>
+                            {% endif %}
+                        {% else %}
                         <p><input type="submit" name="quarantine" value="Quarantine" class="campl-btn campl-primary-cta"></p>
-                        <p><input type="submit" name="quarantine" value="DeQuarantine" class="campl-btn campl-primary-cta"></p>
+                        {% endif %}
                     </div>
                 </fieldset>
             </form>

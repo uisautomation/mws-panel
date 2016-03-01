@@ -471,7 +471,7 @@ def quarantine(request, service_id):
         'site': site,
     }
 
-    if request.method == 'POST':
+    if request.method == 'POST' and not site.is_admin_suspended():
         if request.POST['quarantine'] == "Quarantine":
             service.quarantined = True
         else:
