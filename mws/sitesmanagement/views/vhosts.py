@@ -30,10 +30,10 @@ class ServicePriviledgeCheck(LoginRequiredMixin):
         self.service = service
 
         # If the user is not in the user auth list of the site and neither belongs to a group in the group auth list or
-        # the site is suspended or canceled return None
+        # the site is disabled or canceled return None
         try:
             if (site not in request.user.sites.all() and not user_in_groups(request.user, site.groups.all())) \
-                    or site.is_admin_suspended() or site.is_canceled() or site.is_disabled():
+                    or site.is_canceled() or site.is_disabled():
                 return HttpResponseForbidden()
         except Exception:
             return HttpResponseForbidden()

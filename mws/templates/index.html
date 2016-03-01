@@ -44,46 +44,37 @@
                     </thead>
                     <tbody>
                     {% for site in sites_enabled %}
-                        {% if site.is_admin_suspended %}
-                            <tr class="site_suspended" data-href="{% url 'showsite' site_id=site.id %}">
-                                <td>
-                                    {{ site.name }} <br/>
-                                    This site has been administratively suspended
-                        {% else %}
-                            <tr data-href="{% url 'showsite' site_id=site.id %}">
-                                <td>
-                                    {{ site.name }}
-                        {% endif %}
-                                </td>
-                                <td>
-                                    {{ site.description }}
-                                </td>
-                                <td>
-                                    {{ site.domain_names|join:"<br/>" }}
-                                </td>
-                                <td>
-                                    {% if site.production_service %}
-                                        IPv4: {{ site.production_service.ipv4 }}<br/>
-                                        IPv6: {{ site.production_service.ipv6 }}<br/>
-                                        hostname: {{ site.production_service.hostname }}<br/>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if site.test_service %}
-                                        IPv4: {{ site.test_service.ipv4 }}<br/>
-                                        IPv6: {{ site.test_service.ipv6 }}<br/>
-                                        hostname: {{ site.test_service.hostname }}<br/>
-                                    {% endif %}
-                                </td>
-                                <td style="width: 30px; padding-left: 0px; padding-right: 0px;">
-                                    {% if not site.is_admin_suspended %}
-                                        <a href="{% url 'showsite' site_id=site.id %}">
-                                            <i title="Administrator panel" class="fa fa-angle-double-right fa-2x"
-                                               data-toggle="tooltip"></i>
-                                        </a>
-                                    {% endif %}
-                                </td>
-                            </tr>
+                        <tr data-href="{% url 'showsite' site_id=site.id %}">
+                            <td>
+                                {{ site.name }}
+                            </td>
+                            <td>
+                                {{ site.description }}
+                            </td>
+                            <td>
+                                {{ site.domain_names|join:"<br/>" }}
+                            </td>
+                            <td>
+                                {% if site.production_service %}
+                                    IPv4: {{ site.production_service.ipv4 }}<br/>
+                                    IPv6: {{ site.production_service.ipv6 }}<br/>
+                                    hostname: {{ site.production_service.hostname }}<br/>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if site.test_service %}
+                                    IPv4: {{ site.test_service.ipv4 }}<br/>
+                                    IPv6: {{ site.test_service.ipv6 }}<br/>
+                                    hostname: {{ site.test_service.hostname }}<br/>
+                                {% endif %}
+                            </td>
+                            <td style="width: 30px; padding-left: 0px; padding-right: 0px;">
+                                <a href="{% url 'showsite' site_id=site.id %}">
+                                    <i title="Administrator panel" class="fa fa-angle-double-right fa-2x"
+                                       data-toggle="tooltip"></i>
+                                </a>
+                            </td>
+                        </tr>
                     {% endfor %}
                     </tbody>
                 </table>
@@ -91,7 +82,7 @@
 
             {% if sites_disabled %}
                 <div class="campl-theme-7">
-                    <h1>Disabled MWS sites where you are the administrator</h1>
+                    <h1>Disabled MWS servers where you are the administrator</h1>
                     <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
                         <thead>
                             <tr>
@@ -151,35 +142,28 @@
                         </thead>
                         <tbody>
                         {% for site in sites_authorised %}
-                            {% if site.is_admin_suspended %}
-                                <tr class="site_suspended">
-                                    <td>
-                                        {{ site.name }} <br/>
-                                        This site has been administratively suspended
-                            {% else %}
-                                <tr>
-                                    <td>
-                                        {{ site.name }}
-                            {% endif %}
-                                    </td>
-                                    <td>
-                                        {{ site.description }}
-                                    </td>
-                                    <td>
-                                        {% if site.production_service %}
-                                            IPv4: {{ site.production_service.ipv4 }}<br/>
-                                            IPv6: {{ site.production_service.ipv6 }}<br/>
-                                            hostname: {{ site.production_service.hostname }}<br/>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if site.test_service %}
-                                            IPv4: {{ site.test_service.ipv4 }}<br/>
-                                            IPv6: {{ site.test_service.ipv6 }}<br/>
-                                            hostname: {{ site.test_service.hostname }}<br/>
-                                        {% endif %}
-                                    </td>
-                                </tr>
+                            <tr>
+                                <td>
+                                    {{ site.name }}
+                                </td>
+                                <td>
+                                    {{ site.description }}
+                                </td>
+                                <td>
+                                    {% if site.production_service %}
+                                        IPv4: {{ site.production_service.ipv4 }}<br/>
+                                        IPv6: {{ site.production_service.ipv6 }}<br/>
+                                        hostname: {{ site.production_service.hostname }}<br/>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if site.test_service %}
+                                        IPv4: {{ site.test_service.ipv4 }}<br/>
+                                        IPv6: {{ site.test_service.ipv6 }}<br/>
+                                        hostname: {{ site.test_service.hostname }}<br/>
+                                    {% endif %}
+                                </td>
+                            </tr>
                         {% endfor %}
                         </tbody>
                     </table>
