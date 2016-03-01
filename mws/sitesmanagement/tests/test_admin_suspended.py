@@ -25,6 +25,6 @@ class AdminSuspendedTests(TestCase):
         self.assertTrue(site.is_admin_suspended())
 
         response = self.client.get(reverse('listsites'))
-        self.assertContains(response, "Disabled MWS sites where you are the administrator")
+        self.assertContains(response, "Disabled MWS servers where you are the administrator")
         self.assertContains(response, "This site has been administratively suspended")
         self.assertTrue(site.is_admin_suspended())

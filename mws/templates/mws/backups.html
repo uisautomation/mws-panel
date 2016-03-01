@@ -56,7 +56,7 @@
                 {% endif %}
             {% endfor %}
             <h2>Backups</h2>
-            <p>All MWS sites are backed up nightly. You can restore one of these automatic snapshots by selecting
+            <p>All MWS servers are backed up nightly. You can restore one of these automatic snapshots by selecting
             the date in the date picker below and clicking the submit button</p>
             <form action="{% url 'sitesmanagement.views.backups' service_id=service.id %}" method="post">
                 {% if error_message %}<p style="color: red">{{ error_message }}</p>{% endif %}

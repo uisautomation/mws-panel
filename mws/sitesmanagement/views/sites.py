@@ -139,7 +139,7 @@ class SiteCreate(LoginRequiredMixin, FormView):
         preallocated_site = Site.objects.filter(preallocated=True, disabled=True).first()
         siteform = form.save(commit=False)
         if not preallocated_site:
-            raise ValidationError("No MWS Sites available at this moment")
+            raise ValidationError("No MWS Servers available at this moment")
         preallocated_site.start_date = datetime.date.today()
         preallocated_site.name = siteform.name
         preallocated_site.description = siteform.description
