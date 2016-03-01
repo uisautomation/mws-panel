@@ -123,7 +123,7 @@ class SiteCreate(LoginRequiredMixin, FormView):
 
     def get_context_data(self, **kwargs):
         context = super(SiteCreate, self).get_context_data(**kwargs)
-        context['breadcrumbs'] = {0: dict(name='New Manage Web Service site', url=reverse_lazy('newsite'))}
+        context['breadcrumbs'] = {0: dict(name='New Manage Web Service server', url=reverse_lazy('newsite'))}
         return context
 
     def get_form_kwargs(self):
@@ -170,7 +170,7 @@ class SiteShow(SitePriviledgeCheck, DetailView):
     def get_context_data(self, **kwargs):
         context = super(SiteShow, self).get_context_data(**kwargs)
         context['breadcrumbs'] = {
-            0: dict(name='Manage Web Service site: ' + str(self.object.name), url=self.object.get_absolute_url())
+            0: dict(name='Manage Web Service server: ' + str(self.object.name), url=self.object.get_absolute_url())
         }
         context['DEMO'] = getattr(django_settings, 'DEMO', False)
         context['MAIN_DOMAIN'] = getattr(django_settings, 'MAIN_DOMAIN', False)
@@ -186,7 +186,7 @@ class SiteEdit(SitePriviledgeAndBusyCheck, UpdateView):
     def get_context_data(self, **kwargs):
         context = super(SiteEdit, self).get_context_data(**kwargs)
         context['breadcrumbs'] = {
-            0: dict(name='Manage Web Service site: ' + str(self.object.name), url=self.object.get_absolute_url()),
+            0: dict(name='Manage Web Service server: ' + str(self.object.name), url=self.object.get_absolute_url()),
             1: dict(name='Manage Web Service account settings',
                     url=reverse('editsite', kwargs={'site_id': self.object.id}))
         }
@@ -234,7 +234,7 @@ class SiteDelete(SitePriviledgeCheck, UpdateView):
     def get_context_data(self, **kwargs):
         context = super(SiteDelete, self).get_context_data(**kwargs)
         context['breadcrumbs'] = {
-            0: dict(name='Manage Web Service site: ' + str(self.object.name), url=self.object.get_absolute_url()),
+            0: dict(name='Manage Web Service server: ' + str(self.object.name), url=self.object.get_absolute_url()),
             1: dict(name='Change information about your MWS',
                     url=reverse('editsite', kwargs={'site_id': self.object.id})),
             2: dict(name='Delete your MWS', url=reverse('deletesite', kwargs={'site_id': self.object.id}))
@@ -257,7 +257,7 @@ class SiteDisable(SitePriviledgeCheck, UpdateView):
     def get_context_data(self, **kwargs):
         context = super(SiteDisable, self).get_context_data(**kwargs)
         context['breadcrumbs'] = {
-            0: dict(name='Manage Web Service site: ' + str(self.object.name), url=self.object.get_absolute_url()),
+            0: dict(name='Manage Web Service server: ' + str(self.object.name), url=self.object.get_absolute_url()),
             1: dict(name='Change information about your MWS',
                     url=reverse('editsite', kwargs={'site_id': self.object.id})),
             2: dict(name='Disable your MWS site', url=reverse('disablesite',
@@ -296,7 +296,7 @@ class SiteDoNotRenew(SitePriviledgeCheck, UpdateView):
     def get_context_data(self, **kwargs):
         context = super(SiteDoNotRenew, self).get_context_data(**kwargs)
         context['breadcrumbs'] = {
-            0: dict(name='Manage Web Service site: ' + str(self.object.name), url=self.object.get_absolute_url()),
+            0: dict(name='Manage Web Service server: ' + str(self.object.name), url=self.object.get_absolute_url()),
             1: dict(name='Change information about your MWS',
                     url=reverse('editsite', kwargs={'site_id': self.object.id})),
             2: dict(name='Cancel subscription', url=reverse('donotrenew', kwargs={'site_id': self.object.id}))

@@ -31,7 +31,7 @@ class DomainListView(VhostPriviledgeCheck, ListView):
     def get_context_data(self, **kwargs):
         context = super(DomainListView, self).get_context_data(**kwargs)
         breadcrumbs = {
-            0: dict(name='Manage Web Service site: ' + str(self.site.name), url=self.site.get_absolute_url()),
+            0: dict(name='Manage Web Service server: ' + str(self.site.name), url=self.site.get_absolute_url()),
             1: dict(name='Server settings' if self.vhost.service.primary else 'Test server settings',
                     url=reverse('sitesmanagement.views.service_settings',
                                 kwargs={'service_id': self.vhost.service.id})),
@@ -89,7 +89,7 @@ def add_domain(request, vhost_id, socket_error=None):
                 launch_ansible(vhost.service)  # to add the new domain name to the vhost apache configuration
         else:
             breadcrumbs = {
-                0: dict(name='Manage Web Service site: ' + str(site.name), url=site.get_absolute_url()),
+                0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
                 1: dict(name='Server settings' if vhost.service.primary else 'Test server settings',
                         url=reverse('sitesmanagement.views.service_settings',
                                     kwargs={'service_id': vhost.service.id})),

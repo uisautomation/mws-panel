@@ -4,7 +4,7 @@
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
 
-            <p>This site allows members of the University to request a new <em>site</em> in the Managed Web Service. We
+            <p>This site allows members of the University to request a new server in the Managed Web Service. We
                 provide users with a web-server that they can use without having to worry about manual configuration
                 or operating system maintenance. A server in the Managed Web Service has the following characteristics:
             </p>
@@ -26,7 +26,7 @@
                     please try again later.
                 </p>
             {% else %}
-                <p><a href="{% url 'newsite' %}" class="campl-primary-cta">Register new site</a></p>
+                <p><a href="{% url 'newsite' %}" class="campl-primary-cta">Register new server</a></p>
             {% endif %}
 
             {% if sites_enabled %}
@@ -98,7 +98,7 @@
                                 <tr class="site_suspended">
                                     <td>
                                         {{ site.name }} <br/>
-                                        This site has been administratively suspended
+                                        This server has been administratively suspended
                             {% else %}
                                 <tr>
                                     <td>
