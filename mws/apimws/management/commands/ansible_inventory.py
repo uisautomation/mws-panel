@@ -30,7 +30,7 @@ class Command(NoArgsCommand):
         if list:
             vms = VirtualMachine.objects.filter(
                 service__status__in=('ansible', 'ansible_queued', 'ready', 'postinstall'),
-                service__site__disabled=False, service__site__deleted=False)
+                service__site__disabled=False, service__site__deleted=False, service__site__end_date__isnull=True)
             result = {'_meta': {'hostvars': {}}, group: [self.hostid(vm) for vm in vms]}
             for site in Site.objects.all():
                 if not site.is_canceled():
