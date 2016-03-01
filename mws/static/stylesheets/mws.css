@@ -211,16 +211,99 @@ h3.campl-teaser-title {
     display: block;
 }
 
-#site_status {
+#rightmenu {
     border-right: 1px solid #106470;
     border-bottom: 1px solid #106470;
     border-top: 1px solid #106470;
-    padding: 10px 20px;
     color: #fff;
     text-decoration: none;
     outline: none;
     display: block;
     float: right;
+}
+
+#site_status {
+    padding: 10px 20px;
+    color: #fff;
+    display: block;
+    float: right;
+}
+
+#messages_button {
+    padding: 8px 13px;
+    color: #fff;
+    font-size: 1.5em;
+    display: block;
+    float: right;
+    margin-left: 0;
+    border-bottom: none;
+}
+
+.noti_bubble {
+    position:absolute;    /* This breaks the div from the normal HTML document. */
+    top: 4px;
+    right: 8px;
+    padding: 5px;
+    background-color: red; /* you could use a background image if you'd like as well */
+    color: white;
+    font-weight: bold;
+    font-size: 0.55em;
+
+    /* The following is CSS3, but isn't crucial for this technique to work. */
+    /* Keep in mind that if a browser doesn't support CSS3, it's fine! They just won't have rounded borders and won't have a box shadow effect. */
+    /* You can always use a background image to produce the same effect if you want to, and you can use both together so browsers without CSS3 still have the rounded/shadow look. */
+    border-radius: 30px;
+    box-shadow: 1px 1px 1px gray;
+    
+    /* disabled by default */
+    display: none;
+}
+
+.sidebars > .sidebar {
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.64);
+    position: fixed;
+    color: white;
+    padding: 30px 0;
+    font-size: 2em;
+    text-align: center;
+}
+
+.sidebar.right {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 270px;
+    z-index: 100;
+    background-color: #106470;
+}
+
+.closesidebar, .closesidebar:visited, .closesidebar:hover {
+    color: #fff;
+    text-decoration: none;
+    outline: none;
+    position: absolute;
+    left: -6px;
+    top: 4px;
+}
+
+ul.warning-messages {
+    font-size: 13px;
+    text-align: left;
+    padding: 30px 0;
+    margin: 0;
+    list-style-type: none;
+}
+
+ul.warning-messages li {
+    padding: 15px;
+    margin: 5px;
+    list-style-type: none;
+    background: #0c5963;
+    border: 1px solid #106470;
+}
+
+ul.warning-messages li a {
+    color: #fff;
 }
 
 /*! normalize.css v3.0.0 | MIT License | git.io/normalize */

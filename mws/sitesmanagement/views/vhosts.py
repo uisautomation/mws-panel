@@ -15,10 +15,15 @@ from apimws.ansible import launch_ansible, delete_vhost_ansible
 from mwsauth.utils import privileges_check
 from sitesmanagement.forms import VhostForm
 from sitesmanagement.models import Service, Vhost
-from sitesmanagement.views.sites import LoginRequiredMixin
+from sitesmanagement.views.sites import LoginRequiredMixin, warning_messages
 
 
 class ServicePriviledgeCheck(LoginRequiredMixin):
+    def get_context_data(self, **kwargs):
+        context = super(ServicePriviledgeCheck, self).get_context_data(**kwargs)
+        context['sidebar_messages'] = warning_messages(self.site)
+        return context
+
     def dispatch(self, request, *args, **kwargs):
         service = get_object_or_404(Service, pk=self.kwargs['service_id'])
         site = service.site

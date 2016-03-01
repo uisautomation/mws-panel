@@ -9,6 +9,14 @@
     {% include 'ucamlookup_headers.html' with jquery=False %}
     <link href="{% static 'stylesheets/font-awesome.css' %}" media="screen" rel="stylesheet" type="text/css" />
     <script src="{% static 'js/custom.js' %}"></script>
+    <script src="{% static 'js/sidebar.js' %}"></script>
+    {% if sidebar_messages %}
+        <script>
+            $(document).ready(function () {
+                $(".noti_bubble").show();
+            });
+        </script>
+    {% endif %}
 {% endblock %}
 
 {% block head_title %}Managed Web Service Administration Site{% endblock %}
@@ -83,23 +91,33 @@
                                 });
                             })();
                             </script>
-                            <li id="site_status">Checking status...</li>
+                            <li id="rightmenu">
+                                <a href="#" id="messages_button" class="fa fa-bars togglebtn" data-action="toggle" data-side="right"><div class="noti_bubble"></div></a>
+                                <div id="site_status">Checking status...</div>
+                            </li>
                         {% endif %}
                     {% endif %}
                 </ul>
             </div>
         </div>
     </div>
+    {% if site %}
+    <div class="sidebars">
+        <div class="sidebar right">
+            <a href="#" class="closesidebar togglebtn fa fa-times-circle" data-action="toggle" data-side="right"></a>
+            {% if sidebar_messages %}
+            <ul class="warning-messages">
+                {% for message in sidebar_messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
 {% endblock %}
 
 {% block page_content %}
-    {% if messages %}
-    <ul class="messages">
-        {% for message in messages %}
-        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
     {% if site %}
         {% if not site|emailconfirmed %}
             <div id="confirmemail">

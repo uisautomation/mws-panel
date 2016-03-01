@@ -53,6 +53,11 @@ class SitePriviledgeCheck(LoginRequiredMixin, SingleObjectMixin):
     context_object_name = 'site'
     pk_url_kwarg = 'site_id'
 
+    def get_context_data(self, **kwargs):
+        context = super(SitePriviledgeCheck, self).get_context_data(**kwargs)
+        context['sidebar_messages'] = warning_messages(self.object)
+        return context
+
     def dispatch(self, request, *args, **kwargs):
         site = self.get_object()
 
@@ -167,7 +172,6 @@ class SiteShow(SitePriviledgeCheck, DetailView):
         context['breadcrumbs'] = {
             0: dict(name='Manage Web Service site: ' + str(self.object.name), url=self.object.get_absolute_url())
         }
-        context['warning_messages'] = warning_messages(self.object)
         context['DEMO'] = getattr(django_settings, 'DEMO', False)
         context['MAIN_DOMAIN'] = getattr(django_settings, 'MAIN_DOMAIN', False)
         context['stats_name'] = self.object.production_service.network_configuration.name.replace(".","_")
