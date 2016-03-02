@@ -160,11 +160,23 @@ class AuthTestCases(TestCase):
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_with_auth_users.id}))
         self.assertContains(response, 'crsid: "amc203"', status_code=200)  # User is authorised
 
+
+        with mock.patch("apimws.vm.change_vm_power_state") as mock_change_vm_power_state:
+            mock_change_vm_power_state.return_value = True
+            mock_change_vm_power_state.delay.return_value = True
+            site_with_auth_users.disable()
         suspension = Suspension.objects.create(reason="test_suspension", site=site_with_auth_users,
                                                start_date=datetime.today())
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_with_auth_users.id}))
         self.assertEqual(response.status_code, 403)  # Site is suspended
         suspension.delete()
+
+        with mock.patch("apimws.vm.change_vm_power_state") as mock_change_vm_power_state:
+            mock_change_vm_power_state.return_value = True
+            mock_change_vm_power_state.delay.return_value = True
+            with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+                mock_subprocess.check_output.return_value.returncode = 0
+                site_with_auth_users.enable()
 
         self.assertEqual(len(site_with_auth_users.users.all()), 1)
         self.assertEqual(site_with_auth_users.users.first(), amc203_user)

@@ -291,6 +291,11 @@ class SiteManagementTests(TestCase):
         self.assertEqual(response.status_code, 403)  # The User is not in the list of auth users
 
         site_changed.users.add(User.objects.get(username="test0001"))
+
+        with mock.patch("apimws.vm.change_vm_power_state") as mock_change_vm_power_state:
+            mock_change_vm_power_state.return_value = True
+            mock_change_vm_power_state.delay.return_value = True
+            site.disable()
         site.suspend_now(input_reason="test suspension")
         response = self.client.get(reverse('editsite', kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)  # The site is suspended

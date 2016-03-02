@@ -1,5 +1,6 @@
-from datetime import datetime, timedelta, date
 import uuid
+import mock
+from datetime import datetime, timedelta, date
 from django.contrib.auth.models import User
 from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -51,9 +52,21 @@ class BillingTests(TestCase):
         response = self.client.get(site.get_absolute_url())
         self.assertContains(response, "No billing details are available")
 
+        with mock.patch("apimws.vm.change_vm_power_state") as mock_change_vm_power_state:
+            mock_change_vm_power_state.return_value = True
+            mock_change_vm_power_state.delay.return_value = True
+            site.disable()
+
         suspension = site.suspend_now(input_reason="test suspension")
         response = self.client.get(reverse(billing_management, kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)  # The site is suspended
+
+        with mock.patch("apimws.vm.change_vm_power_state") as mock_change_vm_power_state:
+            mock_change_vm_power_state.return_value = True
+            mock_change_vm_power_state.delay.return_value = True
+            with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+                mock_subprocess.check_output.return_value.returncode = 0
+                site.enable()
 
         suspension.active = False
         suspension.save()
