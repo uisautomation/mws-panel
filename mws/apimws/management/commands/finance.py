@@ -28,9 +28,9 @@ class Command(NoArgsCommand):
         month = int(args[0])
         year = int(args[1])
 
-        #################
-        ### NEW SITES ###
-        #################
+        ###################
+        ### NEW SERVERS ###
+        ###################
 
         if month == 1:
             inidate = date(year-1, 12, 1)
@@ -96,7 +96,7 @@ class Command(NoArgsCommand):
 
         EmailMessage(
             subject="Monthly Financial Report MWS3 - %s %i" % (month_name[month], year),
-            body="Attached you can find the monthly report spreadsheet for new sites and for renewals. You will "
+            body="Attached you can find the monthly report spreadsheet for new servers and for renewals. You will "
                  "also find all the the corresponding purchase orders",
             from_email="Managed Web Service Support <%s>"
                        % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk'),

@@ -115,7 +115,7 @@ class SiteList(LoginRequiredMixin, ListView):
 
 class SiteCreate(LoginRequiredMixin, FormView):
     """View(Controller) with a form to request a new MWS site. The controller checks that there are free network
-    pre configurations in the database before creating the new site."""
+    pre configurations in the database before creating the new server."""
     form_class = SiteForm
     template_name = 'mws/new.html'
     prefix = "siteform"
@@ -153,7 +153,7 @@ class SiteCreate(LoginRequiredMixin, FormView):
         preallocated_site.users.add(self.request.user)
         if preallocated_site.email:
             email_confirmation(preallocated_site)
-        LOGGER.info(str(self.request.user.username) + " requested a new site '" + str(preallocated_site.name) + "'")
+        LOGGER.info(str(self.request.user.username) + " requested a new server '" + str(preallocated_site.name) + "'")
         preallocated_site.production_service.power_on()
         return redirect(preallocated_site)
 

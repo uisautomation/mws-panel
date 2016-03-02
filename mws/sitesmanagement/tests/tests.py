@@ -40,7 +40,7 @@ def pre_create_site(test_interface):
             '+5HQ16wf3x3fUFeMTOYfsbvwQ9T5pkKpFoiUYRxjsz7bXdPQPT4A1UrfgmGnTLJGSUh+uvHYLe7izWoMCCDCV0+Zyn0Ilrlfm' \
             'N+cD"}', '')
 
-        # We create a new site that will be used in the preallocation list
+        # We create a new server that will be used in the preallocation list
         preallocate_new_site()
 
     # We simulate the VM finishing installing
@@ -57,7 +57,7 @@ def assign_a_site(test_interface, pre_create=True):
     if pre_create:
         pre_create_site(test_interface)
     response = test_interface.client.get(reverse('listsites'))
-    test_interface.assertInHTML("<p><a href=\"%s\" class=\"campl-primary-cta\">Register new site</a></p>" %
+    test_interface.assertInHTML("<p><a href=\"%s\" class=\"campl-primary-cta\">Register new server</a></p>" %
                                 reverse('newsite'), response.content)
     with mock.patch("apimws.xen.subprocess") as mock_subprocess:
         def fake_subprocess_output(*args, **kwargs):
@@ -180,7 +180,7 @@ class SiteManagementTests(TestCase):
         pre_create_site(self)
 
         response = self.client.get(reverse('newsite'))
-        self.assertContains(response, "Request new site")
+        self.assertContains(response, "Request new server")
 
         response = self.client.post(reverse('newsite'), {'siteform-description': 'Desc',
                                                          'siteform-institution_id': 'UIS',
