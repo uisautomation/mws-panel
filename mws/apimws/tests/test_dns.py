@@ -94,9 +94,15 @@ class DNSTests(TestCase):
             mock_get_nameinfo.return_value = {'exists': ['C']}
             with mock.patch("apimws.views.set_cname") as mock_set_cname:
                 mock_set_cname.return_value = True
-                self.client.post(reverse('apimws.views.confirm_dns',
-                                         kwargs={'dn_id': domain_name_created.id, 'token': domain_name_created.token}),
-                                 {'accepted': '1'})
+                with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+                    mock_subprocess.check_output.return_value.returncode = 0
+                    self.client.post(reverse('apimws.views.confirm_dns',
+                                             kwargs={'dn_id': domain_name_created.id,
+                                                     'token': domain_name_created.token}), {'accepted': '1'})
+                    mock_subprocess.check_output.assert_called_once_with(["userv", "mws-admin", "mws_ansible_host",
+                                                      Vhost.objects.first().service.virtual_machines.first()
+                                                     .network_configuration.name],
+                                                     stderr=mock_subprocess.STDOUT)
         domain_name_created = DomainName.objects.get(id=domain_name_created.id)  # Refresh object from DB
         self.assertEquals(domain_name_created.status, 'accepted')
         self.assertEquals(domain_name_created.authorised_by.username, 'test0001')
