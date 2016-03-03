@@ -1,4 +1,5 @@
 import logging
+import os
 import subprocess
 from celery import shared_task, Task
 from django.utils import timezone
@@ -70,15 +71,15 @@ def launch_ansible_async(service, ignore_host_key=False):
         try:
             for vm in service.virtual_machines.all():
                 if ignore_host_key:
-                    subprocess.check_output(["export", "ANSIBLE_HOST_KEY_CHECKING=False"], stderr=subprocess.STDOUT)
+                    os.environ['ANSIBLE_HOST_KEY_CHECKING'] = 'False'
                     subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name],
                                         stderr=subprocess.STDOUT)
-                    subprocess.check_output(["export", "ANSIBLE_HOST_KEY_CHECKING=True"], stderr=subprocess.STDOUT)
+                    os.environ['ANSIBLE_HOST_KEY_CHECKING'] = 'True'
                 else:
                     subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name],
                                         stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
-            subprocess.check_output(["export", "ANSIBLE_HOST_KEY_CHECKING=True"], stderr=subprocess.STDOUT)
+            os.environ['ANSIBLE_HOST_KEY_CHECKING'] = 'True'
             raise launch_ansible_async.retry(exc=e)
         service = refresh_object(service)
         if service.status == 'ansible_queued':
