@@ -11,7 +11,7 @@ from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from stronghold.decorators import public
-from apimws.ansible import launch_ansible_async, AnsibleTaskWithFailure
+from apimws.ansible import launch_ansible_async, AnsibleTaskWithFailure, launch_ansible
 from apimws.ipreg import set_cname, get_nameinfo
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.models import DomainName, Site, EmailConfirmation, VirtualMachine, Billing
@@ -37,6 +37,7 @@ def confirm_dns(request, dn_id, token):
             dn.status = 'accepted'
             dn.save()
             set_cname(dn.name, dn.vhost.service.network_configuration.name)
+            launch_ansible(dn.vhost.service)
         else:
             dn.status = 'denied'
             dn.reject_reason = request.POST.get('reason')
