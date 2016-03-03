@@ -135,7 +135,7 @@ def check_backups():
     for failed_backup in result['failed']:
         LOGGER.error("A backup for the host %s did not complete last night", failed_backup)
 
-    for vm in VirtualMachine.objects.filter(Q(service__site__deleted=False,
+    for vm in VirtualMachine.objects.filter(Q(service__site__deleted=False, service__site__disabled=False,
                                               service__site__start_date__lt=(date.today() - timedelta(days=1)),
                                               service__status__in=('ansible', 'ansible_queued', 'ready'))
                                                 & (Q(service__site__end_date__isnull=True) |
