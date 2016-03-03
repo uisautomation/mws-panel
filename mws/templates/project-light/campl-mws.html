@@ -32,7 +32,11 @@
 {% endblock %}
 
 {% block site_name %}
-    <a href="/">Managed Web Service Administration Site</a>
+    {% if site %}
+        <a>MWS server "{{ site.name }}" control panel</a>
+    {% else %}
+        <a>Managed Web Service Administration Site</a>
+    {% endif %}
 {% endblock %}
 
 {% block search_bar %}
@@ -47,14 +51,14 @@
         <div class="campl-wrap clearfix campl-local-navigation" id="local-nav">
             <div class="campl-local-navigation-container campl-mobile">
                 <ul class="campl-unstyled-list">
-                    <li><a href="{% url 'listsites' %}">List of MWS servers</a></li>
+                    <li><a href="{% url 'listsites' %}">My MWS servers</a></li>
                     {% if site %}
-                        <li><span class="separator-tab">Panels for MWS "{{ site.name }}": </span></li>
-                        <li><a href="{% url 'showsite' site_id=site.id %}">Main Panel</a></li>
+                        <li><span class="separator-tab">MWS server "{{ site.name }}": </span></li>
+                        <li><a href="{% url 'showsite' site_id=site.id %}">Control Panel</a></li>
                         {% if site.production_service and site.production_service.virtual_machines.count != 0 and not site.production_service.is_busy %}
-                            <li><a href="{% url 'mwsauth.views.auth_change' site_id=site.id %}">Auth Panel</a></li>
+                            <li><a href="{% url 'mwsauth.views.auth_change' site_id=site.id %}">Authorised users</a></li>
                             <li>
-                                <a>Production Server</a>
+                                <a>Server</a>
                                 <ul class="campl-unstyled-list">
                                     <li><a href="{% url 'sitesmanagement.views.service_settings' service_id=site.production_service.id %}">Settings</a></li>
                                     <li><a href="{% url 'listvhost' service_id=site.production_service.id %}">Web Sites</a></li>

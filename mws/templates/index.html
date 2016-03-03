@@ -38,9 +38,9 @@
                         <tr>
                             <th>Name</th>
                             <th>Description</th>
-                            <th>Domain Name</th>
-                            <th>Production server</th>
-                            <th>Test server</th>
+                            <th>Domain Names</th>
+                            <th>Server info</th>
+{#                            <th>Test server info</th>#}
                             <th></th>
                         </tr>
                     </thead>
@@ -63,16 +63,16 @@
                                     hostname: {{ site.production_service.hostname }}<br/>
                                 {% endif %}
                             </td>
-                            <td>
-                                {% if site.test_service %}
-                                    IPv4: {{ site.test_service.ipv4 }}<br/>
-                                    IPv6: {{ site.test_service.ipv6 }}<br/>
-                                    hostname: {{ site.test_service.hostname }}<br/>
-                                {% endif %}
-                            </td>
+{#                            <td>#}
+{#                                {% if site.test_service %}#}
+{#                                    IPv4: {{ site.test_service.ipv4 }}<br/>#}
+{#                                    IPv6: {{ site.test_service.ipv6 }}<br/>#}
+{#                                    hostname: {{ site.test_service.hostname }}<br/>#}
+{#                                {% endif %}#}
+{#                            </td>#}
                             <td style="width: 30px; padding-left: 0px; padding-right: 0px;">
                                 <a href="{% url 'showsite' site_id=site.id %}">
-                                    <i title="Administrator panel" class="fa fa-angle-double-right fa-2x"
+                                    <i title="Control panel" class="fa fa-angle-double-right fa-2x"
                                        data-toggle="tooltip"></i>
                                 </a>
                             </td>
@@ -90,7 +90,7 @@
                             <tr>
                                 <th>Name</th>
                                 <th>Description</th>
-                                <th>Domain Name</th>
+                                <th>Domain Names</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -118,7 +118,7 @@
                                             <form action={% url 'enablesite' site_id=site.id %} method="post">
                                                 <fieldset>
                                                     {% csrf_token %}
-                                                    <input type="submit" value="Enable" class="campl-btn campl-primary-cta">
+                                                    <input type="submit" value="Re-enable" class="campl-btn campl-primary-cta">
                                                 </fieldset>
                                             </form>
                                         {% endif %}
@@ -138,8 +138,8 @@
                             <tr>
                                 <th>Name</th>
                                 <th>Description</th>
-                                <th>Production server</th>
-                                <th>Test server</th>
+                                <th>Server info</th>
+{#                                <th>Test server info</th>#}
                             </tr>
                         </thead>
                         <tbody>
@@ -158,13 +158,13 @@
                                         hostname: {{ site.production_service.hostname }}<br/>
                                     {% endif %}
                                 </td>
-                                <td>
-                                    {% if site.test_service %}
-                                        IPv4: {{ site.test_service.ipv4 }}<br/>
-                                        IPv6: {{ site.test_service.ipv6 }}<br/>
-                                        hostname: {{ site.test_service.hostname }}<br/>
-                                    {% endif %}
-                                </td>
+{#                                <td>#}
+{#                                    {% if site.test_service %}#}
+{#                                        IPv4: {{ site.test_service.ipv4 }}<br/>#}
+{#                                        IPv6: {{ site.test_service.ipv6 }}<br/>#}
+{#                                        hostname: {{ site.test_service.hostname }}<br/>#}
+{#                                    {% endif %}#}
+{#                                </td>#}
                             </tr>
                         {% endfor %}
                         </tbody>

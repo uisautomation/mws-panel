@@ -49,7 +49,7 @@
                             </div>
                             <div class="campl-focus-teaser-txt">
                                 <div class="campl-content-container campl-horizontal-teaser-txt">
-                                    <h3 class="campl-teaser-title">MWS server settings</h3>
+                                    <h3 class="campl-teaser-title">Server settings</h3>
                                     <span class="ir campl-focus-link"></span>
                                 </div>
                             </div>
@@ -111,70 +111,70 @@
                 </div>
             </div>
 
-            {% if site.is_ready %}
+{#            {% if site.is_ready %}#}
 
-            <div class="campl-column4{% if DEMO %} not-active{% endif %}">
-                <div class="campl-content-container campl-side-padding">
-                    <a href="{% url 'sitesmanagement.views.clone_vm_view' site_id=site.id %}">
-                        <article class="node node-external-link view-mode-focus_on clearfix
-                                        campl-horizontal-teaser campl-teaser campl-focus-teaser">
-                            <div class="campl-focus-teaser-img">
-                                <div class="campl-content-container campl-horizontal-teaser-img">
-                                    <div class="field field-name-field-external-url-image field-type-image
-                                                field-label-hidden">
-                                        <div class="field-items">
-                                            <div class="field-item even">
-                                                <img class="campl-scale-with-grid"
-                                                     src="{% static "icons/cloud-1.png" %}"
-                                                     height="128" style="margin: 10px;" alt="">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="campl-focus-teaser-txt">
-                                <div class="campl-content-container campl-horizontal-teaser-txt">
-                                    <h3 class="campl-teaser-title">Manage production and test servers</h3>
-                                    <span class="ir campl-focus-link"></span>
-                                </div>
-                            </div>
-                        </article>
-                    </a>
-                </div>
-            </div>
+{#            <div class="campl-column4{% if DEMO %} not-active{% endif %}">#}
+{#                <div class="campl-content-container campl-side-padding">#}
+{#                    <a href="{% url 'sitesmanagement.views.clone_vm_view' site_id=site.id %}">#}
+{#                        <article class="node node-external-link view-mode-focus_on clearfix#}
+{#                                        campl-horizontal-teaser campl-teaser campl-focus-teaser">#}
+{#                            <div class="campl-focus-teaser-img">#}
+{#                                <div class="campl-content-container campl-horizontal-teaser-img">#}
+{#                                    <div class="field field-name-field-external-url-image field-type-image#}
+{#                                                field-label-hidden">#}
+{#                                        <div class="field-items">#}
+{#                                            <div class="field-item even">#}
+{#                                                <img class="campl-scale-with-grid"#}
+{#                                                     src="{% static "icons/cloud-1.png" %}"#}
+{#                                                     height="128" style="margin: 10px;" alt="">#}
+{#                                            </div>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                            <div class="campl-focus-teaser-txt">#}
+{#                                <div class="campl-content-container campl-horizontal-teaser-txt">#}
+{#                                    <h3 class="campl-teaser-title">Manage production and test servers</h3>#}
+{#                                    <span class="ir campl-focus-link"></span>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </article>#}
+{#                    </a>#}
+{#                </div>#}
+{#            </div>#}
 
-            {% else %}
+{#            {% else %}#}
 
-            <div class="campl-column4{% if DEMO %} not-active{% endif %}">
-                <div class="campl-content-container campl-side-padding">
-                    <article class="node node-external-link view-mode-focus_on clearfix
-                                    campl-horizontal-teaser campl-teaser campl-focus-teaser">
-                        <div class="campl-focus-teaser-img">
-                            <div class="campl-content-container campl-horizontal-teaser-img">
-                                <div class="field field-name-field-external-url-image field-type-image
-                                            field-label-hidden">
-                                    <div class="field-items">
-                                        <div class="field-item even">
-                                            <img class="campl-scale-with-grid"
-                                                 src="{% static "icons/cloud-1.png" %}"
-                                                 height="128" style="margin: 10px;" alt="">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="campl-focus-teaser-txt">
-                            <div class="campl-content-container campl-horizontal-teaser-txt">
-                                <h3 class="campl-teaser-title" style="color: orangered">
-                                    Manage production and test servers (disabled while any of the servers are being configured)
-                                </h3>
-                            </div>
-                        </div>
-                    </article>
-                </div>
-            </div>
+{#            <div class="campl-column4{% if DEMO %} not-active{% endif %}">#}
+{#                <div class="campl-content-container campl-side-padding">#}
+{#                    <article class="node node-external-link view-mode-focus_on clearfix#}
+{#                                    campl-horizontal-teaser campl-teaser campl-focus-teaser">#}
+{#                        <div class="campl-focus-teaser-img">#}
+{#                            <div class="campl-content-container campl-horizontal-teaser-img">#}
+{#                                <div class="field field-name-field-external-url-image field-type-image#}
+{#                                            field-label-hidden">#}
+{#                                    <div class="field-items">#}
+{#                                        <div class="field-item even">#}
+{#                                            <img class="campl-scale-with-grid"#}
+{#                                                 src="{% static "icons/cloud-1.png" %}"#}
+{#                                                 height="128" style="margin: 10px;" alt="">#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="campl-focus-teaser-txt">#}
+{#                            <div class="campl-content-container campl-horizontal-teaser-txt">#}
+{#                                <h3 class="campl-teaser-title" style="color: orangered">#}
+{#                                    Manage production and test servers (disabled while any of the servers are being configured)#}
+{#                                </h3>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </article>#}
+{#                </div>#}
+{#            </div>#}
 
-            {% endif %}
+{#            {% endif %}#}
 
         {% endif %}
 
@@ -268,7 +268,7 @@
                                     campl-horizontal-teaser campl-teaser campl-focus-teaser">
                         <div style="width: 33%; float: left; margin-right: 0; padding: 0;">
                             <div class="campl-content-container campl-horizontal-teaser-txt" style="color: white;">
-                                    Production server<br/>
+                                    Server info<br/>
                                     IPv4: {{ site.production_service.ipv4 }}<br/>
                                     IPv6: {{ site.production_service.ipv6 }}<br/>
                                     hostname: {{ site.production_service.hostname }}<br/>
