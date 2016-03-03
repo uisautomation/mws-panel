@@ -48,7 +48,7 @@ def auth_change(request, site_id):
         return redirect(site)
 
     breadcrumbs = {
-        0: dict(name='Manage Web Server: ' + str(site.name), url=site.get_absolute_url()),
+        0: dict(name='Managed Web Server: ' + str(site.name), url=site.get_absolute_url()),
         1: dict(name='Authorisation', url=reverse(auth_change, kwargs={'site_id': site.id}))
     }
 

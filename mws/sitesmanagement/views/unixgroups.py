@@ -28,7 +28,7 @@ class UnixGroupListView(ServicePriviledgeCheck, ListView):
     def get_context_data(self, **kwargs):
         context = super(UnixGroupListView, self).get_context_data(**kwargs)
         breadcrumbs = {
-            0: dict(name='Manage Web Service server: ' + str(self.site.name), url=self.site.get_absolute_url()),
+            0: dict(name='Managed Web Service server: ' + str(self.site.name), url=self.site.get_absolute_url()),
             1: dict(name='Server settings' if self.service.primary else 'Test server settings',
                     url=reverse('sitesmanagement.views.service_settings', kwargs={'service_id': self.service.id})),
             2: dict(name='Manage Unix Groups', url=reverse('listunixgroups', kwargs={'service_id': self.service.id}))
@@ -56,7 +56,7 @@ class UnixGroupCreate(ServicePriviledgeCheck, CreateView):
     def get_context_data(self, **kwargs):
         context = super(UnixGroupCreate, self).get_context_data(**kwargs)
         breadcrumbs = {
-            0: dict(name='Manage Web Service server: ' + str(self.site.name), url=self.site.get_absolute_url()),
+            0: dict(name='Managed Web Service server: ' + str(self.site.name), url=self.site.get_absolute_url()),
             1: dict(name='Server settings' if self.service.primary else 'Test server settings',
                     url=reverse('sitesmanagement.views.service_settings', kwargs={'service_id': self.service.id})),
             2: dict(name='Manage Unix Groups', url=reverse('listunixgroups', kwargs={'service_id': self.service.id})),
@@ -105,7 +105,7 @@ class UnixGroupUpdate(UnixGroupPriviledgeCheck, UpdateView):
     def get_context_data(self, **kwargs):
         context = super(UnixGroupUpdate, self).get_context_data(**kwargs)
         breadcrumbs = {
-            0: dict(name='Manage Web Service server: ' + str(self.site.name), url=self.site.get_absolute_url()),
+            0: dict(name='Managed Web Service server: ' + str(self.site.name), url=self.site.get_absolute_url()),
             1: dict(name='Server settings' if self.service.primary else 'Test server settings',
                     url=reverse('sitesmanagement.views.service_settings', kwargs={'service_id': self.service.id})),
             2: dict(name='Manage Unix Groups', url=reverse('listunixgroups', kwargs={'service_id': self.service.id})),

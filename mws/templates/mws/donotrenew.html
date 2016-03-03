@@ -5,7 +5,7 @@
     {{ block.super }}
     <div class="campl-column12">
         <div class="campl-content-container">
-            <h1 id="page-title">Do not renew your MWS site subscription</h1>
+            <h1 id="page-title">Do not renew your MWS server subscription</h1>
             <form action={% url 'donotrenew' site_id=site.id %} method="post">
                 <fieldset>
                     {% csrf_token %}
@@ -17,7 +17,7 @@
 
                         <p>
                             Your subscription will be cancelled and your site will be deleted on {{ site.start_date|calcendperiod }}<br>
-                            You will still be able to use your MWS site until that moment.
+                            You will still be able to use your MWS server until that moment.
                         </p>
                         <p><input type="submit" value="Cancel subscription" class="campl-btn campl-primary-cta"></p>
                     </div>
