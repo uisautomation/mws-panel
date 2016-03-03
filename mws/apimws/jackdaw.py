@@ -41,7 +41,7 @@ def reactivate_or_create_mws_user(user_crsid, jackdaw_users):
         MWSUser.objects.update_or_create(user_id=user_crsid, uid=66000+jackdaw_users[user_crsid])
     else:
         MWSUser.objects.update_or_create(user_id=user_crsid, uid=jackdaw_users[user_crsid])
-    # TODO if we let users enter to MWS site if they are not in jackdaw change to get_or_create
+    # TODO if we let users enter to MWS server if they are not in jackdaw change to get_or_create
 
 
 def reactivate_users(jackdaw_users_crsids, list_of_mws_users, jackdaw_users):

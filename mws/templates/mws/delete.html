@@ -4,13 +4,13 @@
     {{ block.super }}
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
-            <h1>Cancel your MWS site</h1>
+            <h1>Cancel your MWS server</h1>
             <div class="campl-notifications-panel campl-warning-panel campl-notifications-container clearfix">
                 <div class="campl-column4">
                     <p class="campl-notifications-icon campl-warning-icon">Warning:</p>
                 </div>
                 <div class="campl-column8">
-                    <p>Cancelling your MWS site will cause the deletion of all data on that site.</p>
+                    <p>Cancelling your MWS server will cause the deletion of all data on that site.</p>
                 </div>
             </div>
             <form action={% url 'deletesite' site_id=site.id %} method="post">

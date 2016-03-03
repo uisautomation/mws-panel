@@ -60,7 +60,7 @@ class VhostListView(ServicePriviledgeCheck, ListView):
     def get_context_data(self, **kwargs):
         context = super(VhostListView, self).get_context_data(**kwargs)
         breadcrumbs = {
-            0: dict(name='Manage Web Service server: ' + str(self.site.name), url=self.site.get_absolute_url()),
+            0: dict(name='Managed Web Service server: ' + str(self.site.name), url=self.site.get_absolute_url()),
             1: dict(name='Server settings' if self.service.primary else 'Test server settings',
                     url=reverse('sitesmanagement.views.service_settings', kwargs={'service_id': self.service.id})),
             2: dict(name='Web sites management', url=reverse('listvhost', kwargs={'service_id': self.service.id}))
@@ -142,7 +142,7 @@ def generate_csr(request, vhost_id):
     if request.method == 'POST' and vhost.tls_key_hash != 'requested':
         if vhost.main_domain is None:
             breadcrumbs = {
-                0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
+                0: dict(name='Managed Web Service server: ' + str(site.name), url=site.get_absolute_url()),
                 1: dict(name='Server settings' if vhost.service.primary else 'Test server settings',
                         url=reverse('sitesmanagement.views.service_settings', kwargs={'service_id': vhost.service.id})),
                 2: dict(name='Vhosts Management: %s' % vhost.name,
@@ -194,7 +194,7 @@ def certificates(request, vhost_id):
         return redirect(reverse('listvhost', kwargs={'service_id': vhost.service.id}))
 
     breadcrumbs = {
-        0: dict(name='Manage Web Service server: ' + str(site.name), url=site.get_absolute_url()),
+        0: dict(name='Managed Web Service server: ' + str(site.name), url=site.get_absolute_url()),
         1: dict(name='Server settings' if vhost.service.primary else 'Test server settings',
                 url=reverse('sitesmanagement.views.service_settings', kwargs={'service_id': vhost.service.id})),
         2: dict(name='Web sites management: %s' % vhost.name,

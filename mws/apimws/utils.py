@@ -94,8 +94,8 @@ def preallocate_new_site():
     test_service_netconf = NetworkConfig.get_free_test_service_config()
     host_netconf = NetworkConfig.get_free_host_config()
     if not prod_service_netconf or not test_service_netconf or not host_netconf:
-        raise Exception('A MWS site cannot be created at this moment because there are no network addresses available')
+        raise Exception('A MWS server cannot be created at this moment because there are no network addresses available')
     prod_service = Service.objects.create(site=site, type='production', network_configuration=prod_service_netconf)
     Service.objects.create(site=site, type='test', network_configuration=test_service_netconf)
     new_site_primary_vm(prod_service, host_netconf)
-    LOGGER.info("Preallocated MWS site created '" + str(site.name) + "' with id " + str(site.id))
+    LOGGER.info("Preallocated MWS server created '" + str(site.name) + "' with id " + str(site.id))
