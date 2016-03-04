@@ -71,15 +71,12 @@ def launch_ansible_async(service, ignore_host_key=False):
         try:
             for vm in service.virtual_machines.all():
                 if ignore_host_key:
-                    os.environ['ANSIBLE_HOST_KEY_CHECKING'] = 'False'
-                    subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name],
-                                        stderr=subprocess.STDOUT)
-                    os.environ['ANSIBLE_HOST_KEY_CHECKING'] = 'True'
+                    subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name,
+                                             "--defvar", "ANSIBLE_HOST_KEY_CHECKING=False"], stderr=subprocess.STDOUT)
                 else:
                     subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name],
                                         stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
-            os.environ['ANSIBLE_HOST_KEY_CHECKING'] = 'True'
             raise launch_ansible_async.retry(exc=e)
         service = refresh_object(service)
         if service.status == 'ansible_queued':

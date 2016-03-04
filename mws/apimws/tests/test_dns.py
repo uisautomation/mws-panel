@@ -24,7 +24,7 @@ class DNSTests(TestCase):
                                                                   vhost.service.virtual_machines.first()
                                                                  .network_configuration.name],
                                                                  stderr=mock_subprocess.STDOUT)
-        domain_name_created = DomainName.objects.first()
+        domain_name_created = DomainName.objects.last()
         self.assertEquals(domain_name_created.name, test_external_domain)
         self.assertEquals(domain_name_created.status, 'external')
         self.assertEquals(domain_name_created.vhost, vhost)
@@ -42,7 +42,7 @@ class DNSTests(TestCase):
                 mock_set_cname.return_value = True
                 self.client.post(reverse('sitesmanagement.views.add_domain', kwargs={'vhost_id': vhost.id}),
                                  {'name': test_internal_mws3_domain})
-        domain_name_created = DomainName.objects.first()
+        domain_name_created = DomainName.objects.last()
         self.assertEquals(domain_name_created.name, test_internal_mws3_domain)
         self.assertEquals(domain_name_created.status, 'accepted')
         self.assertEquals(domain_name_created.vhost, vhost)
@@ -67,7 +67,7 @@ class DNSTests(TestCase):
         self.assertEqual(mail.outbox[1].subject,
                          "Domain name authorisation request for %s" % test_internal_cam_domain)
         self.assertEqual(mail.outbox[1].to, [test_email])
-        domain_name_created = DomainName.objects.first()
+        domain_name_created = DomainName.objects.last()
         self.assertEquals(domain_name_created.name, test_internal_cam_domain)
         self.assertEquals(domain_name_created.status, 'requested')
         self.assertEquals(domain_name_created.vhost, vhost)

@@ -1,6 +1,6 @@
 from django.test import override_settings, TestCase
 from mwsauth.tests import do_test_login
-from sitesmanagement.models import Vhost
+from sitesmanagement.models import Vhost, DomainName
 from sitesmanagement.tests.tests import assign_a_site
 
 
@@ -14,7 +14,8 @@ class VhostTests(TestCase):
         self.assertEquals(Vhost.objects.count(), 1)
         default_vhost = Vhost.objects.first()
         self.assertEquals(default_vhost.name, 'default')
-        self.assertIsNone(default_vhost.main_domain)
+        self.assertEqual(default_vhost.main_domain,
+                         DomainName.objects.get(name=default_vhost.service.network_configuration.name))
         self.assertIsNotNone(default_vhost.service)
         self.assertIsNone(default_vhost.csr)
         self.assertIsNone(default_vhost.certificate)
