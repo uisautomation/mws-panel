@@ -126,9 +126,12 @@ class VhostDelete(VhostPriviledgeCheck, DeleteView):
         return HttpResponseRedirect(reverse('listvhost', kwargs={'service_id': self.service.id}))
 
     def delete(self, request, *args, **kwargs):
-        delete_vhost_ansible.delay(self.vhost.service, self.vhost.name, self.vhost.webapp)
-        super(VhostDelete, self).delete(request, *args, **kwargs)
-        return HttpResponse()
+        if self.vhost.name != "default":
+            delete_vhost_ansible.delay(self.vhost.service, self.vhost.name, self.vhost.webapp)
+            super(VhostDelete, self).delete(request, *args, **kwargs)
+            return HttpResponse()
+        else:
+            return HttpResponseForbidden()
 
     def get_success_url(self):
         return reverse('listvhost', kwargs={'service_id': self.service.id})
