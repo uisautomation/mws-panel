@@ -5,11 +5,10 @@ import re
 import tempfile
 import uuid
 import json
+import subprocess
 from celery import shared_task, Task
 from django.conf import settings
 from django.core.urlresolvers import reverse
-import subprocess
-
 from apimws.ipreg import set_sshfp
 from apimws.views import post_installation, post_recreate
 from mws.celery import app
@@ -81,7 +80,7 @@ def secrets_prealocation(vm):
         SiteKey.objects.create(site=service.site, type=keytype.replace("ssh", "").upper(), public_key=result["pubkey"],
                                 fingerprint=re.search("([0-9a-f]{2}:)+[0-9a-f]{2}", fingerprint).group(0))
 
-        if keytype is not "sshed25519":  # "sshed25519" as of 2015 is not supported by jackdaw
+        if keytype is not "sshed25519":  # "sshed25519" as of 2016 is not supported by jackdaw
             sshkeygeno = subprocess.check_output(["ssh-keygen", "-r", "replacehostname", "-f", pubkey.name]).split('\n')
             for i in [0, 1]:
                 sshkglnout = sshkeygeno[i].split(' ')
@@ -93,10 +92,6 @@ def secrets_prealocation(vm):
                 except Exception as e:
                     pass
         pubkey.close()
-
-    # Create a default Vhost
-    default_vhost = Vhost.objects.create(service=service, name="default")
-    default_vhost.save()
 
 
 @shared_task(base=XenWithFailure)
@@ -151,6 +146,12 @@ def new_site_primary_vm(service, host_network_configuration=None):
     AnsibleConfiguration.objects.update_or_create(service=service, key='os',
                                                   defaults={'value': getattr(settings,
                                                                              "OS_VERSION_VMXENAPI", "jessie")})
+
+    # Create a default Vhost and associate the service name
+    default_vhost = Vhost.objects.create(service=service, name="default")
+    DomainName.objects.create(name=default_vhost.service.network_configuration.name, status="accepted",
+                              vhost=default_vhost)
+
     secrets_prealocation(vm)
 
 
