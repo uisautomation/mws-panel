@@ -47,9 +47,11 @@
                                     <a onclick="javascript:ajax_call('{% url 'sitesmanagement.views.set_dn_as_main' domain_id=domain.id %}', 'POST')">
                                         Set as main domain
                                     </a>
+                                    {% if domain.name != vhost.service.network_configuration.name %}
                                     <a class="delete_domain" data-href="javascript:ajax_call('{% url 'deletedomain' domain_id=domain.id %}', 'DELETE')">
                                         <i title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i>
                                     </a>
+                                    {% endif %}
                                 </p>
                             </td>
                         </tr>

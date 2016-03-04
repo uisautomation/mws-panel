@@ -142,10 +142,12 @@ class DomainDelete(DomainPriviledgeCheck, DeleteView):
         return HttpResponseRedirect(reverse('listdomains', kwargs={'vhost_id': self.vhost.id}))
 
     def delete(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        self.object.delete()
-        launch_ansible(self.service)
-        return HttpResponse()
+        if self.domain.name != self.domain.vhost.service.network_configuration.name:
+            self.domain.delete()
+            launch_ansible(self.service)
+            return HttpResponse()
+        else:
+            return HttpResponseForbidden()
 
     def get_success_url(self):
         return reverse('listdomains', kwargs={'vhost_id': self.vhost.id})
