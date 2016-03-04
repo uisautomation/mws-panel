@@ -149,9 +149,10 @@ def new_site_primary_vm(service, host_network_configuration=None):
 
     # Create a default Vhost and associate the service name
     default_vhost = Vhost.objects.create(service=service, name="default")
-    DomainName.objects.create(name=default_vhost.service.network_configuration.name, status="accepted",
-                              vhost=default_vhost)
-
+    service_domain = DomainName.objects.create(name=default_vhost.service.network_configuration.name,
+                                               status="accepted", vhost=default_vhost)
+    default_vhost.main_domain = service_domain
+    default_vhost.save()
     secrets_prealocation(vm)
 
 
