@@ -304,64 +304,6 @@ def change_db_root_password(request, service_id):
 
 
 @login_required
-def backups(request, service_id):
-    service = get_object_or_404(Service, pk=service_id)
-    site = privileges_check(service.site.id, request.user)
-
-    if site is None:
-        return HttpResponseForbidden()
-
-    if not service or not service.active or service.is_busy:
-        return redirect(site)
-
-    breadcrumbs = {
-        0: dict(name='Managed Web Service server: ' + str(site.name), url=site.get_absolute_url()),
-        1: dict(name='Server settings' if service.primary else 'Test server settings',
-                url=reverse(service_settings, kwargs={'service_id': service.id})),
-        2: dict(name='Restore backup', url=reverse(backups, kwargs={'service_id': service.id})),
-    }
-
-    fromdate = get_object_or_None(AnsibleConfiguration, service=service, key="backup_first_date")
-    if fromdate:
-        fromdate = datetime.datetime.strptime(fromdate.value, '%Y-%m-%d').date()
-    else:
-        fromdate =  datetime.date.today()-datetime.timedelta(days=30)
-    if fromdate < site.start_date+datetime.timedelta(days=1):
-        fromdate = site.start_date+datetime.timedelta(days=1)
-
-    parameters = {
-        'breadcrumbs': breadcrumbs,
-        'service': service,
-        'site': site,
-        'fromdate': fromdate,
-        'todate': datetime.date.today()-datetime.timedelta(days=1),
-        'snapshot_form': SnapshotForm(),
-        'error_message_snap': request.GET['error_message'] if 'error_message' in request.GET else None,
-        'limit_snaps': Snapshot.objects.filter(service=service).count() >= 2
-    }
-
-    if request.method == 'POST':
-        try:
-            backup_date = dateparse.parse_date(request.POST['backupdate'])
-            if backup_date is None or backup_date > datetime.date.today() or backup_date < fromdate:
-                raise ValueError
-            if 'snapshot_id' in request.POST:
-                snapshot = Snapshot.objects.get(id=request.POST['snapshot_id'], service=service)
-                restore_snapshot.delay(service, snapshot.name)
-            else:
-                restore_snapshot.delay(service, backup_date.strftime("%Y-%m-%d"))
-        except ValueError:
-            parameters['error_message'] = "Incorrect date"
-            return render(request, 'mws/backups.html', parameters)
-        except Exception as e:
-            parameters['error_message'] = str(e)
-            return render(request, 'mws/backups.html', parameters)
-        return redirect(site)
-
-    return render(request, 'mws/backups.html', parameters)
-
-
-@login_required
 def apache_modules(request, service_id):
     service = get_object_or_404(Service, pk=service_id)
     site = privileges_check(service.site.id, request.user)

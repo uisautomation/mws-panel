@@ -5,7 +5,7 @@ from django.contrib import admin
 from sitesmanagement.views.domains import DomainListView, DomainDelete
 from sitesmanagement.views.sites import SiteCreate, SiteShow, SiteList, SiteDisable, SiteDelete, SiteEdit, \
     SiteEditEmail, SiteDoNotRenew
-from sitesmanagement.views.snapshots import SnapshotCreate, SnapshotDelete
+from sitesmanagement.views.snapshots import SnapshotCreate, SnapshotDelete, SnapshotListView
 from sitesmanagement.views.unixgroups import UnixGroupListView, UnixGroupCreate, UnixGroupDelete, UnixGroupUpdate
 from sitesmanagement.views.vhosts import VhostListView, VhostDelete, VhostCreate, VisitVhost
 
@@ -46,7 +46,6 @@ urlpatterns = patterns('',
     url(r'^settings/vm/(?P<service_id>[0-9]+)/reset/$', 'sitesmanagement.views.reset_vm'),
     url(r'^settings/vm/(?P<service_id>[0-9]+)/db_root_pass/$', 'sitesmanagement.views.change_db_root_password'),
     url(r'^update_os/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.update_os'),
-    url(r'^backups/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.backups'),
     url(r'^apache/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.apache_modules'),
     url(r'^phplibs/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.php_libs'),
     url(r'^quarantine/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.quarantine'),
@@ -72,6 +71,7 @@ urlpatterns = patterns('',
     # Snapshot management
     url(r'^create_snapshot/(?P<service_id>[0-9]+)/$', SnapshotCreate.as_view(), name='createsnapshot'),
     url(r'^delete_snapshot/(?P<snapshot_id>[0-9]+)/$', SnapshotDelete.as_view(), name='deletesnapshot'),
+    url(r'^backups/(?P<service_id>[0-9]+)/$', SnapshotListView.as_view(), name='backups'),
 
     # bes++ api
     url(r'^bes/$', 'apimws.bes.bes'),

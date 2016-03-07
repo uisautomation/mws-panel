@@ -32,12 +32,12 @@
             </form>
             {% endif %}
             <h2>List existing snapshots</h2>
-            {% for snapshot in service.snapshots.all %}
+            {% for snapshot in object_list %}
                 {% if snapshot.pending_delete %}
                     <p>{{ snapshot.name }} ({{ snapshot.date }}) <span style="color: darkred">Deleting</span></p>
                 {% else %}
                 <div style="display: inline-block; width: 100%;">
-                    <form action="{% url 'sitesmanagement.views.backups' service_id=service.id %}" method="post" style="float: left; padding-right: 5px;">
+                    <form action="{% url 'backups' service_id=service.id %}" method="post" style="float: left; padding-right: 5px;">
                         <fieldset>
                             {% csrf_token %}
                             {{ snapshot.name }} ({{ snapshot.date }})
@@ -58,7 +58,7 @@
             <h2>Backups</h2>
             <p>All MWS servers are backed up nightly. You can restore one of these automatic snapshots by selecting
             the date in the date picker below and clicking the submit button</p>
-            <form action="{% url 'sitesmanagement.views.backups' service_id=service.id %}" method="post">
+            <form action="{% url 'backups' service_id=service.id %}" method="post">
                 {% if error_message %}<p style="color: red">{{ error_message }}</p>{% endif %}
                 <fieldset>
                     {% csrf_token %}
