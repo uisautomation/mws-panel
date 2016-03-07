@@ -71,8 +71,9 @@ def launch_ansible_async(service, ignore_host_key=False):
         try:
             for vm in service.virtual_machines.all():
                 if ignore_host_key:
-                    subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name,
-                                             "--defvar", "ANSIBLE_HOST_KEY_CHECKING=False"], stderr=subprocess.STDOUT)
+                    subprocess.check_output(["userv", "--defvar", "ANSIBLE_HOST_KEY_CHECKING=False", "mws-admin",
+                                             "mws_ansible_host", vm.network_configuration.name],
+                                            stderr=subprocess.STDOUT)
                 else:
                     subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name],
                                         stderr=subprocess.STDOUT)
