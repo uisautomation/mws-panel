@@ -1,3 +1,4 @@
+from django.core.urlresolvers import reverse
 from django.test import override_settings, TestCase
 from mwsauth.tests import do_test_login
 from sitesmanagement.models import Vhost, DomainName
@@ -12,6 +13,7 @@ class VhostTests(TestCase):
 
     def test_default_vhost_created(self):
         self.assertEquals(Vhost.objects.count(), 1)
+        self.assertEquals(DomainName.objects.count(), 1)
         default_vhost = Vhost.objects.first()
         self.assertEquals(default_vhost.name, 'default')
         self.assertEqual(default_vhost.main_domain,
@@ -22,3 +24,14 @@ class VhostTests(TestCase):
         self.assertIsNone(default_vhost.tls_key_hash)
         self.assertFalse(default_vhost.tls_enabled)
         self.assertIsNone(default_vhost.webapp)
+
+    def test_default_vhost_and_dn_cannot_be_deleted(self):
+        vhost = Vhost.objects.first()
+        response = self.client.post(reverse('deletevhost', kwargs={'vhost_id': vhost.id}))
+        self.assertEqual(response.status_code, 403)
+        self.assertEquals(Vhost.objects.count(), 1)
+
+        dn = DomainName.objects.first()
+        response = self.client.post(reverse('deletedomain', kwargs={'domain_id': dn.id}))
+        self.assertEqual(response.status_code, 403)
+        self.assertEquals(DomainName.objects.count(), 1)
