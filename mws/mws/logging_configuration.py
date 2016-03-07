@@ -12,7 +12,7 @@ LOGGING = {
     'handlers': {
         'log_file': {
             'level': 'INFO',
-            'class': 'logging.TimedRotatingFileHandler',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
             'when': 'midnight',
             'backupCount': 14,
             'filename': '/var/log/mws/mws.log',
@@ -20,7 +20,7 @@ LOGGING = {
         },
         'log_errorfile': {
             'level': 'WARNING',
-            'class': 'logging.TimedRotatingFileHandler',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
             'when': 'midnight',
             'backupCount': 14,
             'filename': '/var/log/mws/mws_error.log',
