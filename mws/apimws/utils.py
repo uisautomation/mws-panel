@@ -70,7 +70,7 @@ def send_email_confirmation(site):
             body="Please, confirm your email address by clicking in the following link: %s%s"
                  % (settings.MAIN_DOMAIN, reverse('apimws.views.confirm_email',
                                                   kwargs={'ec_id': email_conf.id, 'token': email_conf.token})),
-            from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
+            from_email="Managed Web Service Support <mws3-support@uis.cam.ac.uk>",
             to=[site.email],
             headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
         ).send()
@@ -82,7 +82,7 @@ def finished_installation_email_confirmation(site):
         subject="University of Cambridge Managed Web Service: Your MWS3 site is available",
         body="Your MWS3 site is now available. You can access to the web panel of your MWS3 site by clicking the "
              "following link: %s%s" % (settings.MAIN_DOMAIN, site.get_absolute_url()),
-        from_email="Managed Web Service Support <mws3-support@cam.ac.uk>",
+        from_email="Managed Web Service Support <mws3-support@uis.cam.ac.uk>",
         to=[site.email],
         headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
     ).send()
