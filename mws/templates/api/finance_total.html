@@ -29,7 +29,11 @@
                         <td>{{ billing.group }}</td>
                         <td>{{ billing.purchase_order_number }}</td>
                         <td>{{ billing.site.start_date }}</td>
-                        <td><a href="{{ billing.purchase_order.url }}">{{ billing.purchase_order.name }}</a></td>
+                        <td>
+                            {% if billing.purchase_order %}
+                                <a href="{{ billing.purchase_order.url }}">{{ billing.purchase_order.name }}</a>
+                            {% endif %}
+                        </td>
                     </tr>
             {% endfor %}
                 </tbody>
