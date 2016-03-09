@@ -234,5 +234,6 @@ def certificates(request, vhost_id):
         'vhost': vhost,
         'service': vhost.service,
         'site': site,
+        'sidebar_messages': warning_messages(site),
         'error_message': error_message
     })

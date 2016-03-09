@@ -89,7 +89,7 @@ class BillingTests(TestCase):
         site_changed.billing.purchase_order.delete()
 
         site = Site.objects.get(pk=site.id)
-        response = self.client.get(reverse('billing_management'', kwargs={'site_id': site.id}))
+        response = self.client.get(reverse('billing_management', kwargs={'site_id': site.id}))
         self.assertContains(response, "testOrderNumber")
         self.assertContains(response, "testGroup")
         self.assertTrue(hasattr(site, 'billing'))

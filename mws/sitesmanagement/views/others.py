@@ -134,6 +134,7 @@ def service_settings(request, service_id):
         'breadcrumbs': breadcrumbs,
         'site': site,
         'service': service,
+        'sidebar_messages': warning_messages(site),
         'DEMO': getattr(settings, 'DEMO', False)
     })
 
@@ -184,6 +185,7 @@ def system_packages(request, service_id):
         'breadcrumbs': breadcrumbs,
         'packages_installed': packages_installed,
         'site': site,
+        'sidebar_messages': warning_messages(site),
         'service': service
     })
 
@@ -301,6 +303,7 @@ def change_db_root_password(request, service_id):
         'breadcrumbs': breadcrumbs,
         'service': service,
         'site': site,
+        'sidebar_messages': warning_messages(site),
         'ansibleconf': ansibleconf,
     })
 
@@ -329,6 +332,7 @@ def apache_modules(request, service_id):
         'breadcrumbs': breadcrumbs,
         'service': service,
         'site': site,
+        'sidebar_messages': warning_messages(site),
         'form': ApacheModuleForm(initial={'apache_modules': service.apache_modules.values_list('name', flat=True)}),
     }
 
@@ -366,6 +370,7 @@ def php_libs(request, service_id):
         'breadcrumbs': breadcrumbs,
         'service': service,
         'site': site,
+        'sidebar_messages': warning_messages(site),
         'form': PHPLibForm(initial={'php_libs': service.php_libs.values_list('name', flat=True)}),
     }
 
@@ -413,6 +418,7 @@ def quarantine(request, service_id):
         'breadcrumbs': breadcrumbs,
         'service': service,
         'site': site,
+        'sidebar_messages': warning_messages(site),
     }
 
     if request.method == 'POST' and not site.is_admin_suspended():
