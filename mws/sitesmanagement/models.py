@@ -248,7 +248,7 @@ class Suspension(models.Model):
 
     @property
     def active(self):
-        today = datetime.today()
+        today = date.today()
         if self.end_date:
             return self.start_date >= today and self.end_date <= today
         else:

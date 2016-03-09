@@ -68,7 +68,8 @@ class BillingTests(TestCase):
                 mock_subprocess.check_output.return_value.returncode = 0
                 site.enable()
 
-        suspension.active = False
+        suspension.start_date = datetime.today() - timedelta(days=2)
+        suspension.end_date = datetime.today() - timedelta(days=1)
         suspension.save()
         response = self.client.get(reverse(billing_management, kwargs={'site_id': site.id}))
         self.assertContains(response, "Billing data")
