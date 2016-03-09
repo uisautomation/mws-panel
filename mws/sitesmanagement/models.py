@@ -240,13 +240,19 @@ class EmailConfirmation(models.Model):
 
 class Suspension(models.Model):
     reason = models.CharField(max_length=250)
-    # is the suspension active?
-    active = models.BooleanField(default=True)
     # start date of the suspension
     start_date = models.DateField(auto_now_add=True)
     # end date of the suspension
     end_date = models.DateField(null=True, blank=True)
     site = models.ForeignKey(Site, related_name="suspensions")
+
+    @property
+    def active(self):
+        today = datetime.today()
+        if self.end_date:
+            return self.start_date >= today and self.end_date <= today
+        else:
+            return self.start_date >= today
 
 
 def validate_file_extension(value):

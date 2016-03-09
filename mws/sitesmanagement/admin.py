@@ -136,7 +136,11 @@ class DomainNameAdmin(VersionAdmin):
 
 class SuspensionAdmin(ModelAdmin):
     list_display = ('site', 'start_date', 'end_date', 'active')
-    list_filter = ('site__name', 'active')
+    list_filter = ('site__name', )
+
+    def active(self, obj):
+        return obj.active
+    active.short_description = 'Active'
 
 
 class NetworkConfigAdmin(ModelAdmin):
