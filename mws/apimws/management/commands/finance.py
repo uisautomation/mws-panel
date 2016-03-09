@@ -97,7 +97,9 @@ class Command(NoArgsCommand):
         EmailMessage(
             subject="Monthly Financial Report MWS3 - %s %i" % (month_name[month], year),
             body="Attached you can find the monthly report spreadsheet for new servers and for renewals. You will "
-                 "also find all the the corresponding purchase orders",
+                 "also find all the corresponding purchase orders. The cost codes for MWS3 are:"
+                 "Cost centre for Managed Web Service = VCBQ\nTransaction code for Managed Web Service = LRED\n"
+                 "Internal code = VCBQ GAAB LRED\nExternal code = VCBQ GAAA LRED\n\nBest regards,\n\nMWS3 Team.\n",
             from_email="Managed Web Service Support <%s>"
                        % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk'),
             to=[settings.FINANCE_EMAIL],
