@@ -1,8 +1,8 @@
-from calendar import month_name
 import csv
+import logging
+from calendar import month_name
 from datetime import date
 from StringIO import StringIO
-import logging
 from django.conf import settings
 from django.core.mail import EmailMessage
 from django.core.management.base import NoArgsCommand, CommandError
@@ -10,7 +10,6 @@ from django.utils import timezone
 from django.utils.text import slugify
 from os.path import splitext
 from ucamlookup import get_institutions, get_institution_name_by_id
-
 from sitesmanagement.models import Site, Billing
 from sitesmanagement.templatetags.calcendperiod import calcendperiod
 
