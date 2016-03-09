@@ -22,7 +22,9 @@ logger = logging.getLogger('mws')
 
 
 @login_required
-def confirm_dns(request, dn_id, token):
+def confirm_dns(request, dn_id, token=None):
+    if token == None:
+        return HttpResponseForbidden()
     dn = get_object_or_404(DomainName, pk=dn_id, token=token)
     nameinfo = get_nameinfo(dn.name)
     if nameinfo['exists'] and "C" not in nameinfo['exists']:
