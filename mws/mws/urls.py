@@ -35,7 +35,7 @@ urlpatterns = patterns('',
     # Service management
     url(r'^status/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.service_status'),
     url(r'^settings/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.service_settings'),
-    url(r'^billing/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.billing_management'),
+    url(r'^billing/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.billing_management', name='billing_management'),
     url(r'^enable/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.sites.site_enable', name='enablesite'),
     url(r'^vhosts/(?P<vhost_id>[0-9]+)/certificates/$', 'sitesmanagement.views.certificates'),
     url(r'^vhosts/(?P<vhost_id>[0-9]+)/generate_csr/$', 'sitesmanagement.views.generate_csr'),

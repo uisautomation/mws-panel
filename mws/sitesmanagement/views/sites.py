@@ -37,7 +37,7 @@ def warning_messages(site):
     if not Billing.objects.filter(site=site).exists():
         warning_messages_list.append(
             format_html('No billing details are available, please <a href="%s" style="text-decoration: underline;">add '
-                        'them</a>.' % reverse('sitesmanagement.views.billing_management', kwargs={'site_id': site.id})))
+                        'them</a>.' % reverse('billing_management', kwargs={'site_id': site.id})))
 
     return warning_messages_list
 

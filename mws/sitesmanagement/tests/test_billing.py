@@ -16,14 +16,14 @@ from sitesmanagement.views import billing_management
 class BillingTests(TestCase):
 
     def test_view_billing(self):
-        response = self.client.get(reverse(billing_management, kwargs={'site_id': 1}))
+        response = self.client.get(reverse('billing_management', kwargs={'site_id': 1}))
         self.assertEqual(response.status_code, 302)  # Not logged in, redirected to login
         self.assertTrue(response.url.endswith(
-            '%s?next=%s' % (reverse('raven_login'), reverse(billing_management, kwargs={'site_id': 1}))))
+            '%s?next=%s' % (reverse('raven_login'), reverse('billing_management', kwargs={'site_id': 1}))))
 
         do_test_login(self, user="test0001")
 
-        response = self.client.get(reverse(billing_management, kwargs={'site_id': 1}))
+        response = self.client.get(reverse('billing_management', kwargs={'site_id': 1}))
         self.assertEqual(response.status_code, 404)  # The Site does not exist
 
         NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
@@ -215,7 +215,7 @@ class BillingTests(TestCase):
 
         self.assertFalse(hasattr(site, 'billing'))
         pofile = SimpleUploadedFile("file.pdf", "file_content")
-        self.client.post(reverse(billing_management, kwargs={'site_id': site.id}),
+        self.client.post(reverse('billing_management', kwargs={'site_id': site.id}),
                          {'purchase_order_number': 'testOrderNumber', 'group': 'testGroup', 'purchase_order': pofile})
         # Retrieve object
         site = Site.objects.get(pk=site.id)

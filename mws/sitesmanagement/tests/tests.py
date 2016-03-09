@@ -338,7 +338,7 @@ class SiteManagement2Tests(TestCase):
         self.assertEqual(self.client.get(reverse('editsite', kwargs={'site_id': site.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse(views.service_settings,
                                                  kwargs={'service_id': service.id})).status_code, 403)
-        self.assertEqual(self.client.get(reverse(views.billing_management,
+        self.assertEqual(self.client.get(reverse('billing_management',
                                                  kwargs={'site_id': site.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse('deletesite', kwargs={'site_id': site.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse('disablesite', kwargs={'site_id': site.id})).status_code, 403)
@@ -390,7 +390,7 @@ class SiteManagement2Tests(TestCase):
                              expected_url=site.get_absolute_url())
         self.assertRedirects(self.client.get(reverse(views.service_settings, kwargs={'service_id': service.id})),
                              expected_url=site.get_absolute_url())
-        self.assertEqual(self.client.get(reverse(views.billing_management, kwargs={'site_id': site.id})).status_code,
+        self.assertEqual(self.client.get(reverse('billing_management', kwargs={'site_id': site.id})).status_code,
                          200)
         # self.assertRedirects(self.client.get(reverse('deletesite', kwargs={'site_id': site.id})),
         #                      expected_url=site.get_absolute_url())
