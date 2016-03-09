@@ -9,7 +9,6 @@ from django.test import TestCase, override_settings
 from mwsauth.tests import do_test_login
 from sitesmanagement.cronjobs import send_reminder_renewal, check_subscription
 from sitesmanagement.models import NetworkConfig, Site, VirtualMachine, Service, Billing
-from sitesmanagement.views import billing_management
 
 
 @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
@@ -43,11 +42,11 @@ class BillingTests(TestCase):
         VirtualMachine.objects.create(name="test_vm", token=uuid.uuid4(),
                                       service=service, network_configuration=NetworkConfig.get_free_host_config())
 
-        response = self.client.get(reverse(billing_management, kwargs={'site_id': site.id}))
+        response = self.client.get(reverse('billing_management', kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)  # The User is not in the list of auth users
 
         site.users.add(User.objects.get(username="test0001"))
-        response = self.client.get(reverse(billing_management, kwargs={'site_id': site.id}))
+        response = self.client.get(reverse('billing_management', kwargs={'site_id': site.id}))
         self.assertContains(response, "Billing data")
         response = self.client.get(site.get_absolute_url())
         self.assertContains(response, "No billing details are available")
@@ -58,7 +57,7 @@ class BillingTests(TestCase):
             site.disable()
 
         suspension = site.suspend_now(input_reason="test suspension")
-        response = self.client.get(reverse(billing_management, kwargs={'site_id': site.id}))
+        response = self.client.get(reverse('billing_management', kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)  # The site is suspended
 
         with mock.patch("apimws.vm.change_vm_power_state") as mock_change_vm_power_state:
@@ -71,12 +70,12 @@ class BillingTests(TestCase):
         suspension.start_date = datetime.today() - timedelta(days=2)
         suspension.end_date = datetime.today() - timedelta(days=1)
         suspension.save()
-        response = self.client.get(reverse(billing_management, kwargs={'site_id': site.id}))
+        response = self.client.get(reverse('billing_management', kwargs={'site_id': site.id}))
         self.assertContains(response, "Billing data")
 
         self.assertFalse(hasattr(site, 'billing'))
         pofile = SimpleUploadedFile("file.pdf", "file_content")
-        response = self.client.post(reverse(billing_management, kwargs={'site_id': site.id}),
+        response = self.client.post(reverse('billing_management', kwargs={'site_id': site.id}),
                                     {'purchase_order_number': 'testOrderNumber', 'group': 'testGroup',
                                      'purchase_order': pofile})
         self.assertRedirects(response, expected_url=site.get_absolute_url())  # Changes done, redirecting
@@ -90,12 +89,12 @@ class BillingTests(TestCase):
         site_changed.billing.purchase_order.delete()
 
         site = Site.objects.get(pk=site.id)
-        response = self.client.get(reverse(billing_management, kwargs={'site_id': site.id}))
+        response = self.client.get(reverse('billing_management'', kwargs={'site_id': site.id}))
         self.assertContains(response, "testOrderNumber")
         self.assertContains(response, "testGroup")
         self.assertTrue(hasattr(site, 'billing'))
         pofile = SimpleUploadedFile("file.pdf", "file_content")
-        response = self.client.post(reverse(billing_management, kwargs={'site_id': site.id}),
+        response = self.client.post(reverse('billing_management', kwargs={'site_id': site.id}),
                                     {'purchase_order_number': 'testOrderNumber1', 'group': 'testGroup1',
                                      'purchase_order': pofile})
         self.assertRedirects(response, expected_url=site.get_absolute_url())  # Changes done, redirecting

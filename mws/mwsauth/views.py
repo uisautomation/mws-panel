@@ -9,6 +9,7 @@ from apimws.ansible import launch_ansible_site, launch_ansible_by_user
 from mwsauth.models import MWSUser
 from mwsauth.utils import privileges_check
 from mwsauth.validators import validate_groupids
+from sitesmanagement.views.sites import warning_messages
 
 
 @login_required
@@ -55,6 +56,7 @@ def auth_change(request, site_id):
     return render(request, 'mws/auth.html', {
         'lookup_lists': lookup_lists,
         'breadcrumbs': breadcrumbs,
+        'sidebar_messages': warning_messages(site),
         'site': site
     })
 

@@ -18,6 +18,7 @@ from mwsauth.utils import privileges_check
 from sitesmanagement.forms import BillingForm, SnapshotForm
 from sitesmanagement.utils import get_object_or_None
 from sitesmanagement.models import Service, Snapshot, Billing
+from sitesmanagement.views.sites import warning_messages
 
 
 @login_required
@@ -29,7 +30,7 @@ def billing_management(request, site_id):
 
     breadcrumbs = {
         0: dict(name='Managed Web Service server: ' + str(site.name), url=site.get_absolute_url()),
-        1: dict(name='Billing', url=reverse(billing_management, kwargs={'site_id': site.id}))
+        1: dict(name='Billing', url=reverse('billing_management', kwargs={'site_id': site.id}))
     }
 
     if request.method == 'POST':
@@ -54,6 +55,7 @@ def billing_management(request, site_id):
         'breadcrumbs': breadcrumbs,
         'site': site,
         'billing_form': billing_form,
+        'sidebar_messages': warning_messages(site),
         'cost': settings.YEAR_COST
     })
 

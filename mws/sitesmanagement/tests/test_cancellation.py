@@ -7,7 +7,6 @@ from django.test import override_settings, TestCase
 from mwsauth.tests import do_test_login
 from sitesmanagement.cronjobs import check_subscription
 from sitesmanagement.models import Site, NetworkConfig, Service
-from sitesmanagement.views import billing_management
 
 
 @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
