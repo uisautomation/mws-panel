@@ -134,7 +134,7 @@ def delete_snapshot(service, snapshot_id):
 def delete_vhost_ansible(service, vhost_name, vhost_webapp):
     for vm in service.virtual_machines.all():
         subprocess.check_output(["userv", "mws-admin", "mws_delete_vhost", vm.network_configuration.name,
-                                 "--tags", "delete_vhost", "-e", '"delete_vhost_name=%s delete_vhost_webapp=%s"' %
+                                 "--tags", "delete_vhost", "-e", "delete_vhost_name=%s delete_vhost_webapp=%s" %
                                  (vhost_name, vhost_webapp)],
                                 stderr=subprocess.STDOUT)
     launch_ansible(service)
