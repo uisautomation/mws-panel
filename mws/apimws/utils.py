@@ -112,6 +112,6 @@ def domain_confirmation_user(domain_name):
               reverse('listdomains', kwargs={'vhost_id': domain_name.vhost.id})),
         from_email="Managed Web Service Support <%s>"
                    % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk'),
-        to=domain_name.vhost.service.site.email,
+        to=[domain_name.vhost.service.site.email],
         headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
     ).send()
