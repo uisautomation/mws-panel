@@ -1,8 +1,5 @@
-import csv
-from datetime import date
-import json
 import logging
-
+from datetime import date, datetime, timedelta
 from celery import shared_task
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -13,8 +10,9 @@ from django.views.decorators.csrf import csrf_exempt
 from stronghold.decorators import public
 from apimws.ansible import launch_ansible_async, AnsibleTaskWithFailure, launch_ansible
 from apimws.ipreg import set_cname, get_nameinfo
+from apimws.utils import domain_confirmation_user
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
-from sitesmanagement.models import DomainName, Site, EmailConfirmation, VirtualMachine, Billing
+from sitesmanagement.models import DomainName, EmailConfirmation, VirtualMachine, Billing
 from ucamlookup import user_in_groups
 
 
@@ -40,10 +38,23 @@ def confirm_dns(request, dn_id, token=None):
             dn.save()
             set_cname(dn.name, dn.vhost.service.network_configuration.name)
             launch_ansible(dn.vhost.service)
+            now = datetime.now()
+            # Check if the set_cname was executed before the DNS refresh of the current hour.
+            # DNS refreshes happen at 53 minutes of each hour
+            if now.minute > 55:
+                # If it was executed after the DNS refresh of the current hour, send the email to the user when
+                # the next refresh happens
+                eta = now.replace(minute=54) + timedelta(hours=1)
+            else:
+                # If it was executed before the DNS refresh of the current hour, send the email to the user when
+                # the refresh happens
+                eta = now.replace(minute=54)
+            domain_confirmation_user.apply_async(args=[dn, ], eta=eta)
         else:
             dn.status = 'denied'
             dn.reject_reason = request.POST.get('reason')
             dn.save()
+            domain_confirmation_user.delay(dn)
 
     return render(request, 'api/confirm_dns.html', {'dn': dn, 'changeable': changeable, })
 

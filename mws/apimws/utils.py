@@ -10,6 +10,7 @@ from apimws.ipreg import get_nameinfo
 from apimws.vm import new_site_primary_vm
 from sitesmanagement.models import EmailConfirmation, NetworkConfig, Site, Service
 
+
 LOGGER = logging.getLogger('mws')
 
 
@@ -21,7 +22,7 @@ class EmailTaskWithFailure(Task):
                      "The parameters passed to the task were: %s\n\nThe traceback is:\n%s\n", task_id, args, einfo)
 
 
-@shared_task(base=EmailTaskWithFailure, default_retry_delay=15*60, max_retries=12)  # Retry each 15 minutes for 12 times
+@shared_task(base=EmailTaskWithFailure, default_retry_delay=15*60, max_retries=6)  # Retry each 15 minutes for 6 times
 def ip_register_api_request(domain_name):
     nameinfo = get_nameinfo(domain_name)
     if nameinfo['emails']:
@@ -60,7 +61,7 @@ def email_confirmation(site):
     send_email_confirmation.delay(site)
 
 
-@shared_task(base=EmailTaskWithFailure, default_retry_delay=5*60, max_retries=12)  # Retry each 5 minutes for 1 hours
+@shared_task(base=EmailTaskWithFailure, default_retry_delay=5*60, max_retries=12)  # Retry each 5 minutes for 1 hour
 def send_email_confirmation(site):
     email_conf = EmailConfirmation.objects.filter(site=site)
     if email_conf:
@@ -76,7 +77,7 @@ def send_email_confirmation(site):
         ).send()
 
 
-@shared_task(base=EmailTaskWithFailure, default_retry_delay=5*60, max_retries=12)  # Retry each 5 minutes for 1 hours
+@shared_task(base=EmailTaskWithFailure, default_retry_delay=5*60, max_retries=12)  # Retry each 5 minutes for 1 hour
 def finished_installation_email_confirmation(site):
     EmailMessage(
         subject="University of Cambridge Managed Web Service: Your MWS3 site is available",
@@ -99,3 +100,18 @@ def preallocate_new_site():
     Service.objects.create(site=site, type='test', network_configuration=test_service_netconf)
     new_site_primary_vm(prod_service, host_netconf)
     LOGGER.info("Preallocated MWS server created '" + str(site.name) + "' with id " + str(site.id))
+
+
+@shared_task(base=EmailTaskWithFailure, default_retry_delay=15*60, max_retries=6)  # Retry each 15 minutes for 6 times
+def domain_confirmation_user(domain_name):
+    EmailMessage(
+        subject="Domain name %s has been %s" % (domain_name.name, domain_name.status),
+        body="You are receiving this email because the administrator of the domain %s has %s your request.\n\n"
+             "Visit the web control panel to know more: %s%s" %
+             (domain_name.name, domain_name.status, settings.MAIN_DOMAIN,
+              reverse('listdomains', kwargs={'vhost_id': domain_name.vhost.id})),
+        from_email="Managed Web Service Support <%s>"
+                   % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk'),
+        to=domain_name.vhost.service.site.email,
+        headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
+    ).send()
