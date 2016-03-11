@@ -10,7 +10,6 @@ from django.views.decorators.csrf import csrf_exempt
 from stronghold.decorators import public
 from apimws.ansible import launch_ansible_async, AnsibleTaskWithFailure, launch_ansible
 from apimws.ipreg import set_cname, get_nameinfo
-from apimws.utils import domain_confirmation_user
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.models import DomainName, EmailConfirmation, VirtualMachine, Billing
 from ucamlookup import user_in_groups
@@ -31,6 +30,7 @@ def confirm_dns(request, dn_id, token=None):
         changeable = True
     if request.method == 'POST':
         dn.authorised_by = request.user
+        from apimws.utils import domain_confirmation_user
         if request.POST.get('accepted') == '1':
             if changeable is False:
                 return render(request, 'api/confirm_dns.html', {'dn': dn, 'changeable': changeable, })
