@@ -7,10 +7,17 @@
             <h1>Domain Names for the web site "{{ vhost.name }}" of
             the MWS server "{{ vhost.service.site.name }}"</h1>
 
-            <p>
-                If you want to use a domain name for testing puposes only, you can request a subdomain of
-                *.usertest.mws3.csx.cam.ac.uk
-            </p>
+            <p>This panel allows you to associate domain names to your web site. If you want to use a domain name
+                outside cam.ac.uk, then you will be responsible for configuring the domain name although we will
+                provide instructions.</p>
+            <p>In case you want to use a cam.ac.uk domain name, this will have to be approved by its owner. Thus,
+                you will see a "requested" status that will change to accepted or denied based on the response from the
+                domain owner.</p>
+            <p>If you want to use a domain name for testing puposes only, you can request a subdomain of
+                *.usertest.mws3.csx.cam.ac.uk. This domain names do not require authorisation and will be automatically
+                accepted.</p>
+            <p>After the domain name status has changed to accepted it will take up to one hour for the domain name
+                to be active as this is the time it requires the DNS system to refresh its contents.</p>
 
             {% if vhost.domain_names.all %}
                 <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
@@ -116,7 +123,7 @@
                 </div>
                 <div class="modal-body">
                     <p>To configure your domain name, access the
-                    control panel of your service provider and create a CNAME record with the following content: {{ vhost.service.network_configuration.mws_domain }}</p>
+                    control panel of your service provider and create a CNAME record with the following content: {{ vhost.service.network_configuration.name }}</p>
                     <p>If your domain name is a bare domain, zone apex domain, or root domain, then instead create an A record with the following content: {{ vhost.service.network_configuration.IPv4 }}</p>
                     <p>In this latter case, you can also create an AAAA record with the following content for IPv6 compatibility: {{ vhost.service.network_configuration.IPv6 }}</p>
                 </div>

@@ -14,6 +14,7 @@
         <script>
             $(document).ready(function () {
                 $(".noti_bubble").show();
+                $('[data-toggle="tooltip"]').tooltip({'placement': 'top'});
             });
         </script>
     {% endif %}
@@ -83,7 +84,8 @@
                             })();
                             </script>
                             <li id="rightmenu">
-                                <a href="#" id="messages_button" class="fa fa-bars togglebtn" data-action="toggle" data-side="right"><div class="noti_bubble"></div></a>
+                                <a href="#" id="messages_button" class="fa fa-bars togglebtn" data-action="toggle" title="Messages" data-toggle="tooltip" data-side="right"><div class="noti_bubble"></div></a>
+
                                 <div id="site_status">Checking status...</div>
                             </li>
                         {% endif %}

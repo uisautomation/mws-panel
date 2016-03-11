@@ -5,7 +5,7 @@ from sitesmanagement.models import Site, Vhost, DomainName, Billing, UnixGroup, 
 
 class SiteForm(forms.ModelForm):
     institution_id = forms.ChoiceField(label='The University institution responsible for this server')
-    description = forms.CharField(label='Description for the MWS (e.g. Web server for St Botolph\'s '
+    description = forms.CharField(label='Description for the MWS server (e.g. Web server for St Botolph\'s '
                                         'College main website)',
                                   widget=forms.Textarea(attrs={'maxlength': 250}),
                                   max_length=250,
@@ -23,7 +23,7 @@ class SiteForm(forms.ModelForm):
         model = Site
         fields = ('name', 'description', 'institution_id', 'email')
         labels = {
-            'name': 'A short name for this Managed Web Service account (e.g. St Botolph\'s server)',
+            'name': 'A short name for this Managed Web Service Server (e.g. St Botolph\'s server)',
             'email': 'The webmaster email (please use a role email when possible)'
         }
 

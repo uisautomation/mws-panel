@@ -56,6 +56,14 @@
                 <p style="margin-top: 20px; margin-bottom: 20px">The server doesn't have any web sites configured</p>
             {% endif %}
 
+            <p>By default, each MWS server contains a default website associated with the hostname of the MWS server.
+            This means that you can start using your MWS server without further configuration. Web site contents should
+            be stored inside /var/www/{name_of_website} folder of your MWS server.</p>
+            <p>You can create as many web site as you want in you MWS server but be aware that they will share
+            your MWS server resources. You need to use different names for each website.</p>
+            <p>Once you have created you website you will need to associate a domain name to it using the option
+            buttons on the right in order to access it.</p>
+
             <p><a id="add_vhost_button" href="#" class="campl-primary-cta">Add a new web site</a></p>
 
             <div id="add_vhost_div" style="display: none; margin-top: 20px">
