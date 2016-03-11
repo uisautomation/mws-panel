@@ -64,9 +64,10 @@ class SitePriviledgeCheck(LoginRequiredMixin, SingleObjectMixin):
         # If the user is not in the user auth list of the site and neither belongs to a group in the group auth list or
         # the site is disabled or canceled return None
         try:
-            if (site not in request.user.sites.all() and not user_in_groups(request.user, site.groups.all())) \
-                    or site.is_canceled() or site.is_disabled():
-                return HttpResponseForbidden()
+            if not request.user.is_superuser:
+                if (site not in request.user.sites.all() and not user_in_groups(request.user, site.groups.all())) \
+                        or site.is_canceled() or site.is_disabled():
+                    return HttpResponseForbidden()
             if site.production_service is None:
                 return redirect(reverse('listsites'))
         except Exception:
