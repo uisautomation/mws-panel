@@ -33,7 +33,7 @@
 
 {% block site_name %}
     {% if site %}
-        <a>MWS server "{{ site.name }}" control panel</a>
+        <a href="{% url 'showsite' site_id=site.id %}">MWS server "{{ site.name }}" control panel</a>
     {% else %}
         <a>Managed Web Service Administration Site</a>
     {% endif %}
@@ -51,32 +51,19 @@
         <div class="campl-wrap clearfix campl-local-navigation" id="local-nav">
             <div class="campl-local-navigation-container campl-mobile">
                 <ul class="campl-unstyled-list">
-                    <li><a href="{% url 'listsites' %}">My MWS servers</a></li>
                     {% if site %}
-                        <li><span class="separator-tab">MWS server "{{ site.name }}": </span></li>
-                        <li><a href="{% url 'showsite' site_id=site.id %}">Control Panel</a></li>
-                        {% if site.production_service and site.production_service.virtual_machines.count != 0 and not site.production_service.is_busy %}
-                            <li><a href="{% url 'mwsauth.views.auth_change' site_id=site.id %}">Authorised users</a></li>
-                            <li>
-                                <a>Server</a>
-                                <ul class="campl-unstyled-list">
-                                    <li><a href="{% url 'sitesmanagement.views.service_settings' service_id=site.production_service.id %}">Settings</a></li>
-                                    <li><a href="{% url 'listvhost' service_id=site.production_service.id %}">Web Sites</a></li>
-                                    <li><a href="{% url 'listunixgroups' service_id=site.production_service.id %}">Unix Groups</a></li>
-                                </ul>
-                            </li>
+                        <li><a href="{% url 'showsite' site_id=site.id %}">Main Settings</a></li>
+                        {% if site.production_service and site.production_service.active %}
+                            <li><a href="{% url 'sitesmanagement.views.service_settings' service_id=site.production_service.id %}">Server Settings</a></li>
+                            <li><a href="{% url 'listvhost' service_id=site.production_service.id %}">Web Sites</a></li>
                         {% endif %}
                         {% if site.test_service and site.test_service.active %}
-                            <li>
-                                <a>Test Server</a>
-                                <ul class="campl-unstyled-list">
-                                    <li><a href="{% url 'sitesmanagement.views.service_settings' service_id=site.test_service.id %}">Settings</a></li>
-                                    <li><a href="{% url 'listvhost' service_id=site.test_service.id %}">Web Sites</a></li>
-                                    <li><a href="{% url 'listunixgroups' service_id=site.test_service.id %}">Unix Groups</a></li>
-                                </ul>
-                            </li>
+                            <li><a href="{% url 'sitesmanagement.views.service_settings' service_id=site.test_service.id %}">Server Settings</a></li>
+                            <li><a href="{% url 'listvhost' service_id=site.test_service.id %}">Web Sites</a></li>
                         {% endif %}
-                        {% if site.production_service and site.production_service.virtual_machines.count != 0 and not site.production_service.is_busy %}
+                        <li><a href="{% url 'mwsauth.views.auth_change' site_id=site.id %}">Authorised users</a></li>
+                        <li><a href="{% url 'listsites' %}">My other MWS servers</a></li>
+                        {% if site.production_service and site.production_service.active %}
                             <script type="application/javascript">
                             (function poll(){
                                 $.ajax({
