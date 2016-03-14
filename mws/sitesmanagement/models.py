@@ -78,6 +78,9 @@ class Site(models.Model):
     # Indicates if the site is disabled by the user
     disabled = models.BooleanField(default=False)
 
+    # Number of days since the site lost its last admin
+    days_without_admin = models.IntegerField(default=0)
+
     class Meta:
         ordering = ["-id"]
     #

@@ -155,3 +155,55 @@ def check_num_preallocated_sites():
     desired_num_preallocated_sites = getattr(settings, 'NUM_PREALLOCATED_SITES', 0)
     while Site.objects.filter(preallocated=True).count() < desired_num_preallocated_sites:
         preallocate_new_site()
+
+
+
+@shared_task
+def send_warning_last_or_none_admin():
+    for site in Site.objects.filter(Q(start_date__isnull=False) &
+                                    (Q(end_date__isnull=True) | Q(end_date__gt=date.today()))):
+        num_admins = len(site.list_of_active_admins())
+        if num_admins == 1:
+            site.days_without_admin = 0
+            site.save()
+            if datetime.today().weekday() == 0:
+                EmailMessage(
+                    subject="Your MWS3 site '%s' has only one administrator" % site.name,
+                    body="Your MWS3 site '%s' has only one administrator assigned. Please add more to it to stop "
+                         "receiving these warning emails\n\n" % (site.name),
+                    from_email="Managed Web Service Support <%s>"
+                               % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk'),
+                    to=[site.email],
+                    headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
+                ).send()
+        elif num_admins == 0:
+            if site.days_without_admin > 7:
+                site.suspend_now("No site admin for more than a week")
+                site.disable()
+                EmailMessage(
+                    subject="Your MWS3 site '%s' has been deleted" % site.name,
+                    body="Your MWS3 site '%s' had no admin for more than a week, thus it has been automatically "
+                         "deleted. If you think this should had not have happened, contact %s\n\n"
+                         % (site.name, getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')),
+                    from_email="Managed Web Service Support <%s>"
+                               % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk'),
+                    to=[site.email],
+                    headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
+                ).send()
+            else:
+                site.days_without_admin += 1
+                site.save()
+                EmailMessage(
+                    subject="Your MWS3 site '%s' will be deleted" % site.name,
+                    body="Your MWS3 site '%s' currently does not have any administrator assigned. It will be deleted "
+                         "in %s days if you do not contact %s and tell them to add one.\n\n"
+                         % (site.name, str(7-site.days_without_admin),
+                            getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')),
+                    from_email="Managed Web Service Support <%s>"
+                               % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk'),
+                    to=[site.email],
+                    headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
+                ).send()
+        else:
+            site.days_without_admin = 0
+            site.save()
