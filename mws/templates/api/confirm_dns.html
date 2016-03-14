@@ -5,7 +5,7 @@
         <div class="campl-content-container">
             {% if dn.status == "requested" %}
                 <h1>Request for domain name {{ dn.name }}</h1>
-                {% if changeable %}<p>Warning: You can't accept the request of this domain name until you delete the
+                {% if not changeable %}<p>Warning: You can't accept the request of this domain name until you delete the
                     previous record or change it to a CNAME</p>{% endif %}
                 <form action={% url 'apimws.views.confirm_dns' dn_id=dn.id token=dn.token %} method="post">
                     <fieldset>
