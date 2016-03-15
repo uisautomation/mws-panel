@@ -168,9 +168,14 @@ def send_warning_last_or_none_admin():
             site.save()
             if datetime.today().weekday() == 0:
                 EmailMessage(
-                    subject="Your MWS3 site '%s' has only one administrator" % site.name,
-                    body="Your MWS3 site '%s' has only one administrator assigned. Please add more to it to stop "
-                         "receiving these warning emails\n\n" % (site.name),
+                    subject="Your UIS Managed Web Server '%s' has only one administrator" % site.name,
+                    body="You are receiving this message because your email address, or an email alias that includes "
+                         "you as a recipient, has been configured as the contact address for the UIS Managed Web "
+                         "Server '%s'.\n\n The Managed Web Server '%s' only has a single administrator. This could be "
+                         "a problem if some action is required in their absence, or if they leave the University "
+                         "since the site would then be automatically suspended. To avoid this, and to stop these "
+                         "emails, please add at least one additional administrator via the control panel at %s\n\n"
+                         % (site.name, site.name, settings.MAIN_DOMAIN),
                     from_email="Managed Web Service Support <%s>"
                                % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk'),
                     to=[site.email],
@@ -181,10 +186,14 @@ def send_warning_last_or_none_admin():
                 site.suspend_now("No site admin for more than a week")
                 site.disable()
                 EmailMessage(
-                    subject="Your MWS3 site '%s' has been deleted" % site.name,
-                    body="Your MWS3 site '%s' had no admin for more than a week, thus it has been automatically "
-                         "deleted. If you think this should had not have happened, contact %s\n\n"
-                         % (site.name, getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')),
+                    subject="Your UIS Managed Web Server '%s' has been suspended" % site.name,
+                    body="You are receiving this message because your email address, or an email alias that includes "
+                         "you as a recipient, has been configured as the contact address for the UIS Managed Web "
+                         "Server '%s'.\n\nThe Managed Web Server '%s' had no administrators for the last week "
+                         "and has therefore been automatically suspended. It will be deleted in 2 weeks if no action "
+                         "is taken.\n\nIf you think this should had not have happened, contact %s\n\n"
+                         % (site.name, site.name,
+                            getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')),
                     from_email="Managed Web Service Support <%s>"
                                % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk'),
                     to=[site.email],
@@ -194,11 +203,13 @@ def send_warning_last_or_none_admin():
                 site.days_without_admin += 1
                 site.save()
                 EmailMessage(
-                    subject="Your MWS3 site '%s' will be deleted" % site.name,
-                    body="Your MWS3 site '%s' currently does not have any administrator assigned. It will be deleted "
-                         "in %s days if you do not contact %s and tell them to add one.\n\n"
-                         % (site.name, str(7-site.days_without_admin),
-                            getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')),
+                    subject="Your UIS Managed Web Server '%s' will be suspended" % site.name,
+                    body="You are receiving this message because your email address, or an email alias that includes "
+                         "you as a recipient, has been configured as the contact address for the UIS Managed Web "
+                         "Server '%s'.\n\nThe Managed Web Server '%s' has no administrators and it will be suspended"
+                         "in %s days if you do not contact %s and arrange to have at lease one administrator "
+                         "added.\n\n" % (site.name, site.name, str(7-site.days_without_admin),
+                                          getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')),
                     from_email="Managed Web Service Support <%s>"
                                % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk'),
                     to=[site.email],
