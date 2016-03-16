@@ -33,7 +33,8 @@
                                     {% if site.production_service %}
                                         IPv4: {{ site.production_service.ipv4 }}<br/>
                                         IPv6: {{ site.production_service.ipv6 }}<br/>
-                                        hostname: {{ site.production_service.hostname }}<br/>
+                                        servicename: {{ site.production_service.hostname }}<br/>
+                                        hostname: {{ site.production_vms.0.hostname }}<br/>
                                     {% endif %}
                                 </td>
                                 <td>
