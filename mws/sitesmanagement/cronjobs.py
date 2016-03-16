@@ -206,9 +206,9 @@ def send_warning_last_or_none_admin():
                     subject="Your UIS Managed Web Server '%s' will be suspended" % site.name,
                     body="You are receiving this message because your email address, or an email alias that includes "
                          "you as a recipient, has been configured as the contact address for the UIS Managed Web "
-                         "Server '%s'.\n\nThe Managed Web Server '%s' has no administrators and it will be suspended"
+                         "Server '%s'.\n\nThe Managed Web Server '%s' has no administrators and it will be suspended "
                          "in %s days if you do not contact %s and arrange to have at lease one administrator "
-                         "added.\n\n" % (site.name, site.name, str(7-site.days_without_admin),
+                         "added.\n\n" % (site.name, site.name, str(8-site.days_without_admin),
                                           getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')),
                     from_email="Managed Web Service Support <%s>"
                                % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk'),

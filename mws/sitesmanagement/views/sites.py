@@ -274,8 +274,9 @@ def site_enable(request, site_id):
     site = get_object_or_404(Site, pk=site_id)
 
     try:
-        if (site not in request.user.sites.all() and not user_in_groups(request.user, site.groups.all())) \
-                or site.is_admin_suspended() or site.is_canceled():
+        if not request.user.is_superuser and \
+            (site not in request.user.sites.all() and not user_in_groups(request.user, site.groups.all())) \
+            or site.is_admin_suspended() or site.is_canceled():
             return HttpResponseForbidden()
     except Exception:
         return HttpResponseForbidden()

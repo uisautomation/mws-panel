@@ -24,6 +24,14 @@
                                     {{ site.name }}
                                     {% if site.is_canceled %}<br/>This site is cancelled{% endif %}
                                     {% if site.is_disabled %}<br/>This site is disabled{% endif %}
+                                    {% if not site.is_admin_suspended %}
+                                        <form action={% url 'enablesite' site_id=site.id %} method="post">
+                                            <fieldset>
+                                                {% csrf_token %}
+                                                <input type="submit" value="Re-enable" class="campl-btn campl-primary-cta">
+                                            </fieldset>
+                                        </form>
+                                    {% endif %}
                                 </td>
                                 <td>
                                     {{ site.description }}
