@@ -21,7 +21,7 @@
                     {% for site in results %}
                             <tr data-href="{% url 'showsite' site_id=site.id %}">
                                 <td>
-                                    {{ site.name }}
+                                    {{ site.name }}<br/>
                                     {% if site.is_canceled %}<br/>This site is cancelled{% endif %}
                                     {% if site.is_disabled %}
                                         <br/>This site is disabled<br/>
@@ -33,7 +33,7 @@
                                         </form>
                                     {% endif %}
                                     {% if site.is_admin_suspended %}
-                                        <br/>This site is Administrativelly suspended<br/>
+                                        <br/>This site is administrativelly suspended<br/>
                                         <form action={% url 'unsuspendsite' site_id=site.id %} method="post">
                                             <fieldset>
                                                 {% csrf_token %}

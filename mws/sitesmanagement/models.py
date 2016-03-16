@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from itertools import chain
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -122,7 +122,7 @@ class Site(models.Model):
         suspensions = Suspension.objects.filter(site=self)
         for susp in suspensions:
             if susp.active:
-                susp.end_date = datetime.today() - datetime.timedelta(days=1)
+                susp.end_date = datetime.today() - timedelta(days=1)
         return True
 
     @property
