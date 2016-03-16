@@ -15,18 +15,20 @@ def admin_search(request):
 
     if request.method == 'POST':
         if 'mwsname' in request.POST and request.POST['mwsname']:
-            sites = Site.objects.filter(name__contains=request.POST['mwsname'])
+            sites = Site.objects.filter(name__contains=request.POST['mwsname'], preallocated=False)
             parameters['results'] = sites
         elif 'mwshostname' in request.POST and request.POST['mwshostname']:
             sites = Site.objects.filter(services__virtual_machines__network_configuration__name__contains=
-                                        request.POST['mwshostname'])
+                                        request.POST['mwshostname'], preallocated=False)
             parameters['results'] = sites
         elif 'mwsdomainname' in request.POST and request.POST['mwsdomainname']:
-            sites = Site.objects.filter(services__vhosts__domain_names__name__contains=request.POST['mwsdomainname'])
+            sites = Site.objects.filter(services__vhosts__domain_names__name__contains=request.POST['mwsdomainname'],
+                                        preallocated=False)
             parameters['results'] = sites
         elif 'crsid' in request.POST and request.POST['crsid']:
             user = validate_crsids(request.POST['crsid'])[0]
-            sites = filter(lambda site: user in site.list_of_all_type_of_users(), Site.objects.all())
+            sites = filter(lambda site: user in site.list_of_all_type_of_users(),
+                           Site.objects.filter(preallocated=False))
             parameters['results'] = sites
 
     return render(request, 'mws/admin/search.html', parameters)
