@@ -123,6 +123,7 @@ class Site(models.Model):
         for susp in suspensions:
             if susp.active:
                 susp.end_date = datetime.today() - timedelta(days=1)
+                susp.save()
         return True
 
     @property

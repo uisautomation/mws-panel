@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponseForbidden
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.html import format_html
 from django.views.generic import FormView, ListView, UpdateView
 from django.views.generic.detail import SingleObjectMixin, DetailView
@@ -301,7 +301,7 @@ def site_unsuspend(request, site_id):
 
     if request.method == 'POST':
         if site.unsuspend():
-            return redirect(site)
+            render(request, 'mws/admin/search.html', {'results': [site]})
 
     return HttpResponseForbidden()
 
