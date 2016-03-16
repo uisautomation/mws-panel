@@ -283,7 +283,10 @@ def site_enable(request, site_id):
 
     if request.method == 'POST':
         if site.enable():
-            return redirect(site)
+            if request.user.is_superuser:
+                return render(request, 'mws/admin/search.html', {'results': [site]})
+            else:
+                return redirect(site)
 
     return redirect(reverse('listsites'))
 
@@ -301,7 +304,7 @@ def site_unsuspend(request, site_id):
 
     if request.method == 'POST':
         if site.unsuspend():
-            render(request, 'mws/admin/search.html', {'results': [site]})
+            return render(request, 'mws/admin/search.html', {'results': [site]})
 
     return HttpResponseForbidden()
 

@@ -8,6 +8,7 @@ from django.core.validators import validate_slug
 from django.db import models
 import re
 from django.utils import timezone
+from django.utils.timezone import now
 from os.path import splitext
 import reversion
 from ucamlookup.models import LookupGroup
@@ -123,7 +124,7 @@ class Site(models.Model):
         suspensions = Suspension.objects.filter(site=self)
         for susp in suspensions:
             if susp.active:
-                susp.end_date = datetime.today()
+                susp.end_date = now()
                 susp.save()
         return True
 
