@@ -23,8 +23,8 @@
                                 <td>
                                     {{ site.name }}
                                     {% if site.is_canceled %}<br/>This site is cancelled{% endif %}
-                                    {% if site.is_disabled %}<br/>This site is disabled{% endif %}
-                                    {% if not site.is_admin_suspended %}
+                                    {% if site.is_disabled %}
+                                        <br/>This site is disabled<br/>
                                         <form action={% url 'enablesite' site_id=site.id %} method="post">
                                             <fieldset>
                                                 {% csrf_token %}
