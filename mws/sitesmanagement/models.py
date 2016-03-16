@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_slug
 from django.db import models
 import re
+from django.utils import timezone
 from os.path import splitext
 import reversion
 from ucamlookup.models import LookupGroup
@@ -122,7 +123,7 @@ class Site(models.Model):
         suspensions = Suspension.objects.filter(site=self)
         for susp in suspensions:
             if susp.active:
-                susp.end_date = datetime.today() - timedelta(days=1)
+                susp.end_date = datetime.today()
                 susp.save()
         return True
 
@@ -255,18 +256,18 @@ class EmailConfirmation(models.Model):
 class Suspension(models.Model):
     reason = models.CharField(max_length=250)
     # start date of the suspension
-    start_date = models.DateField(auto_now_add=True)
+    start_date = models.DateTimeField(auto_now_add=True)
     # end date of the suspension
-    end_date = models.DateField(null=True, blank=True)
+    end_date = models.DateTimeField(null=True, blank=True)
     site = models.ForeignKey(Site, related_name="suspensions")
 
     @property
     def active(self):
-        today = date.today()
+        now = timezone.now()
         if self.end_date:
-            return self.start_date >= today and self.end_date <= today
+            return self.start_date <= now and self.end_date > now
         else:
-            return self.start_date >= today
+            return self.start_date <= now
 
 
 def validate_file_extension(value):
