@@ -81,6 +81,9 @@ class Site(models.Model):
     # Number of days since the site lost its last admin
     days_without_admin = models.IntegerField(default=0)
 
+    # Flag to mark Grandfathered MWS2 sites
+    exmws2 = models.BooleanField(default=False)
+
     class Meta:
         ordering = ["-id"]
     #
