@@ -288,6 +288,24 @@ def site_enable(request, site_id):
     return redirect(reverse('listsites'))
 
 
+@login_required
+def site_unsuspend(request, site_id):
+    """View(Controller) to unsuspend a Site object."""
+    site = get_object_or_404(Site, pk=site_id)
+
+    try:
+        if not request.user.is_superuser:
+            return HttpResponseForbidden()
+    except Exception:
+        return HttpResponseForbidden()
+
+    if request.method == 'POST':
+        if site.unsuspend():
+            return redirect(site)
+
+    return HttpResponseForbidden()
+
+
 class SiteDoNotRenew(SitePriviledgeCheck, UpdateView):
     """Schedules cancellation of the site for the end of the current billing period"""
     template_name = 'mws/donotrenew.html'

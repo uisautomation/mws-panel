@@ -118,6 +118,13 @@ class Site(models.Model):
     def suspend_now(self, input_reason):
         return Suspension.objects.create(reason=input_reason, start_date=datetime.today(), site=self)
 
+    def unsuspend(self):
+        suspensions = Suspension.objects.filter(site=self)
+        for susp in suspensions:
+            if susp.active:
+                susp.end_date = datetime.today() - datetime.timedelta(days=1)
+        return True
+
     @property
     def vms(self):
         return VirtualMachine.objects.filter(service__site=self)

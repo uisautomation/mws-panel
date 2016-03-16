@@ -32,6 +32,15 @@
                                             </fieldset>
                                         </form>
                                     {% endif %}
+                                    {% if site.is_admin_suspended %}
+                                        <br/>This site is Administrativelly suspended<br/>
+                                        <form action={% url 'unsuspendsite' site_id=site.id %} method="post">
+                                            <fieldset>
+                                                {% csrf_token %}
+                                                <input type="submit" value="Unsuspend" class="campl-btn campl-primary-cta">
+                                            </fieldset>
+                                        </form>
+                                    {% endif %}
                                 </td>
                                 <td>
                                     {{ site.description }}
