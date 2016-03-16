@@ -24,13 +24,11 @@ def privileges_check(site_id, user):
     # If the user is not in the user auth list of the site and neither belongs to a group in the group auth list or
     # the site is disabled or canceled return None
     try:
-        if not user.is_superuser:
-            if (site not in user.sites.all() and not user_in_groups(user, site.groups.all()))\
-                    or site.is_canceled() or site.is_disabled():
-                return None
+        if not user.is_superuser and (site not in user.sites.all() and not user_in_groups(user, site.groups.all())) or \
+            (site.is_canceled() or site.is_disabled()):
+            return None
     except Exception:
         return None
-
     return site
 
 

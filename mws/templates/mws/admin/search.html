@@ -22,6 +22,8 @@
                             <tr data-href="{% url 'showsite' site_id=site.id %}">
                                 <td>
                                     {{ site.name }}
+                                    {% if site.is_canceled %}<br/>This site is cancelled{% endif %}
+                                    {% if site.is_disabled %}<br/>This site is disabled{% endif %}
                                 </td>
                                 <td>
                                     {{ site.description }}
