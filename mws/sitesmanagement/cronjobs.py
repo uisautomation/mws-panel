@@ -171,7 +171,7 @@ def send_warning_last_or_none_admin():
                     subject="Your UIS Managed Web Server '%s' has only one administrator" % site.name,
                     body="You are receiving this message because your email address, or an email alias that includes "
                          "you as a recipient, has been configured as the contact address for the UIS Managed Web "
-                         "Server '%s'.\n\n The Managed Web Server '%s' only has a single administrator. This could be "
+                         "Server '%s'.\n\nThe Managed Web Server '%s' only has a single administrator. This could be "
                          "a problem if some action is required in their absence, or if they leave the University "
                          "since the site would then be automatically suspended. To avoid this, and to stop these "
                          "emails, please add at least one additional administrator via the control panel at %s\n\n"
