@@ -102,4 +102,7 @@ urlpatterns = patterns('',
     url(r'^privacy/$', 'sitesmanagement.views.privacy'),
     url(r'^termsandconditions/$', 'sitesmanagement.views.termsconds'),
 
+    # Admin
+    url(r'^searchadmin/$', 'sitesmanagement.views.admin_search'),
+
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
