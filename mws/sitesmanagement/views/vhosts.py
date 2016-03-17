@@ -248,7 +248,7 @@ def vhost_onwership(request, vhost_id):
     if site is None or (not service or not service.active or service.is_busy):
         return HttpResponseForbidden()
 
-    if request.method == 'POST':
+    if request.method == 'POST' and not vhost.apache_owned:
         vhost_enable_apache_owned.delay(vhost_id)
         return HttpResponse("The ownership of the '%s' website docroot folder has been changed to www-data "
                             "successfully. This change will only remain for one hour." % vhost.name)
