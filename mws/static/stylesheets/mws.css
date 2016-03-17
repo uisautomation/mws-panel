@@ -306,6 +306,13 @@ ul.warning-messages li a {
     color: #fff;
 }
 
+.bg-info{
+    padding: 15px;
+    background-color: #d9edf7;
+    margin: 0 0 10px;
+    box-sizing: border-box;
+}
+
 /*! normalize.css v3.0.0 | MIT License | git.io/normalize */
 
 .btn {

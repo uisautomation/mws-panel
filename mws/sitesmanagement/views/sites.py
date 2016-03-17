@@ -15,7 +15,7 @@ from ucamlookup import user_in_groups, get_user_lookupgroups
 from apimws.ansible import launch_ansible_site
 from apimws.utils import email_confirmation
 from sitesmanagement.forms import SiteForm, SiteEmailForm
-from sitesmanagement.models import Site, DomainName, Billing
+from sitesmanagement.models import Site, DomainName, Billing, Vhost
 from django.conf import settings as django_settings
 from sitesmanagement.utils import can_create_new_site
 
@@ -38,6 +38,11 @@ def warning_messages(site):
         warning_messages_list.append(
             format_html('No billing details are available, please <a href="%s" style="text-decoration: underline;">add '
                         'them</a>.' % reverse('billing_management', kwargs={'site_id': site.id})))
+
+    for vhost in Vhost.objects.filter(service__site=site, apache_owned=True):
+        warning_messages_list.append(
+            format_html('Your website/vhost "%s" docroot folder is currently temporary writable by the apache user.' %
+                        vhost.name))
 
     return warning_messages_list
 

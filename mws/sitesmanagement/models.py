@@ -485,6 +485,7 @@ class Vhost(models.Model):
     tls_key_hash = models.TextField(null=True, blank=True)
     tls_enabled = models.BooleanField(default=False)
     webapp = models.CharField(max_length=100, choices=WEBAPP_CHOICES, null=True, blank=True)
+    apache_owned = models.BooleanField(default=False)
 
     def sorted_domain_names(self):
         return sorted(set(self.domain_names.all()))

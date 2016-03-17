@@ -56,6 +56,7 @@ urlpatterns = patterns('',
     url(r'^add_vhost/(?P<service_id>[0-9]+)/$', VhostCreate.as_view(), name='createvhost'),
     url(r'^vhosts/(?P<vhost_id>[0-9]+)/delete/$', VhostDelete.as_view(), name='deletevhost'),
     url(r'^visit_website/(?P<vhost_id>[0-9]+)/$', VisitVhost.as_view(), name='visitvhost'),
+    url(r'^vhost/(?P<vhost_id>[0-9]+)/apache_owned$', 'sitesmanagement.views.vhost_onwership', name='vhostapache'),
 
     # Domains management
     url(r'^add_domain/(?P<vhost_id>[0-9]+)/$', 'sitesmanagement.views.add_domain'),

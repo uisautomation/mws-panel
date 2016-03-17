@@ -10,7 +10,7 @@ from django.http import HttpResponseForbidden, HttpResponse, HttpResponseRedirec
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import ListView, DeleteView, CreateView, DetailView
 from ucamlookup import user_in_groups
-from apimws.ansible import launch_ansible, delete_vhost_ansible
+from apimws.ansible import launch_ansible, delete_vhost_ansible, vhost_enable_apache_owned
 from mwsauth.utils import privileges_check
 from sitesmanagement.forms import VhostForm
 from sitesmanagement.models import Service, Vhost
@@ -125,12 +125,13 @@ class VhostDelete(VhostPriviledgeCheck, DeleteView):
         return HttpResponseRedirect(reverse('listvhost', kwargs={'service_id': self.service.id}))
 
     def delete(self, request, *args, **kwargs):
-        if self.vhost.name != "default":
+        vhost_name = self.vhost.name
+        if vhost_name != "default":
             delete_vhost_ansible.delay(self.vhost.service, self.vhost.name, self.vhost.webapp)
             super(VhostDelete, self).delete(request, *args, **kwargs)
-            return HttpResponse()
+            return HttpResponse("The website/vhost '%s' has been deleted successfully" % vhost_name)
         else:
-            return HttpResponseForbidden()
+            return HttpResponseForbidden("The default website/vhost cannot be deleted")
 
     def get_success_url(self):
         return reverse('listvhost', kwargs={'service_id': self.service.id})
@@ -236,3 +237,21 @@ def certificates(request, vhost_id):
         'sidebar_messages': warning_messages(site),
         'error_message': error_message
     })
+
+
+@login_required
+def vhost_onwership(request, vhost_id):
+    vhost = get_object_or_404(Vhost, pk=vhost_id)
+    site = privileges_check(vhost.service.site.id, request.user)
+    service = vhost.service
+
+    if site is None or (not service or not service.active or service.is_busy):
+        return HttpResponseForbidden()
+
+    if request.method == 'POST':
+        vhost_enable_apache_owned.delay(vhost_id)
+        return HttpResponse("The ownership of the '%s' website docroot folder has been changed to www-data "
+                            "successfully. This change will only remain for one hour." % vhost.name)
+
+    return HttpResponseForbidden("An error happened while changing ownership of the docroot folder of the '%s' "
+                                 "website" % vhost.name)
