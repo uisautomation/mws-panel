@@ -79,6 +79,11 @@ CELERYBEAT_SCHEDULE = {
         'task': 'sitesmanagement.cronjobs.send_warning_last_or_none_admin',
         'schedule': crontab(hour=9, minute=25),
         'args': ()
+    },
+    'reject_or_accepted_old_domain_names_requests': {
+        'task': 'sitesmanagement.cronjobs.reject_or_accepted_old_domain_names_requests',
+        'schedule': crontab(hour=7, minute=25),
+        'args': ()
     }
 }
 

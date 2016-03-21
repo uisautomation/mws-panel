@@ -44,7 +44,7 @@ def ip_register_api_request(domain_name):
              % (nameinfo['domain'], domain_name.requested_by.last_name, domain_name.requested_by.username,
                 domain_name.name, settings.MAIN_DOMAIN,
                 reverse('apimws.views.confirm_dns', kwargs={'dn_id': domain_name.id, 'token': domain_name.token}),
-                "rejected" if nameinfo['exists'] else "accepted",
+                "rejected" if nameinfo['exists'] and "C" not in nameinfo['exists'] else "accepted",
                 "We have detected that this domain name already exists in the DNS. In order to accept the request "
                 "you will have to change the domain name to a CNAME or delete it.\n\n"
                 if nameinfo['exists'] and "C" not in nameinfo['exists'] else ""),

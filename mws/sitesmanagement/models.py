@@ -514,6 +514,34 @@ class DomainName(models.Model):
     token = models.CharField(max_length=50, default=uuid.uuid4)
     authorised_by = models.ForeignKey(User, related_name='domain_names_authorised', blank=True, null=True)
 
+    def accept_it(self):
+        self.status = 'accepted'
+        self.save()
+        from apimws.ipreg import set_cname
+        set_cname(self.name, self.vhost.service.network_configuration.name)
+        from apimws.ansible import launch_ansible
+        launch_ansible(self.vhost.service)
+        now = datetime.now()
+        # Check if the set_cname was executed before the DNS refresh of the current hour.
+        # DNS refreshes happen at 53 minutes of each hour
+        if now.minute > 55:
+            # If it was executed after the DNS refresh of the current hour, send the email to the user when
+            # the next refresh happens
+            eta = now.replace(minute=54) + timedelta(hours=1)
+        else:
+            # If it was executed before the DNS refresh of the current hour, send the email to the user when
+            # the refresh happens
+            eta = now.replace(minute=54)
+        from apimws.utils import domain_confirmation_user
+        domain_confirmation_user.apply_async(args=[self, ], eta=eta)
+
+    def reject_it(self, reason=""):
+        self.status = 'denied'
+        self.reject_reason = reason
+        self.save()
+        from apimws.utils import domain_confirmation_user
+        domain_confirmation_user.delay(self)
+
     def __unicode__(self):
         return self.name
 

@@ -1,6 +1,5 @@
 import json
 import subprocess
-
 from celery import shared_task
 from django.conf import settings
 from apimws.ansible import LOGGER

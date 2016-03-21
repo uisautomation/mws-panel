@@ -92,7 +92,7 @@ class DNSTests(TestCase):
         with mock.patch("apimws.views.get_nameinfo") as mock_get_nameinfo:
             # Now test accept a changeable domain name
             mock_get_nameinfo.return_value = {'exists': ['C']}
-            with mock.patch("apimws.views.set_cname") as mock_set_cname:
+            with mock.patch("apimws.ipreg.set_cname") as mock_set_cname:
                 mock_set_cname.return_value = True
                 with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
                     mock_subprocess.check_output.return_value.returncode = 0

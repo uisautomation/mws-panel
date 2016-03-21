@@ -7,9 +7,10 @@ from django.conf import settings
 from django.core.mail import EmailMessage
 from django.db.models import Q
 from django.utils import timezone
-from apimws.utils import preallocate_new_site
-from sitesmanagement.models import Billing, Site, VirtualMachine
 
+from apimws.ipreg import get_nameinfo
+from apimws.utils import preallocate_new_site
+from sitesmanagement.models import Billing, Site, VirtualMachine, DomainName
 
 LOGGER = logging.getLogger('mws')
 
@@ -157,7 +158,6 @@ def check_num_preallocated_sites():
         preallocate_new_site()
 
 
-
 @shared_task
 def send_warning_last_or_none_admin():
     for site in Site.objects.filter(Q(start_date__isnull=False) &
@@ -218,3 +218,15 @@ def send_warning_last_or_none_admin():
         else:
             site.days_without_admin = 0
             site.save()
+
+
+@shared_task
+def reject_or_accepted_old_domain_names_requests():
+    for domain_name in DomainName.objects.filter(status='requested',
+                                                 requested_at__lt=(timezone.now()-timedelta(days=3))):
+        nameinfo = get_nameinfo(domain_name.name)
+        if nameinfo['exists'] and "C" not in nameinfo['exists']:
+            domain_name.reject_it("This domain name request has been automatically denied due to the lack of answer "
+                                  "from the domain name administrator after 3 days.")
+        else:
+            domain_name.accept_it()
