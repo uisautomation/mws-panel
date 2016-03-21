@@ -5,7 +5,7 @@ from sitesmanagement.models import Service
 
 class Command(NoArgsCommand):
     args = "{ <service_id> <variable_name> <variable_value> }"
-    help = "Stores the TLS key hash in the database"
+    help = "Stores variables of a MWS3 server in the database"
 
     def handle(self, *args, **options):
         if len(args) != 3:

@@ -8,7 +8,7 @@ from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from stronghold.decorators import public
-from apimws.ansible import launch_ansible_async, AnsibleTaskWithFailure, launch_ansible
+from apimws.ansible import launch_ansible_async, AnsibleTaskWithFailure, launch_ansible, ansible_change_mysql_root_pwd
 from apimws.ipreg import set_cname, get_nameinfo
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.models import DomainName, EmailConfirmation, VirtualMachine, Billing
@@ -121,6 +121,7 @@ def confirm_email(request, ec_id, token):
 @shared_task(base=AnsibleTaskWithFailure, default_retry_delay=120, max_retries=2)
 def post_installOS(service):
     launch_ansible_async(service, ignore_host_key=True)
+    ansible_change_mysql_root_pwd(service)
     if service.site.preallocated:
         service.site.disable()
 
