@@ -74,6 +74,11 @@ CELERYBEAT_SCHEDULE = {
         'task': 'sitesmanagement.cronjobs.check_num_preallocated_sites',
         'schedule': crontab(hour=3, minute=25),
         'args': ()
+    },
+    'send_warning_last_or_none_admin': {
+        'task': 'sitesmanagement.cronjobs.send_warning_last_or_none_admin',
+        'schedule': crontab(hour=9, minute=25),
+        'args': ()
     }
 }
 
