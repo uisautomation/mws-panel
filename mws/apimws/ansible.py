@@ -4,6 +4,7 @@ from celery import shared_task, Task
 from django.utils import timezone
 from sitesmanagement.models import Site, Snapshot, Service, Vhost
 
+
 LOGGER = logging.getLogger('mws')
 
 

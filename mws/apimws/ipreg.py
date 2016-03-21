@@ -1,9 +1,12 @@
 import json
+import logging
 import subprocess
 from celery import shared_task
 from django.conf import settings
-from apimws.ansible import LOGGER
 from apimws.jackdaw import SSHTaskWithFailure
+
+
+LOGGER = logging.getLogger('mws')
 
 
 def ip_reg_call(call):
