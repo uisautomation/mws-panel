@@ -6,7 +6,6 @@ from celery import shared_task, Task
 from django.core.mail import EmailMessage
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from apimws.ipreg import get_nameinfo
 from apimws.vm import new_site_primary_vm
 from sitesmanagement.models import EmailConfirmation, NetworkConfig, Site, Service
 
@@ -24,6 +23,7 @@ class EmailTaskWithFailure(Task):
 
 @shared_task(base=EmailTaskWithFailure, default_retry_delay=15*60, max_retries=6)  # Retry each 15 minutes for 6 times
 def ip_register_api_request(domain_name):
+    from apimws.ipreg import get_nameinfo
     nameinfo = get_nameinfo(domain_name)
     if nameinfo['emails']:
         emails = nameinfo['emails']
