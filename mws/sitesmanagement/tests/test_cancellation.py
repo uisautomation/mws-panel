@@ -60,7 +60,7 @@ class CancelSiteTest(TestCase):
         site = Site.objects.get(pk=site.id)
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject,
-                         'Your managed web site has been cancelled')
+                         'Your managed web server has been cancelled')
         self.assertEqual(mail.outbox[0].to, [site.email])
         self.assertEqual(site.end_date, today.date())
         self.assertFalse(site.users.exists())

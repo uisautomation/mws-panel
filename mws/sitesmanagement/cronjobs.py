@@ -129,7 +129,7 @@ def check_subscription():
             subject="Your managed web server has been cancelled",
             body="You are receiving this message because your email address, or an email alias that includes "
                  "you as a recipient, has been configured as the contact address for the UIS Managed Web "
-                 "Server '%s'.\n\nYour managed web site '%s' has been cancelled per your requested." %
+                 "Server '%s'.\n\nYour managed web server '%s' has been cancelled per your requested." %
                  (site.name, site.name),
             from_email="Managed Web Service Support <mws3-support@uis.cam.ac.uk>",
             to=[site.email],

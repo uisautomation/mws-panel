@@ -118,7 +118,7 @@ class BillingTests(TestCase):
         send_reminder_renewal()
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject,
-                         'The annual charge for your managed web site is due next month')
+                         'The annual charge for your managed web server is due next month')
         self.assertEqual(mail.outbox[0].to, [site.email])
 
         # same month renewal warning
@@ -127,7 +127,7 @@ class BillingTests(TestCase):
         send_reminder_renewal()
         self.assertEqual(len(mail.outbox), 2)
         self.assertEqual(mail.outbox[1].subject,
-                         'REMINDER: the annual charge for your managed web site is due this month')
+                         'REMINDER: the annual charge for your managed web server is due this month')
         self.assertEqual(mail.outbox[1].to, [site.email])
 
     def test_check_cacnel_if_not_paid(self):
@@ -154,7 +154,7 @@ class BillingTests(TestCase):
         check_subscription()
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject,
-                         'Remember to upload a purchase order for your managed web site')
+                         'Remember to upload a purchase order for your managed web server')
         self.assertEqual(mail.outbox[0].to, [site.email])
         # Retrieve object
         site = Site.objects.get(pk=site.id)
@@ -179,7 +179,7 @@ class BillingTests(TestCase):
         check_subscription()
         self.assertEqual(len(mail.outbox), 2)
         self.assertEqual(mail.outbox[1].subject,
-                         'Remember to upload a purchase order for your managed web site')
+                         'Remember to upload a purchase order for your managed web server')
         self.assertEqual(mail.outbox[1].to, [site.email])
         # Retrieve object
         site = Site.objects.get(pk=site.id)
@@ -195,7 +195,7 @@ class BillingTests(TestCase):
         check_subscription()
         self.assertEqual(len(mail.outbox), 3)
         self.assertEqual(mail.outbox[2].subject,
-                         'Your managed web site has been cancelled')
+                         'Your managed web server has been cancelled')
         self.assertEqual(mail.outbox[2].to, [site.email])
         # Retrieve object
         site = Site.objects.get(pk=site.id)
