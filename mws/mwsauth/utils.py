@@ -1,11 +1,9 @@
 import logging
-
-from celery import shared_task
+from celery import shared_task, Task
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from ucamlookup import user_in_groups, get_or_create_user_by_crsid, GroupMethods, conn
 from ucamlookup.models import LookupGroup
-from sitesmanagement.models import Site
 
 
 LOGGER = logging.getLogger('mws')
@@ -61,6 +59,7 @@ class ScheduledTaskWithFailure(Task):
 
 @shared_task(base=ScheduledTaskWithFailure)
 def remove_supporter(site_id, crsid):
+    from sitesmanagement.models import Site
     site = Site.objects.get(id=site_id)
     user = User.objects.get(username=crsid)
     site.supporters.remove(user)
