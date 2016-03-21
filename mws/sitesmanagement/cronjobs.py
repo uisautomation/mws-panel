@@ -34,15 +34,18 @@ def send_reminder_renewal():
                                                    site__subscription=True)
     for billing in renewal_sites_billing:
         EmailMessage(
-            subject="The annual charge for your managed web site is due next month",
-            body="The annual charge for your managed web site '%s' is due next month on %s. Unless you tell us otherwise "
-                 "we will automatically issue an invoice for this at the end of next month based on information from the "
-                 "most recent purchase order you have given us. Please use the web control panel (under 'billing settings') "
-                 "to check that this information is still current. If you want to amend your purchase order you can upload "
-                 "a new one. Your site may be cancelled if we can't successfully invoice for it.\n\n"
-                 "If you no longer want you site then please either cancel it now (under 'edit the MWS profile'), or mark "
-                 "it 'Not for renewal' in which case it will be automatically cancelled on '%s'." 
-                 % (billing.site.name, billing.site.start_date, billing.site.start_date),
+            subject="The annual charge for your managed web server is due next month",
+            body="You are receiving this message because your email address, or an email alias that includes "
+                 "you as a recipient, has been configured as the contact address for the UIS Managed Web "
+                 "Server '%s'.\n\nThe annual charge for your managed web server '%s' is due next month on %s. "
+                 "Unless you tell us otherwise we will automatically issue an invoice for this at the end of next "
+                 "month based on information from the most recent purchase order you have given us. Please use the "
+                 "web control panel (under 'billing settings') to check that this information is still current. If "
+                 "you want to amend your purchase order you can upload a new one. Your site may be cancelled if we "
+                 "can't successfully invoice for it.\n\nIf you no longer want you site then please either cancel "
+                 "it now (under 'edit the MWS profile'), or mark it 'Not for renewal' in which case it will be "
+                 "automatically cancelled on '%s'."
+                 % (billing.site.name, billing.site.name, billing.site.start_date, billing.site.start_date),
             from_email="Managed Web Service Support <%s>"
                        % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk'),
             to=[billing.site.email],
@@ -54,15 +57,18 @@ def send_reminder_renewal():
                                                    site__end_date__isnull=True)
     for billing in renewal_sites_billing:
         EmailMessage(
-            subject="REMINDER: the annual charge for your managed web site is due this month",
-            body="The annual charge for your managed web site '%s' is due this month on %s. Unless you tell us otherwise "
-                 "we will automatically issue an invoice for this at the end of this month based on information from the "
-                 "most recent purchase order you have given us. If you haven't already, please use the web control panel "
-                 "(under 'billing settings') to check that this information is still current. If you want to amend your "
-                 "purchase order you can upload a new one. Your site may be cancelled if we can't successfully invoice for it.\n\n"
-                 "If you no longer want you site then please either cancel it now (under 'edit the MWS profile'), or mark "
+            subject="REMINDER: the annual charge for your managed web server is due this month",
+            body="You are receiving this message because your email address, or an email alias that includes "
+                 "you as a recipient, has been configured as the contact address for the UIS Managed Web "
+                 "Server '%s'.\n\nThe annual charge for your managed web server '%s' is due this month on %s. "
+                 "Unless you tell us otherwise we will automatically issue an invoice for this at the end of this "
+                 "month based on information from the most recent purchase order you have given us. If you "
+                 "haven't already, please use the web control panel (under 'billing settings') to check that this "
+                 "information is still current. If you want to amend your purchase order you can upload a new one. "
+                 "Your site may be cancelled if we can't successfully invoice for it.\n\nIf you no longer want "
+                 "you site then please either cancel it now (under 'edit the MWS profile'), or mark "
                  "it 'Not for renewal' in which case it will be automatically cancelled on '%s'." 
-                 % (billing.site.name, billing.site.start_date, billing.site.start_date),
+                 % (billing.site.name, billing.site.name, billing.site.start_date, billing.site.start_date),
             from_email="Managed Web Service Support <mws3-support@uis.cam.ac.uk>",
             to=[billing.site.email],
             headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
@@ -79,8 +85,11 @@ def check_subscription():
         if (today - site.start_date) >= timedelta(days=31):
             # Cancel site
             EmailMessage(
-                subject="Your managed web site has been cancelled",
-                body="Your managed web site '%s' has been cancelled because we haven't received payment information for it." % site.name,
+                subject="Your managed web server has been cancelled",
+                body="You are receiving this message because your email address, or an email alias that includes "
+                     "you as a recipient, has been configured as the contact address for the UIS Managed Web "
+                     "Server '%s'.\n\nYour managed web server '%s' has been cancelled because we haven't received "
+                     "payment information for it." % (site.name, site.name),
                 from_email="Managed Web Service Support <mws3-support@uis.cam.ac.uk>",
                 to=[site.email],
                 headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
@@ -89,10 +98,13 @@ def check_subscription():
         elif ((today - site.start_date) == timedelta(days=15)) or ((today - site.start_date) >= timedelta(days=24)):
             # Warning 15 days before and each day in the last week before deadline
             EmailMessage(
-                subject="Remember to upload a purchase order for your managed web site",
-                body="Please upload a purchase order using the control web panel to pay for your managed "
-                     "web site '%s'.\n\nIf you don't upload a valid purchase order before %s your site '%s' will be "
-                     "automatically cancelled." % (site.name, site.start_date+timedelta(days=30), site.name),
+                subject="Remember to upload a purchase order for your managed web server",
+                body="You are receiving this message because your email address, or an email alias that includes "
+                     "you as a recipient, has been configured as the contact address for the UIS Managed Web "
+                     "Server '%s'.\n\nPlease upload a purchase order using the control web panel to pay for your "
+                     "managed web server '%s'.\n\nIf you don't upload a valid purchase order before %s your site "
+                     "'%s' will be automatically cancelled." % (site.name, site.name,
+                                                                site.start_date+timedelta(days=30), site.name),
                 from_email="Managed Web Service Support <mws3-support@uis.cam.ac.uk>",
                 to=[site.email],
                 headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
@@ -106,8 +118,11 @@ def check_subscription():
     for site in sites:
         # Cancel site
         EmailMessage(
-            subject="Your managed web site has been cancelled",
-            body="Your managed web site '%s' has been cancelled per your requested." % site.name,
+            subject="Your managed web server has been cancelled",
+            body="You are receiving this message because your email address, or an email alias that includes "
+                 "you as a recipient, has been configured as the contact address for the UIS Managed Web "
+                 "Server '%s'.\n\nYour managed web site '%s' has been cancelled per your requested." %
+                 (site.name, site.name),
             from_email="Managed Web Service Support <mws3-support@uis.cam.ac.uk>",
             to=[site.email],
             headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}

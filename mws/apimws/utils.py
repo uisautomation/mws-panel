@@ -68,9 +68,11 @@ def send_email_confirmation(site):
         email_conf = email_conf.first()
         EmailMessage(
             subject="University of Cambridge Managed Web Service: Please confirm your email address",
-            body="Please, confirm your email address by clicking in the following link: %s%s"
-                 % (settings.MAIN_DOMAIN, reverse('apimws.views.confirm_email',
-                                                  kwargs={'ec_id': email_conf.id, 'token': email_conf.token})),
+            body="You are receiving this message because your email address, or an email alias that includes "
+                 "you as a recipient, has been configured as the contact address for the UIS Managed Web "
+                 "Server '%s'.\n\nPlease, confirm your email address by clicking in the following link: %s%s"
+                 % (site.name, settings.MAIN_DOMAIN,
+                    reverse('apimws.views.confirm_email', kwargs={'ec_id': email_conf.id, 'token': email_conf.token})),
             from_email="Managed Web Service Support <mws3-support@uis.cam.ac.uk>",
             to=[site.email],
             headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
@@ -80,9 +82,11 @@ def send_email_confirmation(site):
 @shared_task(base=EmailTaskWithFailure, default_retry_delay=5*60, max_retries=12)  # Retry each 5 minutes for 1 hour
 def finished_installation_email_confirmation(site):
     EmailMessage(
-        subject="University of Cambridge Managed Web Service: Your MWS3 site is available",
-        body="Your MWS3 site is now available. You can access to the web panel of your MWS3 site by clicking the "
-             "following link: %s%s" % (settings.MAIN_DOMAIN, site.get_absolute_url()),
+        subject="University of Cambridge Managed Web Service: Your MWS3 server is available",
+        body="You are receiving this message because your email address, or an email alias that includes "
+             "you as a recipient, has been configured as the contact address for the UIS Managed Web "
+             "Server '%s'.\n\nYour MWS3 server is now available. You can access to the web panel of your MWS3 server "
+             "by clicking the following link: %s%s" % (site.name, settings.MAIN_DOMAIN, site.get_absolute_url()),
         from_email="Managed Web Service Support <mws3-support@uis.cam.ac.uk>",
         to=[site.email],
         headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
