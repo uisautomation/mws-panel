@@ -57,7 +57,7 @@ class DNSTests(TestCase):
         test_email = 'amc203@cam.ac.uk'
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
-            with mock.patch("apimws.utils.get_nameinfo") as mock_get_nameinfo:
+            with mock.patch("apimws.ipreg.get_nameinfo") as mock_get_nameinfo:
                 mock_get_nameinfo.return_value = {'emails': [test_email], 'domain': test_internal_cam_domain, 'exists':
                                                   []}
                 self.client.post(reverse('sitesmanagement.views.add_domain', kwargs={'vhost_id': vhost.id}),
