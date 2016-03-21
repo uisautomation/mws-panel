@@ -1,5 +1,4 @@
 import logging
-import os
 import subprocess
 from celery import shared_task, Task
 from django.utils import timezone

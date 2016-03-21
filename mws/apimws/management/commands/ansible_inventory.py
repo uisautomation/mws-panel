@@ -75,7 +75,7 @@ class Command(NoArgsCommand):
                     uv['ssh_key'] = user.mws_user.ssh_public_key
             return uv
         v['mws_users'] = [user_vars(u, vm.service) for u in
-                          vm.site.list_of_all_type_of_active_users()]
+                          vm.site.list_of_all_type_of_active_users() + list(vm.site.supporters.all())]
 
         def vhost_vars(vh):
             vhv = {}

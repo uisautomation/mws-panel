@@ -47,6 +47,19 @@
                     </fieldset>
                 </form>
             </div>
+            {% if request.user.is_superuser %}
+            <div style="float: left; width: 31%; padding: 15px 2% 10px 2%;">
+                <p>This is the current list of supporters for this MWS server: {{ site.supporters.all|join:',' }}</p>
+                <p>If you want to add yourself as a supporter click the button below. After 1 hour you will be
+                    deleted from the supporter list</p>
+                <form action={% url 'mwsauth.views.add_supporter' site_id=site.id %} method="post">
+                    <fieldset>
+                        {% csrf_token %}
+                        <p><input type="submit" value="Add yourself" class="campl-btn campl-primary-cta"></p>
+                    </fieldset>
+                </form>
+            </div>
+            {% endif %}
         </div>
     </div>
 {% endblock %}

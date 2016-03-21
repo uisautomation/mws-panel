@@ -1,13 +1,13 @@
 import subprocess
 from tempfile import NamedTemporaryFile
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
 from ucamlookup import validate_crsids
 from apimws.ansible import launch_ansible_site, launch_ansible_by_user
 from mwsauth.models import MWSUser
-from mwsauth.utils import privileges_check
+from mwsauth.utils import privileges_check, remove_supporter
 from mwsauth.validators import validate_groupids
 from sitesmanagement.views.sites import warning_messages
 
@@ -107,3 +107,20 @@ def user_panel(request):
         'ssh_public_key': mws_user.ssh_public_key,
         'error_message': error_message
     })
+
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def add_supporter(request, site_id):
+    site = privileges_check(site_id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if request.method == 'POST':
+        site.supporters.add(request.user)
+        launch_ansible_site(site)
+        remove_supporter.apply_async(args=(site.id, request.user.username),
+                                     countdown=3600)  # Remove supporter after 1 hour
+
+    return redirect(site)

@@ -1,6 +1,12 @@
+from celery import shared_task
+from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from ucamlookup import user_in_groups, get_or_create_user_by_crsid, GroupMethods, conn
 from ucamlookup.models import LookupGroup
+
+from apimws.ansible import launch_ansible_site
+from sitesmanagement.cronjobs import ScheduledTaskWithFailure
+from sitesmanagement.models import Site
 
 
 def get_or_create_group_by_groupid(groupid):
@@ -41,3 +47,11 @@ def get_users_of_a_group(group):
 
     return map(lambda user: get_or_create_user_by_crsid(user.identifier.value),
                GroupMethods(conn).getMembers(groupid=group.lookup_id))
+
+
+@shared_task(base=ScheduledTaskWithFailure)
+def remove_supporter(site_id, crsid):
+    site = Site.objects.get(id=site_id)
+    user = User.objects.get(username=crsid)
+    site.supporters.remove(user)
+    launch_ansible_site(site)

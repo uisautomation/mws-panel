@@ -76,6 +76,8 @@ class Site(models.Model):
     groups = models.ManyToManyField(LookupGroup, related_name='sites', blank=True)
     # SSH only groups
     ssh_groups = models.ManyToManyField(LookupGroup, related_name='sites_auth_as_user', blank=True)
+    # Supporters list (list of MWS support admins temporary added to the user list)
+    supporters = models.ManyToManyField(User, related_name='sites_auth_as_supporter', blank=True)
 
     # Indicates if the site is disabled by the user
     disabled = models.BooleanField(default=False)

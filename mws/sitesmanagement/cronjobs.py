@@ -23,6 +23,14 @@ class FinanceTaskWithFailure(Task):
                      "The parameters passed to the task were: %s\n\nThe traceback is:\n%s\n", task_id, args, einfo)
 
 
+class ScheduledTaskWithFailure(Task):
+    abstract = True
+
+    def on_failure(self, exc, task_id, args, kwargs, einfo):
+        LOGGER.error("An error happened when trying to execute an scheduled task.\nThe task id is %s.\n\n"
+                     "The parameters passed to the task were: %s\n\nThe traceback is:\n%s\n", task_id, args, einfo)
+
+
 @shared_task(base=FinanceTaskWithFailure)
 def send_reminder_renewal():
     today = timezone.now().date()
@@ -130,7 +138,7 @@ def check_subscription():
         site.cancel()
 
 
-@shared_task
+@shared_task(base=ScheduledTaskWithFailure)
 def check_backups():
     try:
         result = subprocess.check_output(["userv", "mws-admin", "mws_check_backups"], stderr=subprocess.STDOUT)
@@ -160,20 +168,20 @@ def check_backups():
             LOGGER.error("A backup for the host %s did not complete last night", vm.name)
 
 
-@shared_task
+@shared_task(base=ScheduledTaskWithFailure)
 def delete_cancelled():
     """Delete sites that were cancelled 8 weeks ago"""
     Site.objects.filter(end_date__lt=(datetime.today()-timedelta(weeks=8)).date()).delete()
 
 
-@shared_task
+@shared_task(base=ScheduledTaskWithFailure)
 def check_num_preallocated_sites():
     desired_num_preallocated_sites = getattr(settings, 'NUM_PREALLOCATED_SITES', 0)
     while Site.objects.filter(preallocated=True).count() < desired_num_preallocated_sites:
         preallocate_new_site()
 
 
-@shared_task
+@shared_task(base=ScheduledTaskWithFailure)
 def send_warning_last_or_none_admin():
     for site in Site.objects.filter(Q(start_date__isnull=False) &
                                     (Q(end_date__isnull=True) | Q(end_date__gt=date.today()))):
