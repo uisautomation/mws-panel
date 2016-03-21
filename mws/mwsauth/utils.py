@@ -3,8 +3,6 @@ from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from ucamlookup import user_in_groups, get_or_create_user_by_crsid, GroupMethods, conn
 from ucamlookup.models import LookupGroup
-
-from apimws.ansible import launch_ansible_site
 from sitesmanagement.cronjobs import ScheduledTaskWithFailure
 from sitesmanagement.models import Site
 
@@ -54,4 +52,5 @@ def remove_supporter(site_id, crsid):
     site = Site.objects.get(id=site_id)
     user = User.objects.get(username=crsid)
     site.supporters.remove(user)
+    from apimws.ansible import launch_ansible_site
     launch_ansible_site(site)
