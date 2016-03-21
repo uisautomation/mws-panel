@@ -13,6 +13,7 @@ from django.views.generic import FormView, ListView, UpdateView
 from django.views.generic.detail import SingleObjectMixin, DetailView
 from ucamlookup import user_in_groups, get_user_lookupgroups
 from apimws.ansible import launch_ansible_site
+from apimws.models import AnsibleConfiguration
 from apimws.utils import email_confirmation
 from sitesmanagement.forms import SiteForm, SiteEmailForm
 from sitesmanagement.models import Site, DomainName, Billing, Vhost
@@ -43,6 +44,11 @@ def warning_messages(site):
         warning_messages_list.append(
             format_html('Your website/vhost "%s" docroot folder is currently temporary writable by the apache user.' %
                         vhost.name))
+
+    if AnsibleConfiguration.objects.filter(service__site=site, key="mysql_root_password"):
+        warning_messages_list.append(
+            format_html('You have a new MySQL root password. Please visit %s' %
+                        reverse('change_db_root_password', kwargs={'service_id': site.production_service.id})))
 
     return warning_messages_list
 
