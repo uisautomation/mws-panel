@@ -1,10 +1,14 @@
+import logging
+
 from celery import shared_task
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from ucamlookup import user_in_groups, get_or_create_user_by_crsid, GroupMethods, conn
 from ucamlookup.models import LookupGroup
-from sitesmanagement.cronjobs import ScheduledTaskWithFailure
 from sitesmanagement.models import Site
+
+
+LOGGER = logging.getLogger('mws')
 
 
 def get_or_create_group_by_groupid(groupid):
@@ -45,6 +49,14 @@ def get_users_of_a_group(group):
 
     return map(lambda user: get_or_create_user_by_crsid(user.identifier.value),
                GroupMethods(conn).getMembers(groupid=group.lookup_id))
+
+
+class ScheduledTaskWithFailure(Task):
+    abstract = True
+
+    def on_failure(self, exc, task_id, args, kwargs, einfo):
+        LOGGER.error("An error happened when trying to execute an scheduled task.\nThe task id is %s.\n\n"
+                     "The parameters passed to the task were: %s\n\nThe traceback is:\n%s\n", task_id, args, einfo)
 
 
 @shared_task(base=ScheduledTaskWithFailure)
