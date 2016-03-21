@@ -7,8 +7,6 @@ from django.conf import settings
 from django.core.mail import EmailMessage
 from django.db.models import Q
 from django.utils import timezone
-
-from apimws.ipreg import get_nameinfo
 from apimws.utils import preallocate_new_site
 from sitesmanagement.models import Billing, Site, VirtualMachine, DomainName
 
@@ -247,6 +245,7 @@ def send_warning_last_or_none_admin():
 def reject_or_accepted_old_domain_names_requests():
     for domain_name in DomainName.objects.filter(status='requested',
                                                  requested_at__lt=(timezone.now()-timedelta(days=3))):
+        from apimws.ipreg import get_nameinfo
         nameinfo = get_nameinfo(domain_name.name)
         if nameinfo['exists'] and "C" not in nameinfo['exists']:
             domain_name.reject_it("This domain name request has been automatically denied due to the lack of answer "
