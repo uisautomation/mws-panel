@@ -7,6 +7,9 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 import mock
 from ucamwebauth.tests import create_wls_response
+
+from apimws.models import Cluster, Host
+from apimws.xen import which_cluster
 from mwsauth import views
 from mwsauth.models import MWSUser
 from mwsauth.utils import get_or_create_group_by_groupid
@@ -137,6 +140,9 @@ class AuthTestCases(TestCase):
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': 1}))
         self.assertEqual(response.status_code, 404)  # Site does not exists
 
+        cluster = Cluster.objects.create(name="mws-test-1")
+        Host.objects.create(hostname="mws-test-1.dev.mws3.cam.ac.uk", cluster=cluster)
+
         NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
                                      name="mws-66424.mws3.csx.cam.ac.uk")
         NetworkConfig.objects.create(IPv4='172.28.18.253', type='ipv4priv',
@@ -148,7 +154,8 @@ class AuthTestCases(TestCase):
         service_a = Service.objects.create(type='production', network_configuration=NetworkConfig.
                                            get_free_prod_service_config(), site=site_without_auth_users, status='ready')
         VirtualMachine.objects.create(token=uuid.uuid4(), service=service_a,
-                                      network_configuration=NetworkConfig.get_free_host_config())
+                                      network_configuration=NetworkConfig.get_free_host_config(),
+                                      cluster=which_cluster())
 
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_without_auth_users.id}))
         self.assertEqual(response.status_code, 403)  # User is not authorised
@@ -216,6 +223,9 @@ class AuthTestCases(TestCase):
         do_test_login(self, user="amc203")
         amc203_user = User.objects.get(username="amc203")
 
+        cluster = Cluster.objects.create(name="mws-test-1")
+        Host.objects.create(hostname="mws-test-1.dev.mws3.cam.ac.uk", cluster=cluster)
+
         NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
                                      name="mws-66424.mws3.csx.cam.ac.uk")
         NetworkConfig.objects.create(IPv4='172.28.18.253', type='ipv4priv',
@@ -228,7 +238,8 @@ class AuthTestCases(TestCase):
                                            get_free_prod_service_config(), site=site_with_auth_groups,
                                            status='ready')
         VirtualMachine.objects.create(token=uuid.uuid4(), service=service_a,
-                                      network_configuration=NetworkConfig.get_free_host_config())
+                                      network_configuration=NetworkConfig.get_free_host_config(),
+                                      cluster=which_cluster())
         information_systems_group = get_or_create_group_by_groupid(101888)
         site_with_auth_groups.groups.add(information_systems_group)
 

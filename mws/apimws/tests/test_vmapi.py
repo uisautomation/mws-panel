@@ -15,7 +15,6 @@ class XenAPITests(TestCase):
         do_test_login(self, "test0001")
         assign_a_site(self)
 
-    @override_settings(VM_END_POINT_COMMAND=["vmmanager"])
     def test_xen_api(self):
         # We retrieve the VM created by the create Xen API call
         vm = VirtualMachine.objects.first()
