@@ -91,8 +91,7 @@ MIDDLEWARE_CLASSES += (
     'mwsauth.middleware.CheckBannedUsers',
 )
 
-VM_END_POINT = ["agogue.csi.cam.ac.uk", "odochium.csi.cam.ac.uk"]
-VM_END_POINT_COMMAND = ["userv", "mws-admin", "mws_xen_vm_api", VM_END_POINT[0]]
+VM_END_POINT_COMMAND = ["userv", "mws-admin", "mws_xen_vm_api"]
 VM_API = "xen"
 
 EMAIL_TIMEOUT = 60
