@@ -5,10 +5,16 @@ from sitesmanagement.models import Service
 class Cluster(models.Model):
     name = models.CharField(max_length=100, primary_key=True)
 
+    def __unicode__(self):
+        return self.name
+
 
 class Host(models.Model):
     hostname = models.CharField(max_length=250, primary_key=True)
     cluster = models.ForeignKey(Cluster, related_name='hosts')
+
+    def __unicode__(self):
+        return self.hostname
 
 
 class AnsibleConfiguration(models.Model):
