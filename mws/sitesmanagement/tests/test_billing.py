@@ -6,6 +6,9 @@ from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
+
+from apimws.models import Cluster, Host
+from apimws.xen import which_cluster
 from mwsauth.tests import do_test_login
 from sitesmanagement.cronjobs import send_reminder_renewal, check_subscription
 from sitesmanagement.models import NetworkConfig, Site, VirtualMachine, Service, Billing
@@ -25,6 +28,9 @@ class BillingTests(TestCase):
         response = self.client.get(reverse('billing_management', kwargs={'site_id': 1}))
         self.assertEqual(response.status_code, 404)  # The Site does not exist
 
+        cluster = Cluster.objects.create(name="mws-test-1")
+        Host.objects.create(hostname="mws-test-1.dev.mws3.cam.ac.uk", cluster=cluster)
+
         NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
                                      name="mws-66424.mws3.csx.cam.ac.uk")
 
@@ -39,7 +45,7 @@ class BillingTests(TestCase):
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
         service = Service.objects.create(site=site, type='production', status="ready",
                                          network_configuration=NetworkConfig.get_free_prod_service_config())
-        VirtualMachine.objects.create(name="test_vm", token=uuid.uuid4(),
+        VirtualMachine.objects.create(name="test_vm", token=uuid.uuid4(), cluster=which_cluster(),
                                       service=service, network_configuration=NetworkConfig.get_free_host_config())
 
         response = self.client.get(reverse('billing_management', kwargs={'site_id': site.id}))

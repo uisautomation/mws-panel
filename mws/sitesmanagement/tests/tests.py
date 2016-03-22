@@ -4,9 +4,10 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
-from apimws.models import AnsibleConfiguration
+from apimws.models import AnsibleConfiguration, Cluster, Host
 from apimws.utils import preallocate_new_site
 from apimws.views import post_installation
+from apimws.xen import which_cluster
 from mwsauth.tests import do_test_login
 import sitesmanagement.views as views
 from sitesmanagement.models import Site, VirtualMachine, UnixGroup, Vhost, DomainName, NetworkConfig, Service
@@ -315,19 +316,23 @@ class SiteManagement2Tests(TestCase):
         NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff1', name='mws-client4', type='ipv6')
 
     def create_site(self):
+        cluster = Cluster.objects.create(name="mws-test-1")
+        Host.objects.create(hostname="mws-test-1.dev.mws3.cam.ac.uk", cluster=cluster)
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
         site.users.add(User.objects.get(username='test0001'))
         service = Service.objects.create(site=site, type='production', status="ready",
                                          network_configuration=NetworkConfig.get_free_prod_service_config())
-        VirtualMachine.objects.create(name="test_vm", token=uuid.uuid4(),
+        VirtualMachine.objects.create(name="test_vm", token=uuid.uuid4(), cluster=which_cluster(),
                                       service=service, network_configuration=NetworkConfig.get_free_host_config())
         return site
 
     def test_no_permission_views_tests(self):
+        cluster = Cluster.objects.create(name="mws-test-1")
+        Host.objects.create(hostname="mws-test-1.dev.mws3.cam.ac.uk", cluster=cluster)
         site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
         service = Service.objects.create(site=site, type='production', status="ready",
                                          network_configuration=NetworkConfig.get_free_prod_service_config())
-        vm = VirtualMachine.objects.create(name="test_vm", token=uuid.uuid4(),
+        vm = VirtualMachine.objects.create(name="test_vm", token=uuid.uuid4(), cluster=which_cluster(),
                                            service=service, network_configuration=NetworkConfig.get_free_host_config())
         vhost = Vhost.objects.create(name="tests_vhost", service=service)
         dn = DomainName.objects.create(name="testtestest.mws3.csx.cam.ac.uk", status="accepted", vhost=vhost)
@@ -379,7 +384,7 @@ class SiteManagement2Tests(TestCase):
         service.save()
         service2 = Service.objects.create(site=site, type='test', status="requested",
                                           network_configuration=NetworkConfig.get_free_prod_service_config())
-        VirtualMachine.objects.create(name="test_vm2", token=uuid.uuid4(), service=service2,
+        VirtualMachine.objects.create(name="test_vm2", token=uuid.uuid4(), service=service2, cluster=which_cluster(),
                                       network_configuration=NetworkConfig.get_free_host_config())
         vhost = Vhost.objects.create(name="tests_vhost", service=service)
         dn = DomainName.objects.create(name="testtestest.mws3.csx.cam.ac.uk", status="accepted", vhost=vhost)

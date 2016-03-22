@@ -10,6 +10,7 @@ from celery import shared_task, Task
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from apimws.ipreg import set_sshfp
+from apimws.models import Cluster
 from apimws.views import post_installation, post_recreate
 from mws.celery import app
 from sitesmanagement.models import VirtualMachine, NetworkConfig, Service, SiteKey, Vhost, DomainName
@@ -110,7 +111,7 @@ def new_site_primary_vm(service, host_network_configuration=None):
         if host_network_configuration.name:
             netconf["hostname"] = host_network_configuration.name
         vm = VirtualMachine.objects.create(service=service, token=uuid.uuid4(),
-                                           network_configuration=host_network_configuration)
+                                           network_configuration=host_network_configuration, cluster=which_cluster())
     else:
         raise AttributeError("No host network configuration")
 
@@ -255,7 +256,8 @@ def clone_vm(site, primary_vm):
     destination_service = Service.objects.create(site=original_service.site, type=service_type,
                                                  network_configuration=service_netconf, status='requested')
     destination_vm = VirtualMachine.objects.create(token=uuid.uuid4(), service=destination_service,
-                                                   network_configuration=NetworkConfig.get_free_host_config())
+                                                   network_configuration=NetworkConfig.get_free_host_config(),
+                                                   cluster=which_cluster())
 
     clone_vm_api_call.delay(original_service, destination_vm)
 
@@ -311,3 +313,10 @@ def clone_vm_api_call(original_service, destination_vm):
         vhost.save()
 
     return True
+
+
+def which_cluster():
+    """This function decides which cluster to use when creating a new VM based on how busy each cluster is.
+    At present we only have one cluster, so the decision algorithm is pretty obvious. Returns a Cluster object.
+    """
+    return Cluster.objects.first()
