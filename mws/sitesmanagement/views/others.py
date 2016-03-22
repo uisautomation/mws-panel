@@ -14,6 +14,7 @@ from django.utils.encoding import smart_str
 from apimws.ansible import launch_ansible, ansible_change_mysql_root_pwd, restore_snapshot
 from apimws.models import AnsibleConfiguration
 from apimws.vm import clone_vm
+from apimws.xen import clone_production_service
 from mwsauth.utils import privileges_check
 from sitesmanagement.forms import BillingForm, SnapshotForm
 from sitesmanagement.utils import get_object_or_None
@@ -62,26 +63,21 @@ def billing_management(request, site_id):
 
 @login_required
 def clone_vm_view(request, site_id):
-    if getattr(settings, 'DEMO', False):
-        return HttpResponseRedirect(reverse('listsites'))
     site = privileges_check(site_id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
-
-    if not site.is_ready:
-        return redirect(site)
 
     breadcrumbs = {
         0: dict(name='Managed Web Service server: ' + str(site.name), url=site.get_absolute_url()),
         1: dict(name='Production and test servers management', url=reverse(clone_vm_view, kwargs={'site_id': site.id}))
     }
 
-    if request.method == 'POST':
-        if request.POST.get('primary_vm') == "true":
-            clone_vm(site, True)
-        if request.POST.get('primary_vm') == "false":
-            clone_vm(site, False)
+    if request.method == 'POST' and site.is_ready:
+        if request.POST.get('production_service') == "true":
+            clone_production_service(site)
+        if request.POST.get('production_service') == "false":
+            pass  # TODO make function to move service address from production to test
 
         return redirect(site)
 

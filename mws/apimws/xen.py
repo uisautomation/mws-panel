@@ -235,6 +235,10 @@ def destroy_vm(vm_id):
     return True
 
 
+def clone_production_service(site):
+    pass
+
+
 def clone_vm(site, primary_vm):
     if primary_vm:
         original_service = site.production_service
