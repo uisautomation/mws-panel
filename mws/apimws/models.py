@@ -5,6 +5,15 @@ from apimws.vm import destroy_vm
 from sitesmanagement.models import VirtualMachine, Service
 
 
+class Cluster(models.Model):
+    name = models.CharField(max_length=100, primary_key=True)
+
+
+class Host(models.Model):
+    hostname = models.CharField(max_length=250, primary_key=True)
+    cluster = models.ForeignKey(Cluster, related_name='hosts')
+
+
 class AnsibleConfiguration(models.Model):
     service = models.ForeignKey(Service, related_name='ansible_configuration')
     key = models.CharField(max_length=250, db_index=True)
