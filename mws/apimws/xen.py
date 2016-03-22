@@ -31,12 +31,11 @@ class VMAPIFailure(Exception):
     pass
 
 
-def vm_api_request(**json_object):
-    if not getattr(settings, 'VM_END_POINT_COMMAND', False):
-        raise VMAPIFailure("VM_END_POINT_COMMAND not found")
+def vm_api_request(command, parameters, vm):
     api_command = copy.copy(settings.VM_END_POINT_COMMAND)
-    api_command.append(json_object['command'])
-    api_command.append("'%s'" % json.dumps(json_object['parameters']))
+    api_command.append(vm.cluster.hosts.first().hostname)
+    api_command.append(command)
+    api_command.append("'%s'" % json.dumps(parameters))
     try:
         response = subprocess.check_output(api_command, stderr=subprocess.STDOUT)
         LOGGER.info("VM API request: %s\nVM API response: %s", api_command, response)
@@ -125,7 +124,7 @@ def new_site_primary_vm(service, host_network_configuration=None):
     service.status = 'installing'
     service.save()
 
-    response = vm_api_request(command='create', parameters=parameters)
+    response = vm_api_request(command='create', parameters=parameters, vm=vm)
 
     try:
         jresponse = json.loads(response)
@@ -183,7 +182,7 @@ def recreate_vm(vm_id):
     service.status = 'installing'
     service.save()
 
-    response = vm_api_request(command='create', parameters=parameters)
+    response = vm_api_request(command='create', parameters=parameters, vm=vm)
 
     try:
         jresponse = json.loads(response)
@@ -212,7 +211,7 @@ def change_vm_power_state(vm_id, on):
                             x['args'] == u"(%s, '%s')" % (vm_id, on),
                   [item for sublist in app.control.inspect().active().values() for item in sublist])
     if len(lock) == 1:
-        vm_api_request(command='button', parameters={"action": "power%s" % on, "vmid": vm.name})
+        vm_api_request(command='button', parameters={"action": "power%s" % on, "vmid": vm.name}, vm=vm)
         return True
     else:
         return False
@@ -223,8 +222,8 @@ def reset_vm(vm_id):
     lock = filter(lambda x: x and x['name'] == u'apimws.xen.reset_vm' and x['args'] == u'(%s,)' % vm_id,
                   [item for sublist in app.control.inspect().active().values() for item in sublist])
     if len(lock) == 1:
-        vm_api_request(command='button',
-                       parameters={"action": "reboot", "vmid": VirtualMachine.objects.get(pk=vm_id).name})
+        vm = VirtualMachine.objects.get(pk=vm_id)
+        vm_api_request(command='button', vm=vm, parameters={"action": "reboot", "vmid": vm.name})
         return True
     else:
         return False
@@ -232,7 +231,8 @@ def reset_vm(vm_id):
 
 @shared_task(base=XenWithFailure)
 def destroy_vm(vm_id):
-    vm_api_request(command='delete', parameters={'vmid': VirtualMachine.objects.get(pk=vm_id).name})
+    vm = VirtualMachine.objects.get(pk=vm_id)
+    vm_api_request(command='delete', parameters={'vmid': vm.name}, vm=vm)
     return True
 
 
@@ -281,7 +281,7 @@ def clone_vm_api_call(original_service, destination_vm):
     if destination_vm.network_configuration.name:
         parameters["netconf"]["hostname"] = destination_vm.network_configuration.name
 
-    response = vm_api_request(command='clone', vmid=original_vm.name, parameters=parameters)
+    response = vm_api_request(command='clone', parameters=parameters, vm=destination_vm)
 
     response = json.loads(response)
 
