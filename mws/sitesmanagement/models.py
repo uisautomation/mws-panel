@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 from itertools import chain
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -425,6 +425,9 @@ class VirtualMachine(models.Model):
 
     network_configuration = models.OneToOneField(NetworkConfig, related_name="vm", unique=True)
     service = models.ForeignKey(Service, related_name='virtual_machines')
+
+    from apimws.models import Cluster
+    cluster = models.ForeignKey(Cluster, related_name='guests')
 
     @property
     def site(self):
