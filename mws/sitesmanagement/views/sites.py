@@ -47,7 +47,8 @@ def warning_messages(site):
 
     if AnsibleConfiguration.objects.filter(service__site=site, key="mysql_root_password"):
         warning_messages_list.append(
-            format_html('You have a new MySQL root password. Please visit %s' %
+            format_html('You have a new MySQL root password. Please visit the following <a href="%s" '
+                        'style="text-decoration: underline;">URL</a>.' %
                         reverse('change_db_root_password', kwargs={'service_id': site.production_service.id})))
 
     return warning_messages_list
