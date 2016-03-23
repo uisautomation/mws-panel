@@ -26,7 +26,7 @@ class SnapshotsTests(TestCase):
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse('createsnapshot', kwargs={'service_id': service.id}),
                                         {'name': snapshot_name})
-            mock_subprocess.check_output.assert_called_once_with(["userv", "mws-admin", "mws_ansible_host",
+            mock_subprocess.check_output.assert_called_once_with(["userv", "mws-admin", "mws_ansible_host_d",
                                                                   service.virtual_machines.first().network_configuration.name,
                                                                   "--tags", "create_custom_snapshot", "-e",
                                                                   'create_snapshot_name="%s"' % snapshot_name],
@@ -63,7 +63,7 @@ class SnapshotsTests(TestCase):
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse('createsnapshot', kwargs={'service_id': service.id}),
                                         {'name': snapshot_name})
-            mock_subprocess.check_output.assert_called_once_with(["userv", "mws-admin", "mws_ansible_host",
+            mock_subprocess.check_output.assert_called_once_with(["userv", "mws-admin", "mws_ansible_host_d",
                                                                   service.virtual_machines.first().network_configuration.name,
                                                                   "--tags", "create_custom_snapshot", "-e",
                                                                   'create_snapshot_name="%s"' % snapshot_name],
@@ -90,7 +90,7 @@ class SnapshotsTests(TestCase):
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse('createsnapshot', kwargs={'service_id': service.id}),
                                         {'name': snapshot_name})
-            mock_subprocess.check_output.assert_called_once_with(["userv", "mws-admin", "mws_ansible_host",
+            mock_subprocess.check_output.assert_called_once_with(["userv", "mws-admin", "mws_ansible_host_d",
                                                                   service.virtual_machines.first().network_configuration.name,
                                                                   "--tags", "create_custom_snapshot", "-e",
                                                                   'create_snapshot_name="%s"' % snapshot_name],
@@ -103,7 +103,7 @@ class SnapshotsTests(TestCase):
             self.assertEquals(Snapshot.objects.count(), 1)
             snapshot = Snapshot.objects.first()
             response = self.client.post(reverse('deletesnapshot', kwargs={'snapshot_id': snapshot.id}))
-            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
+            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host_d",
                                                              service.virtual_machines.first().network_configuration.name,
                                                              "--tags", "delete_snapshot", "-e",
                                                              'delete_snapshot_name="%s"' % snapshot.name],
