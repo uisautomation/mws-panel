@@ -7,6 +7,8 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_slug
 from django.db import models
 import re
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.timezone import now
 from os.path import splitext
@@ -475,6 +477,13 @@ class VirtualMachine(models.Model):
             return "<Under request>"
         else:
             return self.name
+
+
+@receiver(pre_delete, sender=VirtualMachine)
+def api_call_to_delete_vm(instance, **kwargs):
+    if instance.name:
+        from apimws.xen import destroy_vm
+        destroy_vm(instance.id)
 
 
 class Vhost(models.Model):
