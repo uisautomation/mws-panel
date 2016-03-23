@@ -8,7 +8,8 @@ from sitesmanagement.models import VirtualMachine, Site, UnixGroup
 
 
 group = "mwsclients"
-# We start Unix Group IDs by the 2^16-2 which is the last one free in Debian and assign them to groups in decrease order
+# We start Unix Group IDs by the 2^16-2 which is the last one free in Debian
+# and assign them to groups in decrease order
 INITIAL_GID = 4294967293
 
 
@@ -74,48 +75,55 @@ class Command(NoArgsCommand):
                 if user.mws_user.ssh_public_key:
                     uv['ssh_key'] = user.mws_user.ssh_public_key
             return uv
+
+        # List of active users (admin and ssh only) together with the list of supporters
         v['mws_users'] = [user_vars(u, vm.service) for u in
                           vm.site.list_of_all_type_of_active_users() + list(vm.site.supporters.all())]
 
         def vhost_vars(vh):
+            # List of variables for each vhost
             vhv = {}
             vhv['id'] = vh.id
             vhv['name'] = vh.name
+            # List of domain names associated to the vhost (only those already accepted or external [non cam.ac.uk])
             vhv['domains'] = [dom.name for dom in
                               vh.domain_names.filter(Q(status='accepted') | Q(status='external'))]
+            # The main domain where all the domain names associated will redirect to
             if vh.main_domain:
                 vhv['main_domain'] = vh.main_domain.name
+            # The TLS certificate if already uploaded
             if vh.certificate:
                 vhv['certificate'] = vh.certificate
             if vh.tls_key_hash:
                 vhv['tls_key_hash'] = vh.tls_key_hash
+            # If is TLS enabled whether the certificate has been yet uploaded or not
             vhv['tls_enabled'] = vh.tls_enabled
+            # Generate csr if there is a request from the web panel
             vhv['generate_csr'] = 'tls_key_hash' in vhv and vh.tls_key_hash == "requested"
+            # Type of webapp: wordpress, drupal, etc.
             vhv['webapp'] = vh.webapp
             return vhv
 
+        # List of Vhosts
         v['mws_vhosts'] = [vhost_vars(vh) for vh in vm.service.vhosts.all()]
+
+        # Is the VM the production or the test one?
         v['mws_is_primary'] = vm.primary
+
+        # Network configuration of the VM
         if vm.network_configuration.IPv4:
             v['mws_ipv4'] = vm.network_configuration.IPv4
             v['mws_ipv4_netmask'] = vm.network_configuration.IPv4_netmask
             v['mws_ipv4_gateway'] = vm.network_configuration.IPv4_gateway
         if vm.network_configuration.IPv6:
             v['mws_ipv6'] = vm.network_configuration.IPv6
-        v['mws_tls_enabled'] = any(['certificate' in vhv
-                                    for vhv in v['mws_vhosts']])
+
+        # is there any vhost TLS enabled? That is used later on to use http or https for
+        # redirections that do not match any vhost
+        v['mws_tls_enabled'] = any(['certificate' in vhv for vhv in v['mws_vhosts']])
+
+        # version of the operating system
         v['mws_os'] = vm.operating_system
-
-        v['mws_with_pacemaker'] = False
-
-        # Corosync needs a 32-bit node ID.  ID 0 is reserved, and
-        # according to corosync.conf(5), "Some openais clients require
-        # a signed 32 bit nodeid that is greater than zero".  For
-        # safety, we thus insist on something between 1 and 0x7fffffff
-        # inclusive.  For a reasonably-sized MWS, just using the
-        # primary key of the VirtualMachine should be fine.
-        v['mws_cluster_nodeid'] = vm.id
-        assert(1 <= v['mws_cluster_nodeid'] <= 0x7fffffff)
 
         # mws_site_group refers to the Ansible host group representing
         # this host's site.
