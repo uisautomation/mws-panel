@@ -123,7 +123,7 @@ class SiteKeyAdmin(VersionAdmin):
 
 
 class DomainNameAdmin(VersionAdmin):
-    list_display = ('name', 'vhost', 'get_site', 'status')
+    list_display = ('name', 'vhost', 'get_site', 'status', 'requested_at')
     ordering = ('name', )
     search_fields = ('name', )
     list_filter = ('vhost', 'status')
