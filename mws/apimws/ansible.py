@@ -93,7 +93,7 @@ def launch_ansible_async(service, ignore_host_key=False):
 @shared_task(base=AnsibleTaskWithFailure)
 def ansible_change_mysql_root_pwd(service):
     for vm in service.virtual_machines.all():
-        subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name,
+        subprocess.check_output(["userv", "mws-admin", "mws_ansible_host_d", vm.network_configuration.name,
                                  "--tags", "change_mysql_root_pwd", "-e", "change_mysql_root_pwd=true"],
                                 stderr=subprocess.STDOUT)
 
@@ -102,7 +102,7 @@ def ansible_change_mysql_root_pwd(service):
 def ansible_create_custom_snapshot(service, snapshot):
     try:
         for vm in service.virtual_machines.all():
-            subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name,
+            subprocess.check_output(["userv", "mws-admin", "mws_ansible_host_d", vm.network_configuration.name,
                                      "--tags", "create_custom_snapshot", "-e",
                                      'create_snapshot_name="%s"' % snapshot.name], stderr=subprocess.STDOUT)
         snapshot.date = timezone.now()
@@ -115,7 +115,7 @@ def ansible_create_custom_snapshot(service, snapshot):
 @shared_task(base=AnsibleTaskWithFailure)
 def restore_snapshot(service, snapshot_name):
     for vm in service.virtual_machines.all():
-        subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name,
+        subprocess.check_output(["userv", "mws-admin", "mws_ansible_host_d", vm.network_configuration.name,
                                  "--tags", "restore_snapshot", "-e", 'restore_snapshot_name="%s"' % snapshot_name],
                                 stderr=subprocess.STDOUT)
 
@@ -124,7 +124,7 @@ def restore_snapshot(service, snapshot_name):
 def delete_snapshot(service, snapshot_id):
     snapshot = Snapshot.objects.get(id=snapshot_id)
     for vm in snapshot.service.virtual_machines.all():
-        subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name,
+        subprocess.check_output(["userv", "mws-admin", "mws_ansible_host_d", vm.network_configuration.name,
                                  "--tags", "delete_snapshot", "-e", 'delete_snapshot_name="%s"' % snapshot.name],
                                 stderr=subprocess.STDOUT)
     snapshot.delete()
