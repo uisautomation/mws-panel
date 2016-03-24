@@ -23,12 +23,6 @@ def check_permited_betatesters(request):
         if not hasattr(request.user, 'mws_user') and (resolve(request.path).url_name != 'logout'):
             return False
 
-        if request.user.is_authenticated() and getattr(settings, 'DEMO', False) and \
-                not user_in_groups(request.user,
-                                   [get_or_create_group_by_groupid(101611),  # UIS members
-                                    get_or_create_group_by_groupid(102170)]):  # MWS3 Betatesters
-            return False
-
         return True
     except Exception:
         return False
