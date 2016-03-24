@@ -73,9 +73,13 @@ class UnixGroupCreate(ServicePriviledgeCheck, CreateView):
         return context
 
     def form_valid(self, form):
-        self.object = form.save(commit=False)
-        self.object.service = self.service
-        self.object.save()
+        try:
+            self.object = form.save(commit=False)
+            self.object.service = self.service
+            self.object.save()
+        except Exception:
+            form.add_error(None, "A Unix Group already exists with that name")
+            return self.form_invalid(form)
 
         unix_users = list(set(validate_crsids(self.request.POST.get('unix_users'))))
 
