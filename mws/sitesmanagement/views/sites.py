@@ -182,7 +182,6 @@ class SiteShow(SitePriviledgeCheck, DetailView):
         context['breadcrumbs'] = {
             0: dict(name='Managed Web Service server: ' + str(self.object.name), url=self.object.get_absolute_url())
         }
-        context['DEMO'] = getattr(django_settings, 'DEMO', False)
         context['MAIN_DOMAIN'] = getattr(django_settings, 'MAIN_DOMAIN', False)
         context['stats_name'] = self.object.production_service.network_configuration.name.replace(".","_")
         return context
