@@ -110,9 +110,11 @@ def preallocate_new_site():
 def domain_confirmation_user(domain_name):
     EmailMessage(
         subject="Domain name %s has been %s" % (domain_name.name, domain_name.status),
-        body="You are receiving this email because the administrator of the domain %s has %s your request.\n\n"
+        body="You are receiving this message because your email address, or an email alias that includes "
+             "you as a recipient, has been configured as the contact address for the UIS Managed Web "
+             "Server '%s'.\n\nThe administrator of the domain %s has %s your request.\n\n"
              "Visit the web control panel to know more: %s%s" %
-             (domain_name.name, domain_name.status, settings.MAIN_DOMAIN,
+             (domain_name.vhost.service.site.name, domain_name.name, domain_name.status, settings.MAIN_DOMAIN,
               reverse('listdomains', kwargs={'vhost_id': domain_name.vhost.id})),
         from_email="Managed Web Service Support <%s>"
                    % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk'),
