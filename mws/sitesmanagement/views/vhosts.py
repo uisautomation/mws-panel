@@ -69,7 +69,6 @@ class VhostListView(ServicePriviledgeCheck, ListView):
             'service': self.service,
             'site': self.site,
             'vhost_form': VhostForm(),
-            'DEMO': getattr(django_settings, 'DEMO', False)
         })
         return context
 

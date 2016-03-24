@@ -131,7 +131,6 @@ def service_settings(request, service_id):
         'site': site,
         'service': service,
         'sidebar_messages': warning_messages(site),
-        'DEMO': getattr(settings, 'DEMO', False)
     })
 
 
