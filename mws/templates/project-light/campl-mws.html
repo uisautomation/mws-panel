@@ -188,8 +188,36 @@
     {% endif %}
 {% endblock %}
 
-{% block blurb %}The Managed Web Service is provided by the <a href="http://www.uis.cam.ac.uk">University Information Services</a>.{% endblock %}
 
-{% block footer1 %}<h3><a href="{% url 'sitesmanagement.views.termsconds' %}">Terms and conditions</a></h3>{% endblock %}
+{% block local_footer %}
+    <div class="campl-row campl-local-footer campl-app-footer">
+        <div class="campl-wrap clearfix">
+            <div class="campl-column3 campl-footer-navigation">
+                <p class="campl-app-footer-content">The Managed Web Service is provided by the <a href="http://www.uis.cam.ac.uk">University Information Services</a>.</p>
+            </div>
+            <div class="campl-column3 campl-footer-navigation">
+                <div class="campl-content-container campl-navigation-list">
+                    <h3><a href="http://mws-help.uis.cam.ac.uk/">Help</a></h3>
+                </div>
+            </div>
+            <div class="campl-column3 campl-footer-navigation">
+                <div class="campl-content-container campl-navigation-list">
+                    <h3><a href="{% url 'sitesmanagement.views.termsconds' %}">Terms and conditions</a></h3>
+                </div>
+            </div>
+            <div class="campl-column3 campl-footer-navigation last">
+                <div class="campl-content-container campl-navigation-list">
+                    <h3><a href="{% url 'sitesmanagement.views.privacy' %}">Privacy &amp; cookie policy</a></h3>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
 
-{% block footer2 %}<h3><a href="{% url 'sitesmanagement.views.privacy' %}">Privacy & cookie policy</a></h3>{% endblock %}
+{% block blurb %}{% endblock %}
+
+{% block footer1 %}{% endblock %}
+
+{% block footer2 %}
+
+{% endblock %}
