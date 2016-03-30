@@ -14,7 +14,6 @@ from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
 from sitesmanagement.models import DomainName, EmailConfirmation, VirtualMachine, Billing
 from ucamlookup import user_in_groups
 
-
 logger = logging.getLogger('mws')
 
 
@@ -32,11 +31,11 @@ def confirm_dns(request, dn_id, token=None):
         dn.authorised_by = request.user
         if request.POST.get('accepted') == '1':
             if changeable is False:
-                return render(request, 'api/confirm_dns.html', {'dn': dn, 'changeable': changeable, })
+                return render(request, 'api/confirm_dns.html', {'dn': dn, 'changeable': changeable,})
             dn.accept_it()
         else:
             dn.reject_it(request.POST.get('reason'))
-    return render(request, 'api/confirm_dns.html', {'dn': dn, 'changeable': changeable, })
+    return render(request, 'api/confirm_dns.html', {'dn': dn, 'changeable': changeable,})
 
 
 @login_required
@@ -66,9 +65,9 @@ def billing_month(request, year, month):
         return HttpResponseForbidden()
 
     if month == 1:
-        inidate = date(year-1, 12, 1)
+        inidate = date(year - 1, 12, 1)
     else:
-        inidate = date(year, month-1, 1)
+        inidate = date(year, month - 1, 1)
 
     return render(request, 'api/finance_month.html', {
         'new_sites_billing': Billing.objects.filter(site__start_date__month=inidate.month,
@@ -79,6 +78,7 @@ def billing_month(request, year, month):
         'month': month,
         'year_cost': settings.YEAR_COST,
     })
+
 
 @login_required
 def confirm_email(request, ec_id, token):
@@ -123,7 +123,7 @@ def post_installation(request):
                 raise Exception("The service wasn't in the OS installation process")  # TODO raise custom exception
             service.status = 'postinstall'
             service.save()
-            post_installOS.apply_async((service, ), countdown=90)
+            post_installOS.apply_async((service,), countdown=90)
             # Wait 90 seconds before launching ansible, this will allow the machine have time to complete the reboot
             return HttpResponse()
 
