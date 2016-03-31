@@ -9,7 +9,7 @@ from mws.production_secrets import *
 DEBUG = False
 
 ADMINS = (('MWS3 robot mail receiver', 'mws-robotmail@uis.cam.ac.uk'), )
-SERVER_EMAIL = "mws3-support@uis.cam.ac.uk"
+SERVER_EMAIL = "mws-support@uis.cam.ac.uk"
 
 TEMPLATE_DEBUG = False
 

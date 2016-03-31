@@ -40,7 +40,7 @@ def ip_register_api_request(domain_name):
              "name %s for a UIS Managed Web Server website (see http://www.ucs.cam.ac.uk/managed-web-service/).\n\n"
              "To authorise or reject this request please visit the following URL %s%s. If we don't hear from you "
              "in three working days the request will be automatically %s.\n\n%s"
-             "Questions about this message can be referred to mws3-support@uis.cam.ac.uk."
+             "Questions about this message can be referred to mws-support@uis.cam.ac.uk."
              % (nameinfo['domain'], domain_name.requested_by.last_name, domain_name.requested_by.username,
                 domain_name.name, settings.MAIN_DOMAIN,
                 reverse('apimws.views.confirm_dns', kwargs={'dn_id': domain_name.id, 'token': domain_name.token}),
@@ -49,9 +49,9 @@ def ip_register_api_request(domain_name):
                 "you will have to change the domain name to a CNAME or delete it.\n\n"
                 if nameinfo['exists'] and "C" not in nameinfo['exists'] else ""),
         from_email="Managed Web Service Support <%s>"
-                   % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk'),
+                   % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
         to=emails,
-        headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
+        headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')}
     ).send()
 
 
@@ -73,9 +73,9 @@ def send_email_confirmation(site):
                  "Server '%s'.\n\nPlease, confirm your email address by clicking in the following link: %s%s"
                  % (site.name, settings.MAIN_DOMAIN,
                     reverse('apimws.views.confirm_email', kwargs={'ec_id': email_conf.id, 'token': email_conf.token})),
-            from_email="Managed Web Service Support <mws3-support@uis.cam.ac.uk>",
+            from_email="Managed Web Service Support <mws-support@uis.cam.ac.uk>",
             to=[site.email],
-            headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
+            headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')}
         ).send()
 
 
@@ -87,9 +87,9 @@ def finished_installation_email_confirmation(site):
              "you as a recipient, has been configured as the contact address for the UIS Managed Web "
              "Server '%s'.\n\nYour MWS3 server is now available. You can access to the web panel of your MWS3 server "
              "by clicking the following link: %s%s" % (site.name, settings.MAIN_DOMAIN, site.get_absolute_url()),
-        from_email="Managed Web Service Support <mws3-support@uis.cam.ac.uk>",
+        from_email="Managed Web Service Support <mws-support@uis.cam.ac.uk>",
         to=[site.email],
-        headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
+        headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')}
     ).send()
 
 
@@ -117,7 +117,7 @@ def domain_confirmation_user(domain_name):
              (domain_name.vhost.service.site.name, domain_name.name, domain_name.status, settings.MAIN_DOMAIN,
               reverse('listdomains', kwargs={'vhost_id': domain_name.vhost.id})),
         from_email="Managed Web Service Support <%s>"
-                   % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk'),
+                   % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
         to=[domain_name.vhost.service.site.email],
-        headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
+        headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')}
     ).send()
