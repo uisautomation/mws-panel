@@ -9,7 +9,7 @@ from mws.production_secrets import *
 DEBUG = False
 
 ADMINS = (('amc203', 'amc203@cam.ac.uk'), )
-SERVER_EMAIL = "mws3-support@ucs.cam.ac.uk"
+SERVER_EMAIL = "mws-support@uis.cam.ac.uk"
 
 TEMPLATE_DEBUG = False
 

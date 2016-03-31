@@ -100,9 +100,9 @@ class Command(NoArgsCommand):
                  "Cost centre for Managed Web Service = VCBQ\nTransaction code for Managed Web Service = LRED\n"
                  "Internal code = VCBQ GAAB LRED\nExternal code = VCBQ GAAA LRED\n\nBest regards,\n\nMWS3 Team.\n",
             from_email="Managed Web Service Support <%s>"
-                       % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk'),
+                       % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
             to=[settings.FINANCE_EMAIL],
-            headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')},
+            headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')},
             attachments=[('mws3sites_new.csv', stream_new.getvalue(), 'application/vnd.ms-excel'),
                          ('mws3sites_renewals.csv', stream_renewal.getvalue(), 'application/vnd.ms-excel')] + po_files
         ).send()

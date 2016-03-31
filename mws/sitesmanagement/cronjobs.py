@@ -54,9 +54,9 @@ def send_reminder_renewal():
                  "automatically cancelled on '%s'."
                  % (billing.site.name, billing.site.name, billing.site.start_date, billing.site.start_date),
             from_email="Managed Web Service Support <%s>"
-                       % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk'),
+                       % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
             to=[billing.site.email],
-            headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
+            headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')}
         ).send()
 
     renewal_sites_billing = Billing.objects.filter(site__start_date__month=today.month, site__subscription=True,
@@ -76,9 +76,9 @@ def send_reminder_renewal():
                  "you site then please either cancel it now (under 'edit the MWS profile'), or mark "
                  "it 'Not for renewal' in which case it will be automatically cancelled on '%s'." 
                  % (billing.site.name, billing.site.name, billing.site.start_date, billing.site.start_date),
-            from_email="Managed Web Service Support <mws3-support@uis.cam.ac.uk>",
+            from_email="Managed Web Service Support <mws-support@uis.cam.ac.uk>",
             to=[billing.site.email],
-            headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
+            headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')}
         ).send()
 
 
@@ -97,9 +97,9 @@ def check_subscription():
                      "you as a recipient, has been configured as the contact address for the UIS Managed Web "
                      "Server '%s'.\n\nYour managed web server '%s' has been cancelled because we haven't received "
                      "payment information for it." % (site.name, site.name),
-                from_email="Managed Web Service Support <mws3-support@uis.cam.ac.uk>",
+                from_email="Managed Web Service Support <mws-support@uis.cam.ac.uk>",
                 to=[site.email],
-                headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
+                headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')}
             ).send()
             site.cancel()
         elif ((today - site.start_date) == timedelta(days=15)) or ((today - site.start_date) >= timedelta(days=24)):
@@ -112,9 +112,9 @@ def check_subscription():
                      "managed web server '%s'.\n\nIf you don't upload a valid purchase order before %s your site "
                      "'%s' will be automatically cancelled." % (site.name, site.name,
                                                                 site.start_date+timedelta(days=30), site.name),
-                from_email="Managed Web Service Support <mws3-support@uis.cam.ac.uk>",
+                from_email="Managed Web Service Support <mws-support@uis.cam.ac.uk>",
                 to=[site.email],
-                headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
+                headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')}
             ).send()
     # Cancel sites with subscription finished
     if today.month == 2 and today.day == 29:
@@ -130,9 +130,9 @@ def check_subscription():
                  "you as a recipient, has been configured as the contact address for the UIS Managed Web "
                  "Server '%s'.\n\nYour managed web server '%s' has been cancelled per your requested." %
                  (site.name, site.name),
-            from_email="Managed Web Service Support <mws3-support@uis.cam.ac.uk>",
+            from_email="Managed Web Service Support <mws-support@uis.cam.ac.uk>",
             to=[site.email],
-            headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
+            headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')}
         ).send()
         site.cancel()
 
@@ -199,9 +199,9 @@ def send_warning_last_or_none_admin():
                          "emails, please add at least one additional administrator via the control panel at %s\n\n"
                          % (site.name, site.name, settings.MAIN_DOMAIN),
                     from_email="Managed Web Service Support <%s>"
-                               % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk'),
+                               % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
                     to=[site.email],
-                    headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
+                    headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')}
                 ).send()
         elif num_admins == 0:
             if site.days_without_admin > 7:
@@ -215,11 +215,11 @@ def send_warning_last_or_none_admin():
                          "and has therefore been automatically suspended. It will be deleted in 2 weeks if no action "
                          "is taken.\n\nIf you think this should had not have happened, contact %s\n\n"
                          % (site.name, site.name,
-                            getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')),
+                            getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')),
                     from_email="Managed Web Service Support <%s>"
-                               % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk'),
+                               % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
                     to=[site.email],
-                    headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
+                    headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')}
                 ).send()
             else:
                 site.days_without_admin += 1
@@ -231,11 +231,11 @@ def send_warning_last_or_none_admin():
                          "Server '%s'.\n\nThe Managed Web Server '%s' has no administrators and it will be suspended "
                          "in %s days if you do not contact %s and arrange to have at lease one administrator "
                          "added.\n\n" % (site.name, site.name, str(8-site.days_without_admin),
-                                          getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')),
+                                          getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')),
                     from_email="Managed Web Service Support <%s>"
-                               % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk'),
+                               % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
                     to=[site.email],
-                    headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
+                    headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')}
                 ).send()
         else:
             site.days_without_admin = 0

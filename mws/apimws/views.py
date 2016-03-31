@@ -147,9 +147,9 @@ def post_recreate(request):
                 body="VM finished restoring. Please restore the backup and execute ansible. "
                      "VM part of the MWS3 site id %s" % vm.service.site.id,
                 from_email="Managed Web Service Support <%s>"
-                           % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk'),
-                to=[getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')],
-                headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws3-support@uis.cam.ac.uk')}
+                           % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
+                to=[getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')],
+                headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')}
             ).send()
 
     return HttpResponseForbidden()
