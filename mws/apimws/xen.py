@@ -98,8 +98,7 @@ def secrets_prealocation(vm):
 def new_site_primary_vm(service, host_network_configuration=None):
     parameters = {}
     parameters["site-id"] = "mwssite-%d" % service.site.id
-    if getattr(settings, 'OS_VERSION_VMXENAPI', False):
-        parameters["os"] = settings.OS_VERSION_VMXENAPI
+    parameters["os"] = getattr(settings, 'OS_VERSION_VMXENAPI', "jessie")
 
     if host_network_configuration:
         netconf = {}
