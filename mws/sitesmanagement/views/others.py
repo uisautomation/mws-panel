@@ -6,7 +6,7 @@ import json
 from django.conf import settings
 from django.contrib import messages
 from django.utils import dateparse
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponse, HttpResponseNotFound
 from django.shortcuts import render, get_object_or_404, redirect
@@ -17,7 +17,7 @@ from apimws.vm import clone_vm
 from mwsauth.utils import privileges_check
 from sitesmanagement.forms import BillingForm, SnapshotForm
 from sitesmanagement.utils import get_object_or_None
-from sitesmanagement.models import Service, Snapshot, Billing
+from sitesmanagement.models import Service, Snapshot, Billing, Site
 from sitesmanagement.views.sites import warning_messages
 
 
@@ -430,3 +430,10 @@ def quarantine(request, service_id):
         return redirect(site)
 
     return render(request, 'mws/quarantine.html', parameters)
+
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def admin_email_list(request):
+    return render(request, 'mws/admin/email_list.html',
+                  {'site_list': Site.objects.filter(deleted=False, send_date__isnull=True)})

@@ -107,5 +107,6 @@ urlpatterns = patterns('',
 
     # Admin
     url(r'^searchadmin/$', 'sitesmanagement.views.admin_search', name='searchadmin'),
+    url(r'^adminemailist/$', 'sitesmanagement.views.others.admin_email_list', name='adminemailist'),
 
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
