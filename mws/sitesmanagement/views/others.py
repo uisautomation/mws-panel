@@ -432,4 +432,4 @@ def quarantine(request, service_id):
 @user_passes_test(lambda u: u.is_superuser)
 def admin_email_list(request):
     return render(request, 'mws/admin/email_list.html',
-                  {'site_list': Site.objects.filter(deleted=False, send_date__isnull=True)})
+                  {'site_list': Site.objects.filter(deleted=False, end_date__isnull=True)})
