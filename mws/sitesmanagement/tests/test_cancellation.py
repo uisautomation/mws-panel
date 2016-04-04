@@ -16,7 +16,7 @@ class CancelSiteTest(TestCase):
         today = datetime.today()
         do_test_login(self, user="test0001")
         # Create site (300 days ago start date)
-        site = Site.objects.create(name="testSite", institution_id="testInst", email='amc203@cam.ac.uk',
+        site = Site.objects.create(name="testSite", email='amc203@cam.ac.uk',
                                    start_date=today-timedelta(days=300))
         netconf = NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
                                                name="mws-66424.mws3.csx.cam.ac.uk")

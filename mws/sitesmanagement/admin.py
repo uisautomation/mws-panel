@@ -8,7 +8,6 @@ from django.utils.encoding import force_text
 from reversion import VersionAdmin
 from .models import Site, Billing, DomainName, Suspension, VirtualMachine, EmailConfirmation, \
     Vhost, UnixGroup, NetworkConfig, SiteKey, Service, Snapshot
-from ucamlookup import get_institutions, get_institution_name_by_id, IbisException
 
 
 def recreate_vm(modeladmin, request, queryset):
@@ -68,23 +67,11 @@ def execute_ansible(modeladmin, request, queryset):
 execute_ansible.short_description = "Launch Ansible"
 
 
-def get_institutions_no_exception():
-    try:
-        get_institutions()
-    except IbisException:
-        return []
-
-
 class SiteAdmin(ModelAdmin):
-    all_institutions = get_institutions_no_exception()
-
-    list_display = ('name', 'institution', 'primary_vm', 'secondary_vm', 'start_date', 'disabled', 'canceled')
+    list_display = ('name', 'primary_vm', 'secondary_vm', 'start_date', 'disabled', 'canceled')
     ordering = ('name', 'start_date')
     search_fields = ('name', )
-    list_filter = ('institution_id', 'disabled', )
-
-    def institution(self, obj):
-        return get_institution_name_by_id(obj.institution_id, self.all_institutions) if obj.institution_id else ''
+    list_filter = ('disabled', )
 
     def primary_vm_name(self, obj):
         if obj.primary_vm:
@@ -101,8 +88,6 @@ class SiteAdmin(ModelAdmin):
     def canceled(self, obj):
         return obj.is_canceled()
     canceled.boolean = True
-
-    institution.admin_order_field = 'institution_id'
 
 
 class ServiceAdmin(VersionAdmin):

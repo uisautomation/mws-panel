@@ -58,7 +58,7 @@ class Site(models.Model):
     # Description of the site
     description = models.CharField(max_length=250, blank=True)
     # The institution (retrieved using lookup)
-    institution_id = models.CharField(max_length=100)
+    institution_id = models.CharField(max_length=100, blank=True, null=True)
     # Start date of the site
     start_date = models.DateField(null=True, blank=True)
     # End date of the site (when the site will be cancelled, scheduled by the user or other reasons)

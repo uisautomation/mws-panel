@@ -42,7 +42,7 @@ class BillingTests(TestCase):
         NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff2', name='mws-client3', type='ipv6')
         NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff1', name='mws-client4', type='ipv6')
 
-        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
+        site = Site.objects.create(name="testSite", start_date=datetime.today())
         service = Service.objects.create(site=site, type='production', status="ready",
                                          network_configuration=NetworkConfig.get_free_prod_service_config())
         VirtualMachine.objects.create(name="test_vm", token=uuid.uuid4(), cluster=which_cluster(),
@@ -116,7 +116,7 @@ class BillingTests(TestCase):
     def test_renewals_emails(self):
         # 1 month for renewal warning
         today = datetime.today()
-        site = Site.objects.create(name="testSite", institution_id="testInst", email='amc203@cam.ac.uk',
+        site = Site.objects.create(name="testSite", email='amc203@cam.ac.uk',
                                    start_date=date(year=today.year-1, day=15,
                                                    month=today.month-1 if today.month!=1 else 12))
         pofile = SimpleUploadedFile("file.pdf", "file_content")
@@ -141,7 +141,7 @@ class BillingTests(TestCase):
         automatically'''
         # 1 month for renewal warning
         today = datetime.today()
-        site = Site.objects.create(name="testSite", institution_id="testInst", email='amc203@cam.ac.uk',
+        site = Site.objects.create(name="testSite", email='amc203@cam.ac.uk',
                                    start_date=today-timedelta(days=10))
         User.objects.create(username="test0001")
         site.users.add(User.objects.get(username="test0001"))
@@ -215,7 +215,7 @@ class BillingTests(TestCase):
         today = datetime.today()
         do_test_login(self, user="test0001")
         # Create site (more than 30 days ago start date)
-        site = Site.objects.create(name="testSite", institution_id="testInst", email='amc203@cam.ac.uk',
+        site = Site.objects.create(name="testSite", email='amc203@cam.ac.uk',
                                    start_date=today-timedelta(days=40))
         site.users.add(User.objects.get(username="test0001"))
 

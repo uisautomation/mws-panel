@@ -136,13 +136,6 @@ class SiteCreate(LoginRequiredMixin, FormView):
         context['breadcrumbs'] = {0: dict(name='New Managed Web Service server', url=reverse_lazy('newsite'))}
         return context
 
-    def get_form_kwargs(self):
-        kwargs = super(SiteCreate, self).get_form_kwargs()
-        kwargs.update({
-            'user': self.request.user,
-        })
-        return kwargs
-
     def form_valid(self, form):
         # This method is called when valid form data has been POSTed.
         # It should return an HttpResponse.
@@ -153,7 +146,6 @@ class SiteCreate(LoginRequiredMixin, FormView):
         preallocated_site.start_date = datetime.date.today()
         preallocated_site.name = siteform.name
         preallocated_site.description = siteform.description
-        preallocated_site.institution_id = siteform.institution_id
         preallocated_site.email = siteform.email
         preallocated_site.disabled = False
         preallocated_site.preallocated = False

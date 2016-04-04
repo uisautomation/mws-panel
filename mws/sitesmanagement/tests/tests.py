@@ -90,7 +90,6 @@ def assign_a_site(test_interface, pre_create=True):
                     mock_change_vm_power_state.delay.return_value = True
                     response = test_interface.client.post(reverse('newsite'), {'siteform-name': 'Test Site',
                                                                                'siteform-description': 'Desc',
-                                                                               'siteform-institution_id': 'UIS',
                                                                                'siteform-email': 'amc203@cam.ac.uk'})
                     test_interface.assertIn(response.status_code, [200, 302])
                 # TODO create the checks of how the mock was called
@@ -102,7 +101,6 @@ def assign_a_site(test_interface, pre_create=True):
     site = Site.objects.first()
     test_interface.assertEqual(site.name, 'Test Site')
     test_interface.assertEqual(site.email, 'amc203@cam.ac.uk')
-    test_interface.assertEqual(site.institution_id, 'UIS')
     test_interface.assertEqual(site.description, 'Desc')
     return site
 
@@ -155,7 +153,7 @@ class SiteManagementTests(TestCase):
 
         NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff4', name='mws-client1', type='ipv6')
 
-        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
+        site = Site.objects.create(name="testSite", start_date=datetime.today())
 
         Service.objects.create(network_configuration=NetworkConfig.get_free_prod_service_config(), site=site,
                                type='production', status='requested')
@@ -184,7 +182,6 @@ class SiteManagementTests(TestCase):
         self.assertContains(response, "Request new server")
 
         response = self.client.post(reverse('newsite'), {'siteform-description': 'Desc',
-                                                         'siteform-institution_id': 'UIS',
                                                          'siteform-email': 'amc203@cam.ac.uk'})
         self.assertContains(response, "This field is required.")  # Empty name, error
 
@@ -263,22 +260,20 @@ class SiteManagementTests(TestCase):
 
         self.assertNotEqual(site.name, 'testSiteChange')
         self.assertNotEqual(site.description, 'testDescChange')
-        self.assertNotEqual(site.institution_id, 'CL')
         self.assertNotEqual(site.email, 'email@change.test')
         response = self.client.post(reverse('editsite', kwargs={'site_id': site.id}),
                                     {'name': 'testSiteChange', 'description': 'testDescChange',
-                                     'institution_id': 'CL', 'email': 'email@change.test'})
+                                     'email': 'email@change.test'})
         self.assertRedirects(response, expected_url=site.get_absolute_url())  # Changes done, redirecting
 
         site_changed = Site.objects.get(pk=site.id)
         self.assertEqual(site_changed.name, 'testSiteChange')
         self.assertEqual(site_changed.description, 'testDescChange')
-        self.assertEqual(site_changed.institution_id, 'CL')
         self.assertEqual(site_changed.email, 'email@change.test')
 
         response = self.client.post(reverse('editsite', kwargs={'site_id': site.id}),
                                     {'name': 'testSiteChange', 'description': 'testDescChange',
-                                     'institution_id': 'CL', 'email': 'emailchangetest'})
+                                     'email': 'emailchangetest'})
         self.assertContains(response, '<ul class="errorlist"><li>Enter a valid email address.</li></ul>')
         site_changed = Site.objects.get(pk=site.id)  # Refresh site from DB
         self.assertEqual(site_changed.email, 'email@change.test')
@@ -318,7 +313,7 @@ class SiteManagement2Tests(TestCase):
     def create_site(self):
         cluster = Cluster.objects.create(name="mws-test-1")
         Host.objects.create(hostname="mws-test-1.dev.mws3.cam.ac.uk", cluster=cluster)
-        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
+        site = Site.objects.create(name="testSite", start_date=datetime.today())
         site.users.add(User.objects.get(username='test0001'))
         service = Service.objects.create(site=site, type='production', status="ready",
                                          network_configuration=NetworkConfig.get_free_prod_service_config())
@@ -329,7 +324,7 @@ class SiteManagement2Tests(TestCase):
     def test_no_permission_views_tests(self):
         cluster = Cluster.objects.create(name="mws-test-1")
         Host.objects.create(hostname="mws-test-1.dev.mws3.cam.ac.uk", cluster=cluster)
-        site = Site.objects.create(name="testSite", institution_id="testInst", start_date=datetime.today())
+        site = Site.objects.create(name="testSite", start_date=datetime.today())
         service = Service.objects.create(site=site, type='production', status="ready",
                                          network_configuration=NetworkConfig.get_free_prod_service_config())
         vm = VirtualMachine.objects.create(name="test_vm", token=uuid.uuid4(), cluster=which_cluster(),
