@@ -404,8 +404,6 @@ class SiteManagement2Tests(TestCase):
                              expected_url=site.get_absolute_url())
         self.assertRedirects(self.client.get(reverse(views.system_packages, kwargs={'service_id': service.id})),
                              expected_url=site.get_absolute_url())
-        self.assertRedirects(self.client.get(reverse(views.clone_vm_view, kwargs={'site_id': site.id})),
-                             expected_url=site.get_absolute_url())
         self.assertRedirects(self.client.get(reverse('mwsauth.views.auth_change', kwargs={'site_id': site.id})),
                              expected_url=site.get_absolute_url())
         self.assertEqual(self.client.get(reverse(views.delete_vm, kwargs={'service_id': service.id})).status_code, 403)
