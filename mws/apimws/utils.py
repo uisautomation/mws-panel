@@ -6,7 +6,7 @@ from celery import shared_task, Task
 from django.core.mail import EmailMessage
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from apimws.vm import new_site_primary_vm
+from apimws.vm import new_site_primary_vm, secrets_prealocation_site
 from sitesmanagement.models import EmailConfirmation, NetworkConfig, Site, Service
 
 
@@ -102,6 +102,7 @@ def preallocate_new_site():
         raise Exception('A MWS server cannot be created at this moment because there are no network addresses available')
     prod_service = Service.objects.create(site=site, type='production', network_configuration=prod_service_netconf)
     Service.objects.create(site=site, type='test', network_configuration=test_service_netconf)
+    secrets_prealocation_site(site)
     new_site_primary_vm(prod_service, host_netconf)
     LOGGER.info("Preallocated MWS server created '" + str(site.name) + "' with id " + str(site.id))
 

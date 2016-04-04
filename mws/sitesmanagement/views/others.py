@@ -1,24 +1,21 @@
 """Views(Controllers) for other purposes not in other files"""
 
 import bisect
-import datetime
 import json
 from django.conf import settings
 from django.contrib import messages
-from django.utils import dateparse
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponse, HttpResponseNotFound
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.encoding import smart_str
-from apimws.ansible import launch_ansible, ansible_change_mysql_root_pwd, restore_snapshot
+from apimws.ansible import launch_ansible, ansible_change_mysql_root_pwd
 from apimws.models import AnsibleConfiguration
-from apimws.vm import clone_vm
-from apimws.xen import clone_production_service
+from apimws.vm import clone_vm_api_call
 from mwsauth.utils import privileges_check
-from sitesmanagement.forms import BillingForm, SnapshotForm
+from sitesmanagement.forms import BillingForm
 from sitesmanagement.utils import get_object_or_None
-from sitesmanagement.models import Service, Snapshot, Billing, Site
+from sitesmanagement.models import Service, Billing, Site
 from sitesmanagement.views.sites import warning_messages
 
 
@@ -73,9 +70,9 @@ def clone_vm_view(request, site_id):
         1: dict(name='Production and test servers management', url=reverse(clone_vm_view, kwargs={'site_id': site.id}))
     }
 
-    if request.method == 'POST' and site.is_ready:
+    if request.method == 'POST' and site.is_ready and site.test_service:
         if request.POST.get('production_service') == "true":
-            clone_production_service(site)
+            clone_vm_api_call.delay(site)
         if request.POST.get('production_service') == "false":
             pass  # TODO make function to move service address from production to test
 
