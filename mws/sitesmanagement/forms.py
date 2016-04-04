@@ -1,27 +1,16 @@
 from django import forms
-from ucamlookup import get_institutions, IbisException
 from sitesmanagement.models import Site, Vhost, DomainName, Billing, UnixGroup, Snapshot
 
 
 class SiteForm(forms.ModelForm):
-    institution_id = forms.ChoiceField(label='The University institution responsible for this server')
     description = forms.CharField(label='Description for the MWS server (e.g. Web server for St Botolph\'s '
                                         'College main website)',
                                   widget=forms.Textarea(attrs={'maxlength': 250}),
                                   max_length=250,
                                   required=False)
-
-    def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)
-        super(SiteForm, self).__init__(*args, **kwargs)
-        try:
-            self.fields['institution_id'].choices = get_institutions(user)
-        except IbisException:
-            self.fields['institution_id'].choices = []
-
     class Meta:
         model = Site
-        fields = ('name', 'description', 'institution_id', 'email')
+        fields = ('name', 'description', 'email')
         labels = {
             'name': 'A short name for this Managed Web Service Server (e.g. St Botolph\'s server)',
             'email': 'The webmaster email (please use a role email when possible)'
@@ -50,7 +39,6 @@ class VhostForm(forms.ModelForm):
 class DomainNameFormNew(forms.ModelForm):
     # name = forms.CharField(max_length=250, required=True, label="Domain name",
     #                        validators=[DomainName.full_domain_validator])
-
     class Meta:
         model = DomainName
         fields = ('name', )

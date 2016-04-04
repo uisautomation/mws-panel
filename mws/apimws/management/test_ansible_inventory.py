@@ -43,7 +43,7 @@ class TestsWithData(TestCase):
         NetworkConfig.objects.create(IPv4='192.0.2.255', type='ipv4priv',
                                      name='mws-08246.mws3.private.example')
         NetworkConfig.objects.create(IPv6='2001:db8:212:8::8c:254', name='mws-client1.example', type='ipv6')
-        self.site = Site.objects.create(name="testSite", institution_id="testinst", start_date=datetime.today())
+        self.site = Site.objects.create(name="testSite", start_date=datetime.today())
         self.service = Service.objects.create(type="production", site=self.site, status="ready",
                                               network_configuration=NetworkConfig.get_free_prod_service_config())
         self.vm = VirtualMachine.objects.create(
