@@ -71,11 +71,7 @@ def clone_vm_view(request, site_id):
     }
 
     if request.method == 'POST' and site.is_ready and site.test_service:
-        if request.POST.get('production_service') == "true":
-            clone_vm_api_call.delay(site)
-        if request.POST.get('production_service') == "false":
-            pass  # TODO make function to move service address from production to test
-
+        clone_vm_api_call.delay(site)
         return redirect(site)
 
     return render(request, 'mws/clone_vm.html', {

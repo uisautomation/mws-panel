@@ -1,6 +1,5 @@
 """Views(Controllers) for managing Vhosts"""
 from OpenSSL import crypto
-from django.conf import settings as django_settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError

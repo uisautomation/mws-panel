@@ -12,22 +12,20 @@
                         <div>
                             <h3>Test the OS upgrade of the production server onto a test server</h3>
                             <p>
-                                <input type="hidden" name="production_service" value="true">
                                 <input type="submit" value="Clone Production server onto Test server" class="campl-btn campl-primary-cta">
-                            </p>
-                        </div>
-                    {% endif %}
-                    {% if site.test_service %}
-                        <div>
-                            <h3>Switch the Test server for the Production server and make the OS upgrade permanent</h3>
-                            <p>
-                                <input type="hidden" name="production_service" value="false">
-                                <input type="submit" value="Make the Test server the Production one" class="campl-btn campl-primary-cta">
                             </p>
                         </div>
                     {% endif %}
                 </fieldset>
             </form>
+            {% if site.test_service %}
+                <div>
+                    <h3>Switch the Test server for the Production server and make the OS upgrade permanent</h3>
+                    <p>
+                        <input type="submit" value="Make the Test server the Production one" class="campl-btn campl-primary-cta">
+                    </p>
+                </div>
+            {% endif %}
         </div>
     </div>
 {% endblock %}
