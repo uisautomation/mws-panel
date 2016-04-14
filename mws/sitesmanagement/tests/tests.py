@@ -330,7 +330,7 @@ class SiteManagement2Tests(TestCase):
         vm = VirtualMachine.objects.create(name="test_vm", token=uuid.uuid4(), cluster=which_cluster(),
                                            service=service, network_configuration=NetworkConfig.get_free_host_config())
         vhost = Vhost.objects.create(name="tests_vhost", service=service)
-        dn = DomainName.objects.create(name="testtestest.mws3.csx.cam.ac.uk", status="accepted", vhost=vhost)
+        dn = DomainName.objects.create(name="testtestest.mws3test.csx.cam.ac.uk", status="accepted", vhost=vhost)
         unix_group = UnixGroup.objects.create(name="testUnixGroup", service=service)
 
         # TODO test index empty
@@ -382,7 +382,7 @@ class SiteManagement2Tests(TestCase):
         VirtualMachine.objects.create(name="test_vm2", token=uuid.uuid4(), service=service2, cluster=which_cluster(),
                                       network_configuration=NetworkConfig.get_free_host_config())
         vhost = Vhost.objects.create(name="tests_vhost", service=service)
-        dn = DomainName.objects.create(name="testtestest.mws3.csx.cam.ac.uk", status="accepted", vhost=vhost)
+        dn = DomainName.objects.create(name="testtestest.mws3test.csx.cam.ac.uk", status="accepted", vhost=vhost)
         unix_group = UnixGroup.objects.create(name="testUnixGroup", service=service)
 
         # TODO test index not empty
@@ -536,12 +536,12 @@ class SiteManagement2Tests(TestCase):
             with mock.patch("apimws.ipreg.subprocess") as api_ipreg:
                 api_ipreg.check_output.return_value.returncode = 0
                 def fake_subprocess_output(*args, **kwargs):
-                    return '{"hostname":"test.mws3.csx.cam.ac.uk","exists":[],"emails":["mws-support@uis.cam.ac.uk"],'\
+                    return '{"hostname":"test.mws3test.csx.cam.ac.uk","exists":[],"emails":["mws-support@uis.cam.ac.uk"],'\
                            '"message":"","status":0,"mzone":"MWS3","crsids":["AMC203","JMW11","JW35","MCV21"],' \
                            '"delegated":"N","domain":"mws3.csx.cam.ac.uk"}'
                 api_ipreg.check_output.side_effect = fake_subprocess_output
                 response = self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}),
-                                            {'name': 'test.mws3.csx.cam.ac.uk'})
+                                            {'name': 'test.mws3test.csx.cam.ac.uk'})
             self.assertIn(response.status_code, [200, 302])
             mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
                                                              site.production_service.virtual_machines.first()
@@ -553,7 +553,7 @@ class SiteManagement2Tests(TestCase):
             '''<tbody>
                     <tr>
                         <td>
-                            <p>test.mws3.csx.cam.ac.uk</p>
+                            <p>test.mws3test.csx.cam.ac.uk</p>
                         </td>
                         <td>
                             <p>Requested</p>
@@ -578,7 +578,7 @@ class SiteManagement2Tests(TestCase):
             '''<tbody>
                     <tr>
                         <td>
-                            <p>test.mws3.csx.cam.ac.uk</p>
+                            <p>test.mws3test.csx.cam.ac.uk</p>
                         </td>
                         <td>
                             <p>Requested</p>
@@ -610,7 +610,7 @@ class SiteManagement2Tests(TestCase):
             '''<tbody>
                     <tr>
                         <td>
-                            <p>test.mws3.csx.cam.ac.uk
+                            <p>test.mws3test.csx.cam.ac.uk
                                 <br/>This is the current main domain
                             </p>
                         </td>
@@ -640,7 +640,7 @@ class SiteManagement2Tests(TestCase):
                                                                  .network_configuration.name],
                                                             stderr=mock_subprocess.STDOUT)
         response = self.client.get(reverse('listdomains', kwargs={'vhost_id': vhost.id}))
-        self.assertInHTML('''test.mws3.csx.cam.ac.uk''', response.content, count=0)
+        self.assertInHTML('''test.mws3test.csx.cam.ac.uk''', response.content, count=0)
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}),
