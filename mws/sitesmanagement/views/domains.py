@@ -76,6 +76,9 @@ def add_domain(request, vhost_id, socket_error=None):
                         new_domain = DomainName.objects.create(name=domain_requested.name, status='accepted',
                                                                vhost=vhost, requested_by=request.user)
                         set_cname(new_domain.name, new_domain.vhost.service.network_configuration.name)
+                    elif domain_requested.name.endswith(".mws3.csx.cam.ac.uk"):
+                        new_domain = DomainName.objects.create(name=domain_requested.name, status='denied',
+                                                               vhost=vhost, requested_by=request.user)
                     else:
                         new_domain = DomainName.objects.create(name=domain_requested.name, status='requested',
                                                                vhost=vhost, requested_by=request.user)

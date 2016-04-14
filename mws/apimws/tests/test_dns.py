@@ -35,6 +35,29 @@ class DNSTests(TestCase):
 
     def test_add_internal_mws3_domain(self):
         vhost = Vhost.objects.first()
+        test_internal_mws3_domain = 'test.mws3.csx.cam.ac.uk'
+        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            mock_subprocess.check_output.return_value.returncode = 0
+            with mock.patch("sitesmanagement.views.domains.set_cname") as mock_set_cname:
+                mock_set_cname.return_value = True
+                self.client.post(reverse('sitesmanagement.views.add_domain', kwargs={'vhost_id': vhost.id}),
+                                 {'name': test_internal_mws3_domain})
+                mock_subprocess.check_output.assert_called_once_with(["userv", "mws-admin", "mws_ansible_host",
+                                                                      vhost.service.virtual_machines.first()
+                                                                     .network_configuration.name],
+                                                                     stderr=mock_subprocess.STDOUT)
+                mock_set_cname.check_output.assert_not_called()
+        domain_name_created = DomainName.objects.last()
+        self.assertEquals(domain_name_created.name, test_internal_mws3_domain)
+        self.assertEquals(domain_name_created.status, 'denied')
+        self.assertEquals(domain_name_created.vhost, vhost)
+        self.assertEquals(domain_name_created.requested_by.username, "test0001")
+        self.assertIsNone(domain_name_created.reject_reason)
+        self.assertIsNotNone(domain_name_created.token)
+        self.assertIsNone(domain_name_created.authorised_by)
+
+    def test_add_internal_usertest_mws3_domain(self):
+        vhost = Vhost.objects.first()
         test_internal_mws3_domain = 'test.usertest.mws3.csx.cam.ac.uk'
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
@@ -42,6 +65,11 @@ class DNSTests(TestCase):
                 mock_set_cname.return_value = True
                 self.client.post(reverse('sitesmanagement.views.add_domain', kwargs={'vhost_id': vhost.id}),
                                  {'name': test_internal_mws3_domain})
+                mock_subprocess.check_output.assert_called_once_with(["userv", "mws-admin", "mws_ansible_host",
+                                                                      vhost.service.virtual_machines.first()
+                                                                     .network_configuration.name],
+                                                                     stderr=mock_subprocess.STDOUT)
+                mock_set_cname.check_output.assert_not_called()
         domain_name_created = DomainName.objects.last()
         self.assertEquals(domain_name_created.name, test_internal_mws3_domain)
         self.assertEquals(domain_name_created.status, 'accepted')
