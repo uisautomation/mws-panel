@@ -125,9 +125,12 @@ class VhostDelete(VhostPriviledgeCheck, DeleteView):
 
     def delete(self, request, *args, **kwargs):
         vhost_name = self.vhost.name
+        webapp = self.vhost.webapp
+        service = self.vhost.service
         if vhost_name != "default":
-            delete_vhost_ansible.delay(self.vhost.service, self.vhost.name, self.vhost.webapp)
+            delete_vhost_ansible.delay(service, vhost_name, webapp)
             super(VhostDelete, self).delete(request, *args, **kwargs)
+            launch_ansible(service)
             return HttpResponse("The website/vhost '%s' has been deleted successfully" % vhost_name)
         else:
             return HttpResponseForbidden("The default website/vhost cannot be deleted")
