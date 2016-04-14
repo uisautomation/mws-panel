@@ -134,14 +134,12 @@ class Command(NoArgsCommand):
 
         # mws_service_group refers to the Ansible host group representing
         # this host's service.
-        if vm.service.type == "production":
-            # Only output mws_service_* if the VM is in the prod service, do not use/show test service addresses
-            v['mws_service_group'] = self.servicegroup(vm.service)
-            v['mws_service_fqdn'] = vm.service.network_configuration.name
-            v['mws_service_ipv4'] = vm.service.network_configuration.IPv4
-            v['mws_service_ipv4_netmask'] = vm.service.network_configuration.IPv4_netmask
-            v['mws_service_ipv4_gateway'] = vm.service.network_configuration.IPv4_gateway
-            v['mws_service_ipv6'] = vm.service.network_configuration.IPv6
+        v['mws_service_group'] = self.servicegroup(vm.service)
+        v['mws_service_fqdn'] = vm.service.network_configuration.name
+        v['mws_service_ipv4'] = vm.service.network_configuration.IPv4
+        v['mws_service_ipv4_netmask'] = vm.service.network_configuration.IPv4_netmask
+        v['mws_service_ipv4_gateway'] = vm.service.network_configuration.IPv4_gateway
+        v['mws_service_ipv6'] = vm.service.network_configuration.IPv6
 
         # List of Apache modules to be installed and enable
         v['mws_apache_mods_enabled'] = list(ApacheModule.objects.filter(services__id=vm.service.id, available=True)
