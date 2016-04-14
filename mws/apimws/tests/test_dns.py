@@ -79,6 +79,22 @@ class DNSTests(TestCase):
         self.assertIsNotNone(domain_name_created.token)
         self.assertIsNone(domain_name_created.authorised_by)
 
+    def test_duplicate_domain(self):
+        self.test_add_internal_usertest_mws3_domain()
+        vhost = Vhost.objects.first()
+        num_domains = DomainName.objects.count()
+        test_duplicate_domain = 'test.usertest.mws3.csx.cam.ac.uk'
+        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            mock_subprocess.check_output.return_value.returncode = 0
+            with mock.patch("sitesmanagement.views.domains.set_cname") as mock_set_cname:
+                mock_set_cname.return_value = True
+                response = self.client.post(reverse('sitesmanagement.views.add_domain', kwargs={'vhost_id': vhost.id}),
+                                            {'name': test_duplicate_domain})
+                mock_subprocess.check_output.assert_not_called()
+                mock_set_cname.check_output.assert_not_called()
+        self.assertEqual(num_domains, DomainName.objects.count())
+        self.assertContains(response, "Domain name with this Name already exists.")
+
     def add_internal_non_existing_cam_domain(self):
         vhost = Vhost.objects.first()
         test_internal_cam_domain = 'domaintest.cam.ac.uk'
