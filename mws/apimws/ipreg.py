@@ -41,10 +41,16 @@ def get_cname(hostname):
     return result
 
 
+class DomainNameDelegatedException(Exception):
+    pass
+
+
 def set_cname(hostname, target):
     try:
         result = ip_reg_call(['put', 'cname', str(hostname), str(target)])
     except subprocess.CalledProcessError as excp:
+        if excp.returncode == 7:
+            raise DomainNameDelegatedException()
         raise excp
     return result
 

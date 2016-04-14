@@ -1,3 +1,4 @@
+import subprocess
 import uuid
 from datetime import datetime, timedelta
 from itertools import chain
@@ -14,6 +15,8 @@ from django.utils.timezone import now
 from os.path import splitext
 import reversion
 from ucamlookup.models import LookupGroup
+
+from apimws.ipreg import DomainNameDelegatedException
 from mwsauth.utils import get_users_of_a_group
 from sitesmanagement.utils import get_object_or_None, deprecated
 
@@ -532,7 +535,10 @@ class DomainName(models.Model):
         self.status = 'accepted'
         self.save()
         from apimws.ipreg import set_cname
-        set_cname(self.name, self.vhost.service.network_configuration.name)
+        try:
+            set_cname(self.name, self.vhost.service.network_configuration.name)
+        except DomainNameDelegatedException:
+            return self.reject_it("Domain delegated")
         from apimws.ansible import launch_ansible
         launch_ansible(self.vhost.service)
         now = datetime.now()
