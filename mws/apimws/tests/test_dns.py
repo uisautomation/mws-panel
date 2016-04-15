@@ -16,6 +16,7 @@ class DNSTests(TestCase):
     def test_add_external_domain(self):
         vhost = Vhost.objects.first()
         test_external_domain = 'externaldomain.com'
+        self.assertEqual(vhost.main_domain.name, vhost.service.network_configuration.name)
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             self.client.post(reverse('sitesmanagement.views.add_domain', kwargs={'vhost_id': vhost.id}),
@@ -25,6 +26,8 @@ class DNSTests(TestCase):
                                                                  .network_configuration.name],
                                                                  stderr=mock_subprocess.STDOUT)
         domain_name_created = DomainName.objects.last()
+        vhost = Vhost.objects.get(id=vhost.id)
+        self.assertEqual(vhost.main_domain, domain_name_created)
         self.assertEquals(domain_name_created.name, test_external_domain)
         self.assertEquals(domain_name_created.status, 'external')
         self.assertEquals(domain_name_created.vhost, vhost)
@@ -36,6 +39,7 @@ class DNSTests(TestCase):
     def test_add_internal_mws3_domain(self):
         vhost = Vhost.objects.first()
         test_internal_mws3_domain = 'test.mws3.csx.cam.ac.uk'
+        self.assertEqual(vhost.main_domain.name, vhost.service.network_configuration.name)
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             with mock.patch("sitesmanagement.views.domains.set_cname") as mock_set_cname:
@@ -48,6 +52,8 @@ class DNSTests(TestCase):
                                                                      stderr=mock_subprocess.STDOUT)
                 mock_set_cname.check_output.assert_not_called()
         domain_name_created = DomainName.objects.last()
+        vhost = Vhost.objects.get(id=vhost.id)
+        self.assertEqual(vhost.main_domain.name, vhost.service.network_configuration.name)
         self.assertEquals(domain_name_created.name, test_internal_mws3_domain)
         self.assertEquals(domain_name_created.status, 'denied')
         self.assertEquals(domain_name_created.vhost, vhost)
@@ -58,6 +64,7 @@ class DNSTests(TestCase):
 
     def test_add_internal_usertest_mws3_domain(self):
         vhost = Vhost.objects.first()
+        self.assertEqual(vhost.main_domain.name, vhost.service.network_configuration.name)
         test_internal_mws3_domain = 'test.usertest.mws3.csx.cam.ac.uk'
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
@@ -71,6 +78,8 @@ class DNSTests(TestCase):
                                                                      stderr=mock_subprocess.STDOUT)
                 mock_set_cname.check_output.assert_not_called()
         domain_name_created = DomainName.objects.last()
+        vhost = Vhost.objects.get(id=vhost.id)
+        self.assertEqual(vhost.main_domain, domain_name_created)
         self.assertEquals(domain_name_created.name, test_internal_mws3_domain)
         self.assertEquals(domain_name_created.status, 'accepted')
         self.assertEquals(domain_name_created.vhost, vhost)
@@ -120,6 +129,16 @@ class DNSTests(TestCase):
         self.assertIsNotNone(domain_name_created.token)
         self.assertIsNone(domain_name_created.authorised_by)
         return domain_name_created
+
+    def test_add_new_main_domain(self):
+        domain = self.add_internal_non_existing_cam_domain()
+        self.assertEqual(domain.vhost.main_domain.name, domain.vhost.service.network_configuration.name)
+        with mock.patch("apimws.ipreg.set_cname") as mock_set_cname:
+            mock_set_cname.return_value = True
+            with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+                mock_subprocess.check_output.return_value.returncode = 0
+                domain.accept_it()
+        self.assertEqual(domain.vhost.main_domain, domain)
 
     def test_add_internal_acceptable_non_existing_cam_domain(self):
         domain_name_created = self.add_internal_non_existing_cam_domain()

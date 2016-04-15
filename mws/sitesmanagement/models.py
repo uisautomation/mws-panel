@@ -1,4 +1,3 @@
-import subprocess
 import uuid
 from datetime import datetime, timedelta
 from itertools import chain
@@ -534,6 +533,10 @@ class DomainName(models.Model):
     def accept_it(self):
         self.status = 'accepted'
         self.save()
+        if self.vhost.main_domain is None or \
+                        self.vhost.main_domain.name == self.vhost.service.network_configuration.name:
+            self.vhost.main_domain = self
+            self.vhost.save()
         from apimws.ipreg import set_cname
         try:
             set_cname(self.name, self.vhost.service.network_configuration.name)

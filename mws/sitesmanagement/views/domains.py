@@ -10,7 +10,7 @@ from apimws.utils import ip_register_api_request
 from mwsauth.utils import privileges_check
 from sitesmanagement.forms import DomainNameFormNew
 from sitesmanagement.models import Vhost, DomainName
-from sitesmanagement.utils import is_camacuk, is_delegated_domain
+from sitesmanagement.utils import is_camacuk
 from sitesmanagement.views.vhosts import VhostPriviledgeCheck
 
 
@@ -75,7 +75,8 @@ def add_domain(request, vhost_id, socket_error=None):
                     if domain_requested.name.endswith(".usertest.mws3.csx.cam.ac.uk"):
                         new_domain = DomainName.objects.create(name=domain_requested.name, status='accepted',
                                                                vhost=vhost, requested_by=request.user)
-                        if vhost.main_domain is None:
+                        if vhost.main_domain is None or \
+                                        vhost.main_domain.name == vhost.service.network_configuration.name:
                             vhost.main_domain = new_domain
                             vhost.save()
                         set_cname(new_domain.name, new_domain.vhost.service.network_configuration.name)
@@ -89,7 +90,8 @@ def add_domain(request, vhost_id, socket_error=None):
                 else:
                     new_domain = DomainName.objects.create(name=domain_requested.name, status='external', vhost=vhost,
                                                            requested_by=request.user)
-                    if vhost.main_domain is None:
+                    if vhost.main_domain is None or \
+                                    vhost.main_domain.name == vhost.service.network_configuration.name:
                         vhost.main_domain = new_domain
                         vhost.save()
                 launch_ansible(vhost.service)  # to add the new domain name to the vhost apache configuration
