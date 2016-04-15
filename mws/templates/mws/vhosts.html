@@ -13,8 +13,8 @@
                 <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
                     <thead>
                         <tr>
-                            <th>Web site</th>
-                            <th>Associated domain name</th>
+                            <th>Web site name</th>
+                            <th>Associated hostname</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -28,7 +28,7 @@
                                 {% if vhost.sorted_domain_names %}
                                     {{ vhost.sorted_domain_names|join:", " }}
                                 {% else %}
-                                    <p style="color: #CF0000">This web site does not have any domain name associated. You need to add one using the button in the right hand side.</p>
+                                    <p style="color: #CF0000">This web site does not have any hostname associated. You need to add one using the button in the right hand side.</p>
                                 {% endif %}
                             </td>
                             <td style="width: 180px;">
@@ -38,7 +38,7 @@
                                 </a>
                                 {% endif %}
                                 <a href="{% url 'listdomains' vhost_id=vhost.id %}" style="text-decoration: none;">
-                                    <i title="Domains associated to this web site" class="fa fa-link fa-2x"
+                                    <i title="Hostnames associated to this web site" class="fa fa-link fa-2x"
                                        data-toggle="tooltip" ></i>
                                 </a>
                                 <a href="{% url 'sitesmanagement.views.certificates' vhost_id=vhost.id %}" style="text-decoration: none;">
@@ -63,13 +63,13 @@
                 <p style="margin-top: 20px; margin-bottom: 20px">The server doesn't have any web sites configured</p>
             {% endif %}
 
-            <p>By default, each MWS server contains a default website associated with the hostname of the MWS server.
+            <p>When built, each MWS server contains a website called 'default' that is associated with the hostname of the MWS server.
             This means that you can start using your MWS server without further configuration. Web site contents should
             be stored inside /var/www/{name_of_website} folder of your MWS server.</p>
-            <p>You can create as many web site as you want in you MWS server but be aware that they will share
+            <p>You can create as many web sites as you want in you MWS server bu they will share
             your MWS server resources. You need to use different names for each website.</p>
-            <p>Once you have created you website you will need to associate a domain name to it using the option
-            buttons on the right in order to access it.</p>
+            <p>Once you have created you website you will need to associate a hostname with it using the option
+            buttons on the right before you can access it from a browser.</p>
 
             <p><a id="add_vhost_button" href="#" class="campl-primary-cta">Add a new web site</a></p>
 

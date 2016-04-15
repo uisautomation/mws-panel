@@ -4,8 +4,8 @@
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
             {% if dn.status == "requested" %}
-                <h1>Request for domain name {{ dn.name }}</h1>
-                {% if not changeable %}<p>Warning: You can't accept the request of this domain name until you delete the
+                <h1>Request for hostname {{ dn.name }}</h1>
+                {% if not changeable %}<p>Warning: You can't accept the request for this hostname until you delete the
                     previous record or change it to a CNAME</p>{% endif %}
                 <form action={% url 'apimws.views.confirm_dns' dn_id=dn.id token=dn.token %} method="post">
                     <fieldset>
@@ -19,8 +19,8 @@
                     </fieldset>
                 </form>
             {% else %}
-                <h2>Authorisation status for domain name {{ dn.name }}</h2>
-                <p>The domain, requested by
+                <h2>Authorisation status for hostname {{ dn.name }}</h2>
+                <p>The hostname, requested by
                     <a href="https://www.lookup.cam.ac.uk/person/crsid/{{ dn.requested_by.username }}"> {{ dn.requested_by.last_name }}</a>, was {{ dn.status }} by
                     <a href="https://www.lookup.cam.ac.uk/person/crsid/{{ dn.authorised_by.username }}">{{ dn.authorised_by.last_name }}</a>.
                 </p>
