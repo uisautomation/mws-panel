@@ -273,7 +273,7 @@ h3.campl-teaser-title {
     right: 0;
     bottom: 0;
     width: 270px;
-    z-index: 100;
+    z-index: 200;
     background-color: #106470;
 }
 
