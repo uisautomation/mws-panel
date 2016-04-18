@@ -4,26 +4,26 @@
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
 
-            <h1>Domain Names for the web site "{{ vhost.name }}" of
+            <h1>Hostames for the web site "{{ vhost.name }}" of
             the MWS server "{{ vhost.service.site.name }}"</h1>
 
-            <p>This panel allows you to associate domain names to your web site. If you want to use a domain name
-                outside cam.ac.uk, then you will be responsible for configuring the domain name although we will
+            <p>This panel allows you to associate hostnames with your web site. If you want to use a hostname
+                outside the cam.ac.uk domain, you will need to configure the host name in the DNS although we will
                 provide instructions.</p>
-            <p>In case you want to use a cam.ac.uk domain name, this will have to be approved by its owner. Thus,
+            <p>In you want to use a hostname in the cam.ac.uk domain, this will have to be approved by its administrator. Thus,
                 you will see a "requested" status that will change to accepted or denied based on the response from the
-                domain owner.</p>
-            <p>If you want to use a domain name for testing puposes only, you can request a subdomain of
-                *.usertest.mws3.csx.cam.ac.uk. This domain names do not require authorisation and will be automatically
+                domain administrator.</p>
+            <p>If you want to use a hostname for testing puposes only, you can request a name in the 
+                usertest.mws3.csx.cam.ac.uk domain. These hostnames do not require authorisation and requests to use them will be automatically
                 accepted.</p>
-            <p>After the domain name status has changed to accepted it will take up to one hour for the domain name
-                to be active as this is the time it requires the DNS system to refresh its contents.</p>
+            <p>After a hostname request's status has changed to accepted it can take up to a couple of hours for the change 
+                to become visable.</p>
 
             {% if vhost.domain_names.all %}
                 <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
                     <thead>
                         <tr>
-                            <th>Domain Name</th>
+                            <th>Hostame</th>
                             <th>Status</th>
                             <th>Configuration</th>
                             <th></th>
@@ -46,13 +46,13 @@
                                 {% if domain.status == 'external' %}
                                     <p><a class="setup_instructions" style="cursor: pointer;">Set up instructions</a></p>
                                 {% else %}
-                                    <p>Managed domain name</p>
+                                    <p>Managed hostname</p>
                                 {% endif %}
                             </td>
                             <td style="width: 155px; cursor: pointer">
                                 <p>
                                     <a onclick="javascript:ajax_call('{% url 'sitesmanagement.views.set_dn_as_main' domain_id=domain.id %}', 'POST')">
-                                        Set as main domain
+                                        Set as main hostname
                                     </a>
                                     {% if domain.name != vhost.service.network_configuration.name %}
                                     <a class="delete_domain" data-href="javascript:ajax_call('{% url 'deletedomain' domain_id=domain.id %}', 'DELETE')">
@@ -74,13 +74,13 @@
                 <div>
                     <p>
                         <img src="/static/images/interface/icon-warning.png">
-                        Warning: Adding a new domain name to your vhost will require you to generate a new
+                        Warning: Adding a new hostname to your vhost will require you to generate a new
                         Certificate Request (CSR) and get a new TLS certificate.
                     </p>
                 </div>
             {% endif %}
 
-            <p><a id="add_domain_button" href="#" class="campl-primary-cta">Add a new domain</a></p>
+            <p><a id="add_domain_button" href="#" class="campl-primary-cta">Add a new hostname</a></p>
 
             <div id="add_domain_div" style="{% if not error %}display: none; {% endif %}margin-top: 20px">
                 <form action={% url 'sitesmanagement.views.add_domain' vhost_id=vhost.id %} method="post">
@@ -102,7 +102,7 @@
       <div class="modal-dialog modal-sm">
         <div class="modal-content">
           <div class="modal-body">
-            Are you sure do you want to delete this domain name?
+            Are you sure do you want to delete this hostname?
           </div>
           <div class="modal-footer" style="padding: 10px 20px 10px;">
             <button type="button" class="campl-btn campl-primary-cta" data-dismiss="modal">Cancel</button>
@@ -122,9 +122,9 @@
                     <h4 class="modal-title">Set up instructions</h4>
                 </div>
                 <div class="modal-body">
-                    <p>To configure your domain name, access the
+                    <p>To configure your hostname, access the
                     control panel of your service provider and create a CNAME record with the following content: {{ vhost.service.network_configuration.name }}</p>
-                    <p>If your domain name is a bare domain, zone apex domain, or root domain, then instead create an A record with the following content: {{ vhost.service.network_configuration.IPv4 }}</p>
+                    <p>If your hostname is a bare domain, zone apex domain, or root domain, then instead create an A record with the following content: {{ vhost.service.network_configuration.IPv4 }}</p>
                     <p>In this latter case, you can also create an AAAA record with the following content for IPv6 compatibility: {{ vhost.service.network_configuration.IPv6 }}</p>
                 </div>
             </div>
