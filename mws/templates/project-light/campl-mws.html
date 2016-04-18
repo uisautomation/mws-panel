@@ -118,8 +118,6 @@
                     <p>Your email {{ site.email }} is unconfirmed, please check your email inbox and click on the link of the email we have sent you.</p>
                     <p><a id="resend_email_link" data-href="{% url 'apimws.views.resend_email_confirmation_view' site_id=site.id %}" href="#"
                     style="text-decoration: underline;">Resend confirmation email</a></p>
-                </div>
-                <div>
                     <form action="{% url 'editsitemail' site_id=site.id %}" method="post">
                         <fieldset>
                             {% csrf_token %}
