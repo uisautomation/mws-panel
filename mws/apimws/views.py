@@ -1,4 +1,5 @@
 import logging
+import subprocess
 from datetime import date
 from celery import shared_task
 from django.conf import settings
@@ -101,7 +102,12 @@ def confirm_email(request, ec_id, token):
 @shared_task(base=AnsibleTaskWithFailure, default_retry_delay=120, max_retries=2)
 def post_installOS(service):
     launch_ansible_async(service, ignore_host_key=True)
-    ansible_change_mysql_root_pwd(service)
+    if service.type == 'production':
+        ansible_change_mysql_root_pwd(service)
+    if service.type == 'test':
+        subprocess.check_output(["userv", "mws-admin", "mws_clone",
+                                 service.site.production_service.virtual_machines.first().name,
+                                 service.virtual_machines.first().name])
     if service.site.preallocated:
         service.site.disable()
 
