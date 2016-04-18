@@ -559,12 +559,12 @@ class SiteManagement2Tests(TestCase):
                             <p>Requested</p>
                         </td>
                         <td>
-                            <p>Managed domain name</p>
+                            <p>Managed hostname</p>
                         </td>
                         <td style="width: 155px; cursor: pointer">
                             <p>
                             <a onclick="javascript:ajax_call('/set_dn_as_main/1/', 'POST')">
-                                Set as main domain
+                                Set as main hostname
                             </a>
                             <a class="delete_domain" data-href="javascript:ajax_call('/delete_domain/1/', 'DELETE')">
                                 <i title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i>
@@ -584,12 +584,12 @@ class SiteManagement2Tests(TestCase):
                             <p>Requested</p>
                         </td>
                         <td>
-                            <p>Managed domain name</p>
+                            <p>Managed hostname</p>
                         </td>
                         <td style="width: 155px; cursor: pointer">
                             <p>
                             <a onclick="javascript:ajax_call('/set_dn_as_main/1/', 'POST')">
-                                Set as main domain
+                                Set as main hostname
                             </a>
                             <a class="delete_domain" data-href="javascript:ajax_call('/delete_domain/1/', 'DELETE')">
                                 <i title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i>
@@ -611,19 +611,19 @@ class SiteManagement2Tests(TestCase):
                     <tr>
                         <td>
                             <p>test.mws3test.csx.cam.ac.uk
-                                <br/>This is the current main domain
+                                <br/>This is the current main hostname
                             </p>
                         </td>
                         <td>
                             <p>Requested</p>
                         </td>
                         <td>
-                            <p>Managed domain name</p>
+                            <p>Managed hostname</p>
                         </td>
                         <td style="width: 155px; cursor: pointer">
                             <p>
                             <a onclick="javascript:ajax_call('/set_dn_as_main/1/', 'POST')">
-                                Set as main domain
+                                Set as main hostname
                             </a>
                             <a class="delete_domain" data-href="javascript:ajax_call('/delete_domain/1/', 'DELETE')">
                                 <i title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i>
@@ -655,7 +655,7 @@ class SiteManagement2Tests(TestCase):
                     <tr>
                         <td>
                             <p>externaldomain.com
-                                <br/>This is the current main domain
+                                <br/>This is the current main hostname
                             </p>
                         </td>
                         <td>
@@ -667,7 +667,7 @@ class SiteManagement2Tests(TestCase):
                         <td style="width: 155px; cursor: pointer">
                             <p>
                                 <a onclick="javascript:ajax_call('/set_dn_as_main/2/', 'POST')">
-                                    Set as main domain
+                                    Set as main hostname
                                 </a>
                                 <a class="delete_domain" data-href="javascript:ajax_call('/delete_domain/2/', 'DELETE')">
                                     <i title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i>
