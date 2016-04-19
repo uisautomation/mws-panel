@@ -1,6 +1,6 @@
 import mock
 from django.test import TestCase, override_settings
-from apimws.xen import change_vm_power_state, reset_vm, destroy_vm, clone_prod_to_test_vm
+from apimws.xen import change_vm_power_state, reset_vm, destroy_vm, clone_vm_api_call
 from mwsauth.tests import do_test_login
 from sitesmanagement.models import VirtualMachine
 from sitesmanagement.tests.tests import assign_a_site
@@ -27,7 +27,7 @@ class XenAPITests(TestCase):
                 reset_vm(vm.id)
                 # We clone the production VM to a test VM
                 site = vm.site
-                clone_prod_to_test_vm(site)
+                clone_vm_api_call(site)
                 # We try the deletion of both VMs through a Xen API call
                 destroy_vm(site.secondary_vm.id)
                 destroy_vm(site.primary_vm.id)
