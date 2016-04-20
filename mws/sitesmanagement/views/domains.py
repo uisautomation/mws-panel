@@ -153,11 +153,11 @@ class DomainDelete(DomainPriviledgeCheck, DeleteView):
 
     def delete(self, request, *args, **kwargs):
         if self.domain.name != self.domain.vhost.service.network_configuration.name:
-            self.domain.delete()
-            launch_ansible(self.service)
-            return HttpResponse()
-        else:
-            return HttpResponseForbidden()
+            if self.domain != self.domain.vhost.main_domain or self.domain.vhost.domain_names.count() == 1:
+                self.domain.delete()
+                launch_ansible(self.service)
+                return HttpResponse()
+        return HttpResponseForbidden()
 
     def get_success_url(self):
         return reverse('listdomains', kwargs={'vhost_id': self.vhost.id})
