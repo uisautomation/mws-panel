@@ -45,6 +45,8 @@ class DomainListView(VhostPriviledgeCheck, ListView):
             'vhost': self.vhost,
             'site': self.site,
             'service': self.vhost.service,
+            'domains': self.vhost.domain_names.all(),
+            'ndomains': self.vhost.domain_names.count(),
             'domain_form': DomainNameFormNew()
         })
         return context

@@ -30,7 +30,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                    {% for domain in vhost.domain_names.all %}
+                    {% for domain in domains %}
                         <tr>
                             <td>
                                 <p>{{ domain.name }}
@@ -55,9 +55,11 @@
                                         Set as main hostname
                                     </a>
                                     {% if domain.name != vhost.service.network_configuration.name %}
-                                    <a class="delete_domain" data-href="javascript:ajax_call('{% url 'deletedomain' domain_id=domain.id %}', 'DELETE')">
-                                        <i title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i>
-                                    </a>
+                                        {% if domain != vhost.main_domain or ndomains == 1 %}
+                                        <a class="delete_domain" data-href="javascript:ajax_call('{% url 'deletedomain' domain_id=domain.id %}', 'DELETE')">
+                                            <i title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i>
+                                        </a>
+                                        {% endif %}
                                     {% endif %}
                                 </p>
                             </td>
