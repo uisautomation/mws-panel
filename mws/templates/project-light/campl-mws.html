@@ -110,6 +110,17 @@
 {% endblock %}
 
 {% block page_content %}
+    {% if service and not service.primary %}
+        <style>
+            .campl-content{
+                background-image: url('{% static 'img/warningstripe.png' %}');
+            }
+            .campl-main-content {
+                background-color: white;
+                margin: 10px 0;
+            }
+        </style>
+    {% endif %}
     {% if site %}
         {% if not site|emailconfirmed %}
             <div id="confirmemail">

@@ -2,18 +2,6 @@
 {% load static %}
 {% block page_content %}
     {{ block.super }}
-    {% if not service.primary %}
-        <style>
-            .campl-content{
-                background-image: url({% static 'img/warningstripe.png' %}) repeat;
-            }
-            .campl-main-content {
-                background-color: white;
-                margin: 10px 0;
-            }
-        </style>
-    {% endif %}
-
     <div class="view view-focus-on view-id-focus_on view-display-id-page">
         <div class="view-header">
             <div class="campl-content-container">
