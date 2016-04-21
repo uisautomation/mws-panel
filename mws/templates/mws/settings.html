@@ -4,11 +4,12 @@
     {{ block.super }}
     {% if not service.primary %}
         <style>
+            .campl-content{
+                background-image: url({% static 'img/warningstripe.png' %}) repeat;
+            }
             .campl-main-content {
-                border-style: solid;
-                border-width: 30px;
-                margin-left: -30px;
-                border-color: {% static 'img/warningstripe.png' %};
+                background-color: white;
+                margin: 10px 0;
             }
         </style>
     {% endif %}
