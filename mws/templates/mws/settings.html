@@ -2,278 +2,309 @@
 {% load static %}
 {% block page_content %}
     {{ block.super }}
-    <div class="view view-focus-on view-id-focus_on view-display-id-page">
-        <div class="view-header">
-            <div class="campl-content-container">
-                <div class="campl-heading-container">
-                    <h1 id="page-title">{% if service.primary %}Server{% else %}Test server{% endif %} settings</h1>
-                </div>
-            </div>
-        </div>
-
-        {% if service.quarantined %}
-        <div class="campl-notifications-panel campl-warning-panel campl-notifications-container clearfix">
-            <div class="campl-column4">
-                <p class="campl-notifications-icon campl-warning-icon">Warning:</p>
-            </div>
-            <div class="campl-column8">
-                <p>Your server is currently under quarantine</p>
-            </div>
-        </div>
-        {% endif %}
-
-        <div class="campl-column12" style="{% if not service.primary %}border-style: solid; border-width: 30px; margin-left: -30px; border-color: #890000;{% endif %}">
-            <div class="campl-column3">
-                <div class="campl-content-container campl-side-padding">
-                    <a href="{% url 'listvhost' service_id=service.id %}">
-                        <article class="node node-external-link view-mode-focus_on clearfix
-                                        campl-horizontal-teaser campl-teaser campl-focus-teaser">
-                            <div class="campl-focus-teaser-img">
-                                <div class="campl-content-container campl-horizontal-teaser-img">
-                                    <div class="field field-name-field-external-url-image field-type-image
-                                                field-label-hidden">
-                                        <div class="field-items">
-                                            <div class="field-item even">
-                                                <img class="campl-scale-with-grid"
-                                                     src="{% static "icons/browser.png" %}"
-                                                     height="128" style="margin: 10px;" alt="">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="campl-focus-teaser-txt">
-                                <div class="campl-content-container campl-horizontal-teaser-txt">
-                                    <h3 class="campl-teaser-title">Web sites</h3>
-                                    <span class="ir campl-focus-link"></span>
-                                </div>
-                            </div>
-                        </article>
-                    </a>
+    <div class="campl-column12 campl-main-content" style="{% if not service.primary %}border-style: solid; border-width: 30px; margin-left: -30px; border-color: #890000;{% endif %}">
+        <div class="view view-focus-on view-id-focus_on view-display-id-page">
+            <div class="view-header">
+                <div class="campl-content-container">
+                    <div class="campl-heading-container">
+                        <h1 id="page-title">{% if service.primary %}Server{% else %}Test server{% endif %} settings</h1>
+                    </div>
                 </div>
             </div>
 
-{#            <div class="campl-column3{% if DEMO %} not-active{% endif %}">#}
-{#                <div class="campl-content-container campl-side-padding">#}
-{#                    <a href="{% url 'sitesmanagement.views.system_packages' service_id=service.id %}">#}
-{#                        <article class="node node-external-link view-mode-focus_on clearfix#}
-{#                                        campl-horizontal-teaser campl-teaser campl-focus-teaser">#}
-{#                            <div class="campl-focus-teaser-img">#}
-{#                                <div class="campl-content-container campl-horizontal-teaser-img">#}
-{#                                    <div class="field field-name-field-external-url-image field-type-image#}
-{#                                                field-label-hidden">#}
-{#                                        <div class="field-items">#}
-{#                                            <div class="field-item even">#}
-{#                                                <img class="campl-scale-with-grid"#}
-{#                                                     src="{% static "icons/system-settings.png" %}"#}
-{#                                                     height="128" style="margin: 10px;" alt="">#}
-{#                                            </div>#}
-{#                                        </div>#}
-{#                                    </div>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                            <div class="campl-focus-teaser-txt">#}
-{#                                <div class="campl-content-container campl-horizontal-teaser-txt">#}
-{#                                    <h3 class="campl-teaser-title">System packages</h3>#}
-{#                                    <span class="ir campl-focus-link"></span>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                        </article>#}
-{#                    </a>#}
-{#                </div>#}
-{#            </div>#}
-
-            <div class="campl-column3">
-                <div class="campl-content-container campl-side-padding">
-                    <a href="{% url 'sitesmanagement.views.apache_modules' service_id=service.id %}">
-                        <article class="node node-external-link view-mode-focus_on clearfix
-                                        campl-horizontal-teaser campl-teaser campl-focus-teaser">
-                            <div class="campl-focus-teaser-img">
-                                <div class="campl-content-container campl-horizontal-teaser-img">
-                                    <div class="field field-name-field-external-url-image field-type-image
-                                                field-label-hidden">
-                                        <div class="field-items">
-                                            <div class="field-item even">
-                                                <img class="campl-scale-with-grid"
-                                                     src="{% static "icons/system-settings.png" %}"
-                                                     height="128" style="margin: 10px;" alt="">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="campl-focus-teaser-txt">
-                                <div class="campl-content-container campl-horizontal-teaser-txt">
-                                    <h3 class="campl-teaser-title">Apache modules</h3>
-                                    <span class="ir campl-focus-link"></span>
-                                </div>
-                            </div>
-                        </article>
-                    </a>
+            {% if service.quarantined %}
+            <div class="campl-notifications-panel campl-warning-panel campl-notifications-container clearfix">
+                <div class="campl-column4">
+                    <p class="campl-notifications-icon campl-warning-icon">Warning:</p>
+                </div>
+                <div class="campl-column8">
+                    <p>Your server is currently under quarantine</p>
                 </div>
             </div>
-
-            <div class="campl-column3">
-                <div class="campl-content-container campl-side-padding">
-                    <a href="{% url 'sitesmanagement.views.php_libs' service_id=service.id %}">
-                        <article class="node node-external-link view-mode-focus_on clearfix
-                                        campl-horizontal-teaser campl-teaser campl-focus-teaser">
-                            <div class="campl-focus-teaser-img">
-                                <div class="campl-content-container campl-horizontal-teaser-img">
-                                    <div class="field field-name-field-external-url-image field-type-image
-                                                field-label-hidden">
-                                        <div class="field-items">
-                                            <div class="field-item even">
-                                                <img class="campl-scale-with-grid"
-                                                     src="{% static "icons/system-settings.png" %}"
-                                                     height="128" style="margin: 10px;" alt="">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="campl-focus-teaser-txt">
-                                <div class="campl-content-container campl-horizontal-teaser-txt">
-                                    <h3 class="campl-teaser-title">PHP Libraries</h3>
-                                    <span class="ir campl-focus-link"></span>
-                                </div>
-                            </div>
-                        </article>
-                    </a>
-                </div>
-            </div>
-
-            <div class="campl-column3">
-                <div class="campl-content-container campl-side-padding">
-                    <a href="{% url 'listunixgroups' service_id=service.id %}">
-                        <article class="node node-external-link view-mode-focus_on clearfix
-                                        campl-horizontal-teaser campl-teaser campl-focus-teaser">
-                            <div class="campl-focus-teaser-img">
-                                <div class="campl-content-container campl-horizontal-teaser-img">
-                                    <div class="field field-name-field-external-url-image field-type-image
-                                                field-label-hidden">
-                                        <div class="field-items">
-                                            <div class="field-item even">
-                                                <img class="campl-scale-with-grid"
-                                                     src="{% static "icons/group.png" %}"
-                                                     height="128" style="margin: 10px;" alt="">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="campl-focus-teaser-txt">
-                                <div class="campl-content-container campl-horizontal-teaser-txt">
-                                    <h3 class="campl-teaser-title">Unix Groups</h3>
-                                    <span class="ir campl-focus-link"></span>
-                                </div>
-                            </div>
-                        </article>
-                    </a>
-                </div>
-            </div>
-
-            <div class="campl-column3">
-                <div class="campl-content-container campl-side-padding">
-                    <a href="{% url 'sitesmanagement.views.change_db_root_password' service_id=service.id %}">
-                        <article class="node node-external-link view-mode-focus_on clearfix
-                                        campl-horizontal-teaser campl-teaser campl-focus-teaser">
-                            <div class="campl-focus-teaser-img">
-                                <div class="campl-content-container campl-horizontal-teaser-img">
-                                    <div class="field field-name-field-external-url-image field-type-image
-                                                field-label-hidden">
-                                        <div class="field-items">
-                                            <div class="field-item even">
-                                                <img class="campl-scale-with-grid"
-                                                     src="{% static "icons/db.png" %}"
-                                                     height="128" style="margin: 10px;" alt="">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="campl-focus-teaser-txt">
-                                <div class="campl-content-container campl-horizontal-teaser-txt">
-                                    <h3 class="campl-teaser-title">Change database root password</h3>
-                                    <span class="ir campl-focus-link"></span>
-                                </div>
-                            </div>
-                        </article>
-                    </a>
-                </div>
-            </div>
-
-        {% if service.primary %}
-            <div class="campl-column3">
-                <div class="campl-content-container campl-side-padding">
-                    <a href="{% url 'backups' service_id=service.id %}">
-                        <article class="node node-external-link view-mode-focus_on clearfix
-                                        campl-horizontal-teaser campl-teaser campl-focus-teaser">
-                            <div class="campl-focus-teaser-img">
-                                <div class="campl-content-container campl-horizontal-teaser-img">
-                                    <div class="field field-name-field-external-url-image field-type-image
-                                                field-label-hidden">
-                                        <div class="field-items">
-                                            <div class="field-item even">
-                                                <img class="campl-scale-with-grid"
-                                                     src="{% static "icons/clock-1.png" %}"
-                                                     height="128" style="margin: 10px;" alt="">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="campl-focus-teaser-txt">
-                                <div class="campl-content-container campl-horizontal-teaser-txt">
-                                    <h3 class="campl-teaser-title">Backups</h3>
-                                    <span class="ir campl-focus-link"></span>
-                                </div>
-                            </div>
-                        </article>
-                    </a>
-                </div>
-            </div>
-            {% if service.due_update %}
-{#            <div class="campl-column3{% if DEMO %} not-active{% endif %}">#}
-{#                <div class="campl-content-container campl-side-padding">#}
-{#                    <a class="update_os_vm" data-href="javascript:ajaxCallVM('{% url 'sitesmanagement.views.update_os' service_id=service.id %}', 'POST')" href="#">#}
-{#                        <article class="node node-external-link view-mode-focus_on clearfix#}
-{#                                        campl-horizontal-teaser campl-teaser campl-focus-teaser campl-focus-teaser-red">#}
-{#                            <div class="campl-focus-teaser-img">#}
-{#                                <div class="campl-content-container campl-horizontal-teaser-img">#}
-{#                                    <div class="field field-name-field-external-url-image field-type-image#}
-{#                                                field-label-hidden">#}
-{#                                        <div class="field-items">#}
-{#                                            <div class="field-item even">#}
-{#                                                <i class="fa fa-refresh fa-6x" style="color: orangered; margin-top: 10px; margin-left: 15px; margin-bottom: 10px;"></i>#}
-{#                                            </div>#}
-{#                                        </div>#}
-{#                                    </div>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                            <div class="campl-focus-teaser-txt">#}
-{#                                <div class="campl-content-container campl-horizontal-teaser-txt">#}
-{#                                    <h3 class="campl-teaser-title">Update Operating System</h3>#}
-{#                                    <span class="ir campl-focus-link"></span>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                        </article>#}
-{#                    </a>#}
-{#                </div>#}
-{#            </div>#}
             {% endif %}
-        {% else %}
-            <div class="campl-column3">
+
+            <div class="campl-column12">
+                <div class="campl-column3">
+                    <div class="campl-content-container campl-side-padding">
+                        <a href="{% url 'listvhost' service_id=service.id %}">
+                            <article class="node node-external-link view-mode-focus_on clearfix
+                                            campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                                <div class="campl-focus-teaser-img">
+                                    <div class="campl-content-container campl-horizontal-teaser-img">
+                                        <div class="field field-name-field-external-url-image field-type-image
+                                                    field-label-hidden">
+                                            <div class="field-items">
+                                                <div class="field-item even">
+                                                    <img class="campl-scale-with-grid"
+                                                         src="{% static "icons/browser.png" %}"
+                                                         height="128" style="margin: 10px;" alt="">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="campl-focus-teaser-txt">
+                                    <div class="campl-content-container campl-horizontal-teaser-txt">
+                                        <h3 class="campl-teaser-title">Web sites</h3>
+                                        <span class="ir campl-focus-link"></span>
+                                    </div>
+                                </div>
+                            </article>
+                        </a>
+                    </div>
+                </div>
+
+    {#            <div class="campl-column3{% if DEMO %} not-active{% endif %}">#}
+    {#                <div class="campl-content-container campl-side-padding">#}
+    {#                    <a href="{% url 'sitesmanagement.views.system_packages' service_id=service.id %}">#}
+    {#                        <article class="node node-external-link view-mode-focus_on clearfix#}
+    {#                                        campl-horizontal-teaser campl-teaser campl-focus-teaser">#}
+    {#                            <div class="campl-focus-teaser-img">#}
+    {#                                <div class="campl-content-container campl-horizontal-teaser-img">#}
+    {#                                    <div class="field field-name-field-external-url-image field-type-image#}
+    {#                                                field-label-hidden">#}
+    {#                                        <div class="field-items">#}
+    {#                                            <div class="field-item even">#}
+    {#                                                <img class="campl-scale-with-grid"#}
+    {#                                                     src="{% static "icons/system-settings.png" %}"#}
+    {#                                                     height="128" style="margin: 10px;" alt="">#}
+    {#                                            </div>#}
+    {#                                        </div>#}
+    {#                                    </div>#}
+    {#                                </div>#}
+    {#                            </div>#}
+    {#                            <div class="campl-focus-teaser-txt">#}
+    {#                                <div class="campl-content-container campl-horizontal-teaser-txt">#}
+    {#                                    <h3 class="campl-teaser-title">System packages</h3>#}
+    {#                                    <span class="ir campl-focus-link"></span>#}
+    {#                                </div>#}
+    {#                            </div>#}
+    {#                        </article>#}
+    {#                    </a>#}
+    {#                </div>#}
+    {#            </div>#}
+
+                <div class="campl-column3">
+                    <div class="campl-content-container campl-side-padding">
+                        <a href="{% url 'sitesmanagement.views.apache_modules' service_id=service.id %}">
+                            <article class="node node-external-link view-mode-focus_on clearfix
+                                            campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                                <div class="campl-focus-teaser-img">
+                                    <div class="campl-content-container campl-horizontal-teaser-img">
+                                        <div class="field field-name-field-external-url-image field-type-image
+                                                    field-label-hidden">
+                                            <div class="field-items">
+                                                <div class="field-item even">
+                                                    <img class="campl-scale-with-grid"
+                                                         src="{% static "icons/system-settings.png" %}"
+                                                         height="128" style="margin: 10px;" alt="">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="campl-focus-teaser-txt">
+                                    <div class="campl-content-container campl-horizontal-teaser-txt">
+                                        <h3 class="campl-teaser-title">Apache modules</h3>
+                                        <span class="ir campl-focus-link"></span>
+                                    </div>
+                                </div>
+                            </article>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="campl-column3">
+                    <div class="campl-content-container campl-side-padding">
+                        <a href="{% url 'sitesmanagement.views.php_libs' service_id=service.id %}">
+                            <article class="node node-external-link view-mode-focus_on clearfix
+                                            campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                                <div class="campl-focus-teaser-img">
+                                    <div class="campl-content-container campl-horizontal-teaser-img">
+                                        <div class="field field-name-field-external-url-image field-type-image
+                                                    field-label-hidden">
+                                            <div class="field-items">
+                                                <div class="field-item even">
+                                                    <img class="campl-scale-with-grid"
+                                                         src="{% static "icons/system-settings.png" %}"
+                                                         height="128" style="margin: 10px;" alt="">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="campl-focus-teaser-txt">
+                                    <div class="campl-content-container campl-horizontal-teaser-txt">
+                                        <h3 class="campl-teaser-title">PHP Libraries</h3>
+                                        <span class="ir campl-focus-link"></span>
+                                    </div>
+                                </div>
+                            </article>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="campl-column3">
+                    <div class="campl-content-container campl-side-padding">
+                        <a href="{% url 'listunixgroups' service_id=service.id %}">
+                            <article class="node node-external-link view-mode-focus_on clearfix
+                                            campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                                <div class="campl-focus-teaser-img">
+                                    <div class="campl-content-container campl-horizontal-teaser-img">
+                                        <div class="field field-name-field-external-url-image field-type-image
+                                                    field-label-hidden">
+                                            <div class="field-items">
+                                                <div class="field-item even">
+                                                    <img class="campl-scale-with-grid"
+                                                         src="{% static "icons/group.png" %}"
+                                                         height="128" style="margin: 10px;" alt="">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="campl-focus-teaser-txt">
+                                    <div class="campl-content-container campl-horizontal-teaser-txt">
+                                        <h3 class="campl-teaser-title">Unix Groups</h3>
+                                        <span class="ir campl-focus-link"></span>
+                                    </div>
+                                </div>
+                            </article>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="campl-column3">
+                    <div class="campl-content-container campl-side-padding">
+                        <a href="{% url 'sitesmanagement.views.change_db_root_password' service_id=service.id %}">
+                            <article class="node node-external-link view-mode-focus_on clearfix
+                                            campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                                <div class="campl-focus-teaser-img">
+                                    <div class="campl-content-container campl-horizontal-teaser-img">
+                                        <div class="field field-name-field-external-url-image field-type-image
+                                                    field-label-hidden">
+                                            <div class="field-items">
+                                                <div class="field-item even">
+                                                    <img class="campl-scale-with-grid"
+                                                         src="{% static "icons/db.png" %}"
+                                                         height="128" style="margin: 10px;" alt="">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="campl-focus-teaser-txt">
+                                    <div class="campl-content-container campl-horizontal-teaser-txt">
+                                        <h3 class="campl-teaser-title">Change database root password</h3>
+                                        <span class="ir campl-focus-link"></span>
+                                    </div>
+                                </div>
+                            </article>
+                        </a>
+                    </div>
+                </div>
+
+            {% if service.primary %}
+                <div class="campl-column3">
+                    <div class="campl-content-container campl-side-padding">
+                        <a href="{% url 'backups' service_id=service.id %}">
+                            <article class="node node-external-link view-mode-focus_on clearfix
+                                            campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                                <div class="campl-focus-teaser-img">
+                                    <div class="campl-content-container campl-horizontal-teaser-img">
+                                        <div class="field field-name-field-external-url-image field-type-image
+                                                    field-label-hidden">
+                                            <div class="field-items">
+                                                <div class="field-item even">
+                                                    <img class="campl-scale-with-grid"
+                                                         src="{% static "icons/clock-1.png" %}"
+                                                         height="128" style="margin: 10px;" alt="">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="campl-focus-teaser-txt">
+                                    <div class="campl-content-container campl-horizontal-teaser-txt">
+                                        <h3 class="campl-teaser-title">Backups</h3>
+                                        <span class="ir campl-focus-link"></span>
+                                    </div>
+                                </div>
+                            </article>
+                        </a>
+                    </div>
+                </div>
+                {% if service.due_update %}
+    {#            <div class="campl-column3{% if DEMO %} not-active{% endif %}">#}
+    {#                <div class="campl-content-container campl-side-padding">#}
+    {#                    <a class="update_os_vm" data-href="javascript:ajaxCallVM('{% url 'sitesmanagement.views.update_os' service_id=service.id %}', 'POST')" href="#">#}
+    {#                        <article class="node node-external-link view-mode-focus_on clearfix#}
+    {#                                        campl-horizontal-teaser campl-teaser campl-focus-teaser campl-focus-teaser-red">#}
+    {#                            <div class="campl-focus-teaser-img">#}
+    {#                                <div class="campl-content-container campl-horizontal-teaser-img">#}
+    {#                                    <div class="field field-name-field-external-url-image field-type-image#}
+    {#                                                field-label-hidden">#}
+    {#                                        <div class="field-items">#}
+    {#                                            <div class="field-item even">#}
+    {#                                                <i class="fa fa-refresh fa-6x" style="color: orangered; margin-top: 10px; margin-left: 15px; margin-bottom: 10px;"></i>#}
+    {#                                            </div>#}
+    {#                                        </div>#}
+    {#                                    </div>#}
+    {#                                </div>#}
+    {#                            </div>#}
+    {#                            <div class="campl-focus-teaser-txt">#}
+    {#                                <div class="campl-content-container campl-horizontal-teaser-txt">#}
+    {#                                    <h3 class="campl-teaser-title">Update Operating System</h3>#}
+    {#                                    <span class="ir campl-focus-link"></span>#}
+    {#                                </div>#}
+    {#                            </div>#}
+    {#                        </article>#}
+    {#                    </a>#}
+    {#                </div>#}
+    {#            </div>#}
+                {% endif %}
+            {% else %}
+                <div class="campl-column3">
+                    <div class="campl-content-container campl-side-padding">
+                        <a class="delete_vm" data-href="javascript:ajaxCallVM('{% url 'sitesmanagement.views.delete_vm' service_id=service.id %}', 'DELETE')" href="#">
+                            <article class="node node-external-link view-mode-focus_on clearfix
+                                            campl-horizontal-teaser campl-teaser campl-focus-teaser campl-focus-teaser-red">
+                                <div class="campl-focus-teaser-img">
+                                    <div class="campl-content-container campl-horizontal-teaser-img">
+                                        <div class="field field-name-field-external-url-image field-type-image field-label-hidden">
+                                            <div class="field-items">
+                                                <div class="field-item even">
+                                                    <img class="campl-scale-with-grid" src="{% static "icons/recyclebin.png" %}" height="128" style="margin: 10px;" alt="">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="campl-focus-teaser-txt">
+                                    <div class="campl-content-container campl-horizontal-teaser-txt">
+                                        <h3 class="campl-teaser-title">Delete the test server</h3>
+                                        <span class="ir campl-focus-link"></span>
+                                    </div>
+                                </div>
+                            </article>
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="campl-column3{% if not site.is_ready %} not-active{% endif %}">
                 <div class="campl-content-container campl-side-padding">
-                    <a class="delete_vm" data-href="javascript:ajaxCallVM('{% url 'sitesmanagement.views.delete_vm' service_id=service.id %}', 'DELETE')" href="#">
+                    <a class="restart_vm" data-href="javascript:ajaxCallVM('{% url 'sitesmanagement.views.reset_vm' service_id=service.id %}', 'POST')" href="#">
                         <article class="node node-external-link view-mode-focus_on clearfix
-                                        campl-horizontal-teaser campl-teaser campl-focus-teaser campl-focus-teaser-red">
+                                        campl-horizontal-teaser campl-teaser campl-focus-teaser">
                             <div class="campl-focus-teaser-img">
                                 <div class="campl-content-container campl-horizontal-teaser-img">
-                                    <div class="field field-name-field-external-url-image field-type-image field-label-hidden">
+                                    <div class="field field-name-field-external-url-image field-type-image
+                                                field-label-hidden">
                                         <div class="field-items">
                                             <div class="field-item even">
-                                                <img class="campl-scale-with-grid" src="{% static "icons/recyclebin.png" %}" height="128" style="margin: 10px;" alt="">
+                                                <img class="campl-scale-with-grid" src="{% static "icons/restart.png" %}"
+                                                     height="128" style="margin: 10px;" alt="">
                                             </div>
                                         </div>
                                     </div>
@@ -281,7 +312,9 @@
                             </div>
                             <div class="campl-focus-teaser-txt">
                                 <div class="campl-content-container campl-horizontal-teaser-txt">
-                                    <h3 class="campl-teaser-title">Delete the test server</h3>
+                                    <h3 class="campl-teaser-title"{% if not site.is_ready %} style="color: orangered"{% endif %}>
+                                        Restart{% if not site.is_ready %} (disabled while any of the servers are being configured){% endif %}
+                                    </h3>
                                     <span class="ir campl-focus-link"></span>
                                 </div>
                             </div>
@@ -289,117 +322,86 @@
                     </a>
                 </div>
             </div>
+
+            <div class="campl-column3">
+                <div class="campl-content-container campl-side-padding">
+                    <a href="{% url 'sitesmanagement.views.quarantine' service_id=service.id %}">
+                        <article class="node node-external-link view-mode-focus_on clearfix
+                                        campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                            <div class="campl-focus-teaser-img">
+                                <div class="campl-content-container campl-horizontal-teaser-img">
+                                    <div class="field field-name-field-external-url-image field-type-image
+                                                field-label-hidden">
+                                        <div class="field-items">
+                                            <div class="field-item even">
+                                                <img class="campl-scale-with-grid"
+                                                     src="{% static "icons/quarantine.png" %}"
+                                                     height="128" style="margin: 10px;" alt="">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="campl-focus-teaser-txt">
+                                <div class="campl-content-container campl-horizontal-teaser-txt">
+                                    <h3 class="campl-teaser-title">Quarantine</h3>
+                                    <span class="ir campl-focus-link"></span>
+                                </div>
+                            </div>
+                        </article>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {% if not service.primary %}
+        <!-- Modal delete -->
+        <div class="modal fade" id="delete_modal" tabindex="-1" role="dialog" aria-labelledby="delete_modal_label" aria-hidden="true">
+          <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+              <div class="modal-body">
+                Are you sure you want to delete the test server?
+              </div>
+              <div class="modal-footer" style="padding: 10px 20px 10px;">
+                <button type="button" class="campl-btn campl-primary-cta" data-dismiss="modal">Cancel</button>
+                <a class="campl-btn campl-primary-cta campl-primary-red" id="delete_modal_button">Delete</a>
+              </div>
+            </div>
+          </div>
+        </div>
         {% endif %}
 
-        <div class="campl-column3{% if not site.is_ready %} not-active{% endif %}">
-            <div class="campl-content-container campl-side-padding">
-                <a class="restart_vm" data-href="javascript:ajaxCallVM('{% url 'sitesmanagement.views.reset_vm' service_id=service.id %}', 'POST')" href="#">
-                    <article class="node node-external-link view-mode-focus_on clearfix
-                                    campl-horizontal-teaser campl-teaser campl-focus-teaser">
-                        <div class="campl-focus-teaser-img">
-                            <div class="campl-content-container campl-horizontal-teaser-img">
-                                <div class="field field-name-field-external-url-image field-type-image
-                                            field-label-hidden">
-                                    <div class="field-items">
-                                        <div class="field-item even">
-                                            <img class="campl-scale-with-grid" src="{% static "icons/restart.png" %}"
-                                                 height="128" style="margin: 10px;" alt="">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="campl-focus-teaser-txt">
-                            <div class="campl-content-container campl-horizontal-teaser-txt">
-                                <h3 class="campl-teaser-title"{% if not site.is_ready %} style="color: orangered"{% endif %}>
-                                    Restart{% if not site.is_ready %} (disabled while any of the servers are being configured){% endif %}
-                                </h3>
-                                <span class="ir campl-focus-link"></span>
-                            </div>
-                        </div>
-                    </article>
-                </a>
+        {% if service.primary and service.due_update %}
+        <!-- Modal update os -->
+        <div class="modal fade" id="update_os_modal" tabindex="-1" role="dialog" aria-labelledby="update_os_modal_label" aria-hidden="true">
+          <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+              <div class="modal-body">
+                Are you sure you want to update the operating system?
+              </div>
+              <div class="modal-footer" style="padding: 10px 20px 10px;">
+                <button type="button" class="campl-btn campl-primary-cta" data-dismiss="modal">Cancel</button>
+                <a class="campl-btn campl-primary-cta campl-primary-red" id="update_os_modal_button">Update</a>
+              </div>
             </div>
+          </div>
         </div>
+        {% endif %}
 
-        <div class="campl-column3">
-            <div class="campl-content-container campl-side-padding">
-                <a href="{% url 'sitesmanagement.views.quarantine' service_id=service.id %}">
-                    <article class="node node-external-link view-mode-focus_on clearfix
-                                    campl-horizontal-teaser campl-teaser campl-focus-teaser">
-                        <div class="campl-focus-teaser-img">
-                            <div class="campl-content-container campl-horizontal-teaser-img">
-                                <div class="field field-name-field-external-url-image field-type-image
-                                            field-label-hidden">
-                                    <div class="field-items">
-                                        <div class="field-item even">
-                                            <img class="campl-scale-with-grid"
-                                                 src="{% static "icons/quarantine.png" %}"
-                                                 height="128" style="margin: 10px;" alt="">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="campl-focus-teaser-txt">
-                            <div class="campl-content-container campl-horizontal-teaser-txt">
-                                <h3 class="campl-teaser-title">Quarantine</h3>
-                                <span class="ir campl-focus-link"></span>
-                            </div>
-                        </div>
-                    </article>
-                </a>
+        <!-- Modal restart os -->
+        <div class="modal fade" id="restart_modal" tabindex="-1" role="dialog" aria-labelledby="restart_modal_label" aria-hidden="true">
+          <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+              <div class="modal-body">
+                Are you sure you want to restart your site?
+              </div>
+              <div class="modal-footer" style="padding: 10px 20px 10px;">
+                <button type="button" class="campl-btn campl-primary-cta" data-dismiss="modal">Cancel</button>
+                <a class="campl-btn campl-primary-cta campl-primary-red" id="restart_modal_button">Restart</a>
+              </div>
             </div>
-        </div>
-    </div>
-
-    {% if not service.primary %}
-    <!-- Modal delete -->
-    <div class="modal fade" id="delete_modal" tabindex="-1" role="dialog" aria-labelledby="delete_modal_label" aria-hidden="true">
-      <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-          <div class="modal-body">
-            Are you sure you want to delete the test server?
-          </div>
-          <div class="modal-footer" style="padding: 10px 20px 10px;">
-            <button type="button" class="campl-btn campl-primary-cta" data-dismiss="modal">Cancel</button>
-            <a class="campl-btn campl-primary-cta campl-primary-red" id="delete_modal_button">Delete</a>
           </div>
         </div>
-      </div>
-    </div>
-    {% endif %}
-
-    {% if service.primary and service.due_update %}
-    <!-- Modal update os -->
-    <div class="modal fade" id="update_os_modal" tabindex="-1" role="dialog" aria-labelledby="update_os_modal_label" aria-hidden="true">
-      <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-          <div class="modal-body">
-            Are you sure you want to update the operating system?
-          </div>
-          <div class="modal-footer" style="padding: 10px 20px 10px;">
-            <button type="button" class="campl-btn campl-primary-cta" data-dismiss="modal">Cancel</button>
-            <a class="campl-btn campl-primary-cta campl-primary-red" id="update_os_modal_button">Update</a>
-          </div>
-        </div>
-      </div>
-    </div>
-    {% endif %}
-
-    <!-- Modal restart os -->
-    <div class="modal fade" id="restart_modal" tabindex="-1" role="dialog" aria-labelledby="restart_modal_label" aria-hidden="true">
-      <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-          <div class="modal-body">
-            Are you sure you want to restart your site?
-          </div>
-          <div class="modal-footer" style="padding: 10px 20px 10px;">
-            <button type="button" class="campl-btn campl-primary-cta" data-dismiss="modal">Cancel</button>
-            <a class="campl-btn campl-primary-cta campl-primary-red" id="restart_modal_button">Restart</a>
-          </div>
-        </div>
-      </div>
     </div>
 
 {% endblock %}

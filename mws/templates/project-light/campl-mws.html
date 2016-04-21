@@ -60,7 +60,6 @@
                         {% endif %}
                         {% if site.test_service and site.test_service.active %}
                             <li><a href="{% url 'sitesmanagement.views.service_settings' service_id=site.test_service.id %}">Test Server Settings</a></li>
-                            <li><a href="{% url 'listvhost' service_id=site.test_service.id %}">Test Server Web Sites</a></li>
                         {% endif %}
                         <li><a href="{% url 'mwsauth.views.auth_change' site_id=site.id %}">Authorised users</a></li>
                         <li><a href="{% url 'listsites' %}">My other MWS servers</a></li>
