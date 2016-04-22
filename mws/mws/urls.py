@@ -41,7 +41,6 @@ urlpatterns = patterns('',
     url(r'^vhosts/(?P<vhost_id>[0-9]+)/certificates/$', 'sitesmanagement.views.certificates'),
     url(r'^vhosts/(?P<vhost_id>[0-9]+)/generate_csr/$', 'sitesmanagement.views.generate_csr'),
     url(r'^system_packages/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.system_packages'),
-    url(r'^clone_vm/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.clone_vm_view'),
     url(r'^delete_vm/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.delete_vm'),
     url(r'^settings/vm/(?P<service_id>[0-9]+)/on/$', 'sitesmanagement.views.power_vm'),
     url(r'^settings/vm/(?P<service_id>[0-9]+)/reset/$', 'sitesmanagement.views.reset_vm'),
@@ -89,6 +88,10 @@ urlpatterns = patterns('',
     url(r'^api/post_installation/$', 'apimws.views.post_installation'),
     url(r'^api/post_recreate/$', 'apimws.views.post_recreate'),
     url(r'^api/resend_email_confirmation/(?P<site_id>[0-9]+)/$', 'apimws.views.resend_email_confirmation_view'),
+
+    # test os updates
+    url(r'^clone_vm/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.clone_vm_view'),
+    url(r'^switch_services/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.switch_services'),
 
     # mwsauth app
     url(r'^auth/(?P<site_id>[0-9]+)/$', 'mwsauth.views.auth_change'),
