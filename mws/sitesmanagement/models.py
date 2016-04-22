@@ -510,6 +510,8 @@ class Vhost(models.Model):
         unique_together = ("name", "service")
 
     def __unicode__(self):
+        if self.service and self.service.network_configuration:
+            return self.name + ' - ' + self.service.network_configuration.name
         return self.name
 
 
