@@ -110,35 +110,7 @@
                     </a>
                 </div>
             </div>
-            {% if site.test_service and site.test_service.status == 'installing' and site.test_service.status == 'postinstall'  %}
-                <div class="campl-column4">
-                    <div class="campl-content-container campl-side-padding">
-                        <article class="node node-external-link view-mode-focus_on clearfix
-                                        campl-horizontal-teaser campl-teaser campl-focus-teaser">
-                            <div class="campl-focus-teaser-img">
-                                <div class="campl-content-container campl-horizontal-teaser-img">
-                                    <div class="field field-name-field-external-url-image field-type-image
-                                                field-label-hidden">
-                                        <div class="field-items">
-                                            <div class="field-item even">
-                                                <img class="campl-scale-with-grid"
-                                                     src="{% static "icons/cloud-1.png" %}"
-                                                     height="128" style="margin: 10px;" alt="">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="campl-focus-teaser-txt">
-                                <div class="campl-content-container campl-horizontal-teaser-txt">
-                                    <h3 class="campl-teaser-title">Test OS Upgrade (disabled while the test servers is being configured)</h3>
-                                    <span class="ir campl-focus-link"></span>
-                                </div>
-                            </div>
-                        </article>
-                    </div>
-                </div>
-            {% else %}
+            {% if site.test_service and site.test_service.status != 'installing' and site.test_service.status != 'postinstall'  %}
                 <div class="campl-column4">
                     <div class="campl-content-container campl-side-padding">
                         <a href="{% url 'sitesmanagement.views.clone_vm_view' site_id=site.id %}">
@@ -166,6 +138,34 @@
                                 </div>
                             </article>
                         </a>
+                    </div>
+                </div>
+            {% else %}
+                <div class="campl-column4">
+                    <div class="campl-content-container campl-side-padding">
+                        <article class="node node-external-link view-mode-focus_on clearfix
+                                        campl-horizontal-teaser campl-teaser campl-focus-teaser">
+                            <div class="campl-focus-teaser-img">
+                                <div class="campl-content-container campl-horizontal-teaser-img">
+                                    <div class="field field-name-field-external-url-image field-type-image
+                                                field-label-hidden">
+                                        <div class="field-items">
+                                            <div class="field-item even">
+                                                <img class="campl-scale-with-grid"
+                                                     src="{% static "icons/cloud-1.png" %}"
+                                                     height="128" style="margin: 10px;" alt="">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="campl-focus-teaser-txt">
+                                <div class="campl-content-container campl-horizontal-teaser-txt">
+                                    <h3 class="campl-teaser-title" style="color: orangered">Test OS Upgrade (disabled while the test servers is being configured)</h3>
+                                    <span class="ir campl-focus-link"></span>
+                                </div>
+                            </div>
+                        </article>
                     </div>
                 </div>
             {% endif %}
