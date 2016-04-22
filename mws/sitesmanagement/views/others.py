@@ -457,15 +457,14 @@ def switch_services(request, site_id):
         dnp = DomainName.objects.get(name=prod_service.network_configuration.name)
         vhostt = dnt.vhost
         vhostp = dnp.vhost
-        dnt.vhost = vhostp
-        dnt.save()
-        dnp.vhost = vhostt
-        dnp.save()
         if vhostt.main_domain == dnt:
             vhostt.main_domain = dnp
         if vhostp.main_domain == dnp:
             vhostp.main_domain = dnt
-
+        dnt.vhost = vhostp
+        dnt.save()
+        dnp.vhost = vhostt
+        dnp.save()
         launch_ansible(prod_service)
         launch_ansible(test_service)
 
