@@ -16,7 +16,7 @@ from apimws.vm import clone_vm_api_call
 from mwsauth.utils import privileges_check
 from sitesmanagement.forms import BillingForm
 from sitesmanagement.utils import get_object_or_None
-from sitesmanagement.models import Service, Billing, Site, NetworkConfig
+from sitesmanagement.models import Service, Billing, Site, NetworkConfig, DomainName
 from sitesmanagement.views.sites import warning_messages
 
 
@@ -452,6 +452,20 @@ def switch_services(request, site_id):
         test_service.site = site
         test_service.network_configuration = netconf_prod
         test_service.save()
+
+        dnt = DomainName.objects.get(name=test_service.network_configuration.name)
+        dnp = DomainName.objects.get(name=prod_service.network_configuration.name)
+        vhostt = dnt.vhost
+        vhostp = dnp.vhost
+        dnt.vhost = vhostp
+        dnt.save()
+        dnp.vhost = vhostt
+        dnp.save()
+        if vhostt.main_domain == dnt:
+            vhostt.main_domain = dnp
+        if vhostp.main_domain == dnp:
+            vhostp.main_domain = dnt
+
         launch_ansible(prod_service)
         launch_ansible(test_service)
 
