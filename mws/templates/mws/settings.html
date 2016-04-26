@@ -23,6 +23,7 @@
         {% endif %}
 
         <div class="campl-column12">
+            {% if service.primary %}
             <div class="campl-column3">
                 <div class="campl-content-container campl-side-padding">
                     <a href="{% url 'listvhost' service_id=service.id %}">
@@ -52,6 +53,7 @@
                     </a>
                 </div>
             </div>
+            {% endif %}
 
             <div class="campl-column3">
                 <div class="campl-content-container campl-side-padding">
