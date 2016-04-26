@@ -129,57 +129,6 @@ def service_settings(request, service_id):
 
 
 @login_required
-def system_packages(request, service_id):
-    if getattr(settings, 'DEMO', False):
-        return HttpResponseRedirect(reverse('listsites'))
-    service = get_object_or_404(Service, pk=service_id)
-    site = privileges_check(service.site.id, request.user)
-
-    if site is None:
-        return HttpResponseForbidden()
-
-    if not service or not service.active or service.is_busy:
-        return redirect(site)
-
-    ansible_configuraton = get_object_or_None(AnsibleConfiguration, service=service, key="system_packages") \
-                           or AnsibleConfiguration.objects.create(service=service, key="system_packages", value="")
-
-    packages_installed = list(int(x) for x in ansible_configuraton.value.split(",")) \
-        if ansible_configuraton.value != '' else []
-
-    breadcrumbs = {
-        0: dict(name='Managed Web Service server: ' + str(site.name), url=site.get_absolute_url()),
-        1: dict(name='Server settings' if service.primary else 'Test server settings',
-                url=reverse(service_settings, kwargs={'service_id': service.id})),
-        2: dict(name='System packages', url=reverse(system_packages, kwargs={'service_id': service.id}))
-    }
-
-    package_number_list = [1, 2, 3, 4]  # TODO extract this to settings
-
-    if request.method == 'POST':
-        package_number = int(request.POST['package_number'])
-        if package_number in package_number_list:
-            if package_number in packages_installed:
-                packages_installed.remove(package_number)
-                ansible_configuraton.value = ",".join(str(x) for x in packages_installed)
-                ansible_configuraton.save()
-            else:
-                bisect.insort_left(packages_installed, package_number)
-                ansible_configuraton.value = ",".join(str(x) for x in packages_installed)
-                ansible_configuraton.save()
-
-            launch_ansible(service)  # to install or delete new/old packages selected by the user
-
-    return render(request, 'mws/system_packages.html', {
-        'breadcrumbs': breadcrumbs,
-        'packages_installed': packages_installed,
-        'site': site,
-        'sidebar_messages': warning_messages(site),
-        'service': service
-    })
-
-
-@login_required
 def delete_vm(request, service_id):
     service = get_object_or_404(Service, pk=service_id)
     site = privileges_check(service.site.id, request.user)
