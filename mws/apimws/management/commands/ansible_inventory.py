@@ -104,8 +104,9 @@ class Command(NoArgsCommand):
             vhv['webapp'] = vh.webapp
             return vhv
 
-        # List of Vhosts
-        v['mws_vhosts'] = [vhost_vars(vh) for vh in vm.service.vhosts.all()]
+        # List of Vhosts of the production service (the test service uses the production one)
+        v['mws_vhosts'] = [vhost_vars(vh) for vh in vm.service.vhosts.all()] if vm.service.primary else \
+            [vhost_vars(vh) for vh in vm.service.site.production_service.vhosts.all()]
 
         # Is the VM the production or the test one?
         v['mws_is_primary'] = vm.primary

@@ -308,13 +308,6 @@ def clone_vm_api_call(site):
     AnsibleConfiguration.objects.update_or_create(service=service, key='os',
                                                   defaults={'value': getattr(settings,
                                                                              "OS_VERSION_VMXENAPI", "jessie")})
-
-    # Create a default Vhost and associate the service name
-    default_vhost = Vhost.objects.create(service=service, name="default")
-    service_domain = DomainName.objects.create(name=default_vhost.service.network_configuration.name,
-                                               status="accepted", vhost=default_vhost)
-    default_vhost.main_domain = service_domain
-    default_vhost.save()
     secrets_prealocation_vm(vm)
 
     # Copy Unix Groups
@@ -330,13 +323,6 @@ def clone_vm_api_call(site):
         ansible_conf.pk = None
         ansible_conf.service = site.test_service
         ansible_conf.save()
-
-    # Copy vhosts
-    for vhost in site.production_service.vhosts.all().exclude(name="default"):
-        vhost.pk = None
-        vhost.main_domain = None
-        vhost.service = site.test_service
-        vhost.save()
 
     return True
 
