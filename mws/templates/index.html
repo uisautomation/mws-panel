@@ -4,65 +4,193 @@
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
 
-            <p>This site allows member of the university
-            University to request a managed web server</p>
+            <p>This site allows members of the University to request a new server in the Managed Web Service. We
+                provide users with a web-server that they can use without having to worry about manual configuration
+                or operating system maintenance. A server in the Managed Web Service has the following characteristics:
+            </p>
 
-            <p>When you request a MWS you automatically get the right to
-            manage it in the future. {% if all_metadatas %} A list of
-            the sites that you manage appears below. {% endif %} For
-            any site that you manage you can nominate additional
-            managers, and you are strongly advised to do so.</p>
+            <ul>
+                <li>A server with 1 Core CPU, 1 GB of RAM, and 20Gb of disk space (only 10Gb are available to the user,
+                    the rest is used for other purposes like snapshots)</li>
+                <li>A public IPv4 and IPv6 addresses</li>
+{#                <li>A secondary test server for testing purposes (testing updates for example)</li>#}
+                <li>A simple web-based control panel to control all the features of the Managed Web Service</li>
+                <li>A cost of only £{{ cost|floatformat:2 }} a year</li>
+            </ul>
+
+            <p>After you have registered your new server, you can then set up one or more websites on it.</p>
+
+            <p>Warning: If you don't enter billing details for your site within a month, it may be deleted.</p>
+
+            <p>
+                You will get a Debian Jessie (8) box with (between others) the following software installed by default:
+                <ul>
+                    <li>Apache 2.4.10</li>
+                    <li>PHP 5.6.17</li>
+                    <li>Python 2.7.9</li>
+                    <li>Perl 5.20.2</li>
+                    <li>MySQL 5.5.47</li>
+                </ul>
+            </p>
 
             {% if deactivate_new %}
                 <p class="campl-notifications-icon campl-warning-icon" style="float:none; margin-bottom: 10px;">
-                    At this moment we cannot process any new request for a new Managed Web Server, please try again later.
+                    At this moment we cannot process any new requests for the Managed Web Service,
+                    please try again later.
                 </p>
             {% else %}
-                <p><a href="{% url 'sitesmanagement.views.new' %}" class="campl-primary-cta">Register new site</a></p>
+                <p><a href="{% url 'newsite' %}" class="campl-primary-cta">Register new server</a></p>
             {% endif %}
 
-            {% if all_sites %}
-                <h1>MWS sites for {{ user.username }}</h1>
-                <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
+            {% if sites_enabled %}
+                <h1>MWS servers where you are the administrator</h1>
+                <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table clickable_rows">
                     <thead>
                         <tr>
-                            <th>Name</th>
+                            <th>Server Name</th>
                             <th>Description</th>
-                            <th>Domain Name</th>
+                            <th>Hostnames</th>
+                            <th>Server info</th>
+{#                            <th>Test server info</th>#}
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                    {% for site in all_sites %}
-                        {% if site.is_admin_suspended %}
-                            <tr class="site_suspended">
-                                <td>
-                                    {{ site.name }} <br/>
-                                    This site has been administratively suspended
-                        {% else %}
+                    {% for site in sites_enabled %}
+                        <tr data-href="{% url 'showsite' site_id=site.id %}">
+                            <td>
+                                {{ site.name }}
+                            </td>
+                            <td>
+                                {{ site.description }}
+                            </td>
+                            <td>
+                                {{ site.domain_names|join:"<br/>" }}
+                            </td>
+                            <td>
+                                {% if site.production_service %}
+                                    IPv4: {{ site.production_service.ipv4 }}<br/>
+                                    IPv6: {{ site.production_service.ipv6 }}<br/>
+                                    hostname: {{ site.production_service.hostname }}<br/>
+                                {% endif %}
+                            </td>
+{#                            <td>#}
+{#                                {% if site.test_service %}#}
+{#                                    IPv4: {{ site.test_service.ipv4 }}<br/>#}
+{#                                    IPv6: {{ site.test_service.ipv6 }}<br/>#}
+{#                                    hostname: {{ site.test_service.hostname }}<br/>#}
+{#                                {% endif %}#}
+{#                            </td>#}
+                            <td style="width: 30px; padding-left: 0px; padding-right: 0px;">
+                                <a href="{% url 'showsite' site_id=site.id %}">
+                                    <i title="Control panel" class="fa fa-angle-double-right fa-2x"
+                                       data-toggle="tooltip"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+
+            {% if sites_disabled %}
+                <div class="campl-theme-7">
+                    <h1>Disabled MWS servers where you are the administrator</h1>
+                    <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
+                        <thead>
+                            <tr>
+                                <th>Server Name</th>
+                                <th>Description</th>
+                                <th>Hostames</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for site in sites_disabled %}
+                            {% if site.is_admin_suspended %}
+                                <tr class="site_suspended">
+                                    <td>
+                                        {{ site.name }} <br/>
+                                        This server has been administratively suspended
+                            {% else %}
+                                <tr>
+                                    <td>
+                                        {{ site.name }}
+                            {% endif %}
+                                    </td>
+                                    <td>
+                                        {{ site.description }}
+                                    </td>
+                                    <td>
+                                        {{ site.domain_names|join:"<br/>" }}
+                                    </td>
+                                    <td style="width: 35px;">
+                                        {% if not site.is_admin_suspended %}
+                                            <form action={% url 'enablesite' site_id=site.id %} method="post">
+                                                <fieldset>
+                                                    {% csrf_token %}
+                                                    <input type="submit" value="Re-enable" class="campl-btn campl-primary-cta">
+                                                </fieldset>
+                                            </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+
+            {% if sites_authorised %}
+                <div class="campl-theme-4">
+                    <h1>MWS servers where you are authorised as a user</h1>
+                    <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Server info</th>
+{#                                <th>Test server info</th>#}
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for site in sites_authorised %}
                             <tr>
                                 <td>
                                     {{ site.name }}
-                        {% endif %}
                                 </td>
                                 <td>
                                     {{ site.description }}
                                 </td>
                                 <td>
-                                    {{ site.main_domain }}
-                                </td>
-                                <td style="width: 35px;">
-                                    {% if not site.is_admin_suspended %}
-                                        <a href="{% url 'sitesmanagement.views.show' site_id=site.id %}">
-                                            <img alt="Show" class="iconic" src="{% static 'icons/iconic/magnifying-glass.svg' %}">
-                                        </a>
+                                    {% if site.production_service %}
+                                        IPv4: {{ site.production_service.ipv4 }}<br/>
+                                        IPv6: {{ site.production_service.ipv6 }}<br/>
+                                        hostname: {{ site.production_service.hostname }}<br/>
                                     {% endif %}
                                 </td>
+{#                                <td>#}
+{#                                    {% if site.test_service %}#}
+{#                                        IPv4: {{ site.test_service.ipv4 }}<br/>#}
+{#                                        IPv6: {{ site.test_service.ipv6 }}<br/>#}
+{#                                        hostname: {{ site.test_service.hostname }}<br/>#}
+{#                                    {% endif %}#}
+{#                                </td>#}
                             </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             {% endif %}
         </div>
     </div>
+{% endblock %}
+
+{% block campl_foot_js %}
+    <script>
+        $('[data-toggle="tooltip"]').tooltip({'placement': 'top'});
+        $(".clickable_rows tbody tr").click(function() {
+                window.document.location = $(this).data('href');
+          });
+    </script>
 {% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'project-light/campl-mws.html' %}
+{% block page_content %}
+    {{ block.super }}
+    <div class="campl-column12 campl-main-content">
+        <div class="campl-content-container">
+            <h1>Admin email list</h1>
+            <div><p>
+            {% for site in site_list %}
+                {{ site.email }}<br/>
+            {% endfor %}
+            </p></div>
+        </div>
+    </div>
+{% endblock %}

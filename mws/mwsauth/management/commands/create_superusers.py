@@ -11,5 +11,5 @@ class Command(BaseCommand):
         for crsid in args:
             try:
                 User.objects.create_superuser(crsid, None, None)
-            except Exception as e:
+            except Exception:
                 pass

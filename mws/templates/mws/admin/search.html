@@ -1,0 +1,111 @@
+{% extends 'project-light/campl-mws.html' %}
+{% block page_content %}
+    {{ block.super }}
+    <div class="campl-column12 campl-main-content">
+        <div class="campl-content-container">
+            <h1>Search MWS servers</h1>
+            {% if results %}
+                <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Hostnames</th>
+                            <th>Server info</th>
+                            <th>Admin Users</th>
+                            <th>SSH Users</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for site in results %}
+                            <tr data-href="{% url 'showsite' site_id=site.id %}">
+                                <td>
+                                    {{ site.name }}<br/>
+                                    {% if site.is_canceled %}<br/>This site is cancelled{% endif %}
+                                    {% if site.is_disabled %}
+                                        <br/>This site is disabled<br/>
+                                        <form action={% url 'enablesite' site_id=site.id %} method="post">
+                                            <fieldset>
+                                                {% csrf_token %}
+                                                <input type="submit" value="Re-enable" class="campl-btn campl-primary-cta">
+                                            </fieldset>
+                                        </form>
+                                    {% endif %}
+                                    {% if site.is_admin_suspended %}
+                                        <br/>This site is administrativelly suspended<br/>
+                                        <form action={% url 'unsuspendsite' site_id=site.id %} method="post">
+                                            <fieldset>
+                                                {% csrf_token %}
+                                                <input type="submit" value="Unsuspend" class="campl-btn campl-primary-cta">
+                                            </fieldset>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ site.description }}
+                                </td>
+                                <td>
+                                    {{ site.domain_names|join:"<br/>" }}
+                                </td>
+                                <td>
+                                    {% if site.production_service %}
+                                        IPv4: {{ site.production_service.ipv4 }}<br/>
+                                        IPv6: {{ site.production_service.ipv6 }}<br/>
+                                        servicename: {{ site.production_service.hostname }}<br/>
+                                        hostname: {{ site.production_vms.0.hostname }}<br/>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% for user in site.list_of_admins %}
+                                        {{ user.last_name }} ({{ user.username }})<br/>
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {% for user in site.list_of_ssh_users %}
+                                        {{ user.last_name }} ({{ user.username }})<br/>
+                                    {% endfor %}
+                                </td>
+                                <td style="width: 30px; padding-left: 0px; padding-right: 0px;">
+                                    <a href="{% url 'showsite' site_id=site.id %}">
+                                        <i title="Control panel" class="fa fa-angle-double-right fa-2x"
+                                           data-toggle="tooltip"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+            <form action="{% url 'sitesmanagement.views.admin_search' %}" method="post">
+                <fieldset>
+                    {% csrf_token %}
+                    <div id="site_form">
+                        <p>
+                            <label for="id_mwsname">MWS Name</label>
+                            <input id="id_mwsname" maxlength="100" name="mwsname" type="text">
+                        </p>
+                        <p>
+                            <label for="id_mwshostname">MWS Server Name</label>
+                            <input id="id_mwshostname" maxlength="200" name="mwshostname" type="text">
+                        </p>
+                        <p>
+                            <label for="id_mwsdomainname">MWS Hostname</label>
+                            <input id="id_mwsdomainname" maxlength="200" name="mwsdomainname" type="text">
+                        </p>
+                        <p>
+                            <label for="id_crsid">MWS User</label>
+                            <input id="id_crsid" maxlength="100" name="crsid" type="text">
+                        </p>
+                    </div>
+                    <p><input type="submit" value="Search" class="campl-btn campl-primary-cta"></p>
+                </fieldset>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block campl_foot_js %}
+    {% include 'ucamlookup_users.html' with input_tag_id="id_crsid" multiple="false" %}
+{% endblock %}

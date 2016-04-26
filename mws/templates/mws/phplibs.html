@@ -1,0 +1,44 @@
+{% extends 'project-light/campl-mws.html' %}
+{% load static %}
+
+{% block app_head %}
+    {{ block.super }}
+    <style>
+        .select2-selection__choice {
+            float: none !important;
+        }
+
+        .select2-container {
+            width: 75% !important;
+            max-width: 800px !important;
+        }
+    </style>
+{% endblock %}
+
+{% block page_content %}
+    {{ block.super }}
+    <div class="campl-column12 campl-main-content">
+        <div class="campl-content-container">
+            <h2>PHP Libraries</h2>
+            <p>You can enable or disable the libraries you want.</p>
+            <form action="{% url 'sitesmanagement.views.php_libs' service_id=service.id %}" method="post">
+                {% if error_message %}<p style="color: red">{{ error_message }}</p>{% endif %}
+                <fieldset>
+                    {% csrf_token %}
+                    <div>
+                        {{ form.as_p }}
+                    </div>
+                    <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block campl_foot_js %}
+    <script>
+        $(document).ready(function() {
+            $("#id_php_libs").select2();
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends 'project-light/campl-mws.html' %}
+{% load static %}
+{% block page_content %}
+    {{ block.super }}
+    <div class="campl-column12 campl-main-content">
+        <div class="campl-content-container">
+            <h1>Cancel your MWS server</h1>
+            <div class="campl-notifications-panel campl-warning-panel campl-notifications-container clearfix">
+                <div class="campl-column4">
+                    <p class="campl-notifications-icon campl-warning-icon">Warning:</p>
+                </div>
+                <div class="campl-column8">
+                    <p>Cancelling your MWS server will cause the deletion of all data on that site.</p>
+                </div>
+            </div>
+            <form action={% url 'deletesite' site_id=site.id %} method="post">
+                <fieldset>
+                    {% csrf_token %}
+                    <p>Proceed?</p>
+                    <p>
+                        <input type="radio" name="confirmation" value="yes"> Yes<br>
+                        <input type="radio" name="confirmation" value="no"> No
+                    </p>
+                    <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
+                </fieldset>
+            </form>
+                </div>
+        </div>
+    </div>
+{% endblock %}

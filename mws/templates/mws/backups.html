@@ -1,0 +1,72 @@
+{% extends 'project-light/campl-mws.html' %}
+{% load static %}
+
+{% block app_head %}
+    {{ block.super }}
+    <script src="{% static 'js/polyfiller.js' %}"></script>
+    <script>
+      webshims.setOptions('forms-ext', {types: 'date'});
+      webshims.polyfill('forms-ext');
+    </script>
+{% endblock %}
+
+{% block page_content %}
+    {{ block.super }}
+    <div class="campl-column12 campl-main-content">
+        <div class="campl-content-container">
+            <h2>Snapshots</h2>
+            <p>You can create a snapshot of your current filesystem by pressing the following button.
+            This will create a backup of the contents of your MWS server that you can restore in the future.
+            This option is useful when you have a stable system and you want to preserve the current
+            configuration for future disaster recoveries.</p>
+            {% if error_message_snap %}<p style="color: red">{{ error_message_snap }}</p>{% endif %}
+            {% if not limit_snaps %}
+            <form action="{% url 'createsnapshot' service_id=service.id %}" method="post">
+                <fieldset>
+                    <div id="snapshot_form">
+                        {% csrf_token %}
+                        {{ snapshot_form.as_p }}
+                        <p><input type="submit" value="Create Snapshot" class="campl-btn campl-primary-cta"/></p>
+                    </div>
+                </fieldset>
+            </form>
+            {% endif %}
+            <h2>List existing snapshots</h2>
+            {% for snapshot in object_list %}
+                {% if snapshot.pending_delete %}
+                    <p>{{ snapshot.name }} ({{ snapshot.date }}) <span style="color: darkred">Deleting</span></p>
+                {% else %}
+                <div style="display: inline-block; width: 100%;">
+                    <form action="{% url 'backups' service_id=service.id %}" method="post" style="float: left; padding-right: 5px;">
+                        <fieldset>
+                            {% csrf_token %}
+                            {{ snapshot.name }} ({{ snapshot.date }})
+                            <input type="hidden" value="{{ snapshot.id }}" name="snapshot_id"/>
+                            <input type="hidden" value="{{ snapshot.date|date:"Y-m-d" }}" name="backupdate"/>
+                            <input type="submit" value="Restore snapshot" class="campl-btn campl-primary-cta"/>
+                        </fieldset>
+                    </form>
+                    <form action="{% url 'deletesnapshot' snapshot_id=snapshot.id %}" method="post" style="float: left;">
+                        <fieldset>
+                            {% csrf_token %}
+                            <input type="submit" value="Delete snapshot" class="campl-btn campl-primary-cta"/>
+                        </fieldset>
+                    </form>
+                </div>
+                {% endif %}
+            {% endfor %}
+            <h2>Backups</h2>
+            <p>All MWS servers are backed up nightly. You can restore one of these automatic snapshots by selecting
+            the date in the date picker below and clicking the submit button</p>
+            <form action="{% url 'backups' service_id=service.id %}" method="post">
+                {% if error_message %}<p style="color: red">{{ error_message }}</p>{% endif %}
+                <fieldset>
+                    {% csrf_token %}
+                    <p>Choose date</p>
+                    <p><input type="date" name="backupdate" id="datepicker" class="datepicker" min="{{ fromdate|date:"Y-m-d" }}" max="{{ todate|date:"Y-m-d" }}" /></p>
+                    <p><input type="submit" value="Restore backup" class="campl-btn campl-primary-cta"/></p>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+{% endblock %}

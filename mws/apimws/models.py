@@ -1,27 +1,46 @@
-from django import forms
 from django.db import models
-from sitesmanagement.models import VirtualMachine, Site
+from sitesmanagement.models import Service
+
+
+class Cluster(models.Model):
+    name = models.CharField(max_length=100, primary_key=True)
+
+    def __unicode__(self):
+        return self.name
+
+
+class Host(models.Model):
+    hostname = models.CharField(max_length=250, primary_key=True)
+    cluster = models.ForeignKey(Cluster, related_name='hosts')
+
+    def __unicode__(self):
+        return self.hostname
 
 
 class AnsibleConfiguration(models.Model):
-    site = models.ForeignKey(Site)
+    service = models.ForeignKey(Service, related_name='ansible_configuration')
     key = models.CharField(max_length=250, db_index=True)
     value = models.TextField()
 
-
-class VMForm(forms.ModelForm):
-    name = forms.CharField(max_length=250, required=True)
-
-    def clean(self):
-        super(VMForm, self).clean()
-        cleaned_data = self.cleaned_data
-        name = cleaned_data.get('name')
-
-        if VirtualMachine.objects.filter(name=name).exists():
-            self._errors['name'] = self.error_class(['This name already exists'])
-
-        return cleaned_data
-
     class Meta:
-        model = VirtualMachine
-        fields = ('name', )
+        unique_together = ("service", "key")
+
+
+class ApacheModule(models.Model):
+    name = models.CharField(max_length=150, primary_key=True)
+    description = models.CharField(max_length=250)
+    available = models.BooleanField(default=True)
+    services = models.ManyToManyField(Service, related_name='apache_modules', blank=True)
+
+    def __unicode__(self):
+        return self.name
+
+
+class PHPLib(models.Model):
+    name = models.CharField(max_length=150, primary_key=True)
+    description = models.CharField(max_length=250)
+    available = models.BooleanField(default=True)
+    services = models.ManyToManyField(Service, related_name='php_libs', blank=True)
+
+    def __unicode__(self):
+        return self.name

@@ -1,5 +1,11 @@
 from common_settings import *
 
+# Tolerate the absence of secrets (but some parts of the system will break).
+try:
+    from production_secrets import *
+except ImportError:
+    pass
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '$a2byg9*bc5rcc_e5d5#3+mp^s=v0y_vz18ke-tzy_u!*&!txw'
 
@@ -10,7 +16,14 @@ TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
+ADMINS = (('Abraham', 'amc203@cam.ac.uk'), )
+SERVER_EMAIL = "mws-support@uis.cam.ac.uk"
+
 MAIN_DOMAIN = 'http://localhost:8000'
+
+INSTALLED_APPS = INSTALLED_APPS + (
+    'debug_toolbar',
+)
 
 # Database
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
@@ -53,3 +66,13 @@ LSxbGuFG9yfPFIqaSntlYMxKKB5ba/tIAMzyAOHxdEM5hi1DXRsOok3ElWjOw9oN
 wOq24EIbX5LquL9w+uvnfXw=
 -----END CERTIFICATE-----
 """}
+
+BROKER_URL = 'django://'
+INSTALLED_APPS = INSTALLED_APPS+('kombu.transport.django', )
+
+VM_END_POINT_COMMAND = ["vmmanager"]
+VM_API = "xen"
+
+CELERY_EAGER_PROPAGATES_EXCEPTIONS=True
+CELERY_ALWAYS_EAGER=True
+BROKER_BACKEND='memory'

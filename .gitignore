@@ -11,6 +11,13 @@ deployment/Vagrantfile
 
 # Database files
 *.sqlite3
+*.db
 
 # User uploaded files
 mws/media/*
+
+# Production secrets
+mws/mws/production_secrets.py
+
+# VMManager installation files
+vmmanager/vmmanager.egg-info

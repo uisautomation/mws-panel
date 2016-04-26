@@ -1,0 +1,175 @@
+{% extends 'project-light/campl-mws.html' %}
+{% load static %}
+{% block page_content %}
+    {{ block.super }}
+    <div class="campl-column12 campl-main-content">
+        <div class="campl-content-container">
+
+            <h1>Web sites for the MWS server "{{ service.site.name }}"</h1>
+
+            <p class="messages"></p>
+
+            {% if service.vhosts.all %}
+                <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
+                    <thead>
+                        <tr>
+                            <th>Web site name</th>
+                            <th>Associated hostname</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for vhost in service.vhosts.all %}
+                        <tr>
+                            <td>
+                                {{ vhost.name }}
+                            </td>
+                            <td>
+                                {% if vhost.sorted_domain_names %}
+                                    {{ vhost.sorted_domain_names|join:", " }}
+                                {% else %}
+                                    <p style="color: #CF0000">This web site does not have any hostname associated. You need to add one using the button in the right hand side.</p>
+                                {% endif %}
+                            </td>
+                            <td style="width: 180px;">
+                                {% if vhost.main_domain %}
+                                <a href="{% url 'visitvhost' vhost_id=vhost.id %}" target="_blank" style="text-decoration: none;">
+                                    <i title="Visit website" class="fa fa-eye fa-2x" data-toggle="tooltip"></i>
+                                </a>
+                                {% endif %}
+                                <a href="{% url 'listdomains' vhost_id=vhost.id %}" style="text-decoration: none;">
+                                    <i title="Hostnames associated to this web site" class="fa fa-link fa-2x"
+                                       data-toggle="tooltip" ></i>
+                                </a>
+                                <a href="{% url 'sitesmanagement.views.certificates' vhost_id=vhost.id %}" style="text-decoration: none;">
+                                    <i title="TLS certificates" class="fa fa-lock fa-2x" data-toggle="tooltip"></i>
+                                </a>
+                                {% if not vhost.apache_owned %}
+                                <a href="#" class="vhostapache" data-href="javascript:ajax('{% url 'vhostapache' vhost_id=vhost.id %}', 'POST')" style="text-decoration: none;">
+                                    <i title="Make docroot folder writtable by the apache user" class="fa fa-cogs fa-2x" data-toggle="tooltip"></i>
+                                </a>
+                                {% endif %}
+                                {% if vhost.name != "default" %}
+                                <a class="delete_vhost" data-href="javascript:ajax('{% url 'deletevhost' vhost_id=vhost.id %}', 'DELETE')" href="#" style="text-decoration: none;">
+                                    <i title="Delete" class="fa fa-trash-o fa-2x" data-toggle="tooltip"></i>
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p style="margin-top: 20px; margin-bottom: 20px">The server doesn't have any web sites configured</p>
+            {% endif %}
+
+            <p>When built, each MWS server contains a website called 'default' that is associated with the hostname of the MWS server.
+            This means that you can start using your MWS server without further configuration. Web site contents should
+            be stored inside /var/www/{name_of_website} folder of your MWS server.</p>
+            <p>You can create as many web sites as you want in you MWS server bu they will share
+            your MWS server resources. You need to use different names for each website.</p>
+            <p>Once you have created you website you will need to associate a hostname with it using the option
+            buttons on the right before you can access it from a browser.</p>
+
+            <p><a id="add_vhost_button" href="#" class="campl-primary-cta">Add a new web site</a></p>
+
+            <div id="add_vhost_div" style="display: none; margin-top: 20px">
+                <form action={% url 'createvhost' service_id=service.id %} method="post">{% csrf_token %}
+                    <fieldset>
+                        <div id="vhost_form">
+                            {{ vhost_form.as_p }}
+                        </div>
+                        <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
+                    </fieldset>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="delete_modal" tabindex="-1" role="dialog" aria-labelledby="delete_modal_label" aria-hidden="true">
+      <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+          <div class="modal-body">
+            Are you sure you want to delete this web site? Clicking 'Delete' will cause the deletion of the folder
+              /replicated/www/name_of_website and all its contents
+          </div>
+          <div class="modal-footer" style="padding: 10px 20px 10px;">
+            <button type="button" class="campl-btn campl-primary-cta" data-dismiss="modal">Cancel</button>
+            <a class="campl-btn campl-primary-cta campl-primary-red" id="delete_modal_button">Delete</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="vhostapache_modal" tabindex="-1" role="dialog" aria-labelledby="vhostapache_modal_label" aria-hidden="true">
+      <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+          <div class="modal-body">
+            Your Website (vhost) document root folder (docroot) will be writtable by the apache user (www-data) during
+              1 hour. Sometimes, CMS like drupal or wordpress require this folder to be writtable by the apache user
+              in order to update the software or to install plugins.
+          </div>
+          <div class="modal-footer" style="padding: 10px 20px 10px;">
+            <button type="button" class="campl-btn campl-primary-cta" data-dismiss="modal">Cancel</button>
+            <a class="campl-btn campl-primary-cta campl-primary-red" id="vhostapache_modal_button">Confirm</a>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endblock %}
+
+{% block campl_foot_js %}
+    <script>
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie != '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function ajax(url, type) {
+            $.ajax({
+                url: url,
+                type: type,
+                success: function(data) {
+                    console.log(data);
+                    $('.messages').addClass('bg-info').text(data);
+                    $('#vhostapache_modal').modal('hide');
+                    $('#delete_modal').modal('hide');
+                },
+                beforeSend: function(xhr, settings) {
+                    xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+                },
+                crossDomain: false
+            });
+        }
+
+        $('[data-toggle="tooltip"]').tooltip({'placement': 'top'});
+
+        $('#add_vhost_button').click(function() {
+            $('#add_vhost_div').show("fast")
+        });
+
+        $('.vhostapache').click(function() {
+            $("#vhostapache_modal_button").attr("href", $( this ).attr('data-href'));
+            $('#vhostapache_modal').modal();
+        });
+
+        $('.delete_vhost').click(function() {
+            $("#delete_modal_button").attr("href", $( this ).attr('data-href'));
+            $('#delete_modal').modal();
+        });
+    </script>
+{% endblock %}

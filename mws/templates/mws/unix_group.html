@@ -1,0 +1,28 @@
+{% extends 'project-light/campl-mws.html' %}
+{% load static %}
+{% block page_content %}
+    {{ block.super }}
+    <div class="campl-column12 campl-main-content">
+        <div class="campl-content-container">
+            <h1>Edit the Unix Group "{{ form.instance.name }}"</h1>
+            <p>Unix Group names can only contain letters and need to be written in capital letters</p>
+            <form action={% url 'updateunixgroup' ug_id=form.instance.id %} method="post">
+                <fieldset>
+                    {% csrf_token %}
+                    <div id="unix_group_form">
+                        {{ form.as_p }}
+                        <p>
+                            Users:<br/>
+                            <input id="input-lookup-users-ajax" name="unix_users">
+                        </p>
+                    </div>
+                    <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block campl_foot_js %}
+    {% include 'ucamlookup_users.html' with input_tag_id="input-lookup-users-ajax" multiple="true" user_list="unix_users" %}
+{% endblock %}

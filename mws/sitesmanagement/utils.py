@@ -1,5 +1,5 @@
-import re
 from django.shortcuts import _get_queryset
+import warnings
 
 
 def get_object_or_None(klass, *args, **kwargs):
@@ -11,4 +11,22 @@ def get_object_or_None(klass, *args, **kwargs):
 
 
 def is_camacuk(domain_name):
-    return domain_name.endswith("cam.ac.uk")
+    return domain_name.endswith(".cam.ac.uk")
+
+
+def deprecated(func):
+    '''This is a decorator which can be used to mark functions
+    as deprecated. It will result in a warning being emitted
+    when the function is used.'''
+    def new_func(*args, **kwargs):
+        warnings.warn("Call to deprecated function {}.".format(func.__name__), category=DeprecationWarning)
+        return func(*args, **kwargs)
+    new_func.__name__ = func.__name__
+    new_func.__doc__ = func.__doc__
+    new_func.__dict__.update(func.__dict__)
+    return new_func
+
+
+def can_create_new_site():
+    from sitesmanagement.models import Site
+    return Site.objects.filter(preallocated=True, disabled=True).count() > 0

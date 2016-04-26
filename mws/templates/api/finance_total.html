@@ -1,0 +1,42 @@
+{% extends 'project-light/campl-mws.html' %}
+{% load static %}
+{% load calcendperiod %}
+{% block all_breadcrumbs %}
+{% endblock %}
+{% block page_content %}
+    {{ block.super }}
+    <div class="campl-column12 campl-main-content">
+        <div class="campl-content-container">
+            <h1>Finance report</h1>
+            <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table clickable_rows">
+                <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>Name</th>
+                        <th>Institution</th>
+                        <th>PO raised by</th>
+                        <th>PO number</th>
+                        <th>Site start date</th>
+                        <th>PO file</th>
+                    </tr>
+                </thead>
+                <tbody>
+            {% for billing in billings %}
+                    <tr class="site_suspended">
+                        <td>{{ billing.site.id }}</td>
+                        <td>{{ billing.site.name }}</td>
+                        <td>{{ billing.group }}</td>
+                        <td>{{ billing.purchase_order_number }}</td>
+                        <td>{{ billing.site.start_date }}</td>
+                        <td>
+                            {% if billing.purchase_order %}
+                                <a href="{{ billing.purchase_order.url }}">{{ billing.purchase_order.name }}</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+            {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

@@ -1,15 +1,21 @@
 from datetime import datetime
+import uuid
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+import mock
 from ucamwebauth.tests import create_wls_response
+
+from apimws.models import Cluster, Host
+from apimws.xen import which_cluster
 from mwsauth import views
-from mwsauth.utils import get_or_create_user_by_crsid, get_or_create_group_by_groupid
-from ucamlookup import user_in_groups
-from mwsauth.validators import validate_crsids, validate_groupids
-from sitesmanagement.models import Site, Suspension
+from mwsauth.models import MWSUser
+from mwsauth.utils import get_or_create_group_by_groupid
+from ucamlookup import user_in_groups, get_or_create_user_by_crsid, validate_crsids
+from mwsauth.validators import validate_groupids
+from sitesmanagement.models import Site, Suspension, VirtualMachine, NetworkConfig, Service
 from ucamlookup.models import LookupGroup
 
 
@@ -38,9 +44,9 @@ LSxbGuFG9yfPFIqaSntlYMxKKB5ba/tIAMzyAOHxdEM5hi1DXRsOok3ElWjOw9oN
 wOq24EIbX5LquL9w+uvnfXw=
 -----END CERTIFICATE-----"""}):
         self.client.get(reverse('raven_return'),
-                        {'WLS-Response': create_wls_response(
-                            raven_url=settings.UCAMWEBAUTH_RETURN_URL,
-                            raven_principal=user)})
+                        {'WLS-Response': create_wls_response(raven_issue=datetime.utcnow().strftime('%Y%m%dT%H%M%SZ'),
+                                                             raven_url=settings.UCAMWEBAUTH_RETURN_URL,
+                                                             raven_principal=user)})
         self.assertIn('_auth_user_id', self.client.session)
 
 
@@ -134,86 +140,163 @@ class AuthTestCases(TestCase):
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': 1}))
         self.assertEqual(response.status_code, 404)  # Site does not exists
 
+        cluster = Cluster.objects.create(name="mws-test-1")
+        Host.objects.create(hostname="mws-test-1.dev.mws3.cam.ac.uk", cluster=cluster)
+
+        NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
+                                     name="mws-66424.mws3.csx.cam.ac.uk")
+        NetworkConfig.objects.create(IPv4='172.28.18.253', type='ipv4priv',
+                                     name='mws-46250.mws3.csx.private.cam.ac.uk')
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff4', name='mws-client1', type='ipv6')
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff3', name='mws-client2', type='ipv6')
+
         site_without_auth_users = Site.objects.create(name="test_site1", start_date=datetime.today())
+        service_a = Service.objects.create(type='production', network_configuration=NetworkConfig.
+                                           get_free_prod_service_config(), site=site_without_auth_users, status='ready')
+        VirtualMachine.objects.create(token=uuid.uuid4(), service=service_a,
+                                      network_configuration=NetworkConfig.get_free_host_config(),
+                                      cluster=which_cluster())
 
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_without_auth_users.id}))
         self.assertEqual(response.status_code, 403)  # User is not authorised
 
         site_without_auth_users.users.add(amc203_user)
+        information_systems_group = get_or_create_group_by_groupid(101888)
         site_with_auth_users = site_without_auth_users
 
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_with_auth_users.id}))
-        self.assertContains(response, "amc203", status_code=200)  # User is authorised
+        self.assertContains(response, 'crsid: "amc203"', status_code=200)  # User is authorised
 
-        site_with_auth_groups = Site.objects.create(name="test_site2", start_date=datetime.today())
-        information_systems_group = get_or_create_group_by_groupid(101888)
-        site_with_auth_groups.groups.add(information_systems_group)
 
-        response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_with_auth_groups.id}))
-        self.assertContains(response, "101888", status_code=200)  # User is in an authorised group
-        self.assertNotContains(response, "amc203", status_code=200)
-
+        with mock.patch("apimws.vm.change_vm_power_state") as mock_change_vm_power_state:
+            mock_change_vm_power_state.return_value = True
+            mock_change_vm_power_state.delay.return_value = True
+            site_with_auth_users.disable()
         suspension = Suspension.objects.create(reason="test_suspension", site=site_with_auth_users,
                                                start_date=datetime.today())
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_with_auth_users.id}))
-        self.assertEqual(response.status_code, 302)  # Site is suspended
-        self.assertTrue(response.url.endswith(
-            '%s' % reverse('sitesmanagement.views.show', kwargs={'site_id': site_with_auth_users.id})))
-        self.assertEqual(self.client.get(response.url).status_code, 403)  # Site is suspended
+        self.assertEqual(response.status_code, 403)  # Site is suspended
         suspension.delete()
+
+        with mock.patch("apimws.vm.change_vm_power_state") as mock_change_vm_power_state:
+            mock_change_vm_power_state.return_value = True
+            mock_change_vm_power_state.delay.return_value = True
+            with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+                mock_subprocess.check_output.return_value.returncode = 0
+                site_with_auth_users.enable()
 
         self.assertEqual(len(site_with_auth_users.users.all()), 1)
         self.assertEqual(site_with_auth_users.users.first(), amc203_user)
         self.assertEqual(len(site_with_auth_users.groups.all()), 0)
-        response = self.client.post(reverse(views.auth_change, kwargs={'site_id': site_with_auth_users.id}), {
-            'crsids': "amc203",
-            'groupids': "101888"
-            # we authorise amc203 user and 101888 group
-        })
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(
-            '%s' % reverse('sitesmanagement.views.show', kwargs={'site_id': site_with_auth_users.id})))
-        self.assertEqual(self.client.get(response.url).status_code, 200)
+        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            mock_subprocess.check_output.return_value.returncode = 0
+            response = self.client.post(reverse(views.auth_change, kwargs={'site_id': site_with_auth_users.id}), {
+                'users_crsids': "amc203",
+                'groupids': "101888"
+                # we authorise amc203 user and 101888 group
+            })
+            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
+                                                             site_with_auth_users.production_service
+                                                            .virtual_machines.first().network_configuration.name],
+                                                            stderr=mock_subprocess.STDOUT)
+        self.assertRedirects(response, expected_url=site_with_auth_users.get_absolute_url())
         self.assertEqual(len(site_with_auth_users.users.all()), 1)
         self.assertEqual(site_with_auth_users.users.first(), amc203_user)
         self.assertEqual(len(site_with_auth_users.groups.all()), 1)
         self.assertEqual(site_with_auth_users.groups.first(), information_systems_group)
 
-        response = self.client.post(reverse(views.auth_change, kwargs={'site_id': site_with_auth_users.id}), {
-            # we remove all users and groups authorised, we do not send any crsids or groupids
-        })
+        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            mock_subprocess.check_output.return_value.returncode = 0
+            # remove all users and groups authorised, we do not send any crsids or groupids
+            response = self.client.post(reverse(views.auth_change, kwargs={'site_id': site_with_auth_users.id}), {})
+            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
+                                                             site_with_auth_users.production_service
+                                                            .virtual_machines.first().network_configuration.name],
+                                                            stderr=mock_subprocess.STDOUT)
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(
-            '%s' % reverse('sitesmanagement.views.show', kwargs={'site_id': site_with_auth_users.id})))
+        self.assertTrue(response.url.endswith(site_with_auth_users.get_absolute_url()))
         self.assertEqual(self.client.get(response.url).status_code, 403)  # User is no longer authorised
         self.assertEqual(len(site_with_auth_users.users.all()), 0)
         self.assertEqual(len(site_with_auth_users.groups.all()), 0)
 
+    def test_group_auth_change(self):
+        do_test_login(self, user="amc203")
+        amc203_user = User.objects.get(username="amc203")
+
+        cluster = Cluster.objects.create(name="mws-test-1")
+        Host.objects.create(hostname="mws-test-1.dev.mws3.cam.ac.uk", cluster=cluster)
+
+        NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
+                                     name="mws-66424.mws3.csx.cam.ac.uk")
+        NetworkConfig.objects.create(IPv4='172.28.18.253', type='ipv4priv',
+                                     name='mws-46250.mws3.csx.private.cam.ac.uk')
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff4', name='mws-client1', type='ipv6')
+        NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff3', name='mws-client2', type='ipv6')
+
+        site_with_auth_groups = Site.objects.create(name="test_site2", start_date=datetime.today())
+        service_a = Service.objects.create(type='production', network_configuration=NetworkConfig.
+                                           get_free_prod_service_config(), site=site_with_auth_groups,
+                                           status='ready')
+        VirtualMachine.objects.create(token=uuid.uuid4(), service=service_a,
+                                      network_configuration=NetworkConfig.get_free_host_config(),
+                                      cluster=which_cluster())
+        information_systems_group = get_or_create_group_by_groupid(101888)
+        site_with_auth_groups.groups.add(information_systems_group)
+
+        response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_with_auth_groups.id}))
+        self.assertContains(response, "101888", status_code=200)  # User is in an authorised group
+        self.assertNotContains(response, 'crsid: "amc203"', status_code=200)
+
         self.assertEqual(len(site_with_auth_groups.users.all()), 0)
         self.assertEqual(len(site_with_auth_groups.groups.all()), 1)
         self.assertEqual(site_with_auth_groups.groups.first(), information_systems_group)
-        response = self.client.post(reverse(views.auth_change, kwargs={'site_id': site_with_auth_groups.id}), {
-            'crsids': "amc203",
-            'groupids': "101888"
-            # we authorise amc203 user and 101888 group
-        })
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(
-            '%s' % reverse('sitesmanagement.views.show', kwargs={'site_id': site_with_auth_groups.id})))
-        self.assertEqual(self.client.get(response.url).status_code, 200)
+        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            mock_subprocess.check_output.return_value.returncode = 0
+            response = self.client.post(reverse(views.auth_change, kwargs={'site_id': site_with_auth_groups.id}), {
+                'users_crsids': "amc203",
+                'groupids': "101888"
+                # we authorise amc203 user and 101888 group
+            })
+            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
+                                                             site_with_auth_groups.production_service
+                                                            .virtual_machines.first().network_configuration.name],
+                                                            stderr=mock_subprocess.STDOUT)
+        self.assertRedirects(response, expected_url=site_with_auth_groups.get_absolute_url())
         self.assertEqual(len(site_with_auth_groups.users.all()), 1)
         self.assertEqual(site_with_auth_groups.users.first(), amc203_user)
         self.assertEqual(len(site_with_auth_groups.groups.all()), 1)
         self.assertEqual(site_with_auth_groups.groups.first(), information_systems_group)
 
-        response = self.client.post(reverse(views.auth_change, kwargs={'site_id': site_with_auth_groups.id}), {
-            # we remove all users and groups authorised, we do not send any crsids or groupids
-        })
+        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            mock_subprocess.check_output.return_value.returncode = 0
+            # remove all users and groups authorised, we do not send any crsids or groupids
+            response = self.client.post(reverse(views.auth_change, kwargs={'site_id': site_with_auth_groups.id}), {})
+            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
+                                                             site_with_auth_groups.production_service
+                                                            .virtual_machines.first().network_configuration.name],
+                                                            stderr=mock_subprocess.STDOUT)
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.endswith(
-            '%s' % reverse('sitesmanagement.views.show', kwargs={'site_id': site_with_auth_groups.id})))
+        self.assertTrue(response.url.endswith(site_with_auth_groups.get_absolute_url()))
         self.assertEqual(self.client.get(response.url).status_code, 403)  # User is no longer authorised
         self.assertEqual(len(site_with_auth_groups.users.all()), 0)
         self.assertEqual(len(site_with_auth_groups.groups.all()), 0)
 
-        site_with_auth_users.users.add(amc203_user)
+    def test_banned_users_middleware(self):
+        with self.settings(MIDDLEWARE_CLASSES=settings.MIDDLEWARE_CLASSES+('mwsauth.middleware.CheckBannedUsers',)):
+            do_test_login(self, user="amc203")
+            response = self.client.get(reverse('listsites'))
+            self.assertEqual(response.status_code, 403)  # There user was created without its corresponding mws_user
+            self.assertFalse(User.objects.get(username="amc203").is_active)  # therefore is deactivated by default
+
+            User.objects.filter(username="amc203").update(is_active=True)
+            response = self.client.get(reverse('listsites'))
+            self.assertEqual(response.status_code, 403)  # There is no corresponding mws_user
+            self.assertTrue(User.objects.get(username="amc203").is_active)
+
+            MWSUser.objects.create(uid="9999999", ssh_public_key="testestestestest", user_id="amc203")
+            response = self.client.get(reverse('listsites'))
+            self.assertEqual(response.status_code, 200)  # There is a corresponding mws_user
+
+            User.objects.filter(username="amc203").update(is_active=False)
+            response = self.client.get(reverse('listsites'))
+            self.assertEqual(response.status_code, 403)  # There user is not active

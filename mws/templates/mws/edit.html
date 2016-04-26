@@ -1,30 +1,29 @@
 {% extends 'project-light/campl-mws.html' %}
 {% load static %}
+{% load calcendperiod %}
 {% block page_content %}
+    {{ block.super }}
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
-            <h1>Change information about your MWS</h1>
+            <h1>Managed Web Service account settings</h1>
 
-            <form action={% url 'sitesmanagement.views.edit' site_id=site.id %} method="post">{% csrf_token %}
+            <form action={% url 'editsite' site_id=site.id %} method="post">
                 <fieldset>
+                    {% csrf_token %}
                     <div id="site_form">
-                        {{ site_form.as_p }}
+                        {{ form.as_p }}
                     </div>
-                    <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
+                    <p><input type="submit" value="Update" class="campl-btn campl-primary-cta"/></p>
                 </fieldset>
             </form>
-            <p><a href={% url 'sitesmanagement.views.show' site_id=site.id %}>Back to main menu</a></p>
+            {% if site.subscription %}
+            <p>Your subscription will currently be renewed on {{ site.start_date|calcendperiod }}</p>
+            <p><a href="{% url 'donotrenew' site_id=site.id %}" class="campl-btn campl-primary-cta campl-primary-red">Do not renew the subscription</a></p>
+            {% else %}
+            <p>Your site is scheduled to be cancelled on {{ site.start_date|calcendperiod }}</p>
+            {% endif %}
+            <p><a href="{% url 'disablesite' site_id=site.id %}" class="campl-btn campl-primary-cta campl-primary-red">Disable this Managed Web Service server</a></p>
+            <p><a href="{% url 'deletesite' site_id=site.id %}" class="campl-btn campl-primary-cta campl-primary-red">Cancel this Managed Web Service account</a></p>
         </div>
     </div>
-{% endblock %}
-
-{% block campl_foot_js %}
-    <script>
-        $(document).ready(function() {
-            $("#id_institution_id").select2({
-                placeholder: "Select an Institution",
-                allowClear: false
-            });
-        });
-    </script>
 {% endblock %}

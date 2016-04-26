@@ -1,14 +1,3 @@
-"""
-Django settings for MWS project.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/1.7/topics/settings/
-
-For the full list of settings and their values, see
-https://docs.djangoproject.com/en/1.7/ref/settings/
-"""
-
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 from django.conf import global_settings
 
@@ -18,6 +7,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
 
 # Application definition
+
+PROJECT_APPS = (
+    'sitesmanagement',
+    'apimws',
+    'mwsauth',
+)
 
 INSTALLED_APPS = (
     # Customization for the grappelli admin system
@@ -30,13 +25,11 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     # The following app force all views to have @login_required https://github.com/mgrouchy/django-stronghold/
     'stronghold',
+    'reversion',
     'ucamwebauth',
     'ucamprojectlight',
     'ucamlookup',
-    'sitesmanagement',
-    'apimws',
-    'mwsauth',
-)
+) + PROJECT_APPS
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -47,9 +40,8 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # The following app force all views to have @login_required https://github.com/mgrouchy/django-stronghold/
     'stronghold.middleware.LoginRequiredMiddleware',
-    #TODO The CheckBannedUsers middleware check if users are banned before serving any page
-    #'MWS.middleware.CheckBannedUsers'
-    'ucamwebauth.middleware.DefaultErrorBehaviour'
+    'ucamwebauth.middleware.DefaultErrorBehaviour',
+    'reversion.middleware.RevisionMiddleware',
 )
 
 AUTHENTICATION_BACKENDS = (
@@ -95,7 +87,31 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     'django.contrib.staticfiles.finders.FileSystemFinder',
 )
-GRAPPELLI_ADMIN_TITLE = "Managed Web Service"
+
+SUIT_CONFIG = {
+    'ADMIN_NAME': "Managed Web Service",
+
+    # menu
+    # 'SEARCH_URL': '/admin/auth/user/',
+    # 'MENU_ICONS': {
+    #    'sites': 'icon-leaf',
+    #    'auth': 'icon-lock',
+    # },
+    # 'MENU_OPEN_FIRST_CHILD': True, # Default True
+    # 'MENU_EXCLUDE': ('auth.group',),
+    # 'MENU': (
+    #     'sites',
+    #     {'app': 'auth', 'icon':'icon-lock', 'models': ('user', 'group')},
+    #     {'label': 'Settings', 'icon':'icon-cog', 'models': ('auth.user', 'auth.group')},
+    #     {'label': 'Support', 'icon':'icon-question-sign', 'url': '/support/'},
+    # ),
+
+    # misc
+    # 'LIST_PER_PAGE': 15
+}
+
+# email address where all the error messages will be sent to
+EMAIL_MWS3_SUPPORT = "mws-support@uis.cam.ac.uk"
 
 # ucamwebauth configuration
 UCAMWEBAUTH_CREATE_USER = True
@@ -103,3 +119,16 @@ UCAMWEBAUTH_TIMEOUT = 30
 UCAMWEBAUTH_LOGOUT_REDIRECT = 'http://www.cam.ac.uk/'
 
 STRONGHOLD_PUBLIC_NAMED_URLS = ('raven_login', 'raven_return')
+#CELERY_ACCEPT_CONTENT = ['json'] # TODO
+
+OS_VERSION = "jessie"
+OS_VERSION_VMAPI = "Debian 8RC1 x86_64 preseed"
+OS_VERSION_VMXENAPI = "jessie"
+OS_DUE_UPGRADE = []
+
+YEAR_COST = 100.00
+FINANCE_EMAIL = 'amc203@cam.ac.uk'
+
+CELERY_IMPORTS = ('apimws.platforms', 'apimws.xen', 'apimws.utils', 'apimws.jackdaw', 'apimws.ansible',
+                  'sitesmanagement.cronjobs', 'apimws.ipreg')
+IP_REG_API_END_POINT = ['userv', 'mws-admin', 'mws_ipreg']

@@ -8,7 +8,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('sitesmanagement', '0001_squashed_0017_auto_20140731_1549'),
-        ('ucamlookup', '0001_initial'),
     ]
 
     operations = [
@@ -25,6 +24,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='virtualmachine',
             name='status',
-            field=models.CharField(max_length=50, choices=[(b'requested', b'Requested'), (b'accepted', b'Accepted'), (b'denied', b'Denied'), (b'ready', b'Ready')]),
+            field=models.CharField(max_length=50, choices=[(b'requested', b'Requested'), (b'accepted', b'Accepted'),
+                                                           (b'denied', b'Denied'), (b'ready', b'Ready')]),
         ),
     ]

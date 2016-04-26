@@ -1,28 +1,72 @@
 {% extends 'project-light/campl-mws.html' %}
 {% block page_content %}
+    {{ block.super }}
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
-            <h1>Change authorised users and groups</h1>
+            <h1>Authorised users and groups</h1>
 
-            <form action={% url 'mwsauth.views.auth_change' site_id=site.id %} method="post">{% csrf_token %}
+            <p>You can authorise other users as administrators or ssh-only users. Administrators will have access to all
+                the features of the control panel and can connect to the server via SSH. SSH-only users will only have
+                access to the server via SSH. They won't be able to access the web panel.</p>
+            <p>You can search for other users using the text field below by typing their name or CRSid. It will let you
+                autocomplete by selecting their entry from the drop-down list.</p>
+            <p>You can also authorise users or administrators using
+                <a href="http://www.ucs.cam.ac.uk/lookup/">Lookup</a>
+                <a href="http://www.ucs.cam.ac.uk/lookup/groups">groups</a>.
+            </p>
+
+            <form action={% url 'mwsauth.views.auth_change' site_id=site.id %} method="post" style="float: left; width: 65%;">
                 <fieldset>
+                    {% csrf_token %}
                     <p>
-                        Authorised users:<br/>
-                        <input id="input-lookup-users-ajax" name="crsids">
+                        Administrators:<br/>
+                        <input id="input-lookup-users-ajax" name="users_crsids">
                     </p>
                     <p>
-                        Authorised groups:<br/>
+                        SSH-only users:<br/>
+                        <input id="input-lookup-sshusers-ajax" name="sshusers_crsids">
+                    </p>
+                    <p>
+                        Administrators lookup groups:<br/>
                         <input id="input-lookup-groups-ajax" name="groupids">
+                    </p>
+                    <p>
+                        SSH-only lookup groups:<br/>
+                        <input id="input-lookup-sshgroups-ajax" name="sshgroupids">
                     </p>
                     <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
                 </fieldset>
             </form>
-            <p><a href={% url 'sitesmanagement.views.show' site_id=site.id %}>Back to the main menu</a></p>
+            <div style="background-color: #999999; float: left; width: 25%; padding: 20px 5% 10px 5%;">
+                <p>The list of users authorised using Lookup groups are refreshed every 24 hours. If you want to refresh
+                it now, you can use the following button.</p>
+                <form action={% url 'mwsauth.views.force_update' site_id=site.id %} method="post">
+                    <fieldset>
+                        {% csrf_token %}
+                        <p><input type="submit" value="Force update" class="campl-btn campl-primary-cta"/></p>
+                    </fieldset>
+                </form>
+            </div>
+            {% if request.user.is_superuser %}
+            <div style="float: left; width: 31%; padding: 15px 2% 10px 2%;">
+                <p>This is the current list of supporters for this MWS server: {{ site.supporters.all|join:',' }}</p>
+                <p>If you want to add yourself as a supporter click the button below. After 1 hour you will be
+                    deleted from the supporter list</p>
+                <form action={% url 'mwsauth.views.add_supporter' site_id=site.id %} method="post">
+                    <fieldset>
+                        {% csrf_token %}
+                        <p><input type="submit" value="Add yourself" class="campl-btn campl-primary-cta"></p>
+                    </fieldset>
+                </form>
+            </div>
+            {% endif %}
         </div>
     </div>
 {% endblock %}
 
 {% block campl_foot_js %}
-    {% include 'ucamlookup_users.html' with input_tag_id="input-lookup-users-ajax" multiple="true" %}
-    {% include 'ucamlookup_groups.html' with input_tag_id="input-lookup-groups-ajax" multiple="true" %}
+    {% include 'ucamlookup_users.html' with input_tag_id="input-lookup-users-ajax" multiple="true" user_list="authorised_users" %}
+    {% include 'ucamlookup_users.html' with input_tag_id="input-lookup-sshusers-ajax" multiple="true" user_list="sshuserlist" %}
+    {% include 'ucamlookup_groups.html' with input_tag_id="input-lookup-groups-ajax" multiple="true" group_list="authorised_groups" %}
+    {% include 'ucamlookup_groups.html' with input_tag_id="input-lookup-sshgroups-ajax" multiple="true" group_list="sshusers_groups" %}
 {% endblock %}

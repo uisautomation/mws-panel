@@ -1,0 +1,92 @@
+{% extends 'project-light/campl-mws.html' %}
+{% block page_content %}
+    <div class="campl-column12 campl-main-content" xmlns="http://www.w3.org/1999/html">
+        <div class="campl-content-container">
+            <h1>Terms of use</h1>
+            <h2>General</h2>
+            <ul>
+                <li>
+                    MWS servers are available to support of the work of the University, the Colleges and its
+                    related institutions. They can also be used to support collaborations with outside bodies
+                    providing they are managed and maintained by current members of staff or resident students
+                    of the University.
+                </li>
+                <li>
+                    All fees must be supported by purchase orders acceptable to the University; cash and
+                    other 'personal' payments are not accepted.
+                </li>
+                <li>
+                    Every site must have at least one Site Administrator who is a current member of staff or
+                    resident student of the University. Sites with no administrators will be disabled.
+                </li>
+                <li>
+                    All Site Administrators and SSH users of MWS servers require their own personal UIS account.
+                    UIS User Administration should be consulted about people not normally entitled to UIS
+                    accounts who need to be Site administrators or SSH users.
+                </li>
+                <li>
+                    Routine operating system and web server patches are installed automatically by UIS.
+                    Some of these  will require that the operating system be restarted after installation
+                    and this will result in occasional short interruption to site availability.
+                </li>
+                <li>
+                    MWS users do not get 'root' access to their MWS servers. The expectation is that Site
+                    Administrators will be able to achieve everything that they realistically need to do
+                    without needing root access.
+                </li>
+            </ul>
+            <h2>Responsibilities of Site Administrators</h2>
+            <p><em>Site Administrators</em> are the people who originally requested the site and the people who
+                subsequently take on responsible for the site's operation, have access to the MWS Control Panel
+                and have SSH access to the site.</p>
+            <p>Site administrators are responsible for:</p>
+            <ul>
+                <li>
+                    ensuring that sites are operated within the relevant rules, policies and the law
+                    (see http://www.ucs.cam.ac.uk/policies/). In particular (but not limited to):
+                    <ul>
+                        <li>
+                            <a href="http://www.uis.cam.ac.uk/governance/information-services-committee/rules-and-guidelines">Rules made by the ISC</a>
+                        </li>
+                        <li>
+                            <a href="http://www.uis.cam.ac.uk/governance/information-services-committee/rules-and-guidelines/other-guidelines/web-guidelines">Guidelines for Web Information Providers</a>
+                        </li>
+                        <li>
+                            <a href="http://www.uis.cam.ac.uk/governance/information-services-committee/rules-and-guidelines/other-guidelines/network-use/cudn-rules">Authorisation for Connection to the CUDN</a>
+                        </li>
+                        <li>
+                            <a href="https://community.jisc.ac.uk/library/acceptable-use-policy">Janet Acceptable Use Policy</a>
+                        </li>
+                    </ul>
+                </li>
+                <li>ensuring that sites have appropriate privacy and cookie policies</li>
+                <li>dealing with complaints, take-down requests, etc. relating to their sites</li>
+                <li>creating and maintaining web site content. Administrators may install content management systems
+                    and other web applications (subject to compatibility with the underlying platform) but are
+                    responsible for that installation and subsequent maintenance of the software and for keeping it
+                    up-to-date and secure.</li>
+                <li>upgrading to new versions of the underlying operating system in a timely fashion when they become
+                    available. Facilities are provided to allow Site administrators to test the effect of such upgrades
+                    and to fix any resulting problems, and then to upgrade their sites at a time convenient to them.
+                    Site administrators are responsible for completing the upgrade procedure before the version they
+                    are currently using expires. Sites running expired versions of the operating system will be
+                    upgraded by UIS (which may break the site) or be disabled.</li>
+            </ul>
+            <h2>Rights and responsibilities of University Information Services</h2>
+            <ul>
+                <li>UIS may disable sites that are causing problems for other users of the service or which are
+                    otherwise in contravention of these Terms of Use. Wherever possible Site administrators will be
+                    warned before this happens.</li>
+                <li>UIS is responsible for maintaining the hardware supporting the MWS, the system hosting MWS servers,
+                    the base operating system on the MWS servers and the provided web server software.</li>
+                <li>UIS is responsible for creating 'disaster recovery' backups of MWS servers to allow it to recover
+                    following catastrophic failure.</li>
+                <li>UIS does not offer a formal SLA for this service. Sites are implemented on a pair of Hosts located
+                    in physically distinct data centres within the University. Data is replicated between Hosts such
+                    that MWS servers can be transparently and automatically moved between Hosts for maintenance or
+                    following a failure. This is expected to lead to very high underlying availability of individual
+                    Sites.</li>
+            </ul>
+        </div>
+    </div>
+{% endblock %}

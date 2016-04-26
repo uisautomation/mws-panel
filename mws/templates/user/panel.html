@@ -1,0 +1,34 @@
+{% extends 'project-light/campl-mws.html' %}
+{% load static %}
+{% block page_content %}
+    <div class="campl-column12 campl-main-content">
+        <div class="campl-content-container">
+            <h1>User panel for {{ request.user.last_name }} ({{ request.user.username }})</h1>
+            {% if error_message %}<p style="color: red">{{ error_message }}</p>{% endif %}
+            {% if ssh_public_key %}
+                <pre>{{ ssh_public_key }}</pre>
+                <p><a id="new_key" class="campl-btn campl-primary-cta campl-primary-blue">Upload a new SSH Public Key</a></p>
+            {% endif %}
+            <form {% if ssh_public_key %}style="display: none;"{% endif %} id="ssh_key_form"
+                  action={% url 'mwsauth.views.user_panel' %} method="post" enctype="multipart/form-data">
+                <fieldset>
+                    {% csrf_token %}
+                    {% if not ssh_public_key %}<p>If you upload your ssh public key, you will be able to access every
+                    server where you have been authorised using ssh with your private key</p>{% endif %}
+                    <div id="user_form">
+                        Public SSH Key: <input type="file" name="ssh_public_key"></p>
+                    </div>
+                    <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block campl_foot_js %}
+    <script>
+        $('#new_key').click(function() {
+            $('#ssh_key_form').show("fast")
+        });
+    </script>
+{% endblock %}

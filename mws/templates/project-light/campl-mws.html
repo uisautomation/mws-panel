@@ -1,29 +1,43 @@
 {% extends 'ucamprojectlight.html' %}
 {% load static %}
+{% load emailconfirmed %}
 
 {% block app_head %}
+    <link rel="shortcut icon" href="http://www.cam.ac.uk/profiles/cam/themes/cam/assets/images/favicon.ico" type="image/vnd.microsoft.icon">
     <link rel="stylesheet" href="{% static 'stylesheets/mws.css' %}" />
-    <link href="{% static 'stylesheets/multi-select.css' %}" media="screen" rel="stylesheet" type="text/css" />
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
-    <script src="{% static 'js/bootstrap-confirmation3.js' %}"></script>
     {% include 'ucamlookup_headers.html' with jquery=False %}
+    <link href="{% static 'stylesheets/font-awesome.css' %}" media="screen" rel="stylesheet" type="text/css" />
+    <script src="{% static 'js/custom.js' %}"></script>
+    <script src="{% static 'js/sidebar.js' %}"></script>
+    {% if sidebar_messages %}
+        <script>
+            $(document).ready(function () {
+                $(".noti_bubble").show();
+                $('[data-toggle="tooltip"]').tooltip({'placement': 'top'});
+            });
+        </script>
+    {% endif %}
 {% endblock %}
 
-{% block head_title %}Managed Web Service administration site{% endblock %}
+{% block head_title %}Managed Web Service Administration Site{% endblock %}
+
+{% block all_breadcrumbs %}
+    {{ block.super }}
+    <p style="color: white; text-align: right;">
+        Welcome <a href="{% url 'mwsauth.views.user_panel' %}">{{ request.user.last_name }} ({{ request.user.username }})</a>
+    </p>
+{% endblock %}
 
 {% block static_breadcrumbs %}
-    {# My parent organisation #}
-    <li>
-        <a href="http://www.cam.ac.uk/">University of Cambridge</a>
-    </li>
-    {# My app name #}
-    <li>
-        <a href="/">Managed Web Service administration site</a>
-    </li>
 {% endblock %}
 
 {% block site_name %}
-    <a href="/">Managed Web Service administration site</a>
+    {% if site %}
+        <a href="{% url 'showsite' site_id=site.id %}">MWS server "{{ site.name }}" control panel</a>
+    {% else %}
+        <a>Managed Web Service Administration Site</a>
+    {% endif %}
 {% endblock %}
 
 {% block search_bar %}
@@ -32,8 +46,178 @@
 {% block campl_tabs_header %}
 {% endblock %}
 
-{% block blurb %}The Managed Web Service is provided by the <a href="http://www.uis.cam.ac.uk">University Information Services</a>.{% endblock %}
+{% block campl_page_header %}
+    {{ block.super }}
+    <div class="campl-row campl-page-header">
+        <div class="campl-wrap clearfix campl-local-navigation" id="local-nav">
+            <div class="campl-local-navigation-container campl-mobile">
+                <ul class="campl-unstyled-list">
+                    {% if site %}
+                        <li><a href="{% url 'showsite' site_id=site.id %}">Main Settings</a></li>
+                        {% if site.production_service and site.production_service.active %}
+                            <li><a href="{% url 'sitesmanagement.views.service_settings' service_id=site.production_service.id %}">Server Settings</a></li>
+                            <li><a href="{% url 'listvhost' service_id=site.production_service.id %}">Web Sites</a></li>
+                        {% endif %}
+                        {% if site.test_service and site.test_service.active %}
+                            <li><a href="{% url 'sitesmanagement.views.service_settings' service_id=site.test_service.id %}">Server Settings</a></li>
+                            <li><a href="{% url 'listvhost' service_id=site.test_service.id %}">Web Sites</a></li>
+                        {% endif %}
+                        <li><a href="{% url 'mwsauth.views.auth_change' site_id=site.id %}">Authorised users</a></li>
+                        <li><a href="{% url 'listsites' %}">My other MWS servers</a></li>
+                        {% if site.production_service and site.production_service.active %}
+                            <script type="application/javascript">
+                            (function poll(){
+                                $.ajax({
+                                    url: "{% url 'sitesmanagement.views.service_status' service_id=site.production_service.id %}",
+                                    success: function(data, textStatus, jqXHR){
+                                        if (data['status'] == 'ready') {
+                                            $("#site_status").text("Your server is ready").css("background-color", "#0F8E00");
+                                        } else if (data['status'] == 'busy') {
+                                            $("#site_status").text("Your server is being configured").css("background-color", "#A09B00");
+                                        } else {
+                                            $("#site_status").text("Error while checking status of your server").css("background-color", "#920101");
+                                        }
+                                    },
+                                    dataType: "json",
+                                    complete: setTimeout(function() {poll()}, 15000)
+                                });
+                            })();
+                            </script>
+                            <li id="rightmenu">
+                                <a href="#" id="messages_button" class="fa fa-bars togglebtn" data-action="toggle" title="Messages" data-toggle="tooltip" data-side="right"><div class="noti_bubble"></div></a>
 
-{% block footer1 %}<h3><a href="/">Managed Web Service administration site</a></h3>{% endblock %}
+                                <div id="site_status">Checking status...</div>
+                            </li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% if site %}
+    <div class="sidebars">
+        <div class="sidebar right">
+            <a href="#" class="closesidebar togglebtn fa fa-times-circle" data-action="toggle" data-side="right"></a>
+            {% if sidebar_messages %}
+            <ul class="warning-messages">
+                {% for message in sidebar_messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+{% endblock %}
 
-{% block footer2 %}<h3><a href="{% url 'sitesmanagement.views.privacy' %}">Privacy & cookie policy</a></h3>{% endblock %}
+{% block page_content %}
+    {% if site %}
+        {% if not site|emailconfirmed %}
+            <div id="confirmemail">
+                <div>
+                    <p>Your email {{ site.email }} is unconfirmed, please check your email inbox and click on the link of the email we have sent you.</p>
+                    <p><a id="resend_email_link" data-href="{% url 'apimws.views.resend_email_confirmation_view' site_id=site.id %}" href="#"
+                    style="text-decoration: underline;">Resend confirmation email</a></p>
+                </div>
+                <div>
+                    <form action="{% url 'editsitemail' site_id=site.id %}" method="post">
+                        <fieldset>
+                            {% csrf_token %}
+                            <p>You can change the email associated with your site using the following form</p>
+                            <p>
+                                <label for="id_email">
+                                    The webmaster email (please use a role email when possible):
+                                </label>
+                                <input id="id_email" maxlength="75" name="email" type="email">
+                                <input type="submit" value="Update" class="campl-btn campl-primary-cta">
+                            </p>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+
+            <div class="modal fade" id="resend_email_modal" >
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            <h4 class="modal-title">Email confirmation</h4>
+                        </div>
+                        <div class="modal-body">
+                            <p>The confirmation email has been resent</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <script>
+                function getCookie(name) {
+                    var cookieValue = null;
+                    if (document.cookie && document.cookie != '') {
+                        var cookies = document.cookie.split(';');
+                        for (var i = 0; i < cookies.length; i++) {
+                            var cookie = jQuery.trim(cookies[i]);
+                            // Does this cookie string begin with the name we want?
+                            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                break;
+                            }
+                        }
+                    }
+                    return cookieValue;
+                }
+
+                function ajax_call(url, type) {
+                    $.ajax({
+                        url: url,
+                        type: type,
+                        beforeSend: function(xhr, settings) {
+                            xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+                        },
+                        crossDomain: false
+                    });
+                }
+
+                $('#resend_email_link').click(function() {
+                    $('#resend_email_modal').modal();
+                    ajax_call($("#resend_email_link").attr('data-href'), 'POST');
+                });
+            </script>
+        {% endif %}
+    {% endif %}
+{% endblock %}
+
+
+{% block local_footer %}
+    <div class="campl-row campl-local-footer campl-app-footer">
+        <div class="campl-wrap clearfix">
+            <div class="campl-column3 campl-footer-navigation">
+                <p class="campl-app-footer-content">The Managed Web Service is provided by the <a href="http://www.uis.cam.ac.uk">University Information Services</a>.</p>
+            </div>
+            <div class="campl-column3 campl-footer-navigation">
+                <div class="campl-content-container campl-navigation-list">
+                    <h3><a href="http://mws-help.uis.cam.ac.uk/">Help</a></h3>
+                </div>
+            </div>
+            <div class="campl-column3 campl-footer-navigation">
+                <div class="campl-content-container campl-navigation-list">
+                    <h3><a href="{% url 'sitesmanagement.views.termsconds' %}">Terms and conditions</a></h3>
+                </div>
+            </div>
+            <div class="campl-column3 campl-footer-navigation last">
+                <div class="campl-content-container campl-navigation-list">
+                    <h3><a href="{% url 'sitesmanagement.views.privacy' %}">Privacy &amp; cookie policy</a></h3>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block blurb %}{% endblock %}
+
+{% block footer1 %}{% endblock %}
+
+{% block footer2 %}
+
+{% endblock %}

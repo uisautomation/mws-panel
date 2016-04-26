@@ -1,0 +1,49 @@
+{% extends 'project-light/campl-mws.html' %}
+{% load static %}
+{% block page_content %}
+    {{ block.super }}
+    <div class="campl-column12 campl-main-content">
+        <div class="campl-content-container">
+            <h1>TLS/SSL certificate for the Web site "{{ vhost.name }}"</h1>
+            {% if error_main_domain %}
+                <div class="campl-notifications-panel campl-warning-panel campl-notifications-container clearfix">
+					<div class="campl-column4">
+						<p class="campl-notifications-icon campl-warning-icon">Warning:</p>
+					</div>
+					<div class="campl-column8">
+						<p>A CSR couldn't be generated because you don't have a master hostname assigned to this vhost.</p>
+					</div>
+                </div>
+            {% endif %}
+            {% if vhost.tls_key_hash != 'requested' %}
+                <form action="{% url 'sitesmanagement.views.generate_csr' vhost_id=vhost.id %}" method="post">
+                    <fieldset>
+                        {% csrf_token %}
+                        <p><input type="submit" value="Generate {% if vhost.csr or vhost.certificate %}new {% endif %}TLS Certificate request (CSR)" class="campl-btn campl-primary-cta campl-primary-blue"/></p>
+                    </fieldset>
+                </form>
+                    {% if vhost.certificate %}
+                        <h3>TLS certificate</h3>
+                        <pre>{{ vhost.certificate }}</pre>
+                    {% endif %}
+            {% else %}
+                <p>The TLS certificate request (CSR) is being generated</p>
+            {% endif %}
+            {% if vhost.csr and not vhost.certificate %}
+                <h3>TLS Certificate Request (CSR)</h3>
+                <pre>{{ vhost.csr }}</pre>
+                <form id="key_cert_form" enctype="multipart/form-data" action="{% url 'sitesmanagement.views.certificates' vhost_id=vhost.id %}" method="post">
+                    {% if error_message %}<p style="color: red">Error: {{ error_message }}</p>{% endif %}
+                    <fieldset>
+                        {% csrf_token %}
+                        <p {% if not vhost.csr %}style="display: none;"{% endif %}>
+                            Certificate file: <input type="file" name="cert"></p>
+                        <p {% if not vhost.csr %}style="display: none;"{% endif %}>
+                            <input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
+                    </fieldset>
+                </form>
+            {% endif %}
+
+        </div>
+    </div>
+{% endblock %}

@@ -1,19 +1,34 @@
 {% extends 'project-light/campl-mws.html' %}
 {% load static %}
 {% block page_content %}
+    {{ block.super }}
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
-            <h1>Change billing data</h1>
+            <h1>Billing data</h1>
 
-            <form enctype="multipart/form-data" action={% url 'sitesmanagement.views.billing' site_id=site.id %} method="post">{% csrf_token %}
+            <p>Please, upload your billing data using the following form, you will need to include:</p>
+            <ul>
+                <li>the purchase order number,</li>
+                <li>the name of the team/group/department that raised the purchase order,</li>
+                <li>and a PDF copy of the purchase order.</li>
+            </ul>
+
+            <p>You have 30 days from the start of your MWS request date to include this billing data, otherwise this
+                MWS server will be cancelled. This does not apply to other MWS servers where you have already uploaded
+                billing data.
+            </p>
+
+            <p>The cost of MWS3 is £{{ cost|floatformat:2 }} a year (+VAT for those organisations that pay VAT)</p>
+
+            <form enctype="multipart/form-data" action={% url 'billing_management' site_id=site.id %} method="post">
                 <fieldset>
+                    {% csrf_token %}
                     <div id="site_form">
                         {{ billing_form.as_p }}
                     </div>
                     <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
                 </fieldset>
             </form>
-            <p><a href={% url 'sitesmanagement.views.show' site_id=site.id %}>Back to main menu</a></p>
         </div>
     </div>
 {% endblock %}
