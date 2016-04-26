@@ -68,8 +68,8 @@ class Command(NoArgsCommand):
         def user_vars(user, service):
             uv = {}
             uv['username'] = user.username
-            uv['groups'] = list(UnixGroup.objects.filter(service=service, users__in=[user], to_be_deleted=False)
-                                .values_list('name', flat=True))
+            uv['groups'] = list(UnixGroup.objects.filter(service__site=service.site, users__in=[user],
+                                                         to_be_deleted=False).values_list('name', flat=True))
             if hasattr(user, "mws_user") and user.mws_user.uid is not None:
                 uv['uid'] = user.mws_user.uid
                 if user.mws_user.ssh_public_key:
@@ -160,12 +160,12 @@ class Command(NoArgsCommand):
 
         # List of Unix groups and their associated gids
         v['mws_unix_groups'] = []
-        for unix_group in UnixGroup.objects.filter(service=vm.service, to_be_deleted=False):
+        for unix_group in UnixGroup.objects.filter(service__site=vm.service.site, to_be_deleted=False):
             v['mws_unix_groups'].append({'name': unix_group.name, 'gid': INITIAL_GID-unix_group.id})
 
         # List of Unix Groups to be deleted
         v['mws_delete_unix_groups'] = []
-        for unix_group in UnixGroup.objects.filter(service=vm.service, to_be_deleted=True):
+        for unix_group in UnixGroup.objects.filter(service__site=vm.service.site, to_be_deleted=True):
             v['mws_delete_unix_groups'].append({'name': unix_group.name})
 
         # Let ansible know if the VM should be quarantined (apache and exim services disabled)

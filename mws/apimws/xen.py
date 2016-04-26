@@ -310,14 +310,6 @@ def clone_vm_api_call(site):
                                                                              "OS_VERSION_VMXENAPI", "jessie")})
     secrets_prealocation_vm(vm)
 
-    # Copy Unix Groups
-    for unix_group in site.production_service.unix_groups.all():
-        copy_users = unix_group.users.all()
-        unix_group.pk = None
-        unix_group.service = site.test_service
-        unix_group.save()
-        unix_group.users = copy_users
-
     # Copy Ansible Configuration
     for ansible_conf in site.production_service.ansible_configuration.all().exclude(key="os"):
         ansible_conf.pk = None
