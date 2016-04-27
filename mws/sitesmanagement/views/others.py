@@ -15,7 +15,6 @@ from apimws.models import AnsibleConfiguration
 from apimws.vm import clone_vm_api_call
 from mwsauth.utils import privileges_check
 from sitesmanagement.forms import BillingForm
-from sitesmanagement.utils import get_object_or_None
 from sitesmanagement.models import Service, Billing, Site, NetworkConfig, DomainName
 from sitesmanagement.views.sites import warning_messages
 

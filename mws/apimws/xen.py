@@ -10,10 +10,10 @@ from celery import shared_task, Task
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from apimws.ipreg import set_sshfp
-from apimws.models import Cluster
+from apimws.models import Cluster, PHPLib
 from apimws.views import post_installation, post_recreate
 from mws.celery import app
-from sitesmanagement.models import VirtualMachine, NetworkConfig, Service, SiteKey, Vhost, DomainName
+from sitesmanagement.models import VirtualMachine, NetworkConfig, SiteKey, Vhost, DomainName
 
 
 LOGGER = logging.getLogger('mws')
@@ -315,6 +315,14 @@ def clone_vm_api_call(site):
         ansible_conf.pk = None
         ansible_conf.service = site.test_service
         ansible_conf.save()
+
+    # PHPLibs
+    for phplib in site.production_service.php_libs.all():
+        phplib.services.add(site.test_service)
+
+    # ApacheModules
+    for apache_module in site.production_service.apache_modules.all():
+        apache_module.services.add(site.test_service)
 
     return True
 
