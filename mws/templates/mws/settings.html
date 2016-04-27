@@ -115,6 +115,7 @@
                 </div>
             </div>
 
+            {% if service.primary %}
             <div class="campl-column3">
                 <div class="campl-content-container campl-side-padding">
                     <a href="{% url 'listunixgroups' service_id=service.id %}">
@@ -144,6 +145,7 @@
                     </a>
                 </div>
             </div>
+            {% endif %}
 
             <div class="campl-column3">
                 <div class="campl-content-container campl-side-padding">
