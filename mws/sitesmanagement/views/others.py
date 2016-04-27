@@ -184,28 +184,6 @@ def reset_vm(request, service_id):
 
 
 @login_required
-def update_os(request, service_id):
-    if getattr(settings, 'DEMO', False):
-        return HttpResponseRedirect(reverse('listsites'))
-    service = get_object_or_404(Service, pk=service_id)
-    site = privileges_check(service.site.id, request.user)
-
-    if site is None:
-        return HttpResponseForbidden()
-
-    if not service or not service.active or service.is_busy:
-    # TODO change the button format (disabled) if the vm is not ready
-        return redirect(site)
-
-    # TODO 1) Warn about the secondary VM if exists
-    # TODO 2) Delete secondary VM if exists
-    # TODO 3) Create a new VM with the new OS and launch an ansible task to restore the state of the DB
-    # TODO 4) Put it as a secondary VM?
-
-    return HttpResponse('')
-
-
-@login_required
 def change_db_root_password(request, service_id):
     service = get_object_or_404(Service, pk=service_id)
     site = privileges_check(service.site.id, request.user)

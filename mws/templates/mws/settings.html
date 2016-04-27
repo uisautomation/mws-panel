@@ -207,35 +207,6 @@
                     </a>
                 </div>
             </div>
-            {% if service.due_update %}
-{#            <div class="campl-column3{% if DEMO %} not-active{% endif %}">#}
-{#                <div class="campl-content-container campl-side-padding">#}
-{#                    <a class="update_os_vm" data-href="javascript:ajaxCallVM('{% url 'sitesmanagement.views.update_os' service_id=service.id %}', 'POST')" href="#">#}
-{#                        <article class="node node-external-link view-mode-focus_on clearfix#}
-{#                                        campl-horizontal-teaser campl-teaser campl-focus-teaser campl-focus-teaser-red">#}
-{#                            <div class="campl-focus-teaser-img">#}
-{#                                <div class="campl-content-container campl-horizontal-teaser-img">#}
-{#                                    <div class="field field-name-field-external-url-image field-type-image#}
-{#                                                field-label-hidden">#}
-{#                                        <div class="field-items">#}
-{#                                            <div class="field-item even">#}
-{#                                                <i class="fa fa-refresh fa-6x" style="color: orangered; margin-top: 10px; margin-left: 15px; margin-bottom: 10px;"></i>#}
-{#                                            </div>#}
-{#                                        </div>#}
-{#                                    </div>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                            <div class="campl-focus-teaser-txt">#}
-{#                                <div class="campl-content-container campl-horizontal-teaser-txt">#}
-{#                                    <h3 class="campl-teaser-title">Update Operating System</h3>#}
-{#                                    <span class="ir campl-focus-link"></span>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                        </article>#}
-{#                    </a>#}
-{#                </div>#}
-{#            </div>#}
-            {% endif %}
         {% else %}
             <div class="campl-column3">
                 <div class="campl-content-container campl-side-padding">
@@ -344,23 +315,6 @@
     </div>
     {% endif %}
 
-    {% if service.primary and service.due_update %}
-    <!-- Modal update os -->
-    <div class="modal fade" id="update_os_modal" tabindex="-1" role="dialog" aria-labelledby="update_os_modal_label" aria-hidden="true">
-      <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-          <div class="modal-body">
-            Are you sure you want to update the operating system?
-          </div>
-          <div class="modal-footer" style="padding: 10px 20px 10px;">
-            <button type="button" class="campl-btn campl-primary-cta" data-dismiss="modal">Cancel</button>
-            <a class="campl-btn campl-primary-cta campl-primary-red" id="update_os_modal_button">Update</a>
-          </div>
-        </div>
-      </div>
-    </div>
-    {% endif %}
-
     <!-- Modal restart os -->
     <div class="modal fade" id="restart_modal" tabindex="-1" role="dialog" aria-labelledby="restart_modal_label" aria-hidden="true">
       <div class="modal-dialog modal-sm">
@@ -419,13 +373,6 @@
         $('.delete_vm').click(function() {
             $("#delete_modal_button").attr("href", $( this ).attr('data-href'));
             $('#delete_modal').modal();
-        });
-        {% endif %}
-
-        {% if service.primary and service.due_update %}
-        $('.update_os_vm').click(function() {
-            $("#update_os_modal_button").attr("href", $( this ).attr('data-href'));
-            $('#update_os_modal').modal();
         });
         {% endif %}
 
