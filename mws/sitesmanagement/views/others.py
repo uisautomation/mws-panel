@@ -1,6 +1,5 @@
 """Views(Controllers) for other purposes not in other files"""
 
-import bisect
 import json
 from django.conf import settings
 from django.contrib import messages
@@ -70,8 +69,14 @@ def clone_vm_view(request, site_id):
         1: dict(name='Production and test servers management', url=reverse(clone_vm_view, kwargs={'site_id': site.id}))
     }
 
-    if request.method == 'POST' and site.is_ready and site.test_service:
-        clone_vm_api_call.delay(site)
+    if request.method == 'POST':
+        if site.is_ready and site.test_service:
+            clone_vm_api_call.delay(site)
+            messages.info(request, 'The test server is being created. This will usually take around 10 minutes. You will need to refresh the page.')
+        elif not site.is_ready:
+            messages.error(request, 'The test server cannot be created while the production server is being configured.')
+        elif not site.test_service:
+            messages.error(request, 'The test server cannot be created at this moment, please contact mws-support@uis.cam.ac.uk')
         return redirect(site)
 
     return render(request, 'mws/clone_vm.html', {

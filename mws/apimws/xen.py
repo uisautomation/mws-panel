@@ -10,7 +10,7 @@ from celery import shared_task, Task
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from apimws.ipreg import set_sshfp
-from apimws.models import Cluster, PHPLib
+from apimws.models import Cluster
 from apimws.views import post_installation, post_recreate
 from mws.celery import app
 from sitesmanagement.models import VirtualMachine, NetworkConfig, SiteKey, Vhost, DomainName
