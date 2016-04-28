@@ -1,6 +1,6 @@
 import calendar
 import logging
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 from time import mktime
 
 from celery import shared_task
@@ -188,9 +188,9 @@ def add_months(sourcedate, months=1):
 
 
 def statsdatainuse(request):
-    values = []
-    today = datetime.today().date()
-    odate = date(2016, 1, 1)
+    values = [[mktime(date(2016, 3, 1).timetuple())*1000, Site.objects.filter(exmws2=True).count()], ]
+    today = add_months(datetime.today().date())
+    odate = date(2016, 4, 1) - timedelta(days=1)
     while odate < today:
         values.append([
             mktime(odate.timetuple())*1000,
@@ -206,9 +206,12 @@ def statsdatainuse(request):
 
 
 def statsdatarequests(request):
-    values = []
-    today = datetime.today().date()
-    odate = date(2016, 1, 1)
+    values = [{
+        'x': date(2016, 3, 1),
+        'y': Site.objects.filter(exmws2=True).count()
+    }, ]
+    today = add_months(datetime.today().date())
+    odate = date(2016, 4, 1) - timedelta(days=1)
     while odate < today:
         values.append({
             'x': mktime(odate.timetuple())*1000,
