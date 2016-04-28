@@ -358,10 +358,16 @@
             $.ajax({
                 url: url,
                 type: type,
-                success: function(result) {
-                    document.open();
-                    document.write(result);
-                    document.close();
+                success: function(data, textStatus) {
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    }
+                    else {
+                        $("#modal-content").replaceWith("An error ocurred, please refresh the page.");
+                    }
+                },
+                error: function() {
+                    $("#modal-content").replaceWith("An error ocurred, please refresh the page.");
                 },
                 beforeSend: function(xhr, settings) {
                     xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
