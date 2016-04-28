@@ -7,6 +7,7 @@ from celery import shared_task
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.mail import EmailMessage
+from django.db.models import Q
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.decorators.csrf import csrf_exempt
@@ -189,11 +190,12 @@ def add_months(sourcedate, months=1):
 def statsdatainuse(request):
     values = []
     today = datetime.today().date()
-    odate = date(2016, 3, 1)
+    odate = date(2016, 1, 1)
     while odate < today:
         values.append([
             mktime(odate.timetuple())*1000,
-            Site.objects.filter(end_date__lte=add_months(odate), start_date__lte=odate, end_date__gt=odate).count()
+            Site.objects.filter(Q(start_date__lte=odate), Q(end_date__gt=odate) | Q(end_date__isnull=True),
+                                Q(preallocated=False)).count()
         ])
         odate = add_months(odate)
     data = [{
@@ -206,20 +208,14 @@ def statsdatainuse(request):
 def statsdatarequests(request):
     values = []
     today = datetime.today().date()
-    odate = date(2016, 3, 1)
+    odate = date(2016, 1, 1)
     while odate < today:
         values.append({
-            'x': "%s/%s" % (odate.month, odate.year),
-            'y': Site.objects.filter(start_date__month=odate.month, start_date__year=odate.year).count(),
+            'x': mktime(odate.timetuple())*1000,
+            'y': Site.objects.filter(start_date__month=odate.month, start_date__year=odate.year,
+                                     preallocated=False).count(),
         })
         odate = add_months(odate)
-    # while pdate.year <= today:
-    #     values.append({
-    #         'x': pdate.year,
-    #         'y': Site.objects.filter(start_date__lte=ndate, start_date__gte=pdate).count()
-    #     })
-    #     pdate = ndate
-    #     ndate = date(ndate.year + 1, ndate.month, ndate.day)
     data = [{
       "key" : "MWS Servers",
       "values" : values
