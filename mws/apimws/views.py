@@ -1,17 +1,20 @@
+import calendar
 import logging
-from datetime import date
+from datetime import date, datetime, time
+from time import mktime
+
 from celery import shared_task
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.mail import EmailMessage
-from django.http import HttpResponse, HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from stronghold.decorators import public
 from apimws.ansible import launch_ansible_async, AnsibleTaskWithFailure, ansible_change_mysql_root_pwd
 from apimws.ipreg import get_nameinfo
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
-from sitesmanagement.models import DomainName, EmailConfirmation, VirtualMachine, Billing
+from sitesmanagement.models import DomainName, EmailConfirmation, VirtualMachine, Billing, Site
 from ucamlookup import user_in_groups
 
 logger = logging.getLogger('mws')
@@ -169,3 +172,56 @@ def resend_email_confirmation_view(request, site_id):
         return HttpResponseForbidden()
 
     return HttpResponse()
+
+
+def stats(request):
+    return render(request, 'stats.html')
+
+
+def add_months(sourcedate, months=1):
+    month = sourcedate.month - 1 + months
+    year = sourcedate.year + month / 12
+    month = month % 12 + 1
+    day = min(sourcedate.day, calendar.monthrange(year, month)[1])
+    return date(year, month, day)
+
+
+def statsdatainuse(request):
+    values = []
+    today = datetime.today().date()
+    odate = date(2016, 3, 1)
+    while odate < today:
+        values.append([
+            mktime(odate.timetuple())*1000,
+            Site.objects.filter(end_date__lte=add_months(odate), start_date__lte=odate, end_date__gt=odate).count()
+        ])
+        odate = add_months(odate)
+    data = [{
+      "key" : "MWS Servers",
+      "values" : values
+    }, ]
+    return JsonResponse(data, safe=False)
+
+
+def statsdatarequests(request):
+    values = []
+    today = datetime.today().date()
+    odate = date(2016, 3, 1)
+    while odate < today:
+        values.append({
+            'x': "%s/%s" % (odate.month, odate.year),
+            'y': Site.objects.filter(start_date__month=odate.month, start_date__year=odate.year).count(),
+        })
+        odate = add_months(odate)
+    # while pdate.year <= today:
+    #     values.append({
+    #         'x': pdate.year,
+    #         'y': Site.objects.filter(start_date__lte=ndate, start_date__gte=pdate).count()
+    #     })
+    #     pdate = ndate
+    #     ndate = date(ndate.year + 1, ndate.month, ndate.day)
+    data = [{
+      "key" : "MWS Servers",
+      "values" : values
+    }, ]
+    return JsonResponse(data, safe=False)
