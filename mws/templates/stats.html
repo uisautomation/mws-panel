@@ -12,12 +12,12 @@
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
             <div id="chart2">
-                <h1>Requests processed per year</h1>
+                <h1>Requests processed per month</h1>
                 <p></p>
                 <svg></svg>
             </div>
             <div id="chart">
-                <h1>MWS Servers in use</h1>
+                <h1>MWS Servers in use each month</h1>
                 <p></p>
                 <svg></svg>
             </div>
@@ -40,7 +40,7 @@
                             .clipEdge(true);
                 //Format x-axis labels with custom function.
                 chart.xAxis.tickFormat(function(d) {
-                    return d3.time.format('%x')(new Date(d))
+                    return d3.time.format('%m/%Y')(new Date(d))
                 });
                 chart.yAxis.tickFormat(d3.format(',f'));
                 d3.select('#chart svg').datum(data).call(chart);
@@ -60,13 +60,11 @@
                     .groupSpacing(0.1)    //Distance between each group of bars.
                     .stacked(true)
                 ;
-                chart2.xAxis
-                    .tickFormat(d3.format(''));
-                chart2.yAxis
-                    .tickFormat(d3.format(''));
-                d3.select('#chart2 svg')
-                    .datum(data)
-                    .call(chart2);
+                chart2.xAxis.tickFormat(function(d) {
+                    return d3.time.format('%m/%Y')(new Date(d))
+                });
+                chart2.yAxis.tickFormat(d3.format(''));
+                d3.select('#chart2 svg').datum(data).call(chart2);
                 nv.utils.windowResize(chart2.update);
                 return chart2;
             });
