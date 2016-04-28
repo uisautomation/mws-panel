@@ -1,6 +1,6 @@
 import calendar
 import logging
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, timedelta
 from time import mktime
 
 from celery import shared_task
@@ -206,6 +206,14 @@ def statsdatainuse(request):
       "values" : values
     }, ]
     return JsonResponse(data, safe=False)
+
+
+def statsdataactive(request):
+    all = Site.objects.filter(Q(end_date__gt=datetime.today().date()) | Q(end_date__isnull=True), preallocated=False)
+    external_domains = DomainName.objects.exclude(name__endswith="mws3.csx.cam.ac.uk")
+    active = all.filter(services__vhosts__domain_names__in=external_domains).distinct().count()
+    values = [['live', active], ['test', all.count()-active]]
+    return JsonResponse(values, safe=False)
 
 
 def statsdatarequests(request):
