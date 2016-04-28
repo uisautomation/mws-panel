@@ -188,14 +188,17 @@ def add_months(sourcedate, months=1):
 
 
 def statsdatainuse(request):
-    values = [[mktime(date(2016, 3, 1).timetuple())*1000, Site.objects.filter(exmws2=True).count()], ]
+    mws2sites = Site.objects.filter(exmws2=True).count()
+    values = [[mktime(date(2016, 3, 1).timetuple())*1000, mws2sites], ]
     today = add_months(datetime.today().date())
     odate = date(2016, 5, 1) - timedelta(days=1)
     while odate < today:
+        if odate > date(2016, 10, 1):
+            mws2sites = 0
         values.append([
             mktime(odate.timetuple())*1000,
             Site.objects.filter(Q(start_date__lte=odate), Q(end_date__gt=odate) | Q(end_date__isnull=True),
-                                Q(preallocated=False)).count()
+                                Q(preallocated=False)).count() + mws2sites
         ])
         odate = add_months(odate)
     data = [{
