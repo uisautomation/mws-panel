@@ -21,6 +21,11 @@
                 <p></p>
                 <svg></svg>
             </div>
+            <div id="chart3">
+                <h1>MWS Servers active / test</h1>
+                <p></p>
+                <svg></svg>
+            </div>
         </div>
     </div>
 {% endblock %}
@@ -67,6 +72,19 @@
                 d3.select('#chart2 svg').datum(data).call(chart2);
                 nv.utils.windowResize(chart2.update);
                 return chart2;
+            });
+        });
+
+
+        d3.json('/stats/dataactive', function(data) {
+            nv.addGraph(function() {
+                var chart3 = nv.models.pieChart()
+                    .x(function(d) { return d[0] })
+                    .y(function(d) { return d[1] })
+                    .showLabels(true);
+                d3.select("#chart3 svg").datum(data).transition().duration(350).call(chart3);
+                nv.utils.windowResize(chart3.update);
+                return chart3;
             });
         });
 

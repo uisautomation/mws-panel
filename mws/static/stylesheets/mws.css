@@ -313,6 +313,10 @@ ul.warning-messages li a {
     box-sizing: border-box;
 }
 
+#chart3 {
+    height: 400px;
+}
+
 /*! normalize.css v3.0.0 | MIT License | git.io/normalize */
 
 .btn {
