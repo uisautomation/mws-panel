@@ -213,7 +213,7 @@ def statsdataactive(request):
     external_domains = DomainName.objects.exclude(name__endswith="mws3.csx.cam.ac.uk")
     active = all.filter(services__vhosts__domain_names__in=external_domains).distinct().count()
     websites = Vhost.objects.exclude(main_domain__name__endswith="mws3.csx.cam.ac.uk").count()
-    values = [{'x': 'Total Websites', 'y': websites.count()},
+    values = [{'x': 'Total Websites', 'y': websites},
               {'x': 'Total MWS Servers', 'y': all.count()},
               {'x': 'Live MWS Servers', 'y': active},
               {'x': 'Test MWS Servers', 'y': all.count()-active}]
