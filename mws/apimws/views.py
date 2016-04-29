@@ -175,6 +175,7 @@ def resend_email_confirmation_view(request, site_id):
     return HttpResponse()
 
 
+@public
 def stats(request):
     return render(request, 'stats.html')
 
@@ -187,6 +188,7 @@ def add_months(sourcedate, months=1):
     return date(year, month, day)
 
 
+@public
 def statsdatainuse(request):
     mws2sites = Site.objects.filter(exmws2=True).count()
     values = [[mktime(date(2016, 3, 1).timetuple())*1000, mws2sites], ]
@@ -208,6 +210,7 @@ def statsdatainuse(request):
     return JsonResponse(data, safe=False)
 
 
+@public
 def statsdataactive(request):
     all = Site.objects.filter(Q(end_date__gt=datetime.today().date()) | Q(end_date__isnull=True), preallocated=False)
     external_domains = DomainName.objects.exclude(name__endswith="mws3.csx.cam.ac.uk")
@@ -224,6 +227,7 @@ def statsdataactive(request):
     return JsonResponse(data, safe=False)
 
 
+@public
 def statsdatarequests(request):
     values = [{
         'x': date(2016, 3, 1),
