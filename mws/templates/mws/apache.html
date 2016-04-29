@@ -12,50 +12,7 @@
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
             <h2>Apache Modules</h2>
-            <p>You can enable or disable the modules you want. By default the following apache modules are
-            installed and enabled by default:
-                core_module,
-                so_module,
-                watchdog_module,
-                http_module,
-                log_config_module,
-                logio_module,
-                version_module,
-                unixd_module,
-                access_compat_module,
-                actions_module,
-                alias_module,
-                asis_module,
-                auth_basic_module,
-                authn_core_module,
-                authn_file_module,
-                authz_core_module,
-                authz_groupfile_module,
-                authz_host_module,
-                authz_user_module,
-                autoindex_module,
-                deflate_module,
-                dir_module,
-                env_module,
-                expires_module,
-                filter_module,
-                headers_module,
-                include_module,
-                ldap_module,
-                mime_module,
-                mpm_prefork_module,
-                negotiation_module,
-                php5_module,
-                remoteip_module,
-                rewrite_module,
-                setenvif_module,
-                socache_shmcb_module,
-                speling_module,
-                ssl_module,
-                status_module,
-                ucam_webauth_module,
-                wsgi_module.
-            </p>
+            <p>You can enable or disable the following Apache modules:</p>
             <form action="{% url 'sitesmanagement.views.apache_modules' service_id=service.id %}" method="post">
                 {% if error_message %}<p style="color: red">{{ error_message }}</p>{% endif %}
                 <fieldset>
@@ -66,6 +23,49 @@
                     <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
                 </fieldset>
             </form>
+            <p>The following Apache modules installed and enabled by 
+            default:</p>
+            <p>core_module,
+               so_module,
+               watchdog_module,
+               http_module,
+               log_config_module,
+               logio_module,
+               version_module,
+               unixd_module,
+               access_compat_module,
+               actions_module,
+               alias_module,
+               asis_module,
+               auth_basic_module,
+               authn_core_module,
+               authn_file_module,
+               authz_core_module,
+               authz_groupfile_module,
+               authz_host_module,
+               authz_user_module,
+               autoindex_module,
+               deflate_module,
+               dir_module,
+               env_module,
+               expires_module,
+               filter_module,
+               headers_module,
+               include_module,
+               ldap_module,
+               mime_module,
+               mpm_prefork_module,
+               negotiation_module,
+               php5_module,
+               remoteip_module,
+               rewrite_module,
+               setenvif_module,
+               socache_shmcb_module,
+               speling_module,
+               ssl_module,
+               status_module,
+               ucam_webauth_module,
+               wsgi_module</p>
         </div>
     </div>
 {% endblock %}
