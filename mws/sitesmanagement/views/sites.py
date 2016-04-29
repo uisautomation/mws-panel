@@ -177,6 +177,7 @@ class SiteShow(SitePriviledgeCheck, DetailView):
         }
         context['MAIN_DOMAIN'] = getattr(django_settings, 'MAIN_DOMAIN', False)
         context['stats_name'] = self.object.production_service.network_configuration.name.replace(".","_")
+        context['main_website'] = Vhost.objects.get(name="default", service=self.object.production_service)
         return context
 
 

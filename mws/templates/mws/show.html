@@ -272,6 +272,7 @@
                                     IPv4: {{ site.production_service.ipv4 }}<br/>
                                     IPv6: {{ site.production_service.ipv6 }}<br/>
                                     hostname: {{ site.production_service.hostname }}<br/>
+                                    default website: <a href="http{% if main_website.tls_enabled %}s{% endif %}://{{ main_website.main_domain.name }}">{{ main_website.main_domain.name }}</a>
                             </div>
                         </div>
                         <div style="width: 66%; float: left; margin-right: 0; padding: 0;">
