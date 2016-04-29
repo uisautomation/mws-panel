@@ -212,8 +212,12 @@ def statsdataactive(request):
     all = Site.objects.filter(Q(end_date__gt=datetime.today().date()) | Q(end_date__isnull=True), preallocated=False)
     external_domains = DomainName.objects.exclude(name__endswith="mws3.csx.cam.ac.uk")
     active = all.filter(services__vhosts__domain_names__in=external_domains).distinct().count()
-    values = [['live', active], ['test', all.count()-active]]
-    return JsonResponse(values, safe=False)
+    values = [{'x': 'Total', 'y': all.count()}, {'x': 'Live', 'y': active}, {'x': 'Test', 'y': all.count()-active}]
+    data = [{
+      "key" : "MWS Servers",
+      "values" : values
+    }, ]
+    return JsonResponse(data, safe=False)
 
 
 def statsdatarequests(request):

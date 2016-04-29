@@ -75,14 +75,10 @@
             });
         });
 
-
         d3.json('/stats/dataactive', function(data) {
             nv.addGraph(function() {
-                var chart3 = nv.models.pieChart()
-                    .x(function(d) { return d[0] })
-                    .y(function(d) { return d[1] })
-                    .showLabels(true);
-                d3.select("#chart3 svg").datum(data).transition().duration(350).call(chart3);
+                var chart3 = nv.models.discreteBarChart();
+                d3.select('#chart3 svg').datum(data).call(chart3);
                 nv.utils.windowResize(chart3.update);
                 return chart3;
             });
