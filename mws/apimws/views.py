@@ -15,7 +15,7 @@ from stronghold.decorators import public
 from apimws.ansible import launch_ansible_async, AnsibleTaskWithFailure, ansible_change_mysql_root_pwd
 from apimws.ipreg import get_nameinfo
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
-from sitesmanagement.models import DomainName, EmailConfirmation, VirtualMachine, Billing, Site
+from sitesmanagement.models import DomainName, EmailConfirmation, VirtualMachine, Billing, Site, Vhost
 from ucamlookup import user_in_groups
 
 logger = logging.getLogger('mws')
@@ -212,7 +212,11 @@ def statsdataactive(request):
     all = Site.objects.filter(Q(end_date__gt=datetime.today().date()) | Q(end_date__isnull=True), preallocated=False)
     external_domains = DomainName.objects.exclude(name__endswith="mws3.csx.cam.ac.uk")
     active = all.filter(services__vhosts__domain_names__in=external_domains).distinct().count()
-    values = [{'x': 'Total', 'y': all.count()}, {'x': 'Live', 'y': active}, {'x': 'Test', 'y': all.count()-active}]
+    websites = Vhost.objects.exclude(main_domain__name__endswith="mws3.csx.cam.ac.uk").count()
+    values = [{'x': 'Total Websites', 'y': websites.count()},
+              {'x': 'Total MWS Servers', 'y': all.count()},
+              {'x': 'Live MWS Servers', 'y': active},
+              {'x': 'Test MWS Servers', 'y': all.count()-active}]
     data = [{
       "key" : "MWS Servers",
       "values" : values
