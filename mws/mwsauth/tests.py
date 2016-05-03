@@ -15,7 +15,7 @@ from mwsauth.models import MWSUser
 from mwsauth.utils import get_or_create_group_by_groupid
 from ucamlookup import user_in_groups, get_or_create_user_by_crsid, validate_crsids
 from mwsauth.validators import validate_groupids
-from sitesmanagement.models import Site, Suspension, VirtualMachine, NetworkConfig, Service
+from sitesmanagement.models import Site, Suspension, VirtualMachine, NetworkConfig, Service, Vhost
 from ucamlookup.models import LookupGroup
 
 
@@ -156,6 +156,7 @@ class AuthTestCases(TestCase):
         VirtualMachine.objects.create(token=uuid.uuid4(), service=service_a,
                                       network_configuration=NetworkConfig.get_free_host_config(),
                                       cluster=which_cluster())
+        Vhost.objects.create(name="default", service=service_a)
 
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_without_auth_users.id}))
         self.assertEqual(response.status_code, 403)  # User is not authorised
@@ -240,6 +241,7 @@ class AuthTestCases(TestCase):
         VirtualMachine.objects.create(token=uuid.uuid4(), service=service_a,
                                       network_configuration=NetworkConfig.get_free_host_config(),
                                       cluster=which_cluster())
+        Vhost.objects.create(name="default", service=service_a)
         information_systems_group = get_or_create_group_by_groupid(101888)
         site_with_auth_groups.groups.add(information_systems_group)
 
