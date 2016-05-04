@@ -50,7 +50,7 @@ def warning_messages(site):
             format_html('You have a new MySQL root password. Please visit the following <a href="%s" '
                         'style="text-decoration: underline;">URL</a> and follow the instructions to change '
                         'your temporary MySQL root password and make this message disappear.' %
-                        reverse('change_db_root_password', kwargs={'service_id': pwd.service})))
+                        reverse('change_db_root_password', kwargs={'service_id': pwd.service.id})))
 
     return warning_messages_list
 
