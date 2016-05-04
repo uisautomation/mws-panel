@@ -14,9 +14,12 @@ class Command(NoArgsCommand):
         except Vhost.DoesNotExist:
             raise CommandError("Vhost not found")
 
-        key_hash_file = open("/home/mws-admin/files_repo/vhost_tls/%d/key_hash" % vhost.id, "r")
-        vhost.tls_key_hash = key_hash_file.read()
-        key_hash_file.close()
+        if vhost.tls_key_hash == 'renewal':
+            vhost.tls_key_hash = 'renewal_waiting_cert'
+        else:
+            key_hash_file = open("/home/mws-admin/files_repo/vhost_tls/%d/key_hash" % vhost.id, "r")
+            vhost.tls_key_hash = key_hash_file.read()
+            key_hash_file.close()
 
         csr_file = open("/home/mws-admin/files_repo/vhost_tls/%d/csr" % vhost.id, "r")
         vhost.csr = csr_file.read()
