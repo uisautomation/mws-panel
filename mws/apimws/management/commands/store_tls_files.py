@@ -3,6 +3,11 @@ from sitesmanagement.models import Vhost
 
 
 class Command(NoArgsCommand):
+    '''
+        "requested": First time a CSR is requested, a new key hash and csr needs to be passed to the server
+        "renewal": An existing CSR exists a new key and CSR is generated, new csr needs to be passed to the server
+        "renewal_cert": New certificate uploaded, pass new key hash to the server
+    '''
     args = "{ <vhost_id> <hash> }"
     help = "Stores the TLS key hash and the CSR in the database"
 
