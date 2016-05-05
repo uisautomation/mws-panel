@@ -137,6 +137,7 @@ class Command(NoArgsCommand):
             vhv['generate_csr'] = 'tls_key_hash' in vhv and vh.tls_key_hash == "requested"
             vhv['generate_csr_renewal'] = 'tls_key_hash' in vhv and vh.tls_key_hash == "renewal"
             vhv['generate_csr_renewal_cert'] = 'tls_key_hash' in vhv and vh.tls_key_hash == "renewal_waiting_cert"
+            vhv['generate_renewal_cert'] = 'tls_key_hash' in vhv and vh.tls_key_hash == "renewal_cert"
             # Type of webapp: wordpress, drupal, etc.
             vhv['webapp'] = vh.webapp
             return vhv
