@@ -226,44 +226,44 @@ def change_db_root_password(request, service_id):
         'sidebar_messages': warning_messages(site),
         'ansibleconf': ansibleconf,
     })
-
-
-@login_required
-def apache_modules(request, service_id):
-    service = get_object_or_404(Service, pk=service_id)
-    site = privileges_check(service.site.id, request.user)
-
-    if site is None:
-        return HttpResponseForbidden()
-
-    if not service or not service.active or service.is_busy:
-        return redirect(site)
-
-    breadcrumbs = {
-        0: dict(name='Managed Web Service server: ' + str(site.name), url=site.get_absolute_url()),
-        1: dict(name='Server settings' if service.primary else 'Test server settings',
-                url=reverse(service_settings, kwargs={'service_id': service.id})),
-        2: dict(name='Apache modules', url=reverse(apache_modules, kwargs={'service_id': service.id})),
-    }
-
-    from apimws.forms import ApacheModuleForm
-
-    parameters = {
-        'breadcrumbs': breadcrumbs,
-        'service': service,
-        'site': site,
-        'sidebar_messages': warning_messages(site),
-        'form': ApacheModuleForm(initial={'apache_modules': service.apache_modules.values_list('name', flat=True)}),
-    }
-
-    if request.method == 'POST':
-        f = ApacheModuleForm(request.POST)
-        if f.is_valid():
-            service.apache_modules = f.cleaned_data['apache_modules']
-            service.save()
-            launch_ansible(service)
-
-    return render(request, 'mws/apache.html', parameters)
+#
+#
+# @login_required
+# def apache_modules(request, service_id):
+#     service = get_object_or_404(Service, pk=service_id)
+#     site = privileges_check(service.site.id, request.user)
+#
+#     if site is None:
+#         return HttpResponseForbidden()
+#
+#     if not service or not service.active or service.is_busy:
+#         return redirect(site)
+#
+#     breadcrumbs = {
+#         0: dict(name='Managed Web Service server: ' + str(site.name), url=site.get_absolute_url()),
+#         1: dict(name='Server settings' if service.primary else 'Test server settings',
+#                 url=reverse(service_settings, kwargs={'service_id': service.id})),
+#         2: dict(name='Apache modules', url=reverse(apache_modules, kwargs={'service_id': service.id})),
+#     }
+#
+#     from apimws.forms import ApacheModuleForm
+#
+#     parameters = {
+#         'breadcrumbs': breadcrumbs,
+#         'service': service,
+#         'site': site,
+#         'sidebar_messages': warning_messages(site),
+#         'form': ApacheModuleForm(initial={'apache_modules': service.apache_modules.values_list('name', flat=True)}),
+#     }
+#
+#     if request.method == 'POST':
+#         f = ApacheModuleForm(request.POST)
+#         if f.is_valid():
+#             service.apache_modules = f.cleaned_data['apache_modules']
+#             service.save()
+#             launch_ansible(service)
+#
+#     return render(request, 'mws/apache.html', parameters)
 
 
 @login_required

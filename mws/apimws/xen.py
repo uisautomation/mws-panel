@@ -321,9 +321,9 @@ def clone_vm_api_call(site):
         phplib.services.add(site.test_service)
 
     # ApacheModules
-    for apache_module in site.production_service.apache_modules.all():
-        apache_module.services.add(site.test_service)
-
+    # for apache_module in site.production_service.apache_modules.all():
+    #     apache_module.services.add(site.test_service)
+    #
     return True
 
 

@@ -44,7 +44,7 @@ urlpatterns = patterns('',
     url(r'^settings/vm/(?P<service_id>[0-9]+)/on/$', 'sitesmanagement.views.power_vm'),
     url(r'^settings/vm/(?P<service_id>[0-9]+)/reset/$', 'sitesmanagement.views.reset_vm'),
     url(r'^settings/vm/(?P<service_id>[0-9]+)/db_root_pass/$', 'sitesmanagement.views.change_db_root_password', name='change_db_root_password'),
-    url(r'^apache/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.apache_modules'),
+    #url(r'^apache/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.apache_modules'),
     url(r'^phplibs/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.php_libs'),
     url(r'^quarantine/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.quarantine'),
 
