@@ -212,8 +212,11 @@ def statsdataactive(request):
     all = Site.objects.filter(Q(end_date__gt=datetime.today().date()) | Q(end_date__isnull=True), preallocated=False)
     external_domains = DomainName.objects.exclude(name__endswith="mws3.csx.cam.ac.uk")
     active = all.filter(services__vhosts__domain_names__in=external_domains).distinct().count()
-    websites = Vhost.objects.exclude(main_domain__name__endswith="mws3.csx.cam.ac.uk").count()
+    websites = Vhost.objects.all().count()
+    live_websites = Vhost.objects.exclude(main_domain__name__endswith="mws3.csx.cam.ac.uk").count()
     values = [{'x': 'Total Websites', 'y': websites},
+              {'x': 'Live Websites', 'y':live_websites},
+              {'x': 'Test Websites', 'y': websites-live_websites},
               {'x': 'Total MWS Servers', 'y': all.count()},
               {'x': 'Live MWS Servers', 'y': active},
               {'x': 'Test MWS Servers', 'y': all.count()-active}]
