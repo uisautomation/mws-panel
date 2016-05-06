@@ -149,6 +149,9 @@ class Command(NoArgsCommand):
         # Is the VM the production or the test one?
         v['mws_is_primary'] = vm.primary
 
+        # Has this an active test Service?
+        v['mws_test_active'] = vm.service.site.test_service.active
+
         # Network configuration of the VM
         if vm.network_configuration.IPv4:
             v['mws_ipv4'] = vm.network_configuration.IPv4
