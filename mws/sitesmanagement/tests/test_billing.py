@@ -11,7 +11,7 @@ from apimws.models import Cluster, Host
 from apimws.xen import which_cluster
 from mwsauth.tests import do_test_login
 from sitesmanagement.cronjobs import send_reminder_renewal, check_subscription
-from sitesmanagement.models import NetworkConfig, Site, VirtualMachine, Service, Billing
+from sitesmanagement.models import NetworkConfig, Site, VirtualMachine, Service, Billing, Vhost
 
 
 @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
@@ -47,6 +47,7 @@ class BillingTests(TestCase):
                                          network_configuration=NetworkConfig.get_free_prod_service_config())
         VirtualMachine.objects.create(name="test_vm", token=uuid.uuid4(), cluster=which_cluster(),
                                       service=service, network_configuration=NetworkConfig.get_free_host_config())
+        Vhost.objects.create(name="default", service=service)
 
         response = self.client.get(reverse('billing_management', kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)  # The User is not in the list of auth users

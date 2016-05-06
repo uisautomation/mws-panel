@@ -155,8 +155,10 @@ class SiteManagementTests(TestCase):
 
         site = Site.objects.create(name="testSite", start_date=datetime.today())
 
-        Service.objects.create(network_configuration=NetworkConfig.get_free_prod_service_config(), site=site,
-                               type='production', status='requested')
+        service = Service.objects.create(network_configuration=NetworkConfig.get_free_prod_service_config(), site=site,
+                                         type='production', status='requested')
+
+        Vhost.objects.create(name="default", service=service)
 
         response = self.client.get(site.get_absolute_url())
         self.assertEqual(response.status_code, 403)  # The User is not in the list of auth users
@@ -329,7 +331,7 @@ class SiteManagement2Tests(TestCase):
                                          network_configuration=NetworkConfig.get_free_prod_service_config())
         vm = VirtualMachine.objects.create(name="test_vm", token=uuid.uuid4(), cluster=which_cluster(),
                                            service=service, network_configuration=NetworkConfig.get_free_host_config())
-        vhost = Vhost.objects.create(name="tests_vhost", service=service)
+        vhost = Vhost.objects.create(name="default", service=service)
         dn = DomainName.objects.create(name="testtestest.mws3test.csx.cam.ac.uk", status="accepted", vhost=vhost)
         unix_group = UnixGroup.objects.create(name="testUnixGroup", service=service)
 
@@ -379,7 +381,7 @@ class SiteManagement2Tests(TestCase):
                                           network_configuration=NetworkConfig.get_free_prod_service_config())
         VirtualMachine.objects.create(name="test_vm2", token=uuid.uuid4(), service=service2, cluster=which_cluster(),
                                       network_configuration=NetworkConfig.get_free_host_config())
-        vhost = Vhost.objects.create(name="tests_vhost", service=service)
+        vhost = Vhost.objects.create(name="default", service=service)
         dn = DomainName.objects.create(name="testtestest.mws3test.csx.cam.ac.uk", status="accepted", vhost=vhost)
         unix_group = UnixGroup.objects.create(name="testUnixGroup", service=service)
 
@@ -388,8 +390,7 @@ class SiteManagement2Tests(TestCase):
                              expected_url=site.get_absolute_url())
         self.assertRedirects(self.client.get(reverse(views.service_settings, kwargs={'service_id': service.id})),
                              expected_url=site.get_absolute_url())
-        self.assertEqual(self.client.get(reverse('billing_management', kwargs={'site_id': site.id})).status_code,
-                         200)
+        self.assertEqual(self.client.get(reverse('billing_management', kwargs={'site_id': site.id})).status_code, 200)
         # self.assertRedirects(self.client.get(reverse('deletesite', kwargs={'site_id': site.id})),
         #                      expected_url=site.get_absolute_url())
         # self.assertRedirects(self.client.get(reverse('disablesite', kwargs={'site_id': site.id})),

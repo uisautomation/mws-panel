@@ -96,9 +96,9 @@ class VhostCreate(ServicePriviledgeCheck, CreateView):
 
     def form_invalid(self, form):
         messages.error(self.request, 'There was an error with the form submitted. Please check that the name of your'
-                                     'website is of less than 100 characters only contains alphabetical characters, '
+                                     'website name is of less than 100 characters only contains alphabetical characters, '
                                      'numbers, hyphens, or underscores. Spaces are not permitted.')
-        return redirect(self.get_success_url())
+        return redirect(self.site)
 
     def get_success_url(self):
         return reverse('listvhost', kwargs={'service_id': self.service.id})
@@ -143,7 +143,7 @@ def generate_csr(request, vhost_id):
     vhost = get_object_or_404(Vhost, pk=vhost_id)
     site = privileges_check(vhost.service.site.id, request.user)
 
-    if request.method == 'POST' and vhost.tls_key_hash != 'requested':
+    if request.method == 'POST' and vhost.tls_key_hash != 'requested' and vhost.tls_key_hash != 'renewal':
         if vhost.main_domain is None:
             breadcrumbs = {
                 0: dict(name='Managed Web Service server: ' + str(site.name), url=site.get_absolute_url()),
@@ -162,11 +162,17 @@ def generate_csr(request, vhost_id):
                 'error_main_domain': True
             })
 
-        vhost.tls_key_hash = 'requested'
-        vhost.certificate = None
-        vhost.csr = None
-        vhost.tls_enabled = False
-        vhost.save()
+        if vhost.tls_enabled:
+            vhost.tls_key_hash = 'renewal'
+            vhost.csr = None
+            vhost.save()
+        else:
+            vhost.tls_key_hash = 'requested'
+            vhost.certificate = None
+            vhost.csr = None
+            vhost.tls_enabled = False
+            vhost.save()
+
         launch_ansible(vhost.service)
 
     return redirect(reverse(certificates, kwargs={'vhost_id': vhost.id}))
@@ -225,8 +231,12 @@ def certificates(request, vhost_id):
 
                 vhost.certificate = certificates_str
                 vhost.tls_enabled = True
+                if vhost.tls_key_hash == 'renewal_waiting_cert':
+                    vhost.tls_key_hash = 'renewal_cert'
                 vhost.save()
                 launch_ansible(service)
+            else:
+                raise ValidationError("No Certificate uploaded")
         except ValidationError as e:
             error_message = e.message
 

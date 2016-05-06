@@ -45,11 +45,12 @@ def warning_messages(site):
             format_html('Your website/vhost "%s" docroot folder is currently temporary writable by the apache user.' %
                         vhost.name))
 
-    if AnsibleConfiguration.objects.filter(service__site=site, key="mysql_root_password"):
+    for pwd in AnsibleConfiguration.objects.filter(service__site=site, key="mysql_root_password"):
         warning_messages_list.append(
             format_html('You have a new MySQL root password. Please visit the following <a href="%s" '
-                        'style="text-decoration: underline;">URL</a>.' %
-                        reverse('change_db_root_password', kwargs={'service_id': site.production_service.id})))
+                        'style="text-decoration: underline;">URL</a> and follow the instructions to change '
+                        'your temporary MySQL root password and make this message disappear.' %
+                        reverse('change_db_root_password', kwargs={'service_id': pwd.service.id})))
 
     return warning_messages_list
 
@@ -176,6 +177,7 @@ class SiteShow(SitePriviledgeCheck, DetailView):
         }
         context['MAIN_DOMAIN'] = getattr(django_settings, 'MAIN_DOMAIN', False)
         context['stats_name'] = self.object.production_service.network_configuration.name.replace(".","_")
+        context['main_website'] = Vhost.objects.get(name="default", service=self.object.production_service)
         return context
 
 

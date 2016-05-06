@@ -110,4 +110,10 @@ urlpatterns = patterns('',
     url(r'^searchadmin/$', 'sitesmanagement.views.admin_search', name='searchadmin'),
     url(r'^adminemailist/$', 'sitesmanagement.views.others.admin_email_list', name='adminemailist'),
 
+    # Stats
+    url(r'^stats/$', 'apimws.views.stats', name='stats'),
+    url(r'^stats/datainuse$', 'apimws.views.statsdatainuse'),
+    url(r'^stats/datarequests$', 'apimws.views.statsdatarequests'),
+    url(r'^stats/dataactive$', 'apimws.views.statsdataactive'),
+
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

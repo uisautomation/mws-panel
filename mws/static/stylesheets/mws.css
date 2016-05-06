@@ -312,6 +312,10 @@ ul.warning-messages li a {
     box-sizing: border-box;
 }
 
+#chart svg, #chart2 svg, #chart3 svg {
+    height: 350px;
+}
+
 /*! normalize.css v3.0.0 | MIT License | git.io/normalize */
 
 .btn {

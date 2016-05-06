@@ -45,6 +45,8 @@ class DomainListView(VhostPriviledgeCheck, ListView):
             'vhost': self.vhost,
             'site': self.site,
             'service': self.vhost.service,
+            'domains': self.vhost.domain_names.all(),
+            'ndomains': self.vhost.domain_names.count(),
             'domain_form': DomainNameFormNew()
         })
         return context
@@ -151,11 +153,11 @@ class DomainDelete(DomainPriviledgeCheck, DeleteView):
 
     def delete(self, request, *args, **kwargs):
         if self.domain.name != self.domain.vhost.service.network_configuration.name:
-            self.domain.delete()
-            launch_ansible(self.service)
-            return HttpResponse()
-        else:
-            return HttpResponseForbidden()
+            if self.domain != self.domain.vhost.main_domain or self.domain.vhost.domain_names.count() == 1:
+                self.domain.delete()
+                launch_ansible(self.service)
+                return HttpResponse()
+        return HttpResponseForbidden()
 
     def get_success_url(self):
         return reverse('listdomains', kwargs={'vhost_id': self.vhost.id})

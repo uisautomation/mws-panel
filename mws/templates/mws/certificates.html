@@ -15,29 +15,31 @@
 					</div>
                 </div>
             {% endif %}
-            {% if vhost.tls_key_hash != 'requested' %}
+            {% if vhost.tls_key_hash != 'requested' and vhost.tls_key_hash != 'renewal' and vhost.tls_key_hash != 'renewal_cert' %}
                 <form action="{% url 'sitesmanagement.views.generate_csr' vhost_id=vhost.id %}" method="post">
                     <fieldset>
                         {% csrf_token %}
-                        <p><input type="submit" value="Generate {% if vhost.csr or vhost.certificate %}new {% endif %}TLS Certificate request (CSR)" class="campl-btn campl-primary-cta campl-primary-blue"/></p>
+                        <p><input type="submit" value="Generate {% if vhost.csr or vhost.certificate %} a new {% endif %}TLS Certificate request (CSR)" class="campl-btn campl-primary-cta campl-primary-blue"/></p>
                     </fieldset>
                 </form>
                     {% if vhost.certificate %}
-                        <h3>TLS certificate</h3>
+                        <h3>{% if vhost.tls_key_hash == 'renewal_waiting_cert' %}Current {% endif %}TLS certificate</h3>
                         <pre>{{ vhost.certificate }}</pre>
                     {% endif %}
+            {% elif vhost.tls_key_hash == 'renewal_cert' %}
+                <p>The new certificate is being installed</p>
             {% else %}
-                <p>The TLS certificate request (CSR) is being generated</p>
+                <p>The {% if vhost.certificate %} a new {% endif %} TLS certificate request (CSR) is being generated</p>
             {% endif %}
-            {% if vhost.csr and not vhost.certificate %}
-                <h3>TLS Certificate Request (CSR)</h3>
+            {% if vhost.csr and not vhost.certificate or vhost.tls_key_hash == 'renewal_waiting_cert' %}
+                <h3>{% if vhost.tls_key_hash == 'renewal_waiting_cert' %}Renewal (new) {% endif %}TLS Certificate Request (CSR)</h3>
                 <pre>{{ vhost.csr }}</pre>
                 <form id="key_cert_form" enctype="multipart/form-data" action="{% url 'sitesmanagement.views.certificates' vhost_id=vhost.id %}" method="post">
                     {% if error_message %}<p style="color: red">Error: {{ error_message }}</p>{% endif %}
                     <fieldset>
                         {% csrf_token %}
                         <p {% if not vhost.csr %}style="display: none;"{% endif %}>
-                            Certificate file: <input type="file" name="cert"></p>
+                            {% if vhost.tls_key_hash == 'renewal_waiting_cert' %}Upload renewal (new) {% endif %}Certificate file: <input type="file" name="cert"></p>
                         <p {% if not vhost.csr %}style="display: none;"{% endif %}>
                             <input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
                     </fieldset>

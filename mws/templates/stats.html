@@ -1,0 +1,88 @@
+{% extends 'project-light/campl-mws.html' %}
+{% load static %}
+
+{% block app_head %}
+    {{ block.super }}
+    <link href="{% static 'stylesheets/nv.d3.css' %}" rel="stylesheet">
+    <script src="{% static 'js/d3.v3.js' %}"></script>
+    <script src="{% static 'js/nv.d3.js' %}"></script>
+{% endblock %}
+
+{% block page_content %}
+    <div class="campl-column12 campl-main-content">
+        <div class="campl-content-container">
+            <div id="chart2">
+                <h1>Requests processed per month</h1>
+                <p></p>
+                <svg></svg>
+            </div>
+            <div id="chart">
+                <h1>MWS Servers in use each month</h1>
+                <p></p>
+                <svg></svg>
+            </div>
+            <div id="chart3">
+                <h1>MWS Servers active / test</h1>
+                <p></p>
+                <svg></svg>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block campl_foot_js %}
+    <script>
+        d3.json('/stats/datainuse', function(data) {
+            nv.addGraph(function() {
+                var chart = nv.models.stackedAreaChart()
+                            .margin({right: 100})
+                            .x(function(d) { return d[0] })   //We can modify the data accessor functions...
+                            .y(function(d) { return d[1] })   //...in case your data is formatted differently.
+                            .useInteractiveGuideline(true)    //Tooltips which show all data points. Very nice!
+                            .rightAlignYAxis(true)      //Let's move the y-axis to the right side.
+                            .transitionDuration(500)
+                            .showControls(false)       //Allow user to choose 'Stacked', 'Stream', 'Expanded' mode.
+                            .clipEdge(true);
+                //Format x-axis labels with custom function.
+                chart.xAxis.tickFormat(function(d) {
+                    return d3.time.format('%m/%Y')(new Date(d))
+                });
+                chart.yAxis.tickFormat(d3.format(',f'));
+                d3.select('#chart svg').datum(data).call(chart);
+                nv.utils.windowResize(chart.update);
+                return chart;
+            });
+        });
+
+
+        d3.json('/stats/datarequests', function(data) {
+            nv.addGraph(function() {
+                var chart2 = nv.models.multiBarChart()
+                    .transitionDuration(350)
+                    .reduceXTicks(true)   //If 'false', every single x-axis tick label will be rendered.
+                    .rotateLabels(0)      //Angle to rotate x-axis labels.
+                    .showControls(false)   //Allow user to switch between 'Grouped' and 'Stacked' mode.
+                    .groupSpacing(0.1)    //Distance between each group of bars.
+                    .stacked(true)
+                ;
+                chart2.xAxis.tickFormat(function(d) {
+                    return d3.time.format('%m/%Y')(new Date(d))
+                });
+                chart2.yAxis.tickFormat(d3.format(''));
+                d3.select('#chart2 svg').datum(data).call(chart2);
+                nv.utils.windowResize(chart2.update);
+                return chart2;
+            });
+        });
+
+        d3.json('/stats/dataactive', function(data) {
+            nv.addGraph(function() {
+                var chart3 = nv.models.discreteBarChart();
+                d3.select('#chart3 svg').datum(data).call(chart3);
+                nv.utils.windowResize(chart3.update);
+                return chart3;
+            });
+        });
+
+    </script>
+{% endblock %}
