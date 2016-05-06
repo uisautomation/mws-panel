@@ -1,18 +1,21 @@
+import calendar
 import logging
 import subprocess
-from datetime import date
+from datetime import date, datetime, timedelta
+from time import mktime
 from celery import shared_task
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.mail import EmailMessage
-from django.http import HttpResponse, HttpResponseForbidden
+from django.db.models import Q
+from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from stronghold.decorators import public
 from apimws.ansible import launch_ansible_async, AnsibleTaskWithFailure, ansible_change_mysql_root_pwd
 from apimws.ipreg import get_nameinfo
 from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
-from sitesmanagement.models import DomainName, EmailConfirmation, VirtualMachine, Billing
+from sitesmanagement.models import DomainName, EmailConfirmation, VirtualMachine, Billing, Site, Vhost
 from ucamlookup import user_in_groups
 
 logger = logging.getLogger('mws')
@@ -175,3 +178,81 @@ def resend_email_confirmation_view(request, site_id):
         return HttpResponseForbidden()
 
     return HttpResponse()
+
+
+@public
+def stats(request):
+    return render(request, 'stats.html')
+
+
+def add_months(sourcedate, months=1):
+    month = sourcedate.month - 1 + months
+    year = sourcedate.year + month / 12
+    month = month % 12 + 1
+    day = min(sourcedate.day, calendar.monthrange(year, month)[1])
+    return date(year, month, day)
+
+
+@public
+def statsdatainuse(request):
+    mws2sites = Site.objects.filter(exmws2=True).count()
+    values = [[mktime(date(2016, 3, 1).timetuple())*1000, mws2sites], ]
+    today = add_months(datetime.today().date())
+    odate = date(2016, 5, 1) - timedelta(days=1)
+    while odate < today:
+        if odate > date(2016, 10, 1):
+            mws2sites = 0
+        values.append([
+            mktime(odate.timetuple())*1000,
+            Site.objects.filter(Q(start_date__lte=odate), Q(end_date__gt=odate) | Q(end_date__isnull=True),
+                                Q(preallocated=False)).count() + mws2sites
+        ])
+        odate = add_months(odate)
+    data = [{
+      "key" : "MWS Servers",
+      "values" : values
+    }, ]
+    return JsonResponse(data, safe=False)
+
+
+@public
+def statsdataactive(request):
+    all = Site.objects.filter(Q(end_date__gt=datetime.today().date()) | Q(end_date__isnull=True), preallocated=False)
+    external_domains = DomainName.objects.exclude(name__endswith="mws3.csx.cam.ac.uk")
+    active = all.filter(services__vhosts__domain_names__in=external_domains).distinct().count()
+    websites = Vhost.objects.filter(service__site__preallocated=False, service__site__end_date__isnull=True).count()
+    live_websites = Vhost.objects.filter(service__site__preallocated=False, service__site__end_date__isnull=True)\
+        .exclude(main_domain__name__endswith="mws3.csx.cam.ac.uk").count()
+    values = [{'x': 'Total Websites', 'y': websites},
+              {'x': 'Live Websites', 'y':live_websites},
+              {'x': 'Test Websites', 'y': websites-live_websites},
+              {'x': 'Total MWS Servers', 'y': all.count()},
+              {'x': 'Live MWS Servers', 'y': active},
+              {'x': 'Test MWS Servers', 'y': all.count()-active}]
+    data = [{
+      "key" : "MWS Servers",
+      "values" : values
+    }, ]
+    return JsonResponse(data, safe=False)
+
+
+@public
+def statsdatarequests(request):
+    values = [{
+        'x': date(2016, 3, 1),
+        'y': Site.objects.filter(exmws2=True).count()
+    }, ]
+    today = add_months(datetime.today().date())
+    odate = date(2016, 5, 1) - timedelta(days=1)
+    while odate < today:
+        values.append({
+            'x': mktime(odate.timetuple())*1000,
+            'y': Site.objects.filter(start_date__month=odate.month, start_date__year=odate.year,
+                                     preallocated=False).count(),
+        })
+        odate = add_months(odate)
+    data = [{
+      "key" : "MWS Servers",
+      "values" : values
+    }, ]
+    return JsonResponse(data, safe=False)
