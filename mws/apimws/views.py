@@ -188,17 +188,16 @@ def add_months(sourcedate, months=1):
 
 
 def statsdatainuse(request):
-    mws2sites = Site.objects.filter(exmws2=True).count()
-    values = [[mktime(date(2016, 3, 1).timetuple())*1000, mws2sites], ]
+    values = []
     today = add_months(datetime.today().date())
-    odate = date(2016, 5, 1) - timedelta(days=1)
+    odate = date(2016, 4, 1) - timedelta(days=1)
     while odate < today:
-        if odate > date(2016, 10, 1):
-            mws2sites = 0
         values.append([
             mktime(odate.timetuple())*1000,
             Site.objects.filter(Q(start_date__lte=odate), Q(end_date__gt=odate) | Q(end_date__isnull=True),
-                                Q(preallocated=False)).count() + mws2sites
+                                Q(preallocated=False)).count() +
+            Site.objects.filter(Q(exmws2__isnull=False), Q(exmws2__lte=odate),
+                                Q(end_date__gt=odate) | Q(end_date__isnull=True)).count()  # exmws2 sites
         ])
         odate = add_months(odate)
     data = [{
@@ -229,17 +228,15 @@ def statsdataactive(request):
 
 
 def statsdatarequests(request):
-    values = [{
-        'x': date(2016, 3, 1),
-        'y': Site.objects.filter(exmws2=True).count()
-    }, ]
+    values = []
     today = add_months(datetime.today().date())
-    odate = date(2016, 5, 1) - timedelta(days=1)
+    odate = date(2016, 4, 1) - timedelta(days=1)
     while odate < today:
         values.append({
             'x': mktime(odate.timetuple())*1000,
-            'y': Site.objects.filter(start_date__month=odate.month, start_date__year=odate.year,
-                                     preallocated=False).count(),
+            'y': Site.objects.filter(Q(start_date__month=odate.month, start_date__year=odate.year,
+                                     preallocated=False, exmws2__isnull=True) |
+                                     Q(exmws2__month=odate.month, exmws2__year=odate.year)).count(),  # + exmws2 sites
         })
         odate = add_months(odate)
     data = [{
