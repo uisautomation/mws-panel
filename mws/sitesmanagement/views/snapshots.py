@@ -82,7 +82,10 @@ class SnapshotListView(ServicePriviledgeCheck, ListView):
         else:
             fromdate =  datetime.date.today()-datetime.timedelta(days=30)
         if fromdate < self.site.start_date+datetime.timedelta(days=1):
-            fromdate = self.site.start_date+datetime.timedelta(days=1)
+            if self.site.exmws2:
+                fromdate = self.site.exmws2
+            else:
+                fromdate = self.site.start_date+datetime.timedelta(days=1)
         return fromdate
 
     def get_context_data(self, **kwargs):
