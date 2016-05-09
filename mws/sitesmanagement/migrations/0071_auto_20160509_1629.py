@@ -11,10 +11,15 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterField(
+        migrations.RemoveField(
+            model_name='site',
+            name='exmws2',
+        ),
+        migrations.AddField(
             model_name='site',
             name='exmws2',
             field=models.DateField(null=True, blank=True),
             preserve_default=True,
         ),
     ]
+
