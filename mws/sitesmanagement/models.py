@@ -506,6 +506,15 @@ class Vhost(models.Model):
     def sorted_domain_names(self):
         return sorted(set(self.domain_names.all()))
 
+    def get_url(self):
+        if self.main_domain:
+            if self.tls_enabled:
+                return "https://%s" % self.main_domain.name
+            else:
+                return "http://%s" % self.main_domain.name
+        else:
+            return "#"
+
     class Meta:
         unique_together = ("name", "service")
 

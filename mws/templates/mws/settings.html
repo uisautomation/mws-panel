@@ -300,6 +300,42 @@
         {% endif %}
     </div>
 
+
+    {% if not service.primary %}
+        <table class="campl-table-bordered campl-table-striped campl-table campl-vertical-stacking-table">
+            <thead>
+                <tr>
+                    <th>Web site name</th>
+                    <th>Associated hostname</th>
+                    <th>Production server</th>
+                    <th>Test server</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for vhost in service.vhosts.all %}
+                <tr>
+                    <td>
+                        {{ vhost.name }}
+                    </td>
+                    <td>
+                        {% if vhost.sorted_domain_names %}
+                            {{ vhost.sorted_domain_names|join:", " }}
+                        {% else %}
+                            <p style="color: #CF0000">This web site does not have any hostname associated. You need to add one using the button in the right hand side.</p>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ vhost.get_url }}/mws3/unsetcookie.html" target="_blank" style="text-decoration: none;">Visit the website in the production server</a>
+                    </td>
+                    <td>
+                        <a href="{{ vhost.get_url }}/mws3/setcookie.html" target="_blank" style="text-decoration: none;">Visit the website in the test server</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
     {% if not service.primary %}
     <!-- Modal delete -->
     <div class="modal fade" id="delete_modal" tabindex="-1" role="dialog" aria-labelledby="delete_modal_label" aria-hidden="true">

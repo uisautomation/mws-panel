@@ -104,16 +104,6 @@ class VhostCreate(ServicePriviledgeCheck, CreateView):
         return reverse('listvhost', kwargs={'service_id': self.service.id})
 
 
-class VisitVhost(VhostPriviledgeCheck, DetailView):
-    """View(Controller) to redirect the user to the URL of the vhost selected."""
-    model = Vhost
-    pk_url_kwarg = 'vhost_id'
-
-    def get(self, request, *args, **kwargs):
-        super(VisitVhost, self).get(request, *args, **kwargs)
-        return redirect("http://"+str(self.object.main_domain.name))
-
-
 class VhostDelete(VhostPriviledgeCheck, DeleteView):
     """View to delete the vhost selected."""
     model = Vhost

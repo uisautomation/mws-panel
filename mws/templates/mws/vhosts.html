@@ -33,7 +33,7 @@
                             </td>
                             <td style="width: 180px;">
                                 {% if vhost.main_domain %}
-                                <a href="{% url 'visitvhost' vhost_id=vhost.id %}" target="_blank" style="text-decoration: none;">
+                                <a href="{{ vhost.get_url }}" target="_blank" style="text-decoration: none;">
                                     <i title="Visit website" class="fa fa-eye fa-2x" data-toggle="tooltip"></i>
                                 </a>
                                 {% endif %}
