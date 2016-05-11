@@ -9,7 +9,7 @@
 
         <div class="view-content">
 
-            {% if warning_messages %}
+            {% if messages %}
             <div class="campl-column12">
                 <div class="campl-content-container campl-side-padding">
                     <article class="node node-external-link view-mode-focus_on clearfix campl-horizontal-teaser
@@ -18,7 +18,7 @@
                             <div style="padding: 20px; color: white">
                                 <h2 style="color: white">Messages:</h2>
                                 <ul>
-                                    {% for message in warning_messages %}
+                                    {% for message in messages %}
                                         <li>{{ message }}</li>
                                     {% endfor %}
                                 </ul>
