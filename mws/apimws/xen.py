@@ -310,20 +310,10 @@ def clone_vm_api_call(site):
                                                                              "OS_VERSION_VMXENAPI", "jessie")})
     secrets_prealocation_vm(vm)
 
-    # Copy Ansible Configuration
-    for ansible_conf in site.production_service.ansible_configuration.all().exclude(key="os"):
-        ansible_conf.pk = None
-        ansible_conf.service = site.test_service
-        ansible_conf.save()
-
     # PHPLibs
     for phplib in site.production_service.php_libs.all():
         phplib.services.add(site.test_service)
 
-    # ApacheModules
-    # for apache_module in site.production_service.apache_modules.all():
-    #     apache_module.services.add(site.test_service)
-    #
     return True
 
 
