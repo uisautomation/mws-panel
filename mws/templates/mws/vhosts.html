@@ -19,7 +19,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                    {% for vhost in service.site.production_service.vhosts.all %}
+                    {% for vhost in service.vhosts.all %}
                         <tr>
                             <td>
                                 {{ vhost.name }}
