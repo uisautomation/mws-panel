@@ -34,7 +34,7 @@
             {% if not service.primary %}
             <p>PHP Libraries installed in the production server:</p>
                 <ul>
-                    {% for php_lib in service.site.production_service.php_libs %}
+                    {% for php_lib in service.site.production_service.php_libs.all %}
                     <li>{{ php_lib.name }}</li>
                     {% endfor %}
                 </ul>
