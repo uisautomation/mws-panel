@@ -369,34 +369,16 @@ def switch_services(request, site_id):
         return HttpResponseForbidden()
 
     with transaction.atomic():
-        prod_service = site.production_service
-        test_service = site.test_service
-        netconf_prod = prod_service.network_configuration
-        netconf_test = test_service.network_configuration
-        test_service.network_configuration = NetworkConfig.get_free_test_service_config()
-        test_service.type = "production"
-        test_service.site = None
-        test_service.save()
-        prod_service.network_configuration = netconf_test
-        prod_service.type = "test"
-        prod_service.save()
-        test_service.site = site
-        test_service.network_configuration = netconf_prod
-        test_service.save()
+        test_vms = site.test_service.vms.all()
+        production_vms = site.production_service.all()
 
-        dnt = DomainName.objects.get(name=test_service.network_configuration.name)
-        dnp = DomainName.objects.get(name=prod_service.network_configuration.name)
-        vhostt = dnt.vhost
-        vhostp = dnp.vhost
-        if vhostt.main_domain == dnt:
-            vhostt.main_domain = dnp
-        if vhostp.main_domain == dnp:
-            vhostp.main_domain = dnt
-        dnt.vhost = vhostp
-        dnt.save()
-        dnp.vhost = vhostt
-        dnp.save()
-        launch_ansible(prod_service)
-        launch_ansible(test_service)
+        for vm in test_vms:
+            vm.service = site.production_service
+
+        for vm in production_vms:
+            vm.service = site.test_service
+
+        launch_ansible(site.production_service)
+        launch_ansible(site.test_service)
 
     return redirect(site)
