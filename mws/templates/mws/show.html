@@ -268,7 +268,9 @@
                                     IPv4: {{ site.production_service.ipv4 }}<br/>
                                     IPv6: {{ site.production_service.ipv6 }}<br/>
                                     hostname: {{ site.production_service.hostname }}<br/>
+                                    {% if main_website %}
                                     default website: <a href="http{% if main_website.tls_enabled %}s{% endif %}://{{ main_website.main_domain.name }}">{{ main_website.main_domain.name }}</a>
+                                    {% endif %}
                             </div>
                         </div>
                         {% if site.test_service and site.test_service.active and not site.test_service.is_busy %}
