@@ -9,12 +9,12 @@ from django.db import models
 import re
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
+from django.db import transaction
 from django.utils import timezone
 from django.utils.timezone import now
 from os.path import splitext
 import reversion
 from ucamlookup.models import LookupGroup
-
 from apimws.ipreg import DomainNameDelegatedException
 from mwsauth.utils import get_users_of_a_group
 from sitesmanagement.utils import get_object_or_None, deprecated
@@ -200,6 +200,27 @@ class Site(models.Model):
             self.production_service.power_on()
         if self.test_service:
             self.test_service.power_on()
+        return True
+
+    def switch_services(self):
+        with transaction.atomic():
+            prod_service = self.production_service
+            test_service = self.test_service
+            netconf_prod = prod_service.network_configuration
+            netconf_test = test_service.network_configuration
+            test_service.network_configuration = NetworkConfig.get_free_test_service_config()
+            test_service.type = "production"
+            test_service.site = None
+            test_service.save()
+            prod_service.network_configuration = netconf_test
+            prod_service.type = "test"
+            prod_service.save()
+            test_service.site = self
+            test_service.network_configuration = netconf_prod
+            test_service.save()
+            from apimws.ansible import launch_ansible
+            launch_ansible(prod_service)
+            launch_ansible(test_service)
         return True
 
     @property

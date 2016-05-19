@@ -5,7 +5,6 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.urlresolvers import reverse
-from django.db import transaction
 from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponse, HttpResponseNotFound
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.encoding import smart_str
@@ -362,29 +361,15 @@ def admin_email_list(request):
 
 @login_required
 def switch_services(request, site_id):
+    '''This function swiches the production and test services'''
     site = get_object_or_404(Site, pk=site_id)
     site = privileges_check(site.id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
 
-    with transaction.atomic():
-        prod_service = site.production_service
-        test_service = site.test_service
-        netconf_prod = prod_service.network_configuration
-        netconf_test = test_service.network_configuration
-        test_service.network_configuration = NetworkConfig.get_free_test_service_config()
-        test_service.type = "production"
-        test_service.site = None
-        test_service.save()
-        prod_service.network_configuration = netconf_test
-        prod_service.type = "test"
-        prod_service.save()
-        test_service.site = site
-        test_service.network_configuration = netconf_prod
-        test_service.save()
-        
-        launch_ansible(prod_service)
-        launch_ansible(test_service)
-
-    return redirect(site)
+    if site.switch_services():
+        return redirect(site)
+    else:
+        messages.error(request, 'An error happened while trying to switch the test server with the production server')
+        return redirect(site)
