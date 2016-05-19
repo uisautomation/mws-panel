@@ -219,6 +219,6 @@ class Command(NoArgsCommand):
         v['mws_quarantined'] = vm.service.quarantined
 
         # URL to the panel to inform about the deletion of LVs
-        v['mws_update_lv_list_url'] = "%s%s" % (settings.MAIN_DOMAIN, reverse(update_lv_list)),
+        v['mws_update_lv_list_url'] = "%s%s" % (settings.MAIN_DOMAIN, reverse(update_lv_list))
 
         return v
