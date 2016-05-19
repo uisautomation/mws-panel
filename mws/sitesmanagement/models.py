@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from itertools import chain
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -208,6 +208,12 @@ class Site(models.Model):
             test_service = self.test_service
             netconf_prod = prod_service.network_configuration
             netconf_test = test_service.network_configuration
+            vhost_prod = prod_service.vhosts.all()
+            vhost_test = test_service.vhosts.all()
+            ug_prod = prod_service.unix_groups.all()
+            ug_test = test_service.unix_groups.all()
+
+            # Switch network configuration
             test_service.network_configuration = NetworkConfig.get_free_test_service_config()
             test_service.type = "production"
             test_service.site = None
@@ -218,6 +224,26 @@ class Site(models.Model):
             test_service.site = self
             test_service.network_configuration = netconf_prod
             test_service.save()
+
+            # Switch vhosts
+            for vhost in vhost_prod:
+                vhost.service = test_service
+                vhost.save()
+            for vhost in vhost_test:
+                vhost.service = prod_service
+                vhost.save()
+
+            # Switch unix groups
+            for ug in ug_prod:
+                ug.service = test_service
+                ug.save()
+            for ug in ug_test:
+                ug.service = prod_service
+                ug.save()
+
+            from apimws.models import AnsibleConfiguration
+            AnsibleConfiguration.objects.update_or_create(service=test_service, key="backup_first_date",
+                                                          value=date.today().isoformat())
             from apimws.ansible import launch_ansible
             launch_ansible(prod_service)
             launch_ansible(test_service)
