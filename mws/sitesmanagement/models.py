@@ -213,18 +213,6 @@ class Site(models.Model):
             ug_prod = prod_service.unix_groups.all()
             ug_test = test_service.unix_groups.all()
 
-            # Switch network configuration
-            test_service.network_configuration = NetworkConfig.get_free_test_service_config()
-            test_service.type = "production"
-            test_service.site = None
-            test_service.save()
-            prod_service.network_configuration = netconf_test
-            prod_service.type = "test"
-            prod_service.save()
-            test_service.site = self
-            test_service.network_configuration = netconf_prod
-            test_service.save()
-
             # Switch vhosts
             for vhost in vhost_prod:
                 vhost.service = test_service
@@ -240,6 +228,18 @@ class Site(models.Model):
             for ug in ug_test:
                 ug.service = prod_service
                 ug.save()
+
+            # Switch network configuration
+            test_service.network_configuration = NetworkConfig.get_free_test_service_config()
+            test_service.type = "production"
+            test_service.site = None
+            test_service.save()
+            prod_service.network_configuration = netconf_test
+            prod_service.type = "test"
+            prod_service.save()
+            test_service.site = self
+            test_service.network_configuration = netconf_prod
+            test_service.save()
 
             from apimws.models import AnsibleConfiguration
             AnsibleConfiguration.objects.update_or_create(service=test_service, key="backup_first_date",
