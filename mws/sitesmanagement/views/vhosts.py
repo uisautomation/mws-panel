@@ -75,9 +75,11 @@ class VhostListView(ServicePriviledgeCheck, ListView):
         return self.service.vhosts
 
     def dispatch(self, request, *args, **kwargs):
+        wtreturn =  super(VhostListView, self).dispatch(request, *args, **kwargs)
         if self.service.type == "test":
             return HttpResponseForbidden()
-        return super(VhostListView, self).dispatch(request, *args, **kwargs)
+        else:
+            return wtreturn
 
 
 class VhostCreate(ServicePriviledgeCheck, CreateView):
@@ -109,9 +111,11 @@ class VhostCreate(ServicePriviledgeCheck, CreateView):
         return reverse('listvhost', kwargs={'service_id': self.service.id})
 
     def dispatch(self, request, *args, **kwargs):
+        wtreturn =  super(VhostCreate, self).dispatch(request, *args, **kwargs)
         if self.service.type == "test":
             return HttpResponseForbidden()
-        return super(VhostCreate, self).dispatch(request, *args, **kwargs)
+        else:
+            return wtreturn
 
 
 class VhostDelete(VhostPriviledgeCheck, DeleteView):
