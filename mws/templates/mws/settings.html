@@ -237,7 +237,7 @@
 
             <div class="campl-column3{% if not site.is_ready %} not-active{% endif %}">
                 <div class="campl-content-container campl-side-padding">
-                    <a class="resync" data-href="javascript:ajaxCallVM('{% url 'sitesmanagement.views.resync' service_id=service.id %}', 'POST')" href="#">
+                    <a class="resync" data-href="javascript:ajaxCallVM('{% url 'sitesmanagement.views.resync' site_id=service.site.id %}', 'POST')" href="#">
                         <article class="node node-external-link view-mode-focus_on clearfix
                                         campl-horizontal-teaser campl-teaser campl-focus-teaser">
                             <div class="campl-focus-teaser-img">

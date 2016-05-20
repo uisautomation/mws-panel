@@ -89,6 +89,7 @@ urlpatterns = patterns('',
     # test os updates
     url(r'^clone_vm/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.clone_vm_view'),
     url(r'^switch_services/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.switch_services'),
+    url(r'^resync/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.resync'),
 
     # mwsauth app
     url(r'^auth/(?P<site_id>[0-9]+)/$', 'mwsauth.views.auth_change'),

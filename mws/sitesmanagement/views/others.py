@@ -377,15 +377,10 @@ def switch_services(request, site_id):
 
 
 @login_required
-def resync(request, service_id):
+def resync(request, site_id):
     '''This function syncs production file system with the test one'''
-    service = get_object_or_404(Service, pk=service_id)
-    site = privileges_check(service.site.id, request.user)
-
-    if site is None or service.type == "production":
-        return HttpResponseForbidden()
-
-    post_installOS.delay(service)
-
+    site = get_object_or_404(Site, pk=site_id)
+    site = privileges_check(site.id, request.user)
+    post_installOS.delay(site.production_service)
     messages.info(request, 'The filesystem started to synchronise')
     return redirect(site)
