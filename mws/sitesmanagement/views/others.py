@@ -11,9 +11,10 @@ from django.utils.encoding import smart_str
 from apimws.ansible import launch_ansible, ansible_change_mysql_root_pwd
 from apimws.models import AnsibleConfiguration
 from apimws.vm import clone_vm_api_call
+from apimws.views import post_installOS
 from mwsauth.utils import privileges_check
 from sitesmanagement.forms import BillingForm
-from sitesmanagement.models import Service, Billing, Site, NetworkConfig, DomainName
+from sitesmanagement.models import Service, Billing, Site
 from sitesmanagement.views.sites import warning_messages
 
 
@@ -373,3 +374,18 @@ def switch_services(request, site_id):
     else:
         messages.error(request, 'An error happened while trying to switch the test server with the production server')
         return redirect(site)
+
+
+@login_required
+def resync(request, service_id):
+    '''This function syncs production file system with the test one'''
+    service = get_object_or_404(Service, pk=service_id)
+    site = privileges_check(service.site.id, request.user)
+
+    if site is None or service.type == "production":
+        return HttpResponseForbidden()
+
+    post_installOS.delay(service)
+
+    messages.info(request, 'The filesystem started to synchronise')
+    return redirect(site)
