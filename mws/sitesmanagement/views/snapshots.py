@@ -76,17 +76,18 @@ class SnapshotListView(ServicePriviledgeCheck, ListView):
     template_name = 'mws/backups.html'
 
     def valid_fromdate(self):
-        fromdate = get_object_or_None(AnsibleConfiguration, service=self.service, key="backup_first_date")
-        if fromdate:
-            fromdate = datetime.datetime.strptime(fromdate.value, '%Y-%m-%d').date()
+        start_date = get_object_or_None(AnsibleConfiguration, service=self.service, key="backup_first_date")
+        if start_date:
+            start_date = datetime.datetime.strptime(start_date.value, '%Y-%m-%d').date()
         else:
-            fromdate =  datetime.date.today()-datetime.timedelta(days=30)
-        if fromdate < self.site.start_date+datetime.timedelta(days=1):
             if self.site.exmws2:
-                fromdate = self.site.exmws2
+                start_date = self.site.exmws2+datetime.timedelta(days=1)
             else:
-                fromdate = self.site.start_date+datetime.timedelta(days=1)
-        return fromdate
+                start_date = self.site.start_date+datetime.timedelta(days=1)
+        if start_date < datetime.date.today() - datetime.timedelta(days=30):
+            return datetime.date.today() - datetime.timedelta(days=30)
+        else:
+            return start_date
 
     def get_context_data(self, **kwargs):
         context = super(SnapshotListView, self).get_context_data(**kwargs)
