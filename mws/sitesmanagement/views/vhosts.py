@@ -74,6 +74,11 @@ class VhostListView(ServicePriviledgeCheck, ListView):
     def get_queryset(self):
         return self.service.vhosts
 
+    def dispatch(self, request, *args, **kwargs):
+        if self.service.type == "test":
+            return HttpResponseForbidden()
+        return super(VhostListView, self).dispatch(request, *args, **kwargs)
+
 
 class VhostCreate(ServicePriviledgeCheck, CreateView):
     """View(Controller) to add a new vhost to the service. It shows a form with the Vhost required fields."""
@@ -102,6 +107,11 @@ class VhostCreate(ServicePriviledgeCheck, CreateView):
 
     def get_success_url(self):
         return reverse('listvhost', kwargs={'service_id': self.service.id})
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.service.type == "test":
+            return HttpResponseForbidden()
+        return super(VhostCreate, self).dispatch(request, *args, **kwargs)
 
 
 class VhostDelete(VhostPriviledgeCheck, DeleteView):
