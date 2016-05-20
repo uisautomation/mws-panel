@@ -381,6 +381,7 @@ def resync(request, site_id):
     '''This function syncs production file system with the test one'''
     site = get_object_or_404(Site, pk=site_id)
     site = privileges_check(site.id, request.user)
-    post_installOS.delay(site.production_service)
+    if request.method == 'POST':
+        post_installOS.delay(site.production_service)
     messages.info(request, 'The filesystem started to synchronise')
     return redirect(site)

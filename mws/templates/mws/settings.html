@@ -443,12 +443,7 @@
                 url: url,
                 type: type,
                 success: function(data, textStatus) {
-                    if (data.redirect) {
-                        window.location.href = data.redirect;
-                    }
-                    else {
-                        $("#modal-content").replaceWith("An error ocurred, please refresh the page.");
-                    }
+                    window.location.href = "{% url 'showsite' site_id=service.site.id %}";
                 },
                 error: function() {
                     $("#modal-content").replaceWith("An error ocurred, please refresh the page.");
