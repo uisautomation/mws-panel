@@ -208,25 +208,17 @@ class Site(models.Model):
         netconf_prod = prod_service.network_configuration
         netconf_test = test_service.network_configuration
         vhost_prod = prod_service.vhosts.all()
-        vhost_test = test_service.vhosts.all()
         ug_prod = prod_service.unix_groups.all()
-        ug_test = test_service.unix_groups.all()
 
         with transaction.atomic():
-            # Switch vhosts
+            # Switch vhosts, test service has no vhosts
             for vhost in vhost_prod:
                 vhost.service = test_service
                 vhost.save()
-            for vhost in vhost_test:
-                vhost.service = prod_service
-                vhost.save()
 
-            # Switch unix groups
+            # Switch unix groups, test service has no UG
             for ug in ug_prod:
                 ug.service = test_service
-                ug.save()
-            for ug in ug_test:
-                ug.service = prod_service
                 ug.save()
 
             # Switch network configuration
