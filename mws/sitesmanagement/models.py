@@ -203,16 +203,16 @@ class Site(models.Model):
         return True
 
     def switch_services(self):
-        with transaction.atomic():
-            prod_service = self.production_service
-            test_service = self.test_service
-            netconf_prod = prod_service.network_configuration
-            netconf_test = test_service.network_configuration
-            vhost_prod = prod_service.vhosts.all()
-            vhost_test = test_service.vhosts.all()
-            ug_prod = prod_service.unix_groups.all()
-            ug_test = test_service.unix_groups.all()
+        prod_service = self.production_service
+        test_service = self.test_service
+        netconf_prod = prod_service.network_configuration
+        netconf_test = test_service.network_configuration
+        vhost_prod = prod_service.vhosts.all()
+        vhost_test = test_service.vhosts.all()
+        ug_prod = prod_service.unix_groups.all()
+        ug_test = test_service.unix_groups.all()
 
+        with transaction.atomic():
             # Switch vhosts
             for vhost in vhost_prod:
                 vhost.service = test_service
@@ -244,9 +244,10 @@ class Site(models.Model):
             from apimws.models import AnsibleConfiguration
             AnsibleConfiguration.objects.update_or_create(service=test_service, key="backup_first_date",
                                                           value=date.today().isoformat())
-            from apimws.ansible import launch_ansible
-            launch_ansible(prod_service)
-            launch_ansible(test_service)
+
+        from apimws.ansible import launch_ansible
+        launch_ansible(prod_service)
+        launch_ansible(test_service)
         return True
 
     @property
