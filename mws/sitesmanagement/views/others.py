@@ -143,7 +143,7 @@ def delete_vm(request, service_id):
     if not service or not service.active or service.is_busy:
         return redirect(site)
 
-    if request.method == 'DELETE':
+    if request.method == 'POST':
         for vm in service.virtual_machines.all():
             vm.delete()
         return redirect(site)
