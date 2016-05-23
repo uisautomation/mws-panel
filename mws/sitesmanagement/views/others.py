@@ -180,11 +180,11 @@ def reset_vm(request, service_id):
 
     if request.method == 'POST':
         if service.do_reset():
-            messages.success(request, "Your site will be restarted shortly")
+            messages.success(request, "Your server will be restarted shortly")
         else:
-            messages.error(request, "Your site couldn't be restarted")
+            messages.error(request, "Your server couldn't be restarted")
 
-    return redirect(service_settings, service_id=service.id)
+    return redirect(site)
 
 
 @login_required

@@ -370,57 +370,57 @@
     {% if not service.primary %}
     <!-- Modal delete -->
     <div class="modal fade" id="delete_modal" tabindex="-1" role="dialog" aria-labelledby="delete_modal_label" aria-hidden="true">
-      <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-          <div class="modal-body">
-            Are you sure you want to delete the test server?
-          </div>
-          <div class="modal-footer" style="padding: 10px 20px 10px;">
-            <button type="button" class="campl-btn campl-primary-cta" data-dismiss="modal">Cancel</button>
-              <form action="{% url 'sitesmanagement.views.delete_vm' service_id=service.id %}">
-                {% csrf_token %}
-                <input type="submit" value="Delete" class="campl-btn campl-primary-cta campl-primary-red">
-              </form>
-          </div>
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-body">
+                    Are you sure you want to delete the test server?
+                </div>
+                <div class="modal-footer" style="padding: 10px 20px 10px;">
+                    <form action="{% url 'sitesmanagement.views.delete_vm' service_id=service.id %}">
+                        {% csrf_token %}
+                        <button type="button" class="campl-btn campl-primary-cta" data-dismiss="modal">Cancel</button>
+                        <input type="submit" value="Delete" class="campl-btn campl-primary-cta campl-primary-red">
+                    </form>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
 
     <!-- Modal resync -->
     <div class="modal fade" id="resync_modal" tabindex="-1" role="dialog" aria-labelledby="resync_modal_label" aria-hidden="true">
-      <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-          <div class="modal-body">
-            Are you sure you want to resync your filesystem?
-          </div>
-          <div class="modal-footer" style="padding: 10px 20px 10px;">
-            <button type="button" class="campl-btn campl-primary-cta" data-dismiss="modal">Cancel</button>
-              <form action="{% url 'sitesmanagement.views.resync' site_id=service.site.id %}">
-                {% csrf_token %}
-                <input type="submit" value="Resync" class="campl-btn campl-primary-cta campl-primary-red">
-              </form>
-          </div>
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-body">
+                    Are you sure you want to resync your filesystem?
+                </div>
+                <div class="modal-footer" style="padding: 10px 20px 10px;">
+                    <form action="{% url 'sitesmanagement.views.resync' site_id=service.site.id %}">
+                        {% csrf_token %}
+                        <button type="button" class="campl-btn campl-primary-cta" data-dismiss="modal">Cancel</button>
+                        <input type="submit" value="Resync" class="campl-btn campl-primary-cta campl-primary-red">
+                    </form>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
     {% endif %}
 
     <!-- Modal restart os -->
     <div class="modal fade" id="restart_modal" tabindex="-1" role="dialog" aria-labelledby="restart_modal_label" aria-hidden="true">
-      <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-          <div class="modal-body">
-            Are you sure you want to restart your site?
-          </div>
-          <div class="modal-footer" style="padding: 10px 20px 10px;">
-            <button type="button" class="campl-btn campl-primary-cta" data-dismiss="modal">Cancel</button>
-              <form action="{% url 'sitesmanagement.views.reset_vm' service_id=service.id %}">
-                {% csrf_token %}
-                <input type="submit" value="Restart" class="campl-btn campl-primary-cta campl-primary-red">
-              </form>
-          </div>
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-body">
+                    Are you sure you want to restart your site?
+                </div>
+                <div class="modal-footer" style="padding: 10px 20px 10px;">
+                    <form action="{% url 'sitesmanagement.views.reset_vm' service_id=service.id %}">
+                        {% csrf_token %}
+                        <button type="button" class="campl-btn campl-primary-cta" data-dismiss="modal">Cancel</button>
+                        <input type="submit" value="Restart" class="campl-btn campl-primary-cta campl-primary-red">
+                    </form>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
 
 {% endblock %}
