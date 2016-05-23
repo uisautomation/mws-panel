@@ -235,7 +235,7 @@
                 </div>
             </div>
 
-            <div class="campl-column3{% if not site.is_ready %} not-active{% endif %}">
+            <div class="campl-column3">
                 <div class="campl-content-container campl-side-padding">
                     <a class="resync" href="#">
                         <article class="node node-external-link view-mode-focus_on clearfix
@@ -267,7 +267,7 @@
             </div>
         {% endif %}
 
-        <div class="campl-column3{% if not site.is_ready %} not-active{% endif %}">
+        <div class="campl-column3">
             <div class="campl-content-container campl-side-padding">
                 <a class="restart_vm" href="#">
                     <article class="node node-external-link view-mode-focus_on clearfix
@@ -376,7 +376,7 @@
                     Are you sure you want to delete the test server?
                 </div>
                 <div class="modal-footer" style="padding: 10px 20px 10px;">
-                    <form action="{% url 'sitesmanagement.views.delete_vm' service_id=service.id %}">
+                    <form action="{% url 'sitesmanagement.views.delete_vm' service_id=service.id %}" method="post">
                         {% csrf_token %}
                         <button type="button" class="campl-btn campl-primary-cta" data-dismiss="modal">Cancel</button>
                         <input type="submit" value="Delete" class="campl-btn campl-primary-cta campl-primary-red">
@@ -394,7 +394,7 @@
                     Are you sure you want to resync your filesystem?
                 </div>
                 <div class="modal-footer" style="padding: 10px 20px 10px;">
-                    <form action="{% url 'sitesmanagement.views.resync' site_id=service.site.id %}">
+                    <form action="{% url 'sitesmanagement.views.resync' site_id=service.site.id %}" method="post">
                         {% csrf_token %}
                         <button type="button" class="campl-btn campl-primary-cta" data-dismiss="modal">Cancel</button>
                         <input type="submit" value="Resync" class="campl-btn campl-primary-cta campl-primary-red">
@@ -413,7 +413,7 @@
                     Are you sure you want to restart your site?
                 </div>
                 <div class="modal-footer" style="padding: 10px 20px 10px;">
-                    <form action="{% url 'sitesmanagement.views.reset_vm' service_id=service.id %}">
+                    <form action="{% url 'sitesmanagement.views.reset_vm' service_id=service.id %}" method="post">
                         {% csrf_token %}
                         <button type="button" class="campl-btn campl-primary-cta" data-dismiss="modal">Cancel</button>
                         <input type="submit" value="Restart" class="campl-btn campl-primary-cta campl-primary-red">
@@ -429,15 +429,19 @@
 {% block campl_foot_js %}
     <script>
         {% if not service.primary %}
-        $('.delete_vm').click(function() {
-            $('#delete_modal').modal();
-        });
-        $('.resync').click(function() {
-            $('#resync_modal').modal();
-        });
+            $('.delete_vm').click(function() {
+                $('#delete_modal').modal();
+            });
+            {% if not site.is_ready %}
+                $('.resync').click(function() {
+                    $('#resync_modal').modal();
+                });
+            {% endif %}
         {% endif %}
-        $('.restart_vm').click(function() {
-            $('#restart_modal').modal();
-        });
+        {% if site.is_ready %}
+            $('.restart_vm').click(function() {
+                $('#restart_modal').modal();
+            });
+        {% endif %}
     </script>
 {% endblock %}

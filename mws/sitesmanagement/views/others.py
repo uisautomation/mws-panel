@@ -176,6 +176,7 @@ def reset_vm(request, service_id):
         return HttpResponseForbidden()
 
     if not service or not service.active or service.is_busy:
+        messages.error(request, 'Any of the two server is busy during configuration, wait until both of them are ready')
         return redirect(site)
 
     if request.method == 'POST':
@@ -183,6 +184,8 @@ def reset_vm(request, service_id):
             messages.success(request, "Your server will be restarted shortly")
         else:
             messages.error(request, "Your server couldn't be restarted")
+    else:
+        messages.error(request, "An error happened")
 
     return redirect(site)
 
@@ -381,6 +384,11 @@ def resync(request, site_id):
     '''This function syncs production file system with the test one'''
     site = get_object_or_404(Site, pk=site_id)
     site = privileges_check(site.id, request.user)
+
+    if not site.is_ready:
+        messages.error(request, 'Any of the two server is busy during configuration, wait until both of them are ready')
+        return redirect(site)
+
     if request.method == 'POST':
         post_installOS.delay(site.production_service)
     messages.info(request, 'The filesystem started to synchronise')
