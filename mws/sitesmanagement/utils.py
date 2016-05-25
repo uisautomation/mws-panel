@@ -1,5 +1,6 @@
-from django.shortcuts import _get_queryset
+import re
 import warnings
+from django.shortcuts import _get_queryset
 
 
 def get_object_or_None(klass, *args, **kwargs):
@@ -12,6 +13,10 @@ def get_object_or_None(klass, *args, **kwargs):
 
 def is_camacuk(domain_name):
     return domain_name.endswith(".cam.ac.uk")
+
+
+def is_camacuk_subdomain(domain_name):
+    return re.match("^[a-zA-Z0-9\-]+.cam.ac.uk$", domain_name)
 
 
 def deprecated(func):

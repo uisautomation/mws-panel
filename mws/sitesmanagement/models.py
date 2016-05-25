@@ -518,6 +518,7 @@ class DomainName(models.Model):
         ('requested', 'Requested'),
         ('accepted', 'Accepted'),
         ('external', 'External'),
+        ('special', 'Special'),
         ('denied', 'Denied'),
     )
 

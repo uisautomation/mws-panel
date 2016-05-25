@@ -7,7 +7,7 @@ from sitesmanagement.models import DomainName, SiteKey
 @receiver(post_save, sender=DomainName)
 def check_main_domain_name(instance, **kwargs):
     vhost = instance.vhost
-    if not vhost.main_domain and instance.status in ['external', 'accepted']:
+    if not vhost.main_domain and instance.status in ['external', 'accepted', 'special']:
         vhost.main_domain = instance
         vhost.save()
 

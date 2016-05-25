@@ -121,7 +121,7 @@ class Command(NoArgsCommand):
             vhv['name'] = vh.name
             # List of domain names associated to the vhost (only those already accepted or external [non cam.ac.uk])
             vhv['domains'] = [dom.name for dom in
-                              vh.domain_names.filter(Q(status='accepted') | Q(status='external'))]
+                              vh.domain_names.filter(Q(status='accepted') | Q(status='external') | Q(status='special'))]
             # The main domain where all the domain names associated will redirect to
             if vh.main_domain:
                 vhv['main_domain'] = vh.main_domain.name

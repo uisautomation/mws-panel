@@ -106,7 +106,7 @@ class DNSTests(TestCase):
 
     def add_internal_non_existing_cam_domain(self):
         vhost = Vhost.objects.first()
-        test_internal_cam_domain = 'domaintest.cam.ac.uk'
+        test_internal_cam_domain = 'domaintest.uis.cam.ac.uk'
         test_email = 'amc203@cam.ac.uk'
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
@@ -139,6 +139,29 @@ class DNSTests(TestCase):
                 mock_subprocess.check_output.return_value.returncode = 0
                 domain.accept_it()
         self.assertEqual(domain.vhost.main_domain, domain)
+
+    def test_add_camacuk_subdomain(self):
+        vhost = Vhost.objects.first()
+        test_camacuk_subdomain = 'domaintest.cam.ac.uk'
+        self.assertEqual(vhost.main_domain.name, vhost.service.network_configuration.name)
+        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            mock_subprocess.check_output.return_value.returncode = 0
+            self.client.post(reverse('sitesmanagement.views.add_domain', kwargs={'vhost_id': vhost.id}),
+                             {'name': test_camacuk_subdomain})
+            mock_subprocess.check_output.assert_called_once_with(["userv", "mws-admin", "mws_ansible_host",
+                                                                  vhost.service.virtual_machines.first()
+                                                                 .network_configuration.name],
+                                                                 stderr=mock_subprocess.STDOUT)
+        domain_name_created = DomainName.objects.last()
+        vhost = Vhost.objects.get(id=vhost.id)
+        self.assertEqual(vhost.main_domain, domain_name_created)
+        self.assertEquals(domain_name_created.name, test_camacuk_subdomain)
+        self.assertEquals(domain_name_created.status, 'special')
+        self.assertEquals(domain_name_created.vhost, vhost)
+        self.assertEquals(domain_name_created.requested_by.username, "test0001")
+        self.assertIsNone(domain_name_created.reject_reason)
+        self.assertIsNotNone(domain_name_created.token)
+        self.assertIsNone(domain_name_created.authorised_by)
 
     def test_add_internal_acceptable_non_existing_cam_domain(self):
         domain_name_created = self.add_internal_non_existing_cam_domain()
