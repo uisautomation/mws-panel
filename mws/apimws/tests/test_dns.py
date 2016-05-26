@@ -154,7 +154,6 @@ class DNSTests(TestCase):
                                                                  stderr=mock_subprocess.STDOUT)
         domain_name_created = DomainName.objects.last()
         vhost = Vhost.objects.get(id=vhost.id)
-        self.assertEqual(vhost.main_domain, domain_name_created)
         self.assertEquals(domain_name_created.name, test_camacuk_subdomain)
         self.assertEquals(domain_name_created.status, 'special')
         self.assertEquals(domain_name_created.vhost, vhost)
