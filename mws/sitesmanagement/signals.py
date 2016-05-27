@@ -16,11 +16,13 @@ def check_main_domain_name(instance, **kwargs):
 def delete_sshfp_from_dns(instance, **kwargs):
     if instance.type != "ED25519":
         for service in instance.site.services.all():
-            delete_sshfp(service.network_configuration.name, SiteKey.ALGORITHMS[instance.type], 1)
-            delete_sshfp(service.network_configuration.name, SiteKey.ALGORITHMS[instance.type], 2)
+            for fptype in SiteKey.FP_TYPES:
+                delete_sshfp(service.network_configuration.name, SiteKey.ALGORITHMS[instance.type],
+                             SiteKey.FP_TYPES[fptype])
             for vm in service.virtual_machines.all():
-                delete_sshfp(vm.network_configuration.name, SiteKey.ALGORITHMS[instance.type], 1)
-                delete_sshfp(vm.network_configuration.name, SiteKey.ALGORITHMS[instance.type], 2)
+                for fptype in SiteKey.FP_TYPES:
+                    delete_sshfp(vm.network_configuration.name, SiteKey.ALGORITHMS[instance.type],
+                                 SiteKey.FP_TYPES[fptype])
 
 
 @receiver(pre_delete, sender=DomainName)
