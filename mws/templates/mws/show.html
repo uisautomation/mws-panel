@@ -279,9 +279,9 @@
                         </div>
                         <div style="width: 66%; float: left; margin-right: 0; padding: 0;">
                             <div class="campl-content-container campl-horizontal-teaser-txt" style="color: white;">
-                            List of SSH host key fingerprints<br/>
+                            List of SSH host key fingerprints. Click <span class="fpmd5">here for SHA256</span><span class="fpsha256">here for MD5</span> fingerprints.<br/>
                                 {% for fingerprint in site.keys.all %}
-                                    {{fingerprint.type}} - {{fingerprint.fingerprint}}<br/>
+                                   {{fingerprint.type}} - <span class="fpmd5">{{fingerprint.fingerprint}}</span><span class="fpsha256">{{fingerprint.fingerprint2}}</span><br/>
                                 {% endfor %}
                             </div>
                         </div>
@@ -290,4 +290,17 @@
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block campl_foot_js %}
+    <script>
+        $('.fpmd5').click(function () {
+            $('.fpmd5').toggle();
+            $('.fpsha256').toggle();
+        });
+        $('.fpsha256').click(function () {
+            $('.fpsha256').toggle();
+            $('.fpmd5').toggle();
+        })
+    </script>
 {% endblock %}
