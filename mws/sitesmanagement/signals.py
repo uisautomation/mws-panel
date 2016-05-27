@@ -7,7 +7,7 @@ from sitesmanagement.models import DomainName, SiteKey
 @receiver(post_save, sender=DomainName)
 def check_main_domain_name(instance, **kwargs):
     vhost = instance.vhost
-    if not vhost.main_domain and instance.status in ['external', 'accepted']:
+    if not vhost.main_domain and instance.status in ['external', 'accepted', 'special']:
         vhost.main_domain = instance
         vhost.save()
 
@@ -17,11 +17,13 @@ def delete_sshfp_from_dns(instance, **kwargs):
     '''Delete SSHFP records from the DNS using the DNS API when a SiteKey is deleted from the database'''
     if instance.type != "ED25519":
         for service in instance.site.services.all():
-            delete_sshfp(service.network_configuration.name, SiteKey.ALGORITHMS[instance.type], 1)
-            delete_sshfp(service.network_configuration.name, SiteKey.ALGORITHMS[instance.type], 2)
+            for fptype in SiteKey.FP_TYPES:
+                delete_sshfp(service.network_configuration.name, SiteKey.ALGORITHMS[instance.type],
+                             SiteKey.FP_TYPES[fptype])
             for vm in service.virtual_machines.all():
-                delete_sshfp(vm.network_configuration.name, SiteKey.ALGORITHMS[instance.type], 1)
-                delete_sshfp(vm.network_configuration.name, SiteKey.ALGORITHMS[instance.type], 2)
+                for fptype in SiteKey.FP_TYPES:
+                    delete_sshfp(vm.network_configuration.name, SiteKey.ALGORITHMS[instance.type],
+                                 SiteKey.FP_TYPES[fptype])
 
 
 @receiver(pre_delete, sender=DomainName)

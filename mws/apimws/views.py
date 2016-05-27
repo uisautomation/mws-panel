@@ -161,6 +161,8 @@ def post_recreate(request):
                 to=[getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')],
                 headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')}
             ).send()
+            vm.service.status = 'ready'
+            vm.service.save()
 
     return HttpResponseForbidden()
 

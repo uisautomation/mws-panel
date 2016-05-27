@@ -569,6 +569,7 @@ class DomainName(models.Model):
         ('requested', 'Requested'),
         ('accepted', 'Accepted'),
         ('external', 'External'),
+        ('special', 'Special'),
         ('denied', 'Denied'),
     )
 
@@ -649,12 +650,13 @@ class SiteKey(models.Model):
         'ED25519': 4
     }
     FP_TYPES = {
-        'SHA-1': 1,
-        'SHA-256': 2
+        'SHA1': 1,
+        'SHA256': 2
     }
     type = models.CharField(max_length=100)
     public_key = models.TextField()
     fingerprint = models.CharField(max_length=250, null=True)
+    fingerprint2 = models.CharField(max_length=250, null=True)
     site = models.ForeignKey(Site, related_name="keys")
 
     class Meta:

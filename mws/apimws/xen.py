@@ -12,6 +12,7 @@ from django.core.urlresolvers import reverse
 from apimws.ipreg import set_sshfp
 from apimws.models import Cluster
 from apimws.views import post_installation, post_recreate
+from libs.sshpubkey import SSHPubKey
 from mws.celery import app
 from sitesmanagement.models import VirtualMachine, NetworkConfig, SiteKey, Vhost, DomainName
 
@@ -60,58 +61,43 @@ class XenWithFailure(Task):
 def secrets_prealocation_site(site):
     # Gets all the keys generated for the site and generates the fingerprint and the SSHFP from them
     # It sends the SSHFP record to ip-register
-    for keytype in ["sshrsa", "sshdsa", "sshecdsa", "sshed25519"]:
+    service = vm.service
+
+    for keytype in SiteKey.ALGORITHMS:
         p = subprocess.Popen(["userv", "mws-admin", "mws_pubkey"], stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = p.communicate(json.dumps({"id": "mwssite-%d" % site.id, "keytype": keytype}))
+        stdout, stderr = p.communicate(json.dumps({"id": "mwssite-%d" % service.site.id,
+                                                   "keytype": "ssh"+keytype.lower()}))
         try:
             result = json.loads(stdout)
         except ValueError as e:
             LOGGER.error("mws_pubkey response is not properly formated:\nstdout: %s\nstderr: %s" % (stdout, stderr))
             raise e
 
-        pubkey = tempfile.NamedTemporaryFile()
-        pubkey.write(result["pubkey"])
-        pubkey.flush()
-        fingerprint = subprocess.check_output(["ssh-keygen", "-lf", pubkey.name])
+        pubkey = SSHPubKey(result["pubkey"])
 
-        SiteKey.objects.create(site=site, type=keytype.replace("ssh", "").upper(), public_key=result["pubkey"],
-                                fingerprint=re.search("([0-9a-f]{2}:)+[0-9a-f]{2}", fingerprint).group(0))
+        SiteKey.objects.create(site=service.site, type=keytype, public_key=result["pubkey"],
+                               fingerprint=pubkey.hash_md5(), fingerprint2=pubkey.hash_sha256())
 
-        if keytype is not "sshed25519":  # "sshed25519" as of 2016 is not supported by jackdaw
-            sshkeygeno = subprocess.check_output(["ssh-keygen", "-r", "replacehostname", "-f", pubkey.name]).split('\n')
-            for i in [0, 1]:
-                sshkglnout = sshkeygeno[i].split(' ')
+        if keytype is not "ED25519":  # "sshed25519" as of 2016 is not supported by jackdaw
+            for fptype in SiteKey.FP_TYPES:
                 try:
-                    set_sshfp(site.production_service.network_configuration.name, int(sshkglnout[3]),
-                              int(sshkglnout[4]), sshkglnout[5])
-                    set_sshfp(site.test_service.network_configuration.name, int(sshkglnout[3]),
-                              int(sshkglnout[4]), sshkglnout[5])
+                    if fptype == "SHA1":
+                        fp = pubkey.sshfp_sha1()
+                    elif fptype == "SHA256":
+                        fp = pubkey.sshfp_sha256()
+                    else:
+                        raise Exception("fptype %s do not exists" % fptype)
+                    set_sshfp(service.network_configuration.name, SiteKey.ALGORITHMS[keytype],
+                              SiteKey.FP_TYPES[fptype], fp)
+                    set_sshfp(service.site.test_service.network_configuration.name, SiteKey.ALGORITHMS[keytype],
+                              SiteKey.FP_TYPES[fptype], fp)
+                    set_sshfp(vm.network_configuration.name, SiteKey.ALGORITHMS[keytype], SiteKey.FP_TYPES[fptype],
+                              fp)
                 except Exception as e:
+                    LOGGER.error("Error while trying to set up sshfp records. \nkeytype: %s\nfptype: %s\nexception: %s"
+                                 % (keytype, fptype, str(e.__class__)+" "+e.message))
                     pass
-
-        pubkey.close()
-
-
-def secrets_prealocation_vm(vm):
-    # Gets all the keys generated for the site and generates the fingerprint and the SSHFP from them
-    # It sends the SSHFP record to ip-register
-    for keytype in ["sshrsa", "sshdsa", "sshecdsa"]: # "sshed25519" as of 2016 is not supported by jackdaw
-        key = SiteKey.objects.get(site=vm.service.site, type=keytype.replace("ssh", "").upper())
-
-        pubkey = tempfile.NamedTemporaryFile()
-        pubkey.write(key.public_key)
-        pubkey.flush()
-
-        sshkeygeno = subprocess.check_output(["ssh-keygen", "-r", "replacehostname", "-f", pubkey.name]).split('\n')
-        for i in [0, 1]:
-            sshkglnout = sshkeygeno[i].split(' ')
-            try:
-                set_sshfp(vm.network_configuration.name, int(sshkglnout[3]), int(sshkglnout[4]), sshkglnout[5])
-            except Exception as e:
-                pass
-
-        pubkey.close()
 
 
 @shared_task(base=XenWithFailure)
