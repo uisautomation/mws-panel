@@ -316,6 +316,10 @@ ul.warning-messages li a {
     height: 350px;
 }
 
+.fpsha256 {
+    display: none;
+}
+
 /*! normalize.css v3.0.0 | MIT License | git.io/normalize */
 
 .btn {
