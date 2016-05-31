@@ -148,7 +148,12 @@ class BillingAdmin(VersionAdmin):
 
 
 class VhostAdmin(VersionAdmin):
-    list_display = ('name', 'service', )
+    list_display = ('name', 'service', 'get_site')
+
+    def get_site(self, obj):
+        return obj.service.site
+    get_site.short_description = 'Site'
+    get_site.admin_order_field = 'service__site'
 
 
 class SnapshotAdmin(ModelAdmin):
