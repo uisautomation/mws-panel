@@ -10,4 +10,5 @@ requests
 celery>=3.1.16
 django-celery>=3.1.16
 pycrypto>=2.6.1
+ecdsa
 mock>=1.0.1
