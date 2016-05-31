@@ -68,7 +68,7 @@ class DNSTests(TestCase):
         test_internal_mws3_domain = 'test.usertest.mws3.csx.cam.ac.uk'
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
-            with mock.patch("sitesmanagement.views.domains.set_cname") as mock_set_cname:
+            with mock.patch("apimws.ipreg.set_cname") as mock_set_cname:
                 mock_set_cname.return_value = True
                 self.client.post(reverse('sitesmanagement.views.add_domain', kwargs={'vhost_id': vhost.id}),
                                  {'name': test_internal_mws3_domain})
@@ -95,7 +95,7 @@ class DNSTests(TestCase):
         test_duplicate_domain = 'test.usertest.mws3.csx.cam.ac.uk'
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
-            with mock.patch("sitesmanagement.views.domains.set_cname") as mock_set_cname:
+            with mock.patch("apimws.ipreg.set_cname") as mock_set_cname:
                 mock_set_cname.return_value = True
                 response = self.client.post(reverse('sitesmanagement.views.add_domain', kwargs={'vhost_id': vhost.id}),
                                             {'name': test_duplicate_domain})
