@@ -148,7 +148,7 @@ def post_recreate(request):
         if vm.token == token:
             EmailMessage(
                 subject="MWS3 VM Restore %s" % vm.network_configuration.name,
-                body="VM finished restoring. Please restore the backup and execute ansible. "
+                body="VM finished restoring. Please execute ansible and restore from backup."
                      "VM part of the MWS3 site id %s" % vm.service.site.id,
                 from_email="Managed Web Service Support <%s>"
                            % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
