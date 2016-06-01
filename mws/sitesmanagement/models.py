@@ -565,6 +565,12 @@ class DomainName(models.Model):
         from apimws.utils import domain_confirmation_user
         domain_confirmation_user.delay(self)
 
+    def special_it(self, reason=""):
+        self.status = 'special'
+        self.reject_reason = reason
+        self.save()
+        # TODO send email as special
+
     def __unicode__(self):
         return self.name
 
