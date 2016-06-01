@@ -72,7 +72,7 @@ class Command(NoArgsCommand):
                                           x.purchase_order_number, x.site.start_date, settings.YEAR_COST,
                                           x.site.start_date.replace(year = year), calcendperiod(x.site.start_date)],
                                renewal_sites_billing)
-        header = ['id', 'Name', 'Institution', 'PO raised by', 'PO number', 'Created at', 'Cost', 'Period start',
+        header = ['id', 'Name', 'PO raised by', 'PO number', 'Created at', 'Cost', 'Period start',
                   'Period end']
         new_billing = [header] + new_billing
         renewals_billing = [header] + renewals_billing
