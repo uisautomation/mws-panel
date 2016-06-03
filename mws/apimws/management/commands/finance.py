@@ -72,7 +72,7 @@ class Command(NoArgsCommand):
                                           x.purchase_order_number, x.site.start_date, settings.YEAR_COST,
                                           x.site.start_date.replace(year = year), calcendperiod(x.site.start_date)],
                                renewal_sites_billing)
-        header = ['id', 'Name', 'Institution', 'PO raised by', 'PO number', 'Created at', 'Cost', 'Period start',
+        header = ['id', 'Name', 'PO raised by', 'PO number', 'Created at', 'Cost', 'Period start',
                   'Period end']
         new_billing = [header] + new_billing
         renewals_billing = [header] + renewals_billing
@@ -97,6 +97,7 @@ class Command(NoArgsCommand):
             from_email="Managed Web Service Support <%s>"
                        % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
             to=[settings.FINANCE_EMAIL],
+            bcc=['amc203@cam.ac.uk'],
             headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')},
             attachments=[('mws3sites_new.csv', stream_new.getvalue(), 'application/vnd.ms-excel'),
                          ('mws3sites_renewals.csv', stream_renewal.getvalue(), 'application/vnd.ms-excel')] + po_files

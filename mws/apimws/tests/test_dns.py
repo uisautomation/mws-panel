@@ -25,7 +25,7 @@ class DNSTests(TestCase):
                                                                   vhost.service.virtual_machines.first()
                                                                  .network_configuration.name],
                                                                  stderr=mock_subprocess.STDOUT)
-        domain_name_created = DomainName.objects.last()
+        domain_name_created = DomainName.objects.get(name=test_external_domain)
         vhost = Vhost.objects.get(id=vhost.id)
         self.assertEqual(vhost.main_domain, domain_name_created)
         self.assertEquals(domain_name_created.name, test_external_domain)
@@ -51,7 +51,7 @@ class DNSTests(TestCase):
                                                                      .network_configuration.name],
                                                                      stderr=mock_subprocess.STDOUT)
                 mock_set_cname.check_output.assert_not_called()
-        domain_name_created = DomainName.objects.last()
+        domain_name_created = DomainName.objects.get(name=test_internal_mws3_domain)
         vhost = Vhost.objects.get(id=vhost.id)
         self.assertEqual(vhost.main_domain.name, vhost.service.network_configuration.name)
         self.assertEquals(domain_name_created.name, test_internal_mws3_domain)
@@ -68,7 +68,7 @@ class DNSTests(TestCase):
         test_internal_mws3_domain = 'test.usertest.mws3.csx.cam.ac.uk'
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
-            with mock.patch("sitesmanagement.views.domains.set_cname") as mock_set_cname:
+            with mock.patch("apimws.ipreg.set_cname") as mock_set_cname:
                 mock_set_cname.return_value = True
                 self.client.post(reverse('sitesmanagement.views.add_domain', kwargs={'vhost_id': vhost.id}),
                                  {'name': test_internal_mws3_domain})
@@ -77,7 +77,7 @@ class DNSTests(TestCase):
                                                                      .network_configuration.name],
                                                                      stderr=mock_subprocess.STDOUT)
                 mock_set_cname.check_output.assert_not_called()
-        domain_name_created = DomainName.objects.last()
+        domain_name_created = DomainName.objects.get(name=test_internal_mws3_domain)
         vhost = Vhost.objects.get(id=vhost.id)
         self.assertEqual(vhost.main_domain, domain_name_created)
         self.assertEquals(domain_name_created.name, test_internal_mws3_domain)
@@ -88,6 +88,58 @@ class DNSTests(TestCase):
         self.assertIsNotNone(domain_name_created.token)
         self.assertIsNone(domain_name_created.authorised_by)
 
+    def test_add_internal_delegated_domain(self):
+        vhost = Vhost.objects.first()
+        self.assertEqual(vhost.main_domain.name, vhost.service.network_configuration.name)
+        test_internal_delegated_domain = 'test.foo.bar.cam.ac.uk'
+        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            mock_subprocess.check_output.return_value.returncode = 0
+            with mock.patch("apimws.ipreg.get_nameinfo") as mock_get_nameinfo:
+                mock_get_nameinfo.return_value = {'exists': [], 'delegated': 'Y'}
+                self.client.post(reverse('sitesmanagement.views.add_domain', kwargs={'vhost_id': vhost.id}),
+                                 {'name': test_internal_delegated_domain})
+                mock_subprocess.check_output.assert_called_once_with(["userv", "mws-admin", "mws_ansible_host",
+                                                                      vhost.service.virtual_machines.first()
+                                                                     .network_configuration.name],
+                                                                     stderr=mock_subprocess.STDOUT)
+        domain_name_created = DomainName.objects.get(name=test_internal_delegated_domain)
+        vhost = Vhost.objects.get(id=vhost.id)
+        if vhost.name != "default":
+            self.assertEqual(vhost.main_domain, domain_name_created)
+        self.assertEquals(domain_name_created.name, test_internal_delegated_domain)
+        self.assertEquals(domain_name_created.status, 'special')
+        self.assertEquals(domain_name_created.vhost, vhost)
+        self.assertEquals(domain_name_created.requested_by.username, "test0001")
+        self.assertEquals(domain_name_created.reject_reason, "Delegated domain name")
+        self.assertIsNotNone(domain_name_created.token)
+        self.assertIsNone(domain_name_created.authorised_by)
+
+    def test_add_internal_special_domain(self):
+        vhost = Vhost.objects.first()
+        self.assertEqual(vhost.main_domain.name, vhost.service.network_configuration.name)
+        test_internal_special_domain = 'test.foo.bar.cam.ac.uk'
+        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            mock_subprocess.check_output.return_value.returncode = 0
+            with mock.patch("apimws.ipreg.get_nameinfo") as mock_get_nameinfo:
+                mock_get_nameinfo.return_value = {'exists': []}
+                self.client.post(reverse('sitesmanagement.views.add_domain', kwargs={'vhost_id': vhost.id}),
+                                 {'name': test_internal_special_domain, 'special_case': True})
+                mock_subprocess.check_output.assert_called_once_with(["userv", "mws-admin", "mws_ansible_host",
+                                                                      vhost.service.virtual_machines.first()
+                                                                     .network_configuration.name],
+                                                                     stderr=mock_subprocess.STDOUT)
+        domain_name_created = DomainName.objects.get(name=test_internal_special_domain)
+        vhost = Vhost.objects.get(id=vhost.id)
+        if vhost.name != "default":
+            self.assertEqual(vhost.main_domain, domain_name_created)
+        self.assertEquals(domain_name_created.name, test_internal_special_domain)
+        self.assertEquals(domain_name_created.status, 'special')
+        self.assertEquals(domain_name_created.vhost, vhost)
+        self.assertEquals(domain_name_created.requested_by.username, "test0001")
+        self.assertEquals(domain_name_created.reject_reason, "User marked as special")
+        self.assertIsNotNone(domain_name_created.token)
+        self.assertIsNone(domain_name_created.authorised_by)
+
     def test_duplicate_domain(self):
         self.test_add_internal_usertest_mws3_domain()
         vhost = Vhost.objects.first()
@@ -95,7 +147,7 @@ class DNSTests(TestCase):
         test_duplicate_domain = 'test.usertest.mws3.csx.cam.ac.uk'
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
-            with mock.patch("sitesmanagement.views.domains.set_cname") as mock_set_cname:
+            with mock.patch("apimws.ipreg.set_cname") as mock_set_cname:
                 mock_set_cname.return_value = True
                 response = self.client.post(reverse('sitesmanagement.views.add_domain', kwargs={'vhost_id': vhost.id}),
                                             {'name': test_duplicate_domain})
@@ -120,7 +172,7 @@ class DNSTests(TestCase):
         self.assertEqual(mail.outbox[1].subject,
                          "Domain name authorisation request for %s" % test_internal_cam_domain)
         self.assertEqual(mail.outbox[1].to, [test_email])
-        domain_name_created = DomainName.objects.last()
+        domain_name_created = DomainName.objects.get(name=test_internal_cam_domain)
         self.assertEquals(domain_name_created.name, test_internal_cam_domain)
         self.assertEquals(domain_name_created.status, 'requested')
         self.assertEquals(domain_name_created.vhost, vhost)
@@ -152,13 +204,14 @@ class DNSTests(TestCase):
                                                                   vhost.service.virtual_machines.first()
                                                                  .network_configuration.name],
                                                                  stderr=mock_subprocess.STDOUT)
-        domain_name_created = DomainName.objects.last()
+        domain_name_created = DomainName.objects.get(name='domaintest.cam.ac.uk')
         vhost = Vhost.objects.get(id=vhost.id)
-        self.assertEquals(domain_name_created.name, test_camacuk_subdomain)
+        if vhost.name != "default":
+            self.assertEquals(domain_name_created.name, test_camacuk_subdomain)
         self.assertEquals(domain_name_created.status, 'special')
         self.assertEquals(domain_name_created.vhost, vhost)
         self.assertEquals(domain_name_created.requested_by.username, "test0001")
-        self.assertIsNone(domain_name_created.reject_reason)
+        self.assertEquals(domain_name_created.reject_reason, "cam.ac.uk subdomain")
         self.assertIsNotNone(domain_name_created.token)
         self.assertIsNone(domain_name_created.authorised_by)
 

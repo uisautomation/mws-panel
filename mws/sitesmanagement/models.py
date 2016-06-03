@@ -1,4 +1,6 @@
 import uuid
+import re
+import reversion
 from datetime import datetime, timedelta, date
 from itertools import chain
 from django.conf import settings
@@ -6,14 +8,12 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_slug
 from django.db import models
-import re
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.db import transaction
 from django.utils import timezone
 from django.utils.timezone import now
 from os.path import splitext
-import reversion
 from ucamlookup.models import LookupGroup
 from apimws.ipreg import DomainNameDelegatedException
 from mwsauth.utils import get_users_of_a_group
@@ -616,6 +616,12 @@ class DomainName(models.Model):
         self.save()
         from apimws.utils import domain_confirmation_user
         domain_confirmation_user.delay(self)
+
+    def special_it(self, reason=""):
+        self.status = 'special'
+        self.reject_reason = reason
+        self.save()
+        # TODO send email as special
 
     def __unicode__(self):
         return self.name

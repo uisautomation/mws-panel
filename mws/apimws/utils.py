@@ -8,7 +8,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from apimws.vm import new_site_primary_vm, secrets_prealocation_site
 from sitesmanagement.models import EmailConfirmation, NetworkConfig, Site, Service
-
+from sitesmanagement.utils import is_camacuk_subdomain
 
 LOGGER = logging.getLogger('mws')
 
@@ -23,8 +23,12 @@ class EmailTaskWithFailure(Task):
 
 @shared_task(base=EmailTaskWithFailure, default_retry_delay=15*60, max_retries=6)  # Retry each 15 minutes for 6 times
 def ip_register_api_request(domain_name):
+    if is_camacuk_subdomain(domain_name.name):
+        return domain_name.special_it("cam.ac.uk subdomain")
     from apimws.ipreg import get_nameinfo
     nameinfo = get_nameinfo(domain_name)
+    if 'delegated' in nameinfo and nameinfo['delegated'] == "Y":
+        return domain_name.special_it("Delegated domain name")
     if nameinfo['emails']:
         emails = nameinfo['emails']
     elif nameinfo['crsids']:
@@ -37,7 +41,7 @@ def ip_register_api_request(domain_name):
         subject="Domain name authorisation request for %s" % nameinfo['domain'],
         body="You are receiving this email because you are the administrator of the domain %s.\n\n"
              "The user %s (https://www.lookup.cam.ac.uk/person/crsid/%s) has requested permission to use the domain "
-             "name %s for a UIS Managed Web Server website (see http://www.ucs.cam.ac.uk/managed-web-service/).\n\n"
+             "name %s for a UIS Managed Web Server website (see http://mws-help.uis.cam.ac.uk/).\n\n"
              "To authorise or reject this request please visit the following URL %s%s. If we don't hear from you "
              "in three working days the request will be automatically %s.\n\n%s"
              "Questions about this message can be referred to mws-support@uis.cam.ac.uk."
