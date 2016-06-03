@@ -72,7 +72,7 @@ def add_domain(request, vhost_id, socket_error=None):
         domain_form = DomainNameFormNew(request.POST)
         if domain_form.is_valid():
             domain_requested = domain_form.save(commit=False)
-            if domain_requested.name != '':  # TODO do it after saving a domain request
+            if domain_requested.name != '':
                 if is_camacuk(domain_requested.name):
                     if domain_requested.name.endswith(".usertest.mws3.csx.cam.ac.uk"):
                         new_domain = DomainName.objects.create(name=domain_requested.name, status='accepted',
@@ -81,6 +81,10 @@ def add_domain(request, vhost_id, socket_error=None):
                     elif domain_requested.name.endswith(".mws3.csx.cam.ac.uk"):
                         new_domain = DomainName.objects.create(name=domain_requested.name, status='denied',
                                                                vhost=vhost, requested_by=request.user)
+                    elif 'special_case' in domain_form.data:
+                        new_domain = DomainName.objects.create(name=domain_requested.name, status='special',
+                                                               vhost=vhost, requested_by=request.user,
+                                                               reject_reason="User marked as special")
                     else:
                         new_domain = DomainName.objects.create(name=domain_requested.name, status='requested',
                                                                vhost=vhost, requested_by=request.user)

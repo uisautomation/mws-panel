@@ -37,11 +37,11 @@ class VhostForm(forms.ModelForm):
 
 
 class DomainNameFormNew(forms.ModelForm):
-    # name = forms.CharField(max_length=250, required=True, label="Domain name",
-    #                        validators=[DomainName.full_domain_validator])
+    special_case = forms.BooleanField(label='Special domain name (The user will be in charge of making the'
+                                            'arrangments for *.cam.ac.uk domain names)', required=False)
     class Meta:
         model = DomainName
-        fields = ('name', )
+        fields = ('name', 'special_case')
         labels = {
             'name': 'Domain Name',
         }

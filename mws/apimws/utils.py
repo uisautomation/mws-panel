@@ -23,12 +23,12 @@ class EmailTaskWithFailure(Task):
 
 @shared_task(base=EmailTaskWithFailure, default_retry_delay=15*60, max_retries=6)  # Retry each 15 minutes for 6 times
 def ip_register_api_request(domain_name):
-    from apimws.ipreg import get_nameinfo
-    nameinfo = get_nameinfo(domain_name)
-    if nameinfo['delegated'] and nameinfo['delegated'] == "Y":
-        return domain_name.special_it("Delegated domain name")
     if is_camacuk_subdomain(domain_name.name):
         return domain_name.special_it("cam.ac.uk subdomain")
+    from apimws.ipreg import get_nameinfo
+    nameinfo = get_nameinfo(domain_name)
+    if 'delegated' in nameinfo and nameinfo['delegated'] == "Y":
+        return domain_name.special_it("Delegated domain name")
     if nameinfo['emails']:
         emails = nameinfo['emails']
     elif nameinfo['crsids']:
