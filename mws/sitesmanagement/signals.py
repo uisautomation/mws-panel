@@ -1,7 +1,10 @@
+import logging
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from apimws.ipreg import delete_sshfp, delete_cname
-from sitesmanagement.models import DomainName, SiteKey
+from sitesmanagement.models import DomainName, SiteKey, Site, VirtualMachine
+
+LOGGER = logging.getLogger('mws')
 
 
 @receiver(post_save, sender=DomainName)
@@ -29,3 +32,13 @@ def delete_sshfp_from_dns(instance, **kwargs):
 def delete_cname_from_dns(instance, **kwargs):
     if instance.status == "accepted":
         delete_cname.delay(instance.name)
+
+
+@receiver(pre_delete, sender=Site)
+def log_deleted_site(sender, instance, **kwargs):
+    LOGGER.info("Class %s deleted the Site %s" % (str(sender), instance.name))
+
+
+@receiver(pre_delete, sender=VirtualMachine)
+def log_deleted_site(sender, instance, **kwargs):
+    LOGGER.info("Class %s deleted the Virtual Machine %s" % (str(sender), instance.name))
