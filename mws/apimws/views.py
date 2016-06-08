@@ -2,7 +2,6 @@ import calendar
 import logging
 from datetime import date, datetime, timedelta
 from time import mktime
-
 from celery import shared_task
 from django.conf import settings
 from django.contrib.auth.decorators import login_required

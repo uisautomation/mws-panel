@@ -3,7 +3,8 @@ import json
 from django.core.management.base import NoArgsCommand, CommandError
 from optparse import make_option
 from django.core.urlresolvers import reverse
-from django.db.models import Q, settings
+from django.db.models import Q
+from django.conf import settings
 from apimws.lv import update_lv_list
 from apimws.models import ApacheModule, PHPLib
 from sitesmanagement.models import VirtualMachine, Site, UnixGroup
