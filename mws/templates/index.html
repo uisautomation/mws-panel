@@ -13,7 +13,6 @@
                 <li>A server with 1 Core CPU, 1 GB of RAM, and 20Gb of disk space (only 10Gb are available to the user,
                     the rest is used for other purposes like snapshots)</li>
                 <li>A public IPv4 and IPv6 addresses</li>
-{#                <li>A secondary test server for testing purposes (testing updates for example)</li>#}
                 <li>A simple web-based control panel to control all the features of the Managed Web Service</li>
                 <li>A cost of only £{{ cost|floatformat:2 }} a year</li>
             </ul>
@@ -51,7 +50,6 @@
                             <th>Description</th>
                             <th>Hostnames</th>
                             <th>Server info</th>
-{#                            <th>Test server info</th>#}
                             <th></th>
                         </tr>
                     </thead>
@@ -74,13 +72,6 @@
                                     hostname: {{ site.production_service.hostname }}<br/>
                                 {% endif %}
                             </td>
-{#                            <td>#}
-{#                                {% if site.test_service %}#}
-{#                                    IPv4: {{ site.test_service.ipv4 }}<br/>#}
-{#                                    IPv6: {{ site.test_service.ipv6 }}<br/>#}
-{#                                    hostname: {{ site.test_service.hostname }}<br/>#}
-{#                                {% endif %}#}
-{#                            </td>#}
                             <td style="width: 30px; padding-left: 0px; padding-right: 0px;">
                                 <a href="{% url 'showsite' site_id=site.id %}">
                                     <i title="Control panel" class="fa fa-angle-double-right fa-2x"
@@ -150,7 +141,6 @@
                                 <th>Name</th>
                                 <th>Description</th>
                                 <th>Server info</th>
-{#                                <th>Test server info</th>#}
                             </tr>
                         </thead>
                         <tbody>
@@ -169,13 +159,6 @@
                                         hostname: {{ site.production_service.hostname }}<br/>
                                     {% endif %}
                                 </td>
-{#                                <td>#}
-{#                                    {% if site.test_service %}#}
-{#                                        IPv4: {{ site.test_service.ipv4 }}<br/>#}
-{#                                        IPv6: {{ site.test_service.ipv6 }}<br/>#}
-{#                                        hostname: {{ site.test_service.hostname }}<br/>#}
-{#                                    {% endif %}#}
-{#                                </td>#}
                             </tr>
                         {% endfor %}
                         </tbody>
