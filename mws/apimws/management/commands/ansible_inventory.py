@@ -2,7 +2,9 @@ import sys
 import json
 from django.core.management.base import NoArgsCommand, CommandError
 from optparse import make_option
-from django.db.models import Q
+from django.core.urlresolvers import reverse
+from django.db.models import Q, settings
+from apimws.lv import update_lv_list
 from apimws.models import ApacheModule, PHPLib
 from sitesmanagement.models import VirtualMachine, Site, UnixGroup
 
@@ -214,5 +216,8 @@ class Command(NoArgsCommand):
 
         # Let ansible know if the VM should be quarantined (apache and exim services disabled)
         v['mws_quarantined'] = vm.service.quarantined
+
+        # URL to the panel to inform about the deletion of LVs
+        v['mws_update_lv_list_url'] = "%s%s" % (settings.MAIN_DOMAIN, reverse(update_lv_list))
 
         return v
