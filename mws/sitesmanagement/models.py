@@ -51,6 +51,16 @@ class NetworkConfig(models.Model):
         return self.name
 
 
+class ServerType(models.Model):
+    numcpu = models.IntegerField()
+    sizeram = models.IntegerField()  # In GB
+    sizedisk = models.IntegerField()  # In GB
+    price = models.DecimalField(max_digits=6, decimal_places=2)
+
+    def __unicode__(self):
+        return "%d CPU cores, %dGB of RAM, %dGB of SSD Disk" % self.numcpu
+
+
 class Site(models.Model):
     # Mark if the Site is preallocated or not
     preallocated = models.BooleanField(default=False)
@@ -70,6 +80,9 @@ class Site(models.Model):
     email = models.EmailField(null=False, blank=False)
     # Indicates if the user wants to renew or not their MWS3 subscription
     subscription = models.BooleanField(default=True)
+
+    # Server type (amount of CPU, RAM, and disk)
+    type = models.ForeignKey(ServerType)
 
     # Administrator users of a site
     users = models.ManyToManyField(User, related_name='sites')
