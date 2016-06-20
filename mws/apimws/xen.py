@@ -58,7 +58,7 @@ class XenWithFailure(Task):
                          "The parameters passed to the task were: %s\n\n The traceback is: \n %s", task_id, args, einfo)
 
 
-def secrets_prealocation_site(site):
+def secrets_prealocation_vm(vm):
     # Gets all the keys generated for the site and generates the fingerprint and the SSHFP from them
     # It sends the SSHFP record to ip-register
     service = vm.service
