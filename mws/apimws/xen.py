@@ -121,7 +121,7 @@ def new_site_primary_vm(service, host_network_configuration=None):
 
     parameters["features"] = {
         "cpu": service.site.type.numcpu,
-        "ram": service.site.type.sizeram,
+        "ram": service.site.type.sizeram*1024,
         "disk": service.site.type.sizedisk,
     }
 
@@ -187,7 +187,7 @@ def recreate_vm(vm_id):
 
     parameters["features"] = {
         "cpu": service.site.type.numcpu,
-        "ram": service.site.type.sizeram,
+        "ram": service.site.type.sizeram*1024,
         "disk": service.site.type.sizedisk,
     }
 
