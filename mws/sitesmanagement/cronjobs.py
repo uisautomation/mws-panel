@@ -8,8 +8,7 @@ from django.core.mail import EmailMessage
 from django.db.models import Q
 from django.utils import timezone
 from apimws.utils import preallocate_new_site
-from sitesmanagement.models import Billing, Site, VirtualMachine, DomainName
-
+from sitesmanagement.models import Billing, Site, VirtualMachine, DomainName, ServerType
 
 LOGGER = logging.getLogger('mws')
 
@@ -186,9 +185,9 @@ def delete_cancelled():
 
 @shared_task(base=ScheduledTaskWithFailure)
 def check_num_preallocated_sites():
-    desired_num_preallocated_sites = getattr(settings, 'NUM_PREALLOCATED_SITES', 0)
-    while Site.objects.filter(preallocated=True).count() < desired_num_preallocated_sites:
-        preallocate_new_site()
+    for servertype in ServerType.objects.all():
+        if Site.objects.filter(preallocated=True, type=servertype).count() < servertype.preallocated:
+            preallocate_new_site(type=servertype)
 
 
 @shared_task(base=ScheduledTaskWithFailure)

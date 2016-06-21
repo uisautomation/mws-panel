@@ -55,6 +55,7 @@ class ServerType(models.Model):
     numcpu = models.IntegerField()
     sizeram = models.IntegerField()  # In GB
     sizedisk = models.IntegerField()  # In GB
+    preallocated = models.IntegerField()  # Number of pre-allocated server of this type
     price = models.DecimalField(max_digits=6, decimal_places=2)
 
     def __unicode__(self):
