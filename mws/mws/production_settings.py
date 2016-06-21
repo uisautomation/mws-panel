@@ -98,6 +98,4 @@ EMAIL_TIMEOUT = 60
 
 IP_REG_API_END_POINT = IP_REG_API_END_POINT + ['live']
 
-NUM_PREALLOCATED_SITES = 10
-
 from mws.logging_configuration import *

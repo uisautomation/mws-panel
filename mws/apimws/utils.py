@@ -7,7 +7,7 @@ from django.core.mail import EmailMessage
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from apimws.vm import new_site_primary_vm
-from sitesmanagement.models import EmailConfirmation, NetworkConfig, Site, Service
+from sitesmanagement.models import EmailConfirmation, NetworkConfig, Site, Service, ServerType
 from sitesmanagement.utils import is_camacuk_subdomain
 
 LOGGER = logging.getLogger('mws')
@@ -97,8 +97,12 @@ def finished_installation_email_confirmation(site):
     ).send()
 
 
-def preallocate_new_site():
-    site = Site.objects.create(name=uuid.uuid4(), disabled=False, preallocated=True)
+def preallocate_new_site(servertype=None):
+    if servertype:
+        site = Site.objects.create(name=uuid.uuid4(), disabled=False, preallocated=True, type=servertype)
+    else:
+        site = Site.objects.create(name=uuid.uuid4(), disabled=False, preallocated=True,
+                                   type=ServerType.objects.get(id=1))
     prod_service_netconf = NetworkConfig.get_free_prod_service_config()
     test_service_netconf = NetworkConfig.get_free_test_service_config()
     host_netconf = NetworkConfig.get_free_host_config()

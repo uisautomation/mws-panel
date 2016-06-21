@@ -16,7 +16,7 @@ from apimws.ansible import launch_ansible_site
 from apimws.models import AnsibleConfiguration
 from apimws.utils import email_confirmation
 from sitesmanagement.forms import SiteForm, SiteEmailForm
-from sitesmanagement.models import Site, DomainName, Billing, Vhost
+from sitesmanagement.models import Site, DomainName, Billing, Vhost, ServerType
 from django.conf import settings as django_settings
 from sitesmanagement.utils import can_create_new_site
 
@@ -140,7 +140,8 @@ class SiteCreate(LoginRequiredMixin, FormView):
     def form_valid(self, form):
         # This method is called when valid form data has been POSTed.
         # It should return an HttpResponse.
-        preallocated_site = Site.objects.filter(preallocated=True, disabled=True).first()
+        servertype = ServerType.objects.get(id=1)
+        preallocated_site = Site.objects.filter(preallocated=True, disabled=True, type=servertype).first()
         siteform = form.save(commit=False)
         if not preallocated_site:
             raise ValidationError("No MWS Servers available at this moment")

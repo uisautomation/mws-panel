@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 from django.test import override_settings, TestCase
 from mwsauth.tests import do_test_login
 from sitesmanagement.cronjobs import check_subscription
-from sitesmanagement.models import Site, NetworkConfig, Service
+from sitesmanagement.models import Site, NetworkConfig, Service, ServerType
 
 
 @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
@@ -16,7 +16,7 @@ class CancelSiteTest(TestCase):
         today = datetime.today()
         do_test_login(self, user="test0001")
         # Create site (300 days ago start date)
-        site = Site.objects.create(name="testSite", email='amc203@cam.ac.uk',
+        site = Site.objects.create(name="testSite", email='amc203@cam.ac.uk', type=ServerType.objects.get(id=1),
                                    start_date=today-timedelta(days=300))
         netconf = NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
                                                name="mws-66424.mws3.csx.cam.ac.uk")

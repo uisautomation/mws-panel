@@ -15,7 +15,7 @@ from mwsauth.models import MWSUser
 from mwsauth.utils import get_or_create_group_by_groupid
 from ucamlookup import user_in_groups, get_or_create_user_by_crsid, validate_crsids
 from mwsauth.validators import validate_groupids
-from sitesmanagement.models import Site, Suspension, VirtualMachine, NetworkConfig, Service, Vhost
+from sitesmanagement.models import Site, Suspension, VirtualMachine, NetworkConfig, Service, Vhost, ServerType
 from ucamlookup.models import LookupGroup
 
 
@@ -150,7 +150,8 @@ class AuthTestCases(TestCase):
         NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff4', name='mws-client1', type='ipv6')
         NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff3', name='mws-client2', type='ipv6')
 
-        site_without_auth_users = Site.objects.create(name="test_site1", start_date=datetime.today())
+        site_without_auth_users = Site.objects.create(name="test_site1", start_date=datetime.today(),
+                                                      type=ServerType.objects.get(id=1))
         service_a = Service.objects.create(type='production', network_configuration=NetworkConfig.
                                            get_free_prod_service_config(), site=site_without_auth_users, status='ready')
         VirtualMachine.objects.create(token=uuid.uuid4(), service=service_a,
@@ -234,7 +235,8 @@ class AuthTestCases(TestCase):
         NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff4', name='mws-client1', type='ipv6')
         NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff3', name='mws-client2', type='ipv6')
 
-        site_with_auth_groups = Site.objects.create(name="test_site2", start_date=datetime.today())
+        site_with_auth_groups = Site.objects.create(name="test_site2", start_date=datetime.today(),
+                                                    type=ServerType.objects.get(id=1))
         service_a = Service.objects.create(type='production', network_configuration=NetworkConfig.
                                            get_free_prod_service_config(), site=site_with_auth_groups,
                                            status='ready')

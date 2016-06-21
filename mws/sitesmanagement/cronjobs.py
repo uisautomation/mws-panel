@@ -8,8 +8,7 @@ from django.core.mail import EmailMessage
 from django.db.models import Q
 from django.utils import timezone
 from apimws.utils import preallocate_new_site
-from sitesmanagement.models import Billing, Site, VirtualMachine, DomainName
-
+from sitesmanagement.models import Billing, Site, VirtualMachine, DomainName, ServerType
 
 LOGGER = logging.getLogger('mws')
 
@@ -169,15 +168,26 @@ def check_backups():
 
 @shared_task(base=ScheduledTaskWithFailure)
 def delete_cancelled():
+    """Delete sites that were cancelled 2 weeks ago and were never paid for"""
+    sites_cancelled_never_paid = Site.objects.filter(end_date__lt=(datetime.today()-timedelta(weeks=2)).date(),
+                                                     billing=None)
+    for site in sites_cancelled_never_paid:
+        LOGGER.info("The Site %s has been deleted because it was cancelled more than 2 weeks ago and was never paid for"
+                    % site.name)
+    sites_cancelled_never_paid.delete()
+
     """Delete sites that were cancelled 8 weeks ago"""
-    Site.objects.filter(end_date__lt=(datetime.today()-timedelta(weeks=8)).date()).delete()
+    sites_cancelled = Site.objects.filter(end_date__lt=(datetime.today()-timedelta(weeks=8)).date())
+    for site in sites_cancelled:
+        LOGGER.info("The Site %s has been deleted because it was cancelled more than 8 weeks ago" % site.name)
+    sites_cancelled.delete()
 
 
 @shared_task(base=ScheduledTaskWithFailure)
 def check_num_preallocated_sites():
-    desired_num_preallocated_sites = getattr(settings, 'NUM_PREALLOCATED_SITES', 0)
-    while Site.objects.filter(preallocated=True).count() < desired_num_preallocated_sites:
-        preallocate_new_site()
+    for servertype in ServerType.objects.all():
+        if Site.objects.filter(preallocated=True, type=servertype).count() < servertype.preallocated:
+            preallocate_new_site(servertype=servertype)
 
 
 @shared_task(base=ScheduledTaskWithFailure)

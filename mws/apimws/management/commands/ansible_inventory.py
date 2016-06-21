@@ -6,7 +6,6 @@ from django.core.urlresolvers import reverse
 from django.db.models import Q
 from apimws.lv import update_lv_list
 from apimws.models import PHPLib
-#from apimws.models import ApacheModule
 from sitesmanagement.models import VirtualMachine, Site, UnixGroup
 from django.conf import settings
 
@@ -188,14 +187,6 @@ class Command(NoArgsCommand):
         v['mws_service_ipv4_netmask'] = vm.service.network_configuration.IPv4_netmask
         v['mws_service_ipv4_gateway'] = vm.service.network_configuration.IPv4_gateway
         v['mws_service_ipv6'] = vm.service.network_configuration.IPv6
-        #
-        # # List of Apache modules to be installed and enable
-        # v['mws_apache_mods_enabled'] = list(ApacheModule.objects.filter(services__id=vm.service.id, available=True)
-        #                                     .values_list('name', flat=True))
-        #
-        # # List of Apache modules to be disabled
-        # v['mws_apache_mods_disabled'] = list(ApacheModule.objects.exclude(services__id=vm.service.id)
-        #                                      .values_list('name', flat=True))
 
         # List of PHP libraries to be installed
         v['mws_php_libs_enabled'] = list(PHPLib.objects.filter(services__id=vm.service.id, available=True)
