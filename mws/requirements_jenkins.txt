@@ -12,7 +12,7 @@ django-celery>=3.1.16
 pycrypto>=2.6.1
 ecdsa
 mock>=1.0.1
-django-jenkins
+django-jenkins<0.19
 coverage
 #astroid<1.4
 #pylint<1.5
