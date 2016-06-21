@@ -33,7 +33,7 @@
                             <td>{{ billing.group }}</td>
                             <td>{{ billing.purchase_order_number }}</td>
                             <td>{{ billing.site.start_date }}</td>
-                            <td>£ {{ year_cost }}</td>
+                            <td>£ {{ billing.site.type.price }}</td>
                             <td>{{ billing.site.start_date }}</td>
                             <td>{{ billing.site.start_date|calcendperiod }}</td>
                             <td>
@@ -71,7 +71,7 @@
                             <td>{{ billing.group }}</td>
                             <td>{{ billing.purchase_order_number }}</td>
                             <td>{{ billing.site.start_date }}</td>
-                            <td>£ {{ year_cost }}</td>
+                            <td>£ {{ billing.site.type.price }}</td>
                             <td>{{ billing.site.start_date|renewalsdate:year }}</td>
                             <td>{{ billing.site.start_date|renewalsdate:year|calcendperiod }}</td>
                             <td>

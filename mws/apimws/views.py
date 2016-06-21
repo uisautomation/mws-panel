@@ -52,7 +52,6 @@ def billing_total(request):
 
     return render(request, 'api/finance_total.html', {
         'billings': Billing.objects.filter(site__deleted=False),
-        'year_cost': settings.YEAR_COST,
     })
 
 
@@ -81,7 +80,6 @@ def billing_month(request, year, month):
                                                         site__start_date__lt=date(year, 1, 1), site__deleted=False),
         'year': year,
         'month': month,
-        'year_cost': settings.YEAR_COST,
     })
 
 

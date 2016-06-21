@@ -17,6 +17,7 @@ input,textarea { width: auto !important; }
 ul.errorlist {
     display: inline-block;
     width: 100%;
+    margin-left: 0;
 }
 
 ul.errorlist li {
@@ -35,6 +36,10 @@ ul.errorlist + p input, ul.errorlist + .metadata_email_form_each p input {
 
 ul.errorlist + p textarea {
     border-color: #b94a48 !important;
+}
+
+ul.errorlist + p {
+    color: #b94a48;
 }
 
 #translucidframe {

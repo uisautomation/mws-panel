@@ -60,7 +60,8 @@ class ServerType(models.Model):
     price = models.DecimalField(max_digits=6, decimal_places=2)
 
     def __unicode__(self):
-        return "%d CPU cores, %dGB of RAM, %dGB of SSD Disk" % (self.numcpu, self.sizeram, self.sizedisk)
+        return "%d CPU cores, %dGB of RAM, %dGB of SSD Disk, %s pounds per year" % (self.numcpu, self.sizeram,
+                                                                                    self.sizedisk, self.price)
 
 
 class Site(models.Model):

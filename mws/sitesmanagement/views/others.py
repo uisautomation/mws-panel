@@ -14,7 +14,7 @@ from apimws.vm import clone_vm_api_call
 from apimws.views import post_installOS
 from mwsauth.utils import privileges_check
 from sitesmanagement.forms import BillingForm
-from sitesmanagement.models import Service, Billing, Site
+from sitesmanagement.models import Service, Billing, Site, ServerType
 from sitesmanagement.views.sites import warning_messages
 
 
@@ -53,7 +53,7 @@ def billing_management(request, site_id):
         'site': site,
         'billing_form': billing_form,
         'sidebar_messages': warning_messages(site),
-        'cost': settings.YEAR_COST
+        'cost': ServerType.objects.get(id=1).price
     })
 
 
