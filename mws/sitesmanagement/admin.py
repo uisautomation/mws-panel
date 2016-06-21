@@ -7,7 +7,7 @@ from django.template.response import TemplateResponse
 from django.utils.encoding import force_text
 from reversion import VersionAdmin
 from .models import Site, Billing, DomainName, Suspension, VirtualMachine, EmailConfirmation, \
-    Vhost, UnixGroup, NetworkConfig, SiteKey, Service, Snapshot
+    Vhost, UnixGroup, NetworkConfig, SiteKey, Service, Snapshot, ServerType
 
 
 def recreate_vm(modeladmin, request, queryset):
@@ -176,6 +176,7 @@ class EmailConfirmationAdmin(ModelAdmin):
 
 
 admin.site.register(Site, SiteAdmin)
+admin.site.register(ServerType, ModelAdmin)
 admin.site.register(Billing, BillingAdmin)
 admin.site.register(Vhost, VhostAdmin)
 admin.site.register(DomainName, DomainNameAdmin)
