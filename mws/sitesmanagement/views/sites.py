@@ -140,11 +140,12 @@ class SiteCreate(LoginRequiredMixin, FormView):
     def form_valid(self, form):
         # This method is called when valid form data has been POSTed.
         # It should return an HttpResponse.
-        servertype = ServerType.objects.get(id=1)
-        preallocated_site = Site.objects.filter(preallocated=True, disabled=True, type=servertype).first()
         siteform = form.save(commit=False)
+        preallocated_site = Site.objects.filter(preallocated=True, disabled=True, type=siteform.type).first()
         if not preallocated_site:
-            raise ValidationError("No MWS Servers available at this moment")
+            form.add_error("type", "No MWS Servers available at this moment with this configuration, "
+                                   "please try again later or select other configuration")
+            return self.form_invalid(form)
         preallocated_site.start_date = datetime.date.today()
         preallocated_site.name = siteform.name
         preallocated_site.description = siteform.description

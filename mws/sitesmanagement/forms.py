@@ -10,7 +10,7 @@ class SiteForm(forms.ModelForm):
                                   required=False)
     class Meta:
         model = Site
-        fields = ('name', 'description', 'email')
+        fields = ('name', 'description', 'email', 'type')
         labels = {
             'name': 'A short name for this Managed Web Service Server (e.g. St Botolph\'s server)',
             'email': 'The webmaster email (please use a role email when possible)'
