@@ -187,7 +187,7 @@ def delete_cancelled():
 def check_num_preallocated_sites():
     for servertype in ServerType.objects.all():
         if Site.objects.filter(preallocated=True, type=servertype).count() < servertype.preallocated:
-            preallocate_new_site(type=servertype)
+            preallocate_new_site(servertype=servertype)
 
 
 @shared_task(base=ScheduledTaskWithFailure)

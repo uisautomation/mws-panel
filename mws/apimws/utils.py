@@ -97,9 +97,9 @@ def finished_installation_email_confirmation(site):
     ).send()
 
 
-def preallocate_new_site(type=None):
-    if type:
-        site = Site.objects.create(name=uuid.uuid4(), disabled=False, preallocated=True, type=type)
+def preallocate_new_site(servertype=None):
+    if servertype:
+        site = Site.objects.create(name=uuid.uuid4(), disabled=False, preallocated=True, type=servertype)
     else:
         site = Site.objects.create(name=uuid.uuid4(), disabled=False, preallocated=True,
                                    type=ServerType.objects.get(id=1))

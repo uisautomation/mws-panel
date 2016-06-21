@@ -32,6 +32,11 @@ def deprecated(func):
     return new_func
 
 
-def can_create_new_site():
-    from sitesmanagement.models import Site
-    return Site.objects.filter(preallocated=True, disabled=True).count() > 0
+def can_create_new_site(servertype=None):
+    '''Checks if there are prealloated sites of that servertype'''
+    from sitesmanagement.models import Site, ServerType
+    if servertype:
+        return Site.objects.filter(preallocated=True, disabled=True, type=servertype).count() > 0
+    else:
+        servertype = ServerType.objects.get(id=1)
+        return Site.objects.filter(preallocated=True, disabled=True, type=servertype).count() > 0
