@@ -120,6 +120,12 @@ def new_site_primary_vm(service, host_network_configuration=None):
     else:
         raise AttributeError("No host network configuration")
 
+    parameters["features"] = {
+        "cpu": service.site.type.numcpu,
+        "ram": service.site.type.sizeram,
+        "disk": service.site.type.sizedisk,
+    }
+
     parameters["netconf"] = netconf
     parameters["callback"] = {
         "endpoint": "%s%s" % (settings.MAIN_DOMAIN, reverse(post_installation)),
@@ -179,6 +185,13 @@ def recreate_vm(vm_id):
     if os:
         parameters["os"] = os[0].value
     parameters["netconf"] = netconf
+
+    parameters["features"] = {
+        "cpu": service.site.type.numcpu,
+        "ram": service.site.type.sizeram,
+        "disk": service.site.type.sizedisk,
+    }
+
     parameters["callback"] = {
         "endpoint": "%s%s" % (settings.MAIN_DOMAIN, reverse(post_recreate)),
         "vm_id": vm.id,
