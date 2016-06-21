@@ -65,11 +65,11 @@ class Command(NoArgsCommand):
                                   x.purchase_order.read(), 'application/other'),
                        new_sites_billing | renewal_sites_billing)
         new_billing = map(lambda x: [x.site.id, x.site.name, x.group,
-                                     x.purchase_order_number, x.site.start_date, settings.YEAR_COST, x.site.start_date,
+                                     x.purchase_order_number, x.site.start_date, x.site.type.price, x.site.start_date,
                                      calcendperiod(x.site.start_date)],
                           new_sites_billing)
         renewals_billing = map(lambda x: [x.site.id, x.site.name, x.group,
-                                          x.purchase_order_number, x.site.start_date, settings.YEAR_COST,
+                                          x.purchase_order_number, x.site.start_date, x.site.type.price,
                                           x.site.start_date.replace(year = year), calcendperiod(x.site.start_date)],
                                renewal_sites_billing)
         header = ['id', 'Name', 'PO raised by', 'PO number', 'Created at', 'Cost', 'Period start',
