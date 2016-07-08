@@ -146,7 +146,7 @@ def vhost_enable_apache_owned(vhost_id):
     vhost = Vhost.objects.get(id=vhost_id)
     for vm in vhost.service.virtual_machines.all():
         subprocess.check_output(["userv", "mws-admin", "mws_vhost_owner", vm.network_configuration.name,
-                                 vhost.name, "www-data"], stderr=subprocess.STDOUT)
+                                 vhost.name, "enable"], stderr=subprocess.STDOUT)
     vhost.apache_owned = True
     vhost.save()
     vhost_disable_apache_owned.apply_async(args=(vhost_id,), countdown=3600) # Leave an hour to the user
@@ -157,6 +157,6 @@ def vhost_disable_apache_owned(vhost_id):
     vhost = Vhost.objects.get(id=vhost_id)
     for vm in vhost.service.virtual_machines.all():
         subprocess.check_output(["userv", "mws-admin", "mws_vhost_owner", vm.network_configuration.name,
-                                 vhost.name, "site-admin"], stderr=subprocess.STDOUT)
+                                 vhost.name, "disable"], stderr=subprocess.STDOUT)
     vhost.apache_owned = False
     vhost.save()
