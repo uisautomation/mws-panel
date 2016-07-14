@@ -60,7 +60,7 @@ class ServerType(models.Model):
 
     def __unicode__(self):
         return "%d CPU cores, %dGB of RAM, %dGB of SSD Disk, %s pounds per year" % (self.numcpu, self.sizeram,
-                                                                                    self.sizedisk, self.price)
+                                                                                    self.sizedisk-5, self.price)
 
 
 class Site(models.Model):
