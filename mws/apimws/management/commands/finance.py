@@ -40,9 +40,8 @@ class Command(NoArgsCommand):
                                end_date__isnull=True, billing__isnull=True).exists():
             LOGGER.error("Sites not cancelled were found without billing after a month")
 
-        # Billings of sites that haven't been canceled (end_date is null) and are new (start_date actual month/year)
-        new_sites_billing = Billing.objects.filter(site__start_date__month=inidate.month,
-                                                   site__start_date__year=inidate.year, site__end_date__isnull=True)
+        # Billings of sites that haven't been canceled (end_date is null) and haven't been sent to finance yet
+        new_sites_billing = Billing.objects.filter(date_sent_to_finance__isnull=True, site__end_date__isnull=True)
 
         ################
         ### RENEWALS ###
