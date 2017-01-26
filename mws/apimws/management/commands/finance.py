@@ -96,7 +96,7 @@ class Command(NoArgsCommand):
             from_email="Managed Web Service Support <%s>"
                        % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
             to=[settings.FINANCE_EMAIL],
-            bcc=['amc203@cam.ac.uk'],
+            bcc=[settings.EMAIL_MWS3_SUPPORT],
             headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')},
             attachments=[('mws3sites_new.csv', stream_new.getvalue(), 'application/vnd.ms-excel'),
                          ('mws3sites_renewals.csv', stream_renewal.getvalue(), 'application/vnd.ms-excel')] + po_files
