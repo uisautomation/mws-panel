@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-
 from django.db import models, migrations
+
+
+def add_standard_storage(apps, schema_editor):
+    ServerType = apps.get_model("sitesmanagement", "ServerType")
+    ServerType.objects.create(numcpu=1, sizeram=1, sizedisk=25, preallocated=3, price=100.00, description="Standard")
 
 
 class Migration(migrations.Migration):
@@ -17,4 +21,5 @@ class Migration(migrations.Migration):
             field=models.CharField(max_length=100, null=True, blank=True),
             preserve_default=True,
         ),
+        migrations.RunPython(add_standard_storage),
     ]
