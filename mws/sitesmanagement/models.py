@@ -57,10 +57,11 @@ class ServerType(models.Model):
     sizedisk = models.IntegerField()  # In GB
     preallocated = models.IntegerField()  # Number of pre-allocated server of this type
     price = models.DecimalField(max_digits=6, decimal_places=2)
+    description = models.CharField(max_length=100, blank=True, null=True)
 
     def __unicode__(self):
-        return "%d CPU cores, %dGB of RAM, %dGB of SSD Disk, %s pounds per year" % (self.numcpu, self.sizeram,
-                                                                                    self.sizedisk-5, self.price)
+        return self.description or "%d CPU cores, %dGB of RAM, %dGB of SSD Disk, %s pounds per year" % \
+                                   (self.numcpu, self.sizeram, self.sizedisk-5, self.price)
 
 
 class Site(models.Model):
