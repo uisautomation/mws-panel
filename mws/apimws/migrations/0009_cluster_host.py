@@ -13,6 +13,13 @@ def add_mws_cluster_1(apps, schema_editor):
     host2 = Host.objects.create(hostname="odochium.csi.cam.ac.uk", cluster=cluster1)
 
 
+def no_op(apps, schema_editor):
+    """
+    Nothing to do
+    """
+    pass
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -39,5 +46,5 @@ class Migration(migrations.Migration):
             },
             bases=(models.Model,),
         ),
-        migrations.RunPython(add_mws_cluster_1),
+        migrations.RunPython(add_mws_cluster_1, no_op),
     ]

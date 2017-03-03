@@ -8,6 +8,13 @@ def add_tiers(apps, schema_editor):
     ServerType.objects.create(id=1, numcpu=1, sizeram=1, sizedisk=20, price=100.00)
 
 
+def no_op(apps, schema_editor):
+    """
+    Nothing to do
+    """
+    pass
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -28,7 +35,7 @@ class Migration(migrations.Migration):
             },
             bases=(models.Model,),
         ),
-        migrations.RunPython(add_tiers),
+        migrations.RunPython(add_tiers, no_op),
         migrations.AddField(
             model_name='site',
             name='type',

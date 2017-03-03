@@ -16,6 +16,13 @@ def add_standard_storage_description(apps, schema_editor):
         },)
 
 
+def no_op(apps, schema_editor):
+    """
+    Nothing to do
+    """
+    pass
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -29,5 +36,5 @@ class Migration(migrations.Migration):
             field=models.CharField(max_length=100, null=True, blank=True),
             preserve_default=True,
         ),
-        migrations.RunPython(add_standard_storage_description),
+        migrations.RunPython(add_standard_storage_description, no_op),
     ]

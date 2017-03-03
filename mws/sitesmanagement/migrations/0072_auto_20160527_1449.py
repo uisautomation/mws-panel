@@ -11,6 +11,13 @@ def process_fp_sha256(apps, schema_editor):
         sitekey.save()
 
 
+def no_op(apps, schema_editor):
+    """
+    Nothing to do
+    """
+    pass
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -35,5 +42,5 @@ class Migration(migrations.Migration):
             field=models.CharField(max_length=250, null=True),
             preserve_default=True,
         ),
-        migrations.RunPython(process_fp_sha256),
+        migrations.RunPython(process_fp_sha256, no_op),
     ]

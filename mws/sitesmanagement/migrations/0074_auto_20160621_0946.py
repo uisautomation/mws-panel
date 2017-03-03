@@ -9,6 +9,13 @@ def modifytiers(apps, schema_editor):
     ServerType.objects.filter(id=1).update(preallocated=10)
 
 
+def no_op(apps, schema_editor):
+    """
+    Nothing to do
+    """
+    pass
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -22,5 +29,5 @@ class Migration(migrations.Migration):
             field=models.IntegerField(default=1),
             preserve_default=False,
         ),
-        migrations.RunPython(modifytiers),
+        migrations.RunPython(modifytiers, no_op),
     ]
