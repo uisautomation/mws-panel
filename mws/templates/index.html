@@ -66,6 +66,7 @@
                                 {{ site.domain_names|join:"<br/>" }}
                             </td>
                             <td>
+                                {{ site.type.description }}
                                 {% if site.production_service %}
                                     IPv4: {{ site.production_service.ipv4 }}<br/>
                                     IPv6: {{ site.production_service.ipv6 }}<br/>
@@ -153,6 +154,7 @@
                                     {{ site.description }}
                                 </td>
                                 <td>
+                                    {{ site.type.description }}
                                     {% if site.production_service %}
                                         IPv4: {{ site.production_service.ipv4 }}<br/>
                                         IPv6: {{ site.production_service.ipv6 }}<br/>
