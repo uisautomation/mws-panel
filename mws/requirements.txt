@@ -12,3 +12,4 @@ django-celery>=3.1.16
 pycrypto>=2.6.1
 ecdsa
 mock>=1.0.1
+django-debug-toolbar<1.5
