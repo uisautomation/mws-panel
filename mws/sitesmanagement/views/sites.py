@@ -130,6 +130,7 @@ class SiteCreate(LoginRequiredMixin, FormView):
     template_name = 'mws/new.html'
     prefix = "siteform"
     success_url = reverse_lazy('listsites')
+    initial = {'type': ServerType.objects.order_by('order').first()}
 
     def get_context_data(self, **kwargs):
         context = super(SiteCreate, self).get_context_data(**kwargs)
@@ -142,8 +143,10 @@ class SiteCreate(LoginRequiredMixin, FormView):
         siteform = form.save(commit=False)
         preallocated_site = Site.objects.filter(preallocated=True, disabled=True, type=siteform.type).first()
         if not preallocated_site:
-            form.add_error("type", "No MWS Servers available at this moment with this configuration, "
-                                   "please try again later or select other configuration")
+            form.add_error("type", "No MWS Servers available at this moment with this configuration as they are "
+                                   "currently being built, please try again later (they usually take 20 minutes to "
+                                   "build) or email %s if you have any question."
+                           % getattr(django_settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'))
             return self.form_invalid(form)
         preallocated_site.start_date = datetime.date.today()
         preallocated_site.name = siteform.name

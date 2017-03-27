@@ -58,6 +58,7 @@ class ServerType(models.Model):
     preallocated = models.IntegerField()  # Number of pre-allocated server of this type
     price = models.DecimalField(max_digits=6, decimal_places=2)
     description = models.CharField(max_length=100, blank=True, null=True)
+    order = models.IntegerField()
 
     def __unicode__(self):
         return self.description or "%d CPU cores, %dGB of RAM, %dGB of SSD Disk, %s pounds per year" % \
