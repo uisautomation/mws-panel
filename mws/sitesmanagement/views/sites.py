@@ -4,7 +4,6 @@ import datetime
 import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
@@ -15,7 +14,7 @@ from ucamlookup import user_in_groups, get_user_lookupgroups
 from apimws.ansible import launch_ansible_site
 from apimws.models import AnsibleConfiguration
 from apimws.utils import email_confirmation
-from sitesmanagement.forms import SiteForm, SiteEmailForm
+from sitesmanagement.forms import SiteForm, SiteEmailForm, SiteFormEdit
 from sitesmanagement.models import Site, DomainName, Billing, Vhost, ServerType
 from django.conf import settings as django_settings
 from sitesmanagement.utils import can_create_new_site
@@ -189,7 +188,7 @@ class SiteShow(SitePriviledgeCheck, DetailView):
 class SiteEdit(SitePriviledgeAndBusyCheck, UpdateView):
     """View(Controller) to edit the name, description of a site and access to delete and disable options"""
     template_name = 'mws/edit.html'
-    form_class = SiteForm
+    form_class = SiteFormEdit
 
     def get_context_data(self, **kwargs):
         context = super(SiteEdit, self).get_context_data(**kwargs)

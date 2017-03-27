@@ -17,6 +17,11 @@ class SiteForm(forms.ModelForm):
         }
 
 
+class SiteFormEdit(SiteForm):
+    class Meta(SiteForm.Meta):
+        fields = ('name', 'description', 'email')
+
+
 class SiteEmailForm(forms.ModelForm):
     class Meta:
         model = Site

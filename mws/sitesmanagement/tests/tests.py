@@ -91,7 +91,8 @@ def assign_a_site(test_interface, pre_create=True):
                     mock_change_vm_power_state.delay.return_value = True
                     response = test_interface.client.post(reverse('newsite'), {'siteform-name': 'Test Site',
                                                                                'siteform-description': 'Desc',
-                                                                               'siteform-email': 'amc203@cam.ac.uk'})
+                                                                               'siteform-email': 'amc203@cam.ac.uk',
+                                                                               'siteform-type': 1})
                     test_interface.assertIn(response.status_code, [200, 302])
                 # TODO create the checks of how the mock was called
                 # mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_xen_vm_api",
