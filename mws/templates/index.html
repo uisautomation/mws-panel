@@ -4,32 +4,18 @@
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
 
-            <p>This site allows members of the University to request a new server in the Managed Web Service. We
-                provide users with a web-server that they can use without having to worry about manual configuration
-                or operating system maintenance. A server in the Managed Web Service has the following characteristics:
+            <p>
+                This is the control panel for UIS’s Managed Web Server service. From here, members of the University
+                can request new new servers and manage existing ones. Further information on what you can do with a
+                MWS server and the facilities that they provide is available from the
+                <a href=”http://mws-help.uis.cam.ac.uk/introduction”>dedicated Help and support site</a>.
             </p>
 
-            <ul>
-                <li>A server with {{ features.numcpu }} Core CPU, {{ features.sizeram }} GB of RAM, and {{ features.sizedisk }}Gb of disk space (only 50% is available to the user,
-                    the rest is used for other purposes like snapshots)</li>
-                <li>A public IPv4 and IPv6 addresses</li>
-                <li>A simple web-based control panel to control all the features of the Managed Web Service</li>
-                <li>A cost of only £{{ features.price }} a year</li>
-            </ul>
-
-            <p>After you have registered your new server, you can then set up one or more websites on it.</p>
-
-            <p>Warning: If you don't enter billing details for your site within a month, it may be deleted.</p>
-
             <p>
-                You will get a Debian Jessie (8) box with (between others) the following software installed by default:
-                <ul>
-                    <li>Apache 2.4</li>
-                    <li>PHP 5.6</li>
-                    <li>Python 2.7</li>
-                    <li>Perl 5.20</li>
-                    <li>MySQL 5.5</li>
-                </ul>
+                There is a <a href=”http://mws-help.uis.cam.ac.uk/billing”>charge for using the managed Web Server
+                service</a>. You don’t need to pay before creating and using a server, but you do need to make payment
+                arrangements within a month of creating it otherwise it will be deleted automatically. All payments
+                must be by purchase order (or equivalent).
             </p>
 
             {% if deactivate_new %}
