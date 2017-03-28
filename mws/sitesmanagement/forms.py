@@ -1,5 +1,5 @@
 from django import forms
-from sitesmanagement.models import Site, Vhost, DomainName, Billing, UnixGroup, Snapshot
+from sitesmanagement.models import Site, Vhost, DomainName, Billing, UnixGroup, Snapshot, ServerType
 
 
 class SiteForm(forms.ModelForm):
@@ -8,6 +8,8 @@ class SiteForm(forms.ModelForm):
                                   widget=forms.Textarea(attrs={'maxlength': 250}),
                                   max_length=250,
                                   required=False)
+    type = forms.ModelChoiceField(queryset=ServerType.objects.all().order_by('order'), empty_label=None)
+
     class Meta:
         model = Site
         fields = ('name', 'description', 'email', 'type')
