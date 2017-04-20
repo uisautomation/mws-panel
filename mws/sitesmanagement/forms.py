@@ -19,9 +19,20 @@ class SiteForm(forms.ModelForm):
         }
 
 
-class SiteFormEdit(SiteForm):
-    class Meta(SiteForm.Meta):
+class SiteFormEdit(forms.ModelForm):
+    description = forms.CharField(label='Description for the MWS server (e.g. Web server for St Botolph\'s '
+                                        'College main website)',
+                                  widget=forms.Textarea(attrs={'maxlength': 250}),
+                                  max_length=250,
+                                  required=False)
+
+    class Meta:
+        model = Site
         fields = ('name', 'description', 'email')
+        labels = {
+            'name': 'A short name for this Managed Web Service Server (e.g. St Botolph\'s server)',
+            'email': 'The webmaster email (please use a role email when possible)'
+        }
 
 
 class SiteEmailForm(forms.ModelForm):

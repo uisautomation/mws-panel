@@ -169,15 +169,16 @@ def check_backups():
 @shared_task(base=ScheduledTaskWithFailure)
 def delete_cancelled():
     """Delete sites that were cancelled 2 weeks ago and were never paid for"""
-    sites_cancelled_never_paid = Site.objects.filter(end_date__lt=(datetime.today()-timedelta(weeks=2)).date(),
-                                                     billing=None)
+    sites_cancelled_never_paid = Site.objects.filter(end_date__isnull=False, billing=None,
+                                                     end_date__lt=(datetime.today()-timedelta(weeks=2)).date())
     for site in sites_cancelled_never_paid:
         LOGGER.info("The Site %s has been deleted because it was cancelled more than 2 weeks ago and was never paid for"
                     % site.name)
     sites_cancelled_never_paid.delete()
 
     """Delete sites that were cancelled 8 weeks ago"""
-    sites_cancelled = Site.objects.filter(end_date__lt=(datetime.today()-timedelta(weeks=8)).date())
+    sites_cancelled = Site.objects.filter(end_date__isnull=False,
+                                          end_date__lt=(datetime.today()-timedelta(weeks=8)).date())
     for site in sites_cancelled:
         LOGGER.info("The Site %s has been deleted because it was cancelled more than 8 weeks ago" % site.name)
     sites_cancelled.delete()
