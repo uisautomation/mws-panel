@@ -14,6 +14,7 @@ from ucamlookup import user_in_groups, get_user_lookupgroups
 from apimws.ansible import launch_ansible_site
 from apimws.models import AnsibleConfiguration
 from apimws.utils import email_confirmation
+from sitesmanagement.cronjobs import check_num_preallocated_sites
 from sitesmanagement.forms import SiteForm, SiteEmailForm, SiteFormEdit
 from sitesmanagement.models import Site, DomainName, Billing, Vhost, ServerType
 from django.conf import settings as django_settings
@@ -162,6 +163,7 @@ class SiteCreate(LoginRequiredMixin, FormView):
             email_confirmation(preallocated_site)
         LOGGER.info(str(self.request.user.username) + " requested a new server '" + str(preallocated_site.name) + "'")
         preallocated_site.production_service.power_on()
+        check_num_preallocated_sites.delay()
         return redirect(preallocated_site)
 
     def dispatch(self, *args, **kwargs):

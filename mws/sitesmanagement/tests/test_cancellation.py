@@ -68,6 +68,22 @@ class CancelSiteTest(TestCase):
         self.assertEqual(site.end_date, today.date())
         self.assertFalse(site.users.exists())
 
+        # After 3 weeks the site should have not been deleted yet
+        site.end_date = today - timedelta(days=21)
+        site.save()
+        check_subscription()
+        delete_cancelled()
+        # Retrieve object
+        site = Site.objects.get(pk=site.id)
+
+        # After 9 weeks the site should have been deleted
+        site.end_date = today - timedelta(days=60)
+        site.save()
+        check_subscription()
+        delete_cancelled()
+        # Retrieve object
+        self.assertFalse(Site.objects.filter(pk=site.id))
+
     def test_scheduled_deletion_paid_service(self):
         today = datetime.today().date()
         do_test_login(self, user="test0001")
