@@ -69,7 +69,8 @@ class Command(NoArgsCommand):
                           new_sites_billing)
         renewals_billing = map(lambda x: [x.site.id, x.site.name, x.group,
                                           x.purchase_order_number, x.site.start_date, x.site.type.price,
-                                          x.site.start_date.replace(year = year), calcendperiod(x.site.start_date)],
+                                          x.site.start_date.replace(year = year),
+                                          calcendperiod(x.site.start_date.replace(year = year))],
                                renewal_sites_billing)
         header = ['id', 'Name', 'PO raised by', 'PO number', 'Created at', 'Cost', 'Period start',
                   'Period end']
