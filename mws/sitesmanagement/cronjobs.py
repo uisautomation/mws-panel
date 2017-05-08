@@ -51,7 +51,8 @@ def send_reminder_renewal():
                  "can't successfully invoice for it.\n\nIf you no longer want you site then please either cancel "
                  "it now (under 'edit the MWS profile'), or mark it 'Not for renewal' in which case it will be "
                  "automatically cancelled on '%s'."
-                 % (billing.site.name, billing.site.name, billing.site.start_date, billing.site.start_date),
+                 % (billing.site.name, billing.site.name, billing.site.start_date+timedelta(days=364),
+                    billing.site.start_date+timedelta(days=364)),
             from_email="Managed Web Service Support <%s>"
                        % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
             to=[billing.site.email],
@@ -74,7 +75,8 @@ def send_reminder_renewal():
                  "Your site may be cancelled if we can't successfully invoice for it.\n\nIf you no longer want "
                  "you site then please either cancel it now (under 'edit the MWS profile'), or mark "
                  "it 'Not for renewal' in which case it will be automatically cancelled on '%s'." 
-                 % (billing.site.name, billing.site.name, billing.site.start_date, billing.site.start_date),
+                 % (billing.site.name, billing.site.name, billing.site.start_date+timedelta(days=364),
+                    billing.site.start_date+timedelta(days=364)),
             from_email="Managed Web Service Support <mws-support@uis.cam.ac.uk>",
             to=[billing.site.email],
             headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')}
