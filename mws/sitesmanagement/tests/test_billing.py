@@ -126,6 +126,7 @@ class BillingTests(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject,
                          'The annual charge for your managed web server is due next month')
+        self.assertIn('%s' % site.start_date.replace(year=today.year), mail.outbox[0].body)
         self.assertEqual(mail.outbox[0].to, [site.email])
 
         # same month renewal warning
@@ -135,6 +136,7 @@ class BillingTests(TestCase):
         self.assertEqual(len(mail.outbox), 2)
         self.assertEqual(mail.outbox[1].subject,
                          'REMINDER: the annual charge for your managed web server is due this month')
+        self.assertIn('%s' % site.start_date.replace(year=today.year), mail.outbox[1].body)
         self.assertEqual(mail.outbox[1].to, [site.email])
 
     def test_check_cacnel_if_not_paid(self):
