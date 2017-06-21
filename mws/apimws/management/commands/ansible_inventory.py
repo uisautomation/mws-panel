@@ -131,7 +131,7 @@ class Command(NoArgsCommand):
             # The TLS certificate if already uploaded
             if vh.certificate:
                 vhv['certificate'] = vh.certificate
-                vhv['certificatechain'] = CERT_CHAIN
+                vhv['certificatechain'] = vh.certificate_chain or CERT_CHAIN
             if vh.tls_key_hash:
                 vhv['tls_key_hash'] = vh.tls_key_hash
             # If is TLS enabled whether the certificate has been yet uploaded or not
