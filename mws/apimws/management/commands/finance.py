@@ -1,7 +1,7 @@
 import csv
 import logging
 from calendar import month_name
-from datetime import date
+from datetime import date, timedelta
 from StringIO import StringIO
 from django.conf import settings
 from django.core.mail import EmailMessage
@@ -70,12 +70,13 @@ class Command(NoArgsCommand):
         renewals_billing = map(lambda x: [x.site.id, x.site.name, x.group,
                                           x.purchase_order_number, x.site.start_date, x.site.type.price,
                                           x.site.start_date.replace(year = year),
-                                          calcendperiod(x.site.start_date.replace(year = year))],
+                                          calcendperiod(x.site.start_date.replace(year = year)),
+                                          x.date_modified > (date.today() - timedelta(days=100))],
                                renewal_sites_billing)
         header = ['id', 'Name', 'PO raised by', 'PO number', 'Created at', 'Cost', 'Period start',
                   'Period end']
         new_billing = [header] + new_billing
-        renewals_billing = [header] + renewals_billing
+        renewals_billing = [header +['Have they uploaded a new PO?']] + renewals_billing
 
         stream_new = StringIO()
         stream_renewal = StringIO()
