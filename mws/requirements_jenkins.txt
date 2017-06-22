@@ -1,5 +1,6 @@
 django>=1.7,<1.8
 PyOpenSSL>=0.14,<0.15
+cryptography==1.4
 django-stronghold>=0.2.6
 django-reversion>=1.8.4,<1.10
 django-grappelli<2.7
