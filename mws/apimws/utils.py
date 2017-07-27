@@ -43,7 +43,7 @@ def ip_register_api_request(domain_name):
              "The user %s (https://www.lookup.cam.ac.uk/person/crsid/%s) has requested permission to use the domain "
              "name %s for a UIS Managed Web Server website (see http://mws-help.uis.cam.ac.uk/).\n\n"
              "To authorise or reject this request please visit the following URL %s%s. If we don't hear from you "
-             "in three working days the request will be automatically %s.\n\n%s"
+             "in 10 days the request will be automatically %s.\n\n%s"
              "Questions about this message can be referred to mws-support@uis.cam.ac.uk."
              % (nameinfo['domain'], domain_name.requested_by.last_name, domain_name.requested_by.username,
                 domain_name.name, settings.MAIN_DOMAIN,
