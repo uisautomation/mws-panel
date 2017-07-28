@@ -1,14 +1,19 @@
 import mock
+import os
+from datetime import timedelta, date
+from django.conf import settings
 from django.core import mail
 from django.core.urlresolvers import reverse
 from django.test import override_settings, TestCase
 from mwsauth.tests import do_test_login
+from sitesmanagement.cronjobs import reject_or_accepted_old_domain_names_requests
 from sitesmanagement.models import Vhost, DomainName
 from sitesmanagement.tests.tests import assign_a_site
 
 
 @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
 class DNSTests(TestCase):
+    fixtures = [os.path.join(settings.BASE_DIR, 'sitesmanagement/fixtures/amc203_test_IPs.yaml'), ]
     def setUp(self):
         do_test_login(self, user="test0001")
         assign_a_site(self)
@@ -244,6 +249,63 @@ class DNSTests(TestCase):
         domain_name_created = DomainName.objects.get(id=domain_name_created.id)  # Refresh object from DB
         self.assertEquals(domain_name_created.status, 'accepted')
         self.assertEquals(domain_name_created.authorised_by.username, 'test0001')
+
+    def test_automation_internal_acceptable_cam_domain(self):
+        domain_name_created = self.add_internal_non_existing_cam_domain()
+        # Test that the domain name doesn't get automatically accepted
+        reject_or_accepted_old_domain_names_requests()
+        domain_name_created = DomainName.objects.get(id=domain_name_created.id)  # Refresh object from DB
+        self.assertEquals(domain_name_created.status, 'requested')
+        domain_name_created.requested_at = date.today() - timedelta(days=5)
+        domain_name_created.save()
+        # Test that the domain name doesn't get automatically accepted after 5 days
+        reject_or_accepted_old_domain_names_requests()
+        domain_name_created = DomainName.objects.get(id=domain_name_created.id)  # Refresh object from DB
+        self.assertEquals(domain_name_created.status, 'requested')
+        domain_name_created.requested_at = date.today() - timedelta(days=11)
+        domain_name_created.save()
+        # Test that the domain name gets automatically accepted after 10 days
+        with mock.patch("apimws.ipreg.get_nameinfo") as mock_get_nameinfo:
+            # Now test accept a changeable domain name
+            mock_get_nameinfo.return_value = {'exists': ['C']}
+            with mock.patch("apimws.ipreg.set_cname") as mock_set_cname:
+                mock_set_cname.return_value = True
+                with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+                    mock_subprocess.check_output.return_value.returncode = 0
+                    reject_or_accepted_old_domain_names_requests()
+                    mock_subprocess.check_output.assert_called_once_with(["userv", "mws-admin", "mws_ansible_host",
+                                                      Vhost.objects.first().service.virtual_machines.first()
+                                                     .network_configuration.name],
+                                                     stderr=mock_subprocess.STDOUT)
+        domain_name_created = DomainName.objects.get(id=domain_name_created.id)  # Refresh object from DB
+        self.assertEquals(domain_name_created.status, 'accepted')
+
+    def test_automation_internal_non_acceptable_cam_domain(self):
+        domain_name_created = self.add_internal_non_existing_cam_domain()
+        # Test that the domain name doesn't get automatically accepted
+        reject_or_accepted_old_domain_names_requests()
+        domain_name_created = DomainName.objects.get(id=domain_name_created.id)  # Refresh object from DB
+        self.assertEquals(domain_name_created.status, 'requested')
+        domain_name_created.requested_at = date.today() - timedelta(days=5)
+        domain_name_created.save()
+        # Test that the domain name doesn't get automatically accepted after 5 days
+        reject_or_accepted_old_domain_names_requests()
+        domain_name_created = DomainName.objects.get(id=domain_name_created.id)  # Refresh object from DB
+        self.assertEquals(domain_name_created.status, 'requested')
+        domain_name_created.requested_at = date.today() - timedelta(days=11)
+        domain_name_created.save()
+        # Test that the domain name gets automatically accepted after 10 days
+        with mock.patch("apimws.ipreg.get_nameinfo") as mock_get_nameinfo:
+            # Now test reject a non changeable domain name
+            mock_get_nameinfo.return_value = {'exists': ['V']}
+            with mock.patch("apimws.ipreg.set_cname") as mock_set_cname:
+                mock_set_cname.return_value = True
+                with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+                    mock_subprocess.check_output.return_value.returncode = 0
+                    reject_or_accepted_old_domain_names_requests()
+                    mock_subprocess.check_output.assert_not_called()
+        domain_name_created = DomainName.objects.get(id=domain_name_created.id)  # Refresh object from DB
+        self.assertEquals(domain_name_created.status, 'denied')
 
     def test_add_internal_rejectable_non_existing_cam_domain(self):
         domain_name_created = self.add_internal_non_existing_cam_domain()

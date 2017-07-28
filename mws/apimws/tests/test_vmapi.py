@@ -1,16 +1,16 @@
-from datetime import datetime
-
 import mock
-from django.contrib.auth.models import User
+import os
+from django.conf import settings
 from django.test import TestCase, override_settings
-from apimws.xen import new_site_primary_vm, change_vm_power_state, reset_vm, destroy_vm, clone_vm
+from apimws.xen import change_vm_power_state, reset_vm, destroy_vm, clone_vm
 from mwsauth.tests import do_test_login
-from sitesmanagement.models import NetworkConfig, Site, Service, VirtualMachine
+from sitesmanagement.models import VirtualMachine
 from sitesmanagement.tests.tests import assign_a_site
 
 
 @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
 class XenAPITests(TestCase):
+    fixtures = [os.path.join(settings.BASE_DIR, 'sitesmanagement/fixtures/amc203_test_IPs.yaml'), ]
     def setUp(self):
         do_test_login(self, "test0001")
         assign_a_site(self)
@@ -30,7 +30,7 @@ class XenAPITests(TestCase):
                 reset_vm(vm.id)
                 # We clone the production VM to a test VM
                 site = vm.site
-                clone_vm(site, vm)
+                clone_vm(site, True)
                 # We try the deletion of both VMs through a Xen API call
                 destroy_vm(site.secondary_vm.id)
                 destroy_vm(site.primary_vm.id)

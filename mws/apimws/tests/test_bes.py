@@ -1,4 +1,6 @@
 import json
+import os
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test import override_settings, TestCase
 from mwsauth.tests import do_test_login
@@ -8,12 +10,13 @@ from sitesmanagement.tests.tests import assign_a_site
 
 @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
 class BesTests(TestCase):
+    fixtures = [os.path.join(settings.BASE_DIR, 'sitesmanagement/fixtures/amc203_test_IPs.yaml'), ]
     def setUp(self):
         do_test_login(self, user="test0001")
         assign_a_site(self)
 
     def test_bes_normal_site(self):
-        site = Site.objects.first()
+        site = Site.objects.last()
         response = self.client.get(reverse("apimws.bes.bes"))
         json_site = {}
         json_site['id'] = "mwssite-%s" % site.id
