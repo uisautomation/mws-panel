@@ -34,7 +34,7 @@ def send_reminder_renewal():
     today = timezone.now().date()
     # Billings of sites that haven't been canceled (end_date is null), that hasn't expressed to want to cancel
     # their subscription, and that started in the previous month of the current one of a previous year
-    renewal_sites_billing = Billing.objects.filter(site__start_date__month=today.month-1 if today.month != 1 else 12,
+    renewal_sites_billing = Billing.objects.filter(site__start_date__month=today.month+1 if today.month != 12 else 1,
                                                    site__start_date__lt=date(today.year, 1, 1),
                                                    site__end_date__isnull=True,
                                                    site__subscription=True)
