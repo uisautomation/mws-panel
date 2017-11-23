@@ -1,0 +1,69 @@
+==Service Information==
+
+* [[MWSv3 Panel Server Deployment Checklist]]
+
+* [[MWSv3 VM Life Cycle]]
+
+* [[MWSv3 Supporters Documentation]]
+** Metrics panels for [https://sliderule.mws3.csx.cam.ac.uk/dashboard/script/mws3arch.js?node1=agogue_csi_cam_ac_uk&node2=odochium_csi_cam_ac_uk production] and [https://sliderule.mws3.csx.cam.ac.uk/dashboard/script/mws3arch.js?node1=ophon_csi_cam_ac_uk&node2=opus_csi_cam_ac_uk test] clusters
+** simple cluster status pages for [http://ial.csi.cam.ac.uk/ production] and [http://on.csi.cam.ac.uk/ test] clusters
+** Minimalist monitoring via [[uis:Platforms Nagios | 'Platforms' Nagios instance]] in the 'mws3' [http://beholder.csi.cam.ac.uk/nagios/cgi-bin/status.cgi?hostgroup=mws3&style=detail hostgroup] and [http://beholder.csi.cam.ac.uk/nagios/cgi-bin/status.cgi?servicegroup=mws3&style=detail servicegroup]
+
+* [[MWSv3 List of Manually-created VMs]]
+
+* [[MWSv3 List of Physical machines]]
+
+* [[MWSv3 IPs]]
+
+* [[MWSv3 Sysadmin and Deployment Notes]]
+** [[MWSv3 Server Install]]
+** [[MWSv3 Xen Host Patching]]
+** [[MWSv3 Panel Install]]
+** [[MWSv3 Disaster Recovery|Disaster Recovery]]
+** [[File:Ssd-dc-s3610-spec.pdf|Specs for SSDs]] (those in agogue and odochium)
+** [[MWSv3 2016 new disks]]
+** [[MWSv3 Known bugs and issues]]
+** [[MWSv3 Debian Stretch ]]
+
+* [[MWS Documentation Terminology]]
+
+* [[MWSv3 Load test]]
+
+* [[MWSv3 Password arrangements]]
+
+* Source code:
+** [https://git.csx.cam.ac.uk/x/ucs/mwsv3/webapp.git Web control panel]: ssh://ucs@git.csx.cam.ac.uk/mwsv3/webapp.git (team read/write, world readable)
+** [https://git.csx.cam.ac.uk/i/ucs/mwsv3/ansible.git MWS servers (web control panel) and MWS clients ansible roles]: ssh://ucs@git.csx.cam.ac.uk/mwsv3/ansible.git (team read/write, world readable)
+
+* [[MWSv3 Contacting Webmasters]]
+
+* [[MWSv3 Resource usage]]
+
+* [[Archived documents from old MWS wiki]]
+
+==Development / Project Manglement / Planning Information==
+
+* [[MWSv3 Project Plan]]
+
+* [[MWSv3 survey of existing MWS webmasters]]
+
+* [[Media:MWSv3-proposed-architecture.pdf | Proposed features]]
+
+* [[MWSv3 List of use cases]]
+
+* [[MWSv3 VM arquitecture and infrastructure]]
+
+* [[MWSv3 Architecture]]
+
+* [[MWSv3 Control panel]]
+
+==Release planning==
+
+* [[MWSv3 Release announcements]]
+
+* [[MWSv3 Use inside UIS]]
+
+==Documentation Development==
+
+* [[MWSv3 DNS-related documentation]] -- now published: http://mws-help.uis.cam.ac.uk/mws3-fundamentals/mws-hostnames; http://mws-help.uis.cam.ac.uk/billing/mws-dns-management
+* [[MWSv3 Wordpress notes]]
