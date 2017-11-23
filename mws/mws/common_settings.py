@@ -53,6 +53,22 @@ ROOT_URLCONF = 'mws.urls'
 
 WSGI_APPLICATION = 'mws.wsgi.application'
 
+# Database configuration is, by default, from the environment.
+DATABASES = {
+    'default': {
+        'ENGINE': os.environ.get('DJANGO_DB_ENGINE'),
+        'NAME': os.environ.get('DJANGO_DB_NAME'),
+        'HOST': os.environ.get('DJANGO_DB_HOST'),
+        'PORT': os.environ.get('DJANGO_DB_PORT'),
+        'USER': os.environ.get('DJANGO_DB_USER'),
+        'PASSWORD': os.environ.get('DJANGO_DB_PASSWORD'),
+    }
+}
+
+# Email configuration is, by default, from the environment
+EMAIL_HOST = os.environ.get('DJANGO_EMAIL_HOST', 'localhost')
+EMAIL_PORT = int(os.environ.get('DJANGO_EMAIL_PORT', '25'))
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/
 
