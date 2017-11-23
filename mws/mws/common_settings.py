@@ -123,7 +123,7 @@ STRONGHOLD_PUBLIC_NAMED_URLS = ('raven_login', 'raven_return')
 
 OS_VERSION = "jessie"
 OS_VERSION_VMXENAPI = "jessie"
-OS_DUE_UPGRADE = []
+OS_DUE_UPGRADE = ["jessie"]
 
 FINANCE_EMAIL = 'fh103@cam.ac.uk'
 
