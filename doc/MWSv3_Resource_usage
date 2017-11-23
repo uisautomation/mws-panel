@@ -1,0 +1,94 @@
+A summary of the resources that are consumed by each Xen guest (MWs server), showing total available, in use and free. 
+
+== Resource usage ==
+
+Currently (as of 2016-10-12) we have 134 guests (including cancelled, pre-configured, etc.)
+
+=== Disk space ===
+
+Guest disks are allocated out of the 'guests' volume group:
+
+  vgs --units g guests
+
+Each guest needs 25GB on each Xen server. The guests group is 8941.02GB (as of 2016-10-12, following the addition of more disks), and so supports a total of '''357 guests'''.
+
+=== Memory ===
+
+Guests get their memory from that allocated to Xen. 
+
+  xl info
+
+[see total_memory, free_memory, both aparently in MB]
+
+Each Xen host has a total 262,049MB available which needs to be able to support all guests if they are running on a single node. Each guest consumes 1024MB of memory so we can support a total of '''255 guests''' (probably including DOM0).  
+
+=== IP Addresses ===
+
+Each guest needs one public IPv4 address. The MWS has 131.111.58.0/23 available to it, but currently the top half is being used by the 'old' MWS. In principal 131.111.58.1 to 131.111.58.255 is available.
+
+  https://panel.mws3.csx.cam.ac.uk/admin/sitesmanagement/networkconfig/
+
+The public address pool available to the production MWS seems currently (2016-09-29) to be 231 addresses (at least 10 are in use on the development cluster), of which 132 are in use. The current pool can support '''231 guests'''. 
+
+Once the old MWS is closed down we could add more addresses from the top half of the address space, but probably shouldn't do so until needed. 131.111.59.0 to 131.111.59.249 are ''probably'' available - discuss with IP register. Some people can check this with 
+
+  https://jackdaw.cam.ac.uk/ipreg/range_ops
+
+[Set 'prefix' to RA_ and look at the range from 131.111.58.0 to 131.111.59.255]
+
+== Database queries ==
+
+The panel database can be queried to find the current state of many resources. 
+
+Start a manage.py shell as teh www-data user on the panel server (boarstall.csx.cam.ac.uk) and import the necessary modules:
+
+  $ '''ssh ssh root@boarstall'''
+  # '''su - www-data'''
+  $ '''cd /var/www/mws/mws'''
+  $ '''python manage.py shell --settings=mws.production_settings'''
+  Python 2.7.9 (default, Jun 29 2016, 13:08:31) 
+  [GCC 4.9.2] on linux2
+  Type "help", "copyright", "credits" or "license" for more information.
+  (InteractiveConsole)
+  >>> '''from sitesmanagement.models import Site'''
+  >>> '''from sitesmanagement.models import NetworkConfig'''
+
+and then:
+
+=== Number of current servers ===
+
+  >>> '''Site.objects.all().count()'''
+
+=== Number of current servers, broken down by ===
+
+==== Number of 'real' current servers ====
+
+  >>> '''Site.objects.filter(preallocated=False, end_date__isnull=True).count()'''
+
+Should also fit to what https://panel.mws3.csx.cam.ac.uk/stats/ says
+
+==== Number of cancelled but not deleted servers ====
+
+  >>> '''Site.objects.filter(end_date__isnull=False, deleted=False).count()'''
+
+==== Number of pre-allocated severs ====
+
+  >>> '''Site.objects.filter(preallocated=True).count()'''
+
+=== The number of 'real' current severs, broken down by ===
+
+==== Number of current ex-MWS2 servers ====
+
+  >>> '''Site.objects.filter(preallocated=False, end_date__isnull=True, exmws2__isnull=False).count()'''
+
+==== Number of current new servers ====
+
+  >>> '''Site.objects.filter(preallocated=False, end_date__isnull=True, exmws2__isnull=True).count()'''
+
+=== The number of public IPv4 addresses available ===
+
+  >>> '''NetworkConfig.objects.filter(type="ipvxpub", service__isnull=True).count()'''
+
+=== The number of public IPv4 addresses in use ===
+
+  >>> '''NetworkConfig.objects.filter(type="ipvxpub", service__isnull=False).count()'''

@@ -1,0 +1,110 @@
+Wordpress (in particular, other CMSs may be similar) runs into file system permission issues. These are some notes on the subject.
+
+==Owners, groups, and permission rules==
+
+Based on the relevant man pages, the rules for changing ownership and permissions on a file or directory (other than by root) are:
+;Change owner
+: no one
+;Change Group
+: the owner of a file/directory  can change the group to any group of which that owner is also a member
+;Change permissions
+:  the owner of a file/directory can change the permissions
+
+Note that none of these are affected by the ownership or permissions of the containing directory. However, given readability of the file/directory and writability of the containing directory, anyone can use  copy to ''effectively'' change ownership to them, group to their primary group and permissions to the umask default (-rw-rw-r--).
+
+==Wordpress docs==
+
+Some relavent Wordpress documentation
+
+* http://codex.wordpress.org/Main_Page
+* http://codex.wordpress.org/Installing_WordPress
+* http://codex.wordpress.org/Hardening_WordPress (especially http://codex.wordpress.org/Hardening_WordPress#File_Permissions)
+* https://codex.wordpress.org/Changing_File_Permissions#The_dangers_of_777
+* https://codex.wordpress.org/Moving_WordPress
+* https://wordpress.org/about/requirements/
+
+Digital Ocean's Wordpress guide:
+
+* https://www.digitalocean.com/community/tutorials/how-to-install-wordpress-on-ubuntu-14-04
+
+On enabling SSP updates:
+
+* https://tombevers.me/2012/02/25/update-wordpress-via-sshscp/
+* http://wordpress.org/plugins/ssh-sftp-updater-support/
+
+==Wordpress writability issues: summary==
+
+Core Wordpress has three different needs for filesystem writability:
+
+* Creating an initial wp-config.php
+* To support media uploads
+* To support theme and plugin installation/upgrade, and to support Wordpress upgrades
+
+''It also offers 'in the browser' editing of theme and plugin files -- need to check if this is covered by the above'''
+
+There are some suggestions that some plugins may have their own filesystem writability requirements.
+
+A basic Wordpress install on the MWS leaves all files and directories owned and writable by the person doing the install, and with group site-admin. There is some variability as to whether files and directories are group writable.
+
+===Writing an initial php-config.php===
+
+Install instructions encourage you to copy wp-config-sample.php as wp-config.php snd customise it. If you don't, Wordpress will prompt for database connection information an attempt to write wp-config.php. This will only work if www-data can create this file. 'docroot writable' makes this possible, but leaves the file owned by www-data.
+
+The best plan is to manually create wp-config.php as part of installation; otherwise turning on 'docroot writability' should work but will leave the file owned by www-data.
+
+===Media uploads===
+
+Media is uploaded to wp-content/uploads. uploads isn't created on installation, but Wordpress will create it if it can on first use. However wp-content may not be group writable on installation so setting  'docroot writable' isn't sufficient. Even if was, if Apache creates uploads it will be owned by www-data which makes e.g. changing permissions in the future difficult.
+
+The best plan is probably to create it manually after installation but before first use and set 'chgrp www-data uploads'.
+
+Note that subsequently using 'docroot writable' will undo this, setting the group back to site-admin.
+
+===Upgrades and installs===
+
+Wordpress can install and upgrade plugins, themes and itself in several ways
+* Directly via the web server
+* With the web server locally invoking a file transfer tool using the user's credentials:
+** FTP
+** FTPs (i.e. FTP over TLS)
+** ssh/sftp
+
+By default, Wordpress will try to create a temporary file and then checks that its owner matches the owner of wp-admin/includes/file.php. If so, it uses the 'direct' method, if not it prompts for FTP method choice and user credentials. 'direct' mode can be forced by setting FS_METHOD to 'direct' in wp-config.php, though the web server still needs the necessary write access.
+
+===='direct' method====
+
+This has the advantage of not requiring credentials, but the problem that the web server needs write access to some or all of the Wordpress files which is a security issue. For plugins, write access to wp-content/plugins should be sufficient; for themes write access to wp-content/themes. For Wordpress upgrades, write access to the entire document tree is presumably needed.
+
+This can be achieved by running 'chmod -R g+w *' from the root of the installation and setting 'docroot writable' when needed. Note that setting 'docroot writable' will eventually mess up the permisisons on wp-content/uploads. This approach will leave new files created by the upgrade owned by www-data.
+
+====File transfer method====
+
+This has the advantage that updates are done using a manger's credentials (UIS User Name/Password) and permissions rather than via the web server, but the downside that those credentials will be shipped to the web server in clear unless the site supports TLS. There's an added problem that MWS doesn't support FTP or FTPs, and that ssh/sftp isn't supported without additional software.
+
+On the MWS, ssh access can be enabled by installing the libssh2-1-dev and libssh2-php packages and restarting Apache. ssh access can be authenticated by keys on the server, with or without passphrases. The path to these can be specified in wp-config.php.
+
+==Research notes==
+
+''Original, probably incoherent research notes.''
+
+A basic install works even with docroot unwritable by www-data. But you need to delete index.html because it shadows index.php. 
+
+If you don't provide a wp-config.php then Wordpress will try to write one, which will fail unless docroot is made writable.
+
+Even once you've made docroot writable, wp-content ends up 
+
+  drwxr-sr-x  5 jw35     www-data  4096 Apr 23 16:54 wp-content
+
+Which still doesn't  allow writing. You can change the permissions, except that after an hour the group reverts to site-admin and it all goes wrong again. The <tt>drwxr-sr-x</tt> permissions seem to come out of the tar archive, which is tedious. If you fix it, Wordpress will then create uploads an uploads directory for you:
+
+  drwxrwsr-x 3 www-data www-data 4096 Apr 23 16:54 uploads
+
+which is what we need, but the www-data ownership makes it difficult to subsequently manage it.
+
+There's a further problem with adding themes and plugins. When you try to install them, Wordpress Sees if  the web server can install them. If not, it (silently) falls back to prompting for FTP or FTPS credentials which would be shipped in clear to the web server which uses them to make a 'loopback' connection to the file system to install the necessary files. Even with the entire docroot set to <tt>-rwxrwxrwx</tt> permissions this fails. It appears that to work, wp-admin/includes has to be owned by the www-data user, and all (or at least some) of wp-admin and wp-content needs to be writable by the web-server user.
+
+The wp-admin/includes requirement is actually a requirement on wp-admin/includes/file.php being owned by the user that runs the web server. This is because by default [https://github.com/WordPress/WordPress/blob/4.2.2/wp-admin/includes/file.php#L912 code in this file] checks that this file's owner matches the owner of a temporary file created by the web server and only then defaults to the 'direct' upload method. This requirement can be avoided [https://codex.wordpress.org/Editing_wp-config.php#WordPress_Upgrade_Constants by setting FS_METHOD to 'direct' in wp-config.php].
+
+There are other upload methods, including ssh and sftp, which may need additional software/php installed, but they all require credentials to be submitted and so are only safe if at least admin access is over https:
+
+wp-config.php also [https://codex.wordpress.org/Editing_wp-config.php#Moving_wp-content_folder allows you to move the wp-content directory], but not apparently outside the document root because you still have to supply a URL for it?
