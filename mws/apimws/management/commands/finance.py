@@ -1,7 +1,7 @@
 import csv
 import logging
 from calendar import month_name
-from datetime import date
+from datetime import date, timedelta
 from StringIO import StringIO
 from django.conf import settings
 from django.core.mail import EmailMessage
@@ -40,9 +40,8 @@ class Command(NoArgsCommand):
                                end_date__isnull=True, billing__isnull=True).exists():
             LOGGER.error("Sites not cancelled were found without billing after a month")
 
-        # Billings of sites that haven't been canceled (end_date is null) and are new (start_date actual month/year)
-        new_sites_billing = Billing.objects.filter(site__start_date__month=inidate.month,
-                                                   site__start_date__year=inidate.year, site__end_date__isnull=True)
+        # Billings of sites that haven't been canceled (end_date is null) and haven't been sent to finance yet
+        new_sites_billing = Billing.objects.filter(date_sent_to_finance__isnull=True, site__end_date__isnull=True)
 
         ################
         ### RENEWALS ###
@@ -70,12 +69,14 @@ class Command(NoArgsCommand):
                           new_sites_billing)
         renewals_billing = map(lambda x: [x.site.id, x.site.name, x.group,
                                           x.purchase_order_number, x.site.start_date, x.site.type.price,
-                                          x.site.start_date.replace(year = year), calcendperiod(x.site.start_date)],
+                                          x.site.start_date.replace(year = year),
+                                          calcendperiod(x.site.start_date.replace(year = year)),
+                                          x.date_modified > (date.today() - timedelta(days=100))],
                                renewal_sites_billing)
         header = ['id', 'Name', 'PO raised by', 'PO number', 'Created at', 'Cost', 'Period start',
                   'Period end']
         new_billing = [header] + new_billing
-        renewals_billing = [header] + renewals_billing
+        renewals_billing = [header +['Have they uploaded a new PO?']] + renewals_billing
 
         stream_new = StringIO()
         stream_renewal = StringIO()
@@ -97,7 +98,7 @@ class Command(NoArgsCommand):
             from_email="Managed Web Service Support <%s>"
                        % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
             to=[settings.FINANCE_EMAIL],
-            bcc=['amc203@cam.ac.uk'],
+            bcc=[settings.EMAIL_MWS3_SUPPORT],
             headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')},
             attachments=[('mws3sites_new.csv', stream_new.getvalue(), 'application/vnd.ms-excel'),
                          ('mws3sites_renewals.csv', stream_renewal.getvalue(), 'application/vnd.ms-excel')] + po_files

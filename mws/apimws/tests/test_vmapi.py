@@ -1,18 +1,23 @@
 import mock
+import os
+from django.conf import settings
 from django.test import TestCase, override_settings
-from apimws.xen import change_vm_power_state, reset_vm, destroy_vm, clone_vm_api_call
 from mwsauth.tests import do_test_login
 from sitesmanagement.models import VirtualMachine
 from sitesmanagement.tests.tests import assign_a_site
+from apimws.xen import change_vm_power_state, reset_vm, destroy_vm, clone_vm_api_call
 
 
 @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
 class XenAPITests(TestCase):
+    fixtures = [os.path.join(settings.BASE_DIR, 'sitesmanagement/fixtures/amc203_test_IPs.yaml'), ]
+
     def setUp(self):
         do_test_login(self, "test0001")
         assign_a_site(self)
 
-    def test_xen_api(self):
+    @staticmethod
+    def test_xen_api():
         # We retrieve the VM created by the create Xen API call
         vm = VirtualMachine.objects.first()
         with mock.patch("apimws.xen.app") as mock_xen_app:

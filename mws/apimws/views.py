@@ -203,7 +203,7 @@ def statsdatainuse(request):
         values.append([
             mktime(odate.timetuple())*1000,
             Site.objects.filter(Q(start_date__lte=odate), Q(end_date__gt=odate) | Q(end_date__isnull=True),
-                                Q(preallocated=False)).count() +
+                                Q(preallocated=False), Q(exmws2__isnull=True)).count() +
             Site.objects.filter(Q(exmws2__isnull=False), Q(exmws2__lte=odate),
                                 Q(end_date__gt=odate) | Q(end_date__isnull=True)).count()  # exmws2 sites
         ])

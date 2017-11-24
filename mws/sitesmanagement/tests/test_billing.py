@@ -118,23 +118,25 @@ class BillingTests(TestCase):
         # 1 month for renewal warning
         today = datetime.today()
         site = Site.objects.create(name="testSite", email='amc203@cam.ac.uk', type=ServerType.objects.get(id=1),
-                                   start_date=date(year=today.year-1, day=15,
-                                                   month=today.month-1 if today.month!=1 else 12))
+                                   start_date=date(year=today.year-1 if today.month != 12 else today.year, day=15,
+                                                   month=today.month+1 if today.month != 12 else 1))
         pofile = SimpleUploadedFile("file.pdf", "file_content")
         Billing.objects.create(site=site, purchase_order_number='0000', purchase_order=pofile, group='test')
         send_reminder_renewal()
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject,
                          'The annual charge for your managed web server is due next month')
+        self.assertIn('%s' % site.start_date.replace(year=today.year), mail.outbox[0].body)
         self.assertEqual(mail.outbox[0].to, [site.email])
 
         # same month renewal warning
-        site.start_date = site.start_date + timedelta(days=30)
+        site.start_date = site.start_date - timedelta(days=31)
         site.save()
         send_reminder_renewal()
         self.assertEqual(len(mail.outbox), 2)
         self.assertEqual(mail.outbox[1].subject,
                          'REMINDER: the annual charge for your managed web server is due this month')
+        self.assertIn('%s' % site.start_date.replace(year=today.year), mail.outbox[1].body)
         self.assertEqual(mail.outbox[1].to, [site.email])
 
     def test_check_cacnel_if_not_paid(self):

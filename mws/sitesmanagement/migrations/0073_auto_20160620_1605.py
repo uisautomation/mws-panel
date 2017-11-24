@@ -6,8 +6,13 @@ from django.db import models, migrations
 def add_tiers(apps, schema_editor):
     ServerType = apps.get_model("sitesmanagement", "ServerType")
     ServerType.objects.create(id=1, numcpu=1, sizeram=1, sizedisk=20, price=100.00)
-    ServerType.objects.create(id=2, numcpu=1, sizeram=2, sizedisk=40, price=200.00)
-    ServerType.objects.create(id=3, numcpu=1, sizeram=2, sizedisk=60, price=300.00)
+
+
+def no_op(apps, schema_editor):
+    """
+    Nothing to do
+    """
+    pass
 
 
 class Migration(migrations.Migration):
@@ -30,7 +35,7 @@ class Migration(migrations.Migration):
             },
             bases=(models.Model,),
         ),
-        migrations.RunPython(add_tiers),
+        migrations.RunPython(add_tiers, no_op),
         migrations.AddField(
             model_name='site',
             name='type',

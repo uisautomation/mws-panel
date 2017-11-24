@@ -1,3 +1,5 @@
+import os
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test import override_settings, TestCase
 from mock import mock
@@ -8,12 +10,13 @@ from sitesmanagement.tests.tests import assign_a_site
 
 @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
 class AdminSuspendedTests(TestCase):
+    fixtures = [os.path.join(settings.BASE_DIR, 'sitesmanagement/fixtures/amc203_test_IPs.yaml'), ]
     def setUp(self):
         do_test_login(self, user="test0001")
         assign_a_site(self)
 
     def test_user_has_no_access_admin_suspended_disabled_site(self):
-        site = Site.objects.first()
+        site = Site.objects.last()
         site.suspend_now("Test Admin suspended")
 
         with mock.patch("apimws.vm.change_vm_power_state") as mock_change_vm_power_state:

@@ -132,6 +132,7 @@ def delete_snapshot(service, snapshot_id):
 
 @shared_task(base=AnsibleTaskWithFailure)
 def delete_vhost_ansible(service, vhost_name, vhost_webapp):
+    '''delete the vhost folder and all its contents '''
     for vm in service.virtual_machines.all():
         subprocess.check_output(["userv", "mws-admin", "mws_delete_vhost", vm.network_configuration.name,
                                  "--tags", "delete_vhost", "-e", "delete_vhost_name=%s delete_vhost_webapp=%s" %
@@ -143,6 +144,7 @@ def delete_vhost_ansible(service, vhost_name, vhost_webapp):
 
 @shared_task(base=AnsibleTaskWithFailure)
 def vhost_enable_apache_owned(vhost_id):
+    '''Changes ownership of the docroot folder to the user www-data'''
     vhost = Vhost.objects.get(id=vhost_id)
     for vm in vhost.service.virtual_machines.all():
         subprocess.check_output(["userv", "mws-admin", "mws_vhost_owner", vm.network_configuration.name,
@@ -154,6 +156,7 @@ def vhost_enable_apache_owned(vhost_id):
 
 @shared_task(base=AnsibleTaskWithFailure)
 def vhost_disable_apache_owned(vhost_id):
+    '''Revert the ownership of the docroot folder back to site-admin'''
     vhost = Vhost.objects.get(id=vhost_id)
     for vm in vhost.service.virtual_machines.all():
         subprocess.check_output(["userv", "mws-admin", "mws_vhost_owner", vm.network_configuration.name,

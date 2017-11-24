@@ -58,10 +58,12 @@ class ServerType(models.Model):
     sizedisk = models.IntegerField()  # In GB
     preallocated = models.IntegerField()  # Number of pre-allocated server of this type
     price = models.DecimalField(max_digits=6, decimal_places=2)
+    description = models.CharField(max_length=100, blank=True, null=True)
+    order = models.IntegerField()
 
     def __unicode__(self):
-        return "%d CPU cores, %dGB of RAM, %dGB of SSD Disk, %s pounds per year" % (self.numcpu, self.sizeram,
-                                                                                    self.sizedisk, self.price)
+        return self.description or "%d CPU cores, %dGB of RAM, %dGB of SSD Disk, %s pounds per year" % \
+                                   (self.numcpu, self.sizeram, self.sizedisk-5, self.price)
 
 
 class Site(models.Model):
@@ -553,6 +555,7 @@ class Vhost(models.Model):
     service = models.ForeignKey(Service, related_name='vhosts')
     csr = models.TextField(null=True, blank=True)
     certificate = models.TextField(null=True, blank=True)
+    certificate_chain = models.TextField(null=True, blank=True)
     tls_key_hash = models.TextField(null=True, blank=True)
     tls_enabled = models.BooleanField(default=False)
     webapp = models.CharField(max_length=100, choices=WEBAPP_CHOICES, null=True, blank=True)

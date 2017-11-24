@@ -1,5 +1,5 @@
 from django import forms
-from sitesmanagement.models import Site, Vhost, DomainName, Billing, UnixGroup, Snapshot
+from sitesmanagement.models import Site, Vhost, DomainName, Billing, UnixGroup, Snapshot, ServerType
 
 
 class SiteForm(forms.ModelForm):
@@ -8,9 +8,27 @@ class SiteForm(forms.ModelForm):
                                   widget=forms.Textarea(attrs={'maxlength': 250}),
                                   max_length=250,
                                   required=False)
+    type = forms.ModelChoiceField(queryset=ServerType.objects.all().order_by('order'), empty_label=None)
+
     class Meta:
         model = Site
         fields = ('name', 'description', 'email', 'type')
+        labels = {
+            'name': 'A short name for this Managed Web Service Server (e.g. St Botolph\'s server)',
+            'email': 'The webmaster email (please use a role email when possible)'
+        }
+
+
+class SiteFormEdit(forms.ModelForm):
+    description = forms.CharField(label='Description for the MWS server (e.g. Web server for St Botolph\'s '
+                                        'College main website)',
+                                  widget=forms.Textarea(attrs={'maxlength': 250}),
+                                  max_length=250,
+                                  required=False)
+
+    class Meta:
+        model = Site
+        fields = ('name', 'description', 'email')
         labels = {
             'name': 'A short name for this Managed Web Service Server (e.g. St Botolph\'s server)',
             'email': 'The webmaster email (please use a role email when possible)'

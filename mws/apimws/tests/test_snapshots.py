@@ -1,4 +1,6 @@
 import datetime
+import os
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.test import override_settings, TestCase
@@ -10,12 +12,13 @@ from sitesmanagement.tests.tests import assign_a_site
 
 @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
 class SnapshotsTests(TestCase):
+    fixtures = [os.path.join(settings.BASE_DIR, 'sitesmanagement/fixtures/amc203_test_IPs.yaml'), ]
     def setUp(self):
         do_test_login(self, user="test0001")
         assign_a_site(self)
 
     def test_create_snapshot(self):
-        site = Site.objects.first()
+        site = Site.objects.last()
         service = site.production_service
         snapshot_name = "snapshot1"
         # a get should redirect to backups page
@@ -56,7 +59,7 @@ class SnapshotsTests(TestCase):
         self.assertEquals(Snapshot.objects.count(), 1)
 
     def test_limit_snapshot_number(self):
-        site = Site.objects.first()
+        site = Site.objects.last()
         service = site.production_service
         snapshot_name = "snapshot1"
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
@@ -83,7 +86,7 @@ class SnapshotsTests(TestCase):
             self.assertEquals(Snapshot.objects.count(), 2)
 
     def test_delete_snapshot(self):
-        site = Site.objects.first()
+        site = Site.objects.last()
         service = site.production_service
         snapshot_name = "snapshot1"
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
@@ -112,7 +115,7 @@ class SnapshotsTests(TestCase):
 
     def test_restore_snapshot(self):
         # We fake the start date of the site
-        site = Site.objects.first()
+        site = Site.objects.last()
         service = site.production_service
         new_start_date = datetime.date.today() - datetime.timedelta(days=10)
         site.start_date = new_start_date

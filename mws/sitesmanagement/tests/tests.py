@@ -1,6 +1,8 @@
 import uuid
 import mock
+import os
 from datetime import datetime
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
@@ -22,6 +24,12 @@ def pre_create_site(test_interface):
                                  name='mws-46250.mws3.csx.private.cam.ac.uk')
     NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff4', name='mws-client1', type='ipv6')
     NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff3', name='mws-client2', type='ipv6')
+    NetworkConfig.objects.create(IPv4='131.111.58.252', IPv6='2001:630:212:8::8c:252', type='ipvxpub',
+                                               name="mws-66423.mws3.csx.cam.ac.uk")
+    NetworkConfig.objects.create(IPv4='172.28.18.252', type='ipv4priv',
+                                 name='mws-46251.mws3.csx.private.cam.ac.uk')
+    NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff2', name='mws-client3', type='ipv6')
+    NetworkConfig.objects.create(IPv6='2001:630:212:8::8c:ff1', name='mws-client4', type='ipv6')
 
     with mock.patch("apimws.xen.subprocess") as mock_subprocess:
         def fake_subprocess_output(*args, **kwargs):
@@ -91,7 +99,8 @@ def assign_a_site(test_interface, pre_create=True):
                     mock_change_vm_power_state.delay.return_value = True
                     response = test_interface.client.post(reverse('newsite'), {'siteform-name': 'Test Site',
                                                                                'siteform-description': 'Desc',
-                                                                               'siteform-email': 'amc203@cam.ac.uk'})
+                                                                               'siteform-email': 'amc203@cam.ac.uk',
+                                                                               'siteform-type': 1})
                     test_interface.assertIn(response.status_code, [200, 302])
                 # TODO create the checks of how the mock was called
                 # mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_xen_vm_api",
@@ -99,7 +108,7 @@ def assign_a_site(test_interface, pre_create=True):
                 #                                                  "create",
                 #                                                  "{}"])
 
-    site = Site.objects.first()
+    site = Site.objects.last()
     test_interface.assertEqual(site.name, 'Test Site')
     test_interface.assertEqual(site.email, 'amc203@cam.ac.uk')
     test_interface.assertEqual(site.description, 'Desc')
@@ -108,6 +117,7 @@ def assign_a_site(test_interface, pre_create=True):
 
 @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
 class SiteManagementTests(TestCase):
+    fixtures = [os.path.join(settings.BASE_DIR, 'sitesmanagement/fixtures/amc203_test_IPs.yaml'), ]
 
     def test_is_camacuk_helper(self):
         self.assertTrue(is_camacuk("www.cam.ac.uk"))

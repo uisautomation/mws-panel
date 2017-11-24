@@ -4,7 +4,6 @@ import datetime
 import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
@@ -15,7 +14,8 @@ from ucamlookup import user_in_groups, get_user_lookupgroups
 from apimws.ansible import launch_ansible_site
 from apimws.models import AnsibleConfiguration
 from apimws.utils import email_confirmation
-from sitesmanagement.forms import SiteForm, SiteEmailForm
+from sitesmanagement.cronjobs import check_num_preallocated_sites
+from sitesmanagement.forms import SiteForm, SiteEmailForm, SiteFormEdit
 from sitesmanagement.models import Site, DomainName, Billing, Vhost, ServerType
 from django.conf import settings as django_settings
 from sitesmanagement.utils import can_create_new_site
@@ -131,6 +131,7 @@ class SiteCreate(LoginRequiredMixin, FormView):
     template_name = 'mws/new.html'
     prefix = "siteform"
     success_url = reverse_lazy('listsites')
+    initial = {'type': ServerType.objects.order_by('order').first()}
 
     def get_context_data(self, **kwargs):
         context = super(SiteCreate, self).get_context_data(**kwargs)
@@ -143,8 +144,10 @@ class SiteCreate(LoginRequiredMixin, FormView):
         siteform = form.save(commit=False)
         preallocated_site = Site.objects.filter(preallocated=True, disabled=True, type=siteform.type).first()
         if not preallocated_site:
-            form.add_error("type", "No MWS Servers available at this moment with this configuration, "
-                                   "please try again later or select other configuration")
+            form.add_error("type", "No MWS Servers available at this moment with this configuration as they are "
+                                   "currently being built, please try again later (they usually take 20 minutes to "
+                                   "build) or email %s if you have any question."
+                           % getattr(django_settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'))
             return self.form_invalid(form)
         preallocated_site.start_date = datetime.date.today()
         preallocated_site.name = siteform.name
@@ -160,6 +163,7 @@ class SiteCreate(LoginRequiredMixin, FormView):
             email_confirmation(preallocated_site)
         LOGGER.info(str(self.request.user.username) + " requested a new server '" + str(preallocated_site.name) + "'")
         preallocated_site.production_service.power_on()
+        check_num_preallocated_sites.delay()
         return redirect(preallocated_site)
 
     def dispatch(self, *args, **kwargs):
@@ -189,7 +193,7 @@ class SiteShow(SitePriviledgeCheck, DetailView):
 class SiteEdit(SitePriviledgeAndBusyCheck, UpdateView):
     """View(Controller) to edit the name, description of a site and access to delete and disable options"""
     template_name = 'mws/edit.html'
-    form_class = SiteForm
+    form_class = SiteFormEdit
 
     def get_context_data(self, **kwargs):
         context = super(SiteEdit, self).get_context_data(**kwargs)

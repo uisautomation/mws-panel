@@ -10,6 +10,7 @@ from django.utils import timezone
 from apimws.utils import preallocate_new_site
 from sitesmanagement.models import Billing, Site, VirtualMachine, DomainName, ServerType
 
+
 LOGGER = logging.getLogger('mws')
 
 
@@ -34,7 +35,7 @@ def send_reminder_renewal():
     today = timezone.now().date()
     # Billings of sites that haven't been canceled (end_date is null), that hasn't expressed to want to cancel
     # their subscription, and that started in the previous month of the current one of a previous year
-    renewal_sites_billing = Billing.objects.filter(site__start_date__month=today.month-1 if today.month != 1 else 12,
+    renewal_sites_billing = Billing.objects.filter(site__start_date__month=today.month+1 if today.month != 12 else 1,
                                                    site__start_date__lt=date(today.year, 1, 1),
                                                    site__end_date__isnull=True,
                                                    site__subscription=True)
@@ -51,7 +52,8 @@ def send_reminder_renewal():
                  "can't successfully invoice for it.\n\nIf you no longer want you site then please either cancel "
                  "it now (under 'edit the MWS profile'), or mark it 'Not for renewal' in which case it will be "
                  "automatically cancelled on '%s'."
-                 % (billing.site.name, billing.site.name, billing.site.start_date, billing.site.start_date),
+                 % (billing.site.name, billing.site.name, billing.site.start_date.replace(year=today.year),
+                    billing.site.start_date.replace(year=today.year)),
             from_email="Managed Web Service Support <%s>"
                        % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
             to=[billing.site.email],
@@ -74,7 +76,8 @@ def send_reminder_renewal():
                  "Your site may be cancelled if we can't successfully invoice for it.\n\nIf you no longer want "
                  "you site then please either cancel it now (under 'edit the MWS profile'), or mark "
                  "it 'Not for renewal' in which case it will be automatically cancelled on '%s'." 
-                 % (billing.site.name, billing.site.name, billing.site.start_date, billing.site.start_date),
+                 % (billing.site.name, billing.site.name, billing.site.start_date.replace(year=today.year),
+                    billing.site.start_date.replace(year=today.year)),
             from_email="Managed Web Service Support <mws-support@uis.cam.ac.uk>",
             to=[billing.site.email],
             headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')}
@@ -169,15 +172,16 @@ def check_backups():
 @shared_task(base=ScheduledTaskWithFailure)
 def delete_cancelled():
     """Delete sites that were cancelled 2 weeks ago and were never paid for"""
-    sites_cancelled_never_paid = Site.objects.filter(end_date__lt=(datetime.today()-timedelta(weeks=2)).date(),
-                                                     billing=None)
+    sites_cancelled_never_paid = Site.objects.filter(end_date__isnull=False, billing=None,
+                                                     end_date__lt=(datetime.today()-timedelta(weeks=2)).date())
     for site in sites_cancelled_never_paid:
         LOGGER.info("The Site %s has been deleted because it was cancelled more than 2 weeks ago and was never paid for"
                     % site.name)
     sites_cancelled_never_paid.delete()
 
     """Delete sites that were cancelled 8 weeks ago"""
-    sites_cancelled = Site.objects.filter(end_date__lt=(datetime.today()-timedelta(weeks=8)).date())
+    sites_cancelled = Site.objects.filter(end_date__isnull=False,
+                                          end_date__lt=(datetime.today()-timedelta(weeks=8)).date())
     for site in sites_cancelled:
         LOGGER.info("The Site %s has been deleted because it was cancelled more than 8 weeks ago" % site.name)
     sites_cancelled.delete()
@@ -255,11 +259,11 @@ def send_warning_last_or_none_admin():
 @shared_task
 def reject_or_accepted_old_domain_names_requests():
     for domain_name in DomainName.objects.filter(status='requested',
-                                                 requested_at__lt=(timezone.now()-timedelta(days=3))):
+                                                 requested_at__lt=(timezone.now()-timedelta(days=10))):
         from apimws.ipreg import get_nameinfo
         nameinfo = get_nameinfo(domain_name.name)
         if nameinfo['exists'] and "C" not in nameinfo['exists']:
             domain_name.reject_it("This domain name request has been automatically denied due to the lack of answer "
-                                  "from the domain name administrator after 3 days.")
+                                  "from the domain name administrator after 10 days.")
         else:
             domain_name.accept_it()
