@@ -3,3 +3,22 @@ pipelines:
     - step:
         script:
           - echo "Everything is awesome!"
+  branches:
+    pipeline-test:
+      - step:
+          name: "Mirror to git.uis"
+          script:
+            # Tell git who we are
+            - git config user.email "mws-robotmail@uis.cam.ac.uk"
+            - git config user.name "MWS Bitbucket Robot"
+            # Ask git-uis about ourselves
+            - ssh uis@git.uis.cam.ac.uk info
+            # We need a full clone when mirroring master -> git.uis
+            - git fetch origin "$BITBUCKET_BRANCH"
+            # Configure git-uis remote and merge the branch there into this branch
+            - git remote add git-uis uis@git.uis.cam.ac.uk:mwsv3/webapp
+            # Merge remote branch into this one
+            - git fetch git-uis "$BITBUCKET_BRANCH"
+            - git merge "git-uis/$BITBUCKET_BRANCH"
+            # Push ourselves to git-uis
+            - git push git-uis "$BITBUCKET_BRANCH"
