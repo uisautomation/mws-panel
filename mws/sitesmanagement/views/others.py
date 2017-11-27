@@ -283,7 +283,7 @@ def change_db_root_password(request, service_id):
     }
 
     if request.method == 'POST':
-        if request.POST.get('typepost') == "Delete temporal mySQL root password":
+        if request.POST.get('typepost') == "Delete temporary mySQL root password":
             AnsibleConfiguration.objects.filter(service=service, key="mysql_root_password").delete()
         else:
             ansibleconf, created = AnsibleConfiguration.objects.get_or_create(service=service,
