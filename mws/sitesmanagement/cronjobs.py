@@ -257,12 +257,16 @@ def send_warning_last_or_none_admin():
 
 @shared_task
 def reject_or_accepted_old_domain_names_requests():
+    # number of days grace before a domain name request is denied
+    grace_days = settings.MWS_DOMAIN_NAME_GRACE_DAYS
+
     for domain_name in DomainName.objects.filter(status='requested',
-                                                 requested_at__lt=(timezone.now()-timedelta(days=10))):
+                                                 requested_at__lt=(timezone.now()-timedelta(days=grace_days))):
         from apimws.ipreg import get_nameinfo
         nameinfo = get_nameinfo(domain_name.name)
         if nameinfo['exists'] and "C" not in nameinfo['exists']:
-            domain_name.reject_it("This domain name request has been automatically denied due to the lack of answer "
-                                  "from the domain name administrator after 10 days.")
+            domain_name.reject_it(("This domain name request has been automatically denied due to the lack of answer "
+                                   "from the domain name administrator after "
+                                   "%s days.") % (grace_days,))
         else:
             domain_name.accept_it()
