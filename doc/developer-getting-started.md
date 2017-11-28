@@ -41,7 +41,7 @@ There are several web endpoints now:
 Test suites require some extra packages. Install them via:
 
 ```
-sudo docker-compose exec devel pip install requirements_jenkins.txt
+sudo docker-compose exec devel pip install -r requirements_jenkins.txt
 ```
 
 After that, the tests can be run via:
