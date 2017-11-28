@@ -14,6 +14,6 @@ pipelines:
             - cd .git
             - git fetch --update-head-ok origin refs/heads/*:refs/heads/* refs/tags/*:refs/tags/*
             # Mirror ourselves to git-uis
-            - git push uis@git.uis.cam.ac.uk:mwsv3/webapp +refs/heads/*:refs/heads/* +refs/tags/*:refs/tags/*
+            - git push --prune uis@git.uis.cam.ac.uk:mwsv3/webapp +refs/heads/*:refs/heads/* +refs/tags/*:refs/tags/*
   default:
     - step: *mirror-to-uis
