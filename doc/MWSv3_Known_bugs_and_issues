@@ -1,0 +1,44 @@
+List of reported bugs/issues
+
+
+i) Error message when uploading PO pdf
+
+From Juha Jäykkä <jj411@cam.ac.uk>   2016-10-20
+
+
+"There is a bug in your upload page, which prevents it from accepting PO 
+obtained from CUFS. They either have too long file names or the web
+interface 
+expects a lower case "pdf" extension. CUFS supplies upper case "PDF"
+extension 
+and about 20 characters long file names. Renaming the file to lower case and
+7 
+characters (the PO number, as you saw) allowed me to upload it.
+
+Please note that the file I managed to upload is bit-by-bit identical to the
+one I did not manage to upload, so the check "is this a PDF file" on your 
+website is broken."
+
+
+ii) Default website not always "default"
+
+iii) mod_authnz_ldap needed for LDAP
+
+We have mod_ldap, but not mod_authnz_ldap, loaded. 
+AuthLDAPUrl is provided by mod_authnz_ldap.
+
+FIXED: mod_authnz_ldap has been added.
+
+iv) Reduce frequency of "only one administrator" messages?
+Mat Ridley (mjr66) asked about this.
+
+v) exim4 log permissions
+
+/var/log/README.MWS3 implies the exim logs are readable. The mainlog, etc. files in
+/var/log/exim4 are world-readable, but the directory permissions are
+
+       drwxr-s-- 2 Debian-exim adm
+
+so users can't read the logs.
+
+FIXED: permissions are now -rw-r--r-- 1 Debian-exim adm 10420 Jun  5 10:03 /var/log/exim4/mainlog

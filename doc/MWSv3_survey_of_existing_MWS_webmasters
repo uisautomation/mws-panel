@@ -1,0 +1,253 @@
+Copy - [https://subversion.csi.cam.ac.uk/filedetails.php?repname=jw35&path=%2Fprojects%2F2014-03-mws-replace%2Fwebmaster-response-full master in SVN here]
+
+<pre><nowiki>
+# I asked (on 3rd April 2014, with a reminder on 25 April):
+
+--cut--
+From: Jon Warbrick <jw35@cam.ac.uk>
+To: cs-mws-webmasters@lists.cam.ac.uk
+Date: Thu, 3 Apr 2014 15:23:58 +0100 (BST)
+Subject: Planning the future of the Managed Web Service
+
+You are receiving this as an administrator of a web site hosted by the
+Managed Web Service.
+
+The design of the current MWS, and the hardware that supports it, is
+approaching end of life. We are taking this opportunity to review the
+service that we provide and would welcome your input. We'd be interested to
+know what you like about the current service, what you don't like, and what
+new features you'd like to see (though we obviously can't promise to provide
+everything that everyone would like). If you'd like to contribute to this
+process then please could you add comments under the following headings and
+send the results to me (Jon Warbrick, jw35@cam.ac.uk) in the next couple of
+weeks:
+
+1) What you like about the current service (and so wouldn't want to
+   lose)?
+
+2) What you don't like about the current service that you would like to
+   see changed?
+
+3) What new features would you like to see?
+
+4) Which MWS web sites do you administer?
+
+In addition, would you be willing to participate more closely as a member of
+a user group who will be involved in reviewing proposals for a new MWS and
+in evaluating eventual implementations?  Participation will require some
+time commitment - perhaps an hour or so a week spread over several months -
+and will involve reviewing proposals, contributing to discussions, testing
+implementations, and probably a small number of face-to-face meetings.
+Please contact me directly if you'd be interested in participating.
+--cut--
+
+# Responses from
+
+Alison Pearn <ab55@cam.ac.uk>
+  video.darwin.lib.cam.ac.uk
+Barney Brown <Barney.Brown@admin.cam.ac.uk>
+  comms.group.cam.ac.uk
+C.M. Swannack <cms96@cam.ac.uk>
+  nicrophorus.zoo.cam.ac.uk
+Colin Edwards <cwe20@cam.ac.uk>
+  www.colours.phy.cam.ac.uk
+  www.nanoforum.cam.ac.uk
+David Chalmers <David.Chalmers@cruk.cam.ac.uk>
+  www.cambridgecancercentre.org
+David Instone-Brewer <tech@tyndale.cam.ac.uk>
+  www.Tyndale.cam.ac.uk
+Dr M G Hayes <mgh37@cam.ac.uk>
+  postkeyn.mws.csx.cam.ac.uk
+Geoffrey Kantaris <egk10@cam.ac.uk>
+  hercules.mml.cam.ac.uk 
+  www.latin-american.cam.ac.uk 
+Gordon Ross <gr306@uis.cam.ac.uk>
+  www.phone.cam.ac.uk
+Gulam <gp369@cam.ac.uk>
+  drupal.law.cam.ac.uk (+ virtual hosts)
+James Brimicombe <djb16@medschl.cam.ac.uk>
+  www.madingley2014.phpc.cam.ac.uk
+  www.improve.phpc.cam.ac.uk
+  www.cchsr.iph.cam.ac.uk
+  www.apmuesif.phpc.cam.ac.uk
+John Dolan <jd458@cam.ac.uk>
+  internal.hist.cam.ac.uk
+John Durrell <john.durrell@eng.cam.ac.uk> 
+  www.esas.org
+  www.kacst-cambridge.group.cam.ac.uk
+John Moffett <jm10019@cam.ac.uk>
+  nri.cam.ac.uk
+Kevin Bradley <kjb53@cam.ac.uk>
+  mws.polis.cam.ac.uk
+  mws.hsps.cam.ac.uk
+  www.bioanth.cam.ac.uk 
+  www.sociology.cam.ac.uk
+  www.socanth.cam.ac.uk
+Mark Syddall <mts25@cam.ac.uk>
+  be.4cmr.group.cam.ac.uk
+Mat Ridley <mjr66@cam.ac.uk>
+  iocs.mws.csx.cam.ac.uk
+  theofed.mws.csx.cam.ac.uk
+  wesley.mws.csx.cam.ac.uk
+  westmin.mws.csx.cam.ac.uk
+Miriam Lorie <info@coexisthouse.org.uk>
+  www.coexisthouse.org.uk
+Paul Sumption <ps459@cam.ac.uk> 
+  Sysbiol multisite
+  Socanth one previously
+  placebo project
+Philip Brereton <pb413@cam.ac.uk>
+Ronald Haynes <rsh27@cam.ac.uk>
+  DITG
+Rupert Payne <rap55@medschl.cam.ac.uk>
+  cchsr.iph.cam.ac.uk
+Steve Kimberley <sjk36@cam.ac.uk>
+  extra.classics.cam.ac.uk
+  mrbs.classics.cam.ac.uk
+  museum.classics.cam.ac.uk
+martin.cook@kings.cam.ac.uk
+  * kings.cam.ac.uk
+webmaster biorep <webmaster-biorep@medschl.cam.ac.uk>
+  www.biorep.medschl.cam.ac.uk
+
+# Sites represented
+
+* kings.cam.ac.uk
+DITG
+Placebo project
+Socanth one previously 
+Sysbiol multisite
+be.4cmr.group.cam.ac.uk
+cchsr.iph.cam.ac.uk
+drupal.law.cam.ac.uk (+ virtual hosts)
+extra.classics.cam.ac.uk
+hercules.mml.cam.ac.uk 
+internal.hist.cam.ac.uk
+iocs.mws.csx.cam.ac.uk
+mrbs.classics.cam.ac.uk
+museum.classics.cam.ac.uk
+mws.hsps.cam.ac.uk
+mws.polis.cam.ac.uk
+nicrophorus.zoo.cam.ac.uk
+postkeyn.mws.csx.cam.ac.uk
+theofed.mws.csx.cam.ac.uk
+video.darwin.lib.cam.ac.uk
+wesley.mws.csx.cam.ac.uk
+westmin.mws.csx.cam.ac.uk
+www.Tyndale.cam.ac.uk
+www.apmuesif.phpc.cam.ac.uk
+www.bioanth.cam.ac.uk 
+www.biorep.medschl.cam.ac.uk
+www.cambridgecancercentre.org
+www.cchsr.iph.cam.ac.uk
+www.coexisthouse.org.uk
+www.colours.phy.cam.ac.uk
+www.esas.org
+www.improve.phpc.cam.ac.uk
+www.kacst-cambridge.group.cam.ac.uk
+www.latin-american.cam.ac.uk 
+www.madingley2014.phpc.cam.ac.uk
+www.nanoforum.cam.ac.uk
+www.phone.cam.ac.uk
+www.socanth.cam.ac.uk
+www.sociology.cam.ac.uk
+
+# Liked
+
+Access for non-University people (developers, etc.)
+Apropriate performance *2
+Availability of 'cam' level address for interdiscipinary initiative
+Can install own CMS
+Continued availability of old versions of MySQL, PHP, etc.  [LOOSE]
+Cron
+Direct HTML editing
+Easy to setup Wordpress
+Everything! *6
+FTP access                                          [LOOSE]
+Fast network to University and world
+Free *4                                             [LOOSE]
+Hosts video without SMS branding
+It tends to work
+Light-touch admin
+Minimal bureaucracy *2
+Minimal downtime
+More flexable than Falcon *2
+MySQL *7
+Not blocked (e.g. by schools)
+PHP *6
+Page/directory access control
+Quality of documentation *2
+Quality of support *5
+Raven authentication
+SSH access *3
+Saves managing own web server *6
+Shell access *2
+Simple to use/setup *4
+Simpler than SMS
+Supports non-cam.ac.uk addresses
+Unix-level file access control
+Unlimited quota                            [Not an existing feature!]
+Virtual host support *2
+
+# Not liked
+
+Better documenattion and help pages [?]
+Difficulty of adding new users                      [IMPROVE]
+Difficulty of upgrating to latest versions of software  [IMPROVE]
+Lack of descent package management 
+Limited file storage                                [INCREASE]
+Manupulating Unix permissions *2                    [IMPROVE]
+Needing Apache config changes to enable PHP         [IMPROVE?]
+Provided PHP script for UCS news feed  
+Quality of support  [?]
+SFTPed files get wrong permissions
+Too much technical knowledge required               [IMPROVE]
+
+# New Features
+
+Accessible backups                                  [ADD]
+Additional technical support
+Aegir (http://www.aegirproject.org/)
+Automatic 'www.' and 'non-www.' name support
+Automatic HTTPS certificate support                 [IMPROVE]
+Better support for non-cam/vanity domains
+CMSs with/without University template *5
+Clearer definition of what is and isn't provided 
+Cloning sites for experimenation                    [ADD]
+Documentation of backup arrangements                [ADD]
+Documentation of server spec 
+Freedom to configure and install nonstandard features 
+Guaranteed level of uptime
+Integration into external authentication (e.g. PWF AD)
+More than 1Gb disk space                            [ADD]
+Online management of associated email addresses     [ADD]
+Postgress
+Pre-configured blogging system *2
+Proper support, better definition of what's included
+Provision and docuumentation of defined package
+Remote mouting of htdocs directory *2
+SSL Support                                         [ADD]
+Self-creation of virtual sites *2                   [ADD]
+Service based on modern Linux variant *3            [ADD]
+Standard scripts
+Support for Drupal on a par with Apache/MySQL
+Support for creating Wordpress sites
+Support for pages containing non-roman scripts (Chinese, Japanese, Korean) [N/A]
+Support wget *2                                     [ADD]
+Tomcat, with MATLAB support
+Varnish caching
+Web (or at least non-command line) administration *7 [ADD]
+Web authentication for non-Cambridge users
+
+# Volounteres
+
+Alison Pearn <ab55@cam.ac.uk>
+C.M. Swannack <cms96@cam.ac.uk>
+Gordon Ross <gr306@uis.cam.ac.uk>
+Gulam <gp369@cam.ac.uk>
+M.H. Hadfield <mh716@cam.ac.uk>
+Mark Syddall <mts25@cam.ac.uk>
+Mat Ridley <mjr66@cam.ac.uk>
+Ronald Haynes <rsh27@cam.ac.uk>
+Steve Kimberley <sjk36@cam.ac.uk>
+</nowiki></pre>

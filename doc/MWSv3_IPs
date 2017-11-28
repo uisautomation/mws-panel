@@ -1,0 +1,37 @@
+== IPv4 ==
+
+131.111.58.0/23 Allocated for MWS use
+
+131.111.58.0/24 Currently used for MWS3 clients
+131.111.59.0/24 Currently used for MWS2
+
+MWS3 servers currently use another range of IPs
+
+== IPv6 ==
+
+2001:630:212:8::<identifier>:<instance> for public addresses
+fd19:1b70:f7a6:1ae5::/64 for [[IPv6_unique_local_address_subnet_allocations|private addresses]] (i.e. DRBD traffic on VLAN 1884 (purple cable))
+
+'''BEWARE''' we allocate the private addresses identically to the last 2 blocks of the public address - '''DO NOT''' renumber the public addresses without taking care to adjust the private usage accordingly. For example "odochium" is 2001:630:212:8::8d:7 and fd19:1b70:f7a6:1ae5::8d:7.
+
+=== IPv6 identifiers ===
+
+* 8a - for the MWS2
+* 8c - for the MWS3 'clients'
+* 8d - for the MWS3 'infrastructure (i.e. control panel, quorum server, Xen hosts)
+* 8e - for the MWS3 'clients' service addresses.
+
+==== Xen hosts ====
+* ::8d:1 opus
+* ::8d:2 ophon
+* ::8d:3 ophobe
+* ::8d:4 ix
+* ::8d:6 agogue
+* ::8d:7 odochium
+
+==Borrowed by bjh21==
+for testing
+* 131.111.58.241&ndash;245
+* 172.28.18.241&ndash;245
+* 2001:630:212:8::8c:241&ndash;245
+* 2001:630:212:8::8d:2410&ndash;245f

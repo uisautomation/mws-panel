@@ -1,0 +1,122 @@
+==Project description and rationale==
+
+<!-- A brief summary of the background to the project and why it is necessary. -->
+
+The current Managed Web Server (MWS) is used significantly (197 sites plus a further 39 virtual hosts, March 2014). However its hardware is nearing end-of-life, and it is based on Solaris which is no longer part of our strategy and in which we have a rapidly decreasing expertise. In particular the MWS's lead systems administrator is expected to be retiring during 2014. In addition, the current MWS was designed for an era in which webmasters of necessity had significant system administration expertise - nowadays this is much less the case with the result that many MWS customers struggle to make best use of the facilities provided.
+
+This project aims to replace the current MWS platform using current technology, and at the same time reduce the level of system administration and Unix expertise need for webmasters make best use of the service.
+
+Note that the MWS service is specifically targeted at providing a generic web hosting platform on which its users can mount their own web services. This is, and will remain, distinct from the provision of services such a Falcon which provide a pre-configured platform for presenting web content.
+
+==Project objective(s)==
+
+<!-- What specific, overall objective(s) is the project setting out to achieve? -->
+
+* Reimplement the current MWS service on new hardware using current technologies
+* Retain (with agreed exceptions) all features of the currently-advertised MWS service
+* Reduce the system administration and Unix expertise needed to make best use of the service
+
+==Scope==
+
+<!-- What is included and specifically excluded from the work: in other words, the boundaries of the project    
+     (organisational, geographical, process, service and so forth)? -->
+
+* Included: 
+** Design of the new service
+** Implementation of the new service
+** Procurement of all necessary hardware, etc.
+** Arrangements for on-going system maintenance
+* Excluded
+** Moving existing sites from the current service to the new one
+** Decommissioning the current MWS service
+** User (webmaster) support arrangements for the new service
+** User documentation for the new service
+
+==Key stakeholders==
+
+<!-- Who has an interest in the outcome and work of the project?  Who needs to be consulted or informed about this work? -->
+
+* UIS management
+* Webmasters (including contractors) of existing MWS sites
+* Webmasters (including contractors) of potential future MWS sites
+* Other UIS teams providing components of the new service
+** Platforms (VMs, Hardware hosting, APIs)
+** User Administration (user and site management issues, APIs)
+** Hostmaster (DNS management, APIs)
+** Postmaster (email configuration)
+** Finance (billing)
+** passwords.cam administration
+
+==Project deliverables==
+
+<!-- A summary of the major tangible outputs of the project. -->
+
+* A replacement for the current MWS, including
+** Webserver infrastructure
+** Storage layer
+** Authentication layer
+** Web-based delegated management for webmasters
+** Interfaces to other relevant UIS components
+
+==High-level timeline with milestones==
+
+<!-- When will the outputs be delivered? What are the main steps to achieving them? -->
+ 
+* ''Start:'' March 2014
+
+* ''Finish:'' 
+
+==Project performance metrics==
+
+<!-- How will success be measured? -->
+
+* Willingness of existing MWS users to transition to the new service
+* Continued requests for new sites following deployment
+* Implementation and transition to the new service prior to significant problems with the existing service
+* Reduction in support load as a result of better self-service
+
+==Resources required==
+
+<!-- What do you need to deliver the outputs – people, systems development, money and so forth? -->
+
+==Dependencies==
+
+<!-- what factors impact on the delivery of this project – both within and external to the project? -->
+
+==Roles and responsibilities==
+
+<!-- Which roles will be involved and what will be their area of responsibility? -->
+
+* Project sponsor: RJD
+* Project Manager/Team Leader: JW
+* Team: MCV, JMW (system build/administration, future systems support); AMC (web interface development)
+
+==Risks==
+
+<!-- What are the risks that might impact on the success of this project? -->
+
+* Failure to correctly capture current MWS features
+* Failure to reimplement critical existing features
+* Over ambition in new system design
+* Unresolvable failure of the current service prior to implementation of the new one
+* Non-availability (or loss) of appropriate staff resources, hardware, funding
+* Refusal of existing users to transition to the new service
+
+==Issues==
+
+<!-- What is happening already that may impede progress? -->
+
+* Ongoing UIS reorganisation, and the process proceeding this, may divert resources or reassign responsibilities and priorities to the detriment of this project
+* Retirement of current key MWS staff may result in loss of information/experience
+
+==Quality assurance==
+
+<!-- How will you ensure that the deliverables will be fit for purpose? -->
+
+==Project governance==
+
+<!-- How will progress be reviewed and by whom? -->
+
+==Assumptions==
+
+<!-- List any assumptions you have made in drawing up the Project definition document. -->

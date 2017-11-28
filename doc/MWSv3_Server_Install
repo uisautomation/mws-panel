@@ -1,0 +1,95 @@
+==Introduction==
+
+This page describes how to install the [[Managed_Web_Server_version_3|MWSv3]] Xen servers. In theory it should just be "install operating system, then run Ansible", but life's never quite that simple! Things that still need doing have a little red <span style="color:#ff0000">TODO</span> next to them.
+
+==Outline==
+
+The steps involved in setting up a new Xen cluster (of 1 quorum server and 2 Xen hosts) are thus:
+#Tell ansible about the new servers
+#Install quorum server (VM)
+#Install Xen hosts (real machines)
+#Run ansible
+#Initialise the Cluster
+#...
+#Profit :-)
+
+==Instructions==
+
+===Tell ansible about the new servers===
+
+In the isg_ansible git repository, there is one group_vars file per cluster, called things like <code>group_vars/mwsxencluster2</code>. That should contain the hostname, v4 and v6 addresses for all three hosts, v4 network details, dom0 RAM allocation, and the guest OS version if that's different to what you install on the Xen hosts (which it is with our production hardware). You then need to define the relevant group in the ansible inventory file, called <code>servers</code>, and list the servers there.
+
+===Install quorum server (VM)===
+
+Ask Platforms for a VM, and specify it should be located elsewhere than the Xen hosts (currently, this equates to "in neither the RNB nor the WCDC"). We currently use their standard setup (25G disk, 1G RAM), but this is probably far too much disk - 10G would certainly be fine, and probably 5G would be, too. Ask Platforms to boot it into the Debian/stable netboot installer, and set up a basic system (ssh server and nothing else).
+
+<span style="color:#ff0000">TODO</span>: installation should be automated with preseed
+
+===Install Xen hosts (real machines)===
+
+These notes describe the process for the Intel R2208WTTYS boxes "agogue" and "odochium". It will definitely work with identical hardware, and ''should'' work with most other hardware, although the details will necessarily vary. The basic idea is to enable the remote management system, and use that to provide a custom installer image to the servers as if it were an attached USB stick.
+
+'''WARNING:''' As a result of the [[MWSv3 2016 new disks|new disks installed in September 2016]], agogue and odochium no longer have quite the same hardware as the installed image expects.  In particular, this means that the installer is likely to create a very large RAID5 set, rather than the two smaller RAID5 sets currently in use.  This is not particularly harmful, but you might want to arrange that on initial installation the server only has the disks you want in the first RAID set.
+
+====Enable Remote Management====
+
+RMMs are documented on the [[Infrastructure Network]] wiki page, so refer there for more details. For the RMM4s, you have to both enable remote management and get it to DHCP, and set a user account (go with root and the root password for that box (Platforms' pattern)).
+
+====Prepare Custom Installer====
+
+To use our preseed file (and, particularly, the external script it calls), we need a custom installer. Debian provides instructions for this process [[https://www.debian.org/releases/jessie/i386/ch04s03.html.en here]]. It's easiest to create a <code>fstab</code> entry that lets you loop-mount the installer image, and then proceed as follows (working in the <code>preseed</code> directory of the mws3/misc repository):
+
+ zcat /nfs-uxsup/linux/debian/dists/jessie/main/installer-amd64/current/images/hd-media/boot.img.gz >../installer.img
+ mount ../installer.img /media/iso
+ #download the latest netinst image from https://www.debian.org/CD/netinst/
+ cp ~/Downloads/debian-8.2.0-amd64-netinst.iso /media/iso
+ cp *.{cfg,sh} /media/iso
+ umount /media/iso
+
+Your ../installer.img file is now ready to go.
+
+====Make image available to system and install====
+
+Copy the installer.img file to the relevant infrastructure network gateway machine. Launch the console java applet from the RMM web page, and select "Redirect Floppy / USB Key Image" from the "Device" menu, and select your installer.img. Then power the machine on. If all goes well, you will be prompted for the IPv4 address and then to confirm the hostname (if the latter isn't right, you've probably got the IPv4 address wrong!). The machine will install, and after a while prompt you to reboot it. At that point, tell it to reboot and disable the image redirection, and once it reboots you're ready to run ansible.
+
+<span style="color:#ff0000">BUGS</span>: The installer is a bit buggy (this may get fixed in due course). This can have a number of effects - the installer may not find the ISO inside it (if so, just point it to the right drive), or droppings from previous md-RAID or LVM installs can confuse it, which results in incomprehensible errors from grub install. In that case, you need to <span style="color:#ff0000">salt the earth</span>, roughly thus:
+
+ pvremove --force /dev/md0
+ mdadm -S /dev/md0
+ for X in sda sdb sdc sdd sde sdf sdg ; do mdadm --zero-superblock --force /dev/${X}1 ; dd if=/dev/zero of=/dev/${X} bs=1k count=1024 ; done
+
+This is '''extremely destructive''' of any metadata or data on the disks. Use with care!
+
+====Install correct kernel and/or DRBD====
+
+Debian jessie's kernel and DRBD are not compatible ([https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=794680 bug report]). For these machines, we in fact need a kernel from jessie-backports (i.e. a 4.x series), so we install that:
+
+ apt-get -t jessie-backports install linux-image-amd64
+
+Alternatively, you would need to build a newer DRBD module and install that. mcv21 has done this before, so ask if that becomes necessary.
+
+To make this more complex, some versions of jessie-backports' kernels are buggy ([http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=810472 e.g. some early 4.3s caused xenstored to SIGBUS]). For the time being, therefore, we have fossilised on <code>linux-image-4.2.0-0.bpo.1-amd64_4.2.6-3~bpo8+2_amd64.deb</code>, which is stored in <code>/root</code>. So rather than the above, instead install that by hand:
+
+ dpkg -i /root/linux-image-4.2.0-0.bpo.1-amd64_4.2.6-3~bpo8+2_amd64.deb
+
+Ideally, by the time stretch is released we'll be back to using the distribution kernel...
+
+===Run Ansible===
+
+You should now be ready to run ansible! Make sure you can ssh as root into each machine with your public key, and then run a command like this from the isg_ansible repository:
+
+ ansible-playbook -l mwsxenclusterXXX -i servers site.yml
+
+Where XXX corresponds to the group_vars file you made earlier. Expect this to take a couple of gos, as there are a number of "reboot" handlers involved.
+
+===Initialise the Cluster===
+
+You need to copy root's <code>id_rsa.pub</code> between the cluster nodes, so that root on each node can ssh into root on each other node; then generate a cluster key with <code>corosync-authkey</code> on one node, and copy to the other 2 nodes. You might then need to run <code>/root/initialise_cluster.sh</code> - ansible will have tried to run it, but it will have failed because the previous steps have not been taken.
+
+<span style="color:#ff0000">TODO</span>: Ideally, we'd automate all of this.
+
+===...===
+
+===Profit===
+
+You should be good to go now :-) Running <code>crm_mon</code> should show you a cluster of 3 nodes with 0 resources configured.

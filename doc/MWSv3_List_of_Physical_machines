@@ -1,0 +1,35 @@
+== mwsxencluster0 - main development cluster ==
+
+ address:     131.111.8.217<br>
+ address:     2001:630:212:8::8d:1<br>
+ hostname:    opus.csi.cam.ac.uk<br>
+ 
+ address:     131.111.8.218<br>
+ address:     2001:630:212:8::8d:2<br>
+ hostname:    ophon.csi.cam.ac.uk<br>
+
+With quorum server on.csi.cam.ac.uk
+
+== mwsxencluster2 - production cluster ==
+
+ address:     131.111.8.30<br>
+ address:     2001:630:212:8::8d:6<br>
+ hostname:    agogue.csi.cam.ac.uk<br>
+ 
+ address:     131.111.8.32<br>
+ address:     2001:630:212:8::8d:7<br>
+ hostname:    odochium.csi.cam.ac.uk<br>
+
+With quorum server ial.csi.cam.ac.uk
+
+== mwsxencluster1 - old test/dev cluster ==
+
+ address:     131.111.8.225<br>
+ address:     2001:630:212:8::8d:3<br>
+ hostname:    ophobe.csi.cam.ac.uk<br>
+ 
+ address:     131.111.8.228<br>
+ address:     2001:630:212:8::8d:4<br>
+ hostname:    ix.csi.cam.ac.uk<br>
+
+With quorum server qui.csi.cam.ac.uk
