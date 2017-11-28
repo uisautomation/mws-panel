@@ -1,0 +1,3 @@
+In September 2016, the two [[MWS3]] Xem hosts, agogue and odochium, had extra disks installed in them.  Before the upgrade, each host had seven 800GB SSDs (INTEL SSDSC2BX800G4).  The upgrade added another seven identical SSDs to each host.
+
+The new SSDs are configured as a separate RAID5 set, with as far as possible the same configuration as the first seven.  This then becomes a new LVM PV and is incorporated into the <code>clients</code> VG.

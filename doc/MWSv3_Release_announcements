@@ -1,0 +1,210 @@
+To release MWS3 we need various announcements. Below you will find draft text for a number of them. Suggestions for improvement and corrections are welcome and needed. Feel free to make changes directly in the Wiki or, if you want to make radical changes and want to leave to original in place, to add redrafted versions.
+
+== Main Announcement ==
+
+This is intended for UIS News and anywhere else relevant:
+
+<pre>
+New UIS Managed Web Service
+===========================
+
+University Information Services are pleased to announce general
+availability of its new Managed Web Service. This provides University
+users with a versatile infrastructure on which they can run a variety
+of websites. It will eventually replace the existing version of the 
+Managed Web Service.
+
+--UIS News fold--
+
+This new Managed Web Service (which was known informally as 'MWS3'
+during its development) is similar to commercial Unix-based web
+hosting and doesn't require significant Unix knowledge for common
+use. It provides modern, delegated, self-service access and can be
+used without having to interact directly with UIS.  It runs on 
+dedicated, resilient virtual machine infrastructure using 
+high-performance 'solid state disk' (SSD) storage. It is already being
+used by a number of 'early adopters', some of whom are running
+production web sites.
+
+This new service will replace the current one during 2016. Webmasters
+of existing sites need to take action to transfer their sites
+before the current service is shut down. We will be contacting
+administrators of existing sites with further details shortly.
+
+Use of the new Managed Web Service attracts a cost of £100 a year (no
+VAT for University institutions). this charge will be waived for 
+existing sites transferring to the new service until the old service 
+closes. Other 'early adopters' of the new system have a month to decide 
+if they want to pay for and keep their site, or to delete it.
+
+Further information about the new service is available at
+http://mws-help.uis.cam.ac.uk/. Questions about the new service, about this
+announcement, and about transitioning from the current service can be
+sent to mws-support@uis.cam.ac.uk.
+</pre>
+
+== Anouncement to existing MWS Webmasters ==
+
+This is intended for the existing MWS Webmasters announcement mailing list.
+
+<pre>
+Transition arrangements for existing MWS sites
+==============================================
+
+University Information Services are pleased to announce general
+availability of its new Managed Web Service -- see 
+http://news.uis.cam.ac.uk/articles/2016/03/24/new-uis-managed-web-service
+for the general announcement. The next phase of this process involves
+moving all sites using the existing Managed Web Service onto the new
+one. As previously announced, this is something we need you to do as
+an existing MWS webmaster.
+
+The expected timetable for this is as follows:
+
+Now: 
+     consider what you plan to do with your existing site -- move to
+     the new Managed Web Service, move it elsewhere, delete it, etc. If
+     you plan to move to the new service then arrange to do so at a
+     time to suit you (but see below).
+
+Between now and the end of June 2016: 
+     please let mws-support@uis.cam.ac.uk know what you plan to do.
+
+Week beginning 4th July 2016: 
+     sites for which mws-support has not received transition plans and
+     that have not yet moved will be disabled. This can be reversed,
+     but will allow us to identify sites that have been abandoned.
+
+30 September 2016: 
+     the existing service, along with any sites still hosted by it,
+     is shut down permanently.
+
+We appreciate that this is a demanding timetable. However the existing
+service is getting old and we are struggling to maintain it to the
+standard that we would wish. It is also causing operational issues that
+are blocking other developments. Early adopters who have already
+transitioned have not found the process too onerous. We are happy to
+discuss individual cases - please contact us at
+mws-support@uis.cam.ac.uk.
+
+The new Managed Web Service attracts a charge of £100 per year. This
+charge will be waived for existing sites that have transitioned to the
+new service until October 2016. Please let us know when you create a
+replacement server so we can apply this discount.
+
+Further information about the new service is available at
+http://mws-help.uis.cam.ac.uk/. Questions about the new service, about this
+announcement, and about transitioning from the current service can be
+sent to mws-support@uis.cam.ac.uk.
+</pre>
+
+== Announcement to early adopters ==
+
+This is intended for the "Managed Web Service version 3 development mailing list" (uis-mws3-dev@lists.cam.ac.uk) and any other communication channels we have with existing interested parties and alpha/beta users.
+
+<pre>
+Winding up the 'MWS3 Alpha/Beta test program'
+=============================================
+
+With the formal release of the new Managed Web Service we are starting
+to wind up the MWS3 Alpha/Beta test program in which you have been
+participating. We would like to thank you for helping to develop this
+service - it is already much better than it would have been without
+the active involvement of many of you.
+
+Effects of the wind-up:
+
+1) Servers on the new system will start to attract a charge of £100
+per year. If your server is replacing a site on the current MWS then
+please contact us at mws-support@uis.cam.ac.uk with details of the old
+and new server and we'll arrange to waive the charge until October
+2016. Otherwise you have the choice of arranging to pay for your server
+or deleting it. You have about a month to arrange payment after which
+remaining sites will be deleted automatically.
+
+2) We will be closing down the 'MWS3 project' Wiki (at
+https://wiki.cam.ac.uk/mws3/) and the MWS development mailing list
+(uis-mws3-dev@lists.cam.ac.uk).
+
+3) We will be deprecating some references to 'MWS3' (which was really
+the name of the development project) in email addresses and domain names in favour
+of 'MWS' where we can provide redirects (or equivalent) for old
+names.
+
+Thank you again for all your help during the development of this new
+service.
+</pre>
+
+== Message for DNS administrators ==
+
+This is intended, probably via UIS news, to let DNS
+administrators know about the messages that they may start to
+receive now that the new MWS is live.
+
+<pre> 
+DNS name management on the new Managed Web Server
+=================================================
+
+The new UIS Managed Web Server (see
+http://news.uis.cam.ac.uk/articles/2016/03/24/new-uis-managed-web-service)
+automates most routine operations. This includes the assignment
+of .cam.ac.uk DNS names to web servers via the Jackdaw IP
+Register database. As part of this, DNS 'mzone' administrators
+may receive messages from the Managed Web Service asking for
+approval for changes or asking for changes to be made
+manually. Further details of this process follow.
+
+--UIS News Cut--
+
+Administrators of MWS servers can set up the DNS names
+(a.k.a. domains, domain names or host names) associated with the
+web sites hosted on their servers using the MWS Control Panel. To
+take effect, these names also need to appear in the DNS.
+
+For names in domains outside cam.ac.uk the MWS just provides
+generic instructions for what the domain's owner need to do. For
+names within the cam.ac.uk domain the MWS will, where possible,
+make the necessary changes using a direct interface to IP
+register database. This is consistent with the manual process
+used on the old MWS and on Falcon.
+
+When a new name within cam.ac.uk is requested the following
+happens:
+
+1) Names not within existing cam.ac.uk domains are rejected.
+
+2) Otherwise an email is sent to the contact address for the IP
+   Register Management Zone (mzone) containing the proposed
+   name. The email includes a link that can be used to approve or
+   reject the request. In all cases, if the request is rejected
+   no changes are made to the DNS.
+
+   2.1) If the request is approved and the proposed name doesn't
+        already exist then an appropriate CNAME record is
+        automatically created. If no response is received in
+        three days the request is assumed to be approved.
+
+   2.2) If the request is approved and the proposed name exists
+        and is a CNAME then the CNAME record is automatically
+        amended. If no response is received in three days the
+        requst is assumed to be approved.
+
+   2.3) If the proposed name exists and is something other than a
+        CNAME the request cannot be approved as it stands. To
+        approve the request, mzone administrators must first
+        either delete the existing record or convert it to a
+        CNAME. If no response is received in three days the
+        request is assumed to be rejected.
+
+In all cases the MWS administrators who made the original request
+will be notified of the outcome.
+
+When a name within cam.ac.uk is removed from a Managed Web Server
+site the corresponding CNAME record will be deleted providing it
+does actually point to a MWS site. No notification is sent when
+this happens.
+
+Following any update it can take up to an hour for changes to
+appear on the authoritative servers and up to a further hour to
+propagate to other caching servers.
+</pre>

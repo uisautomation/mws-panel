@@ -8,8 +8,8 @@ from mws.production_secrets import *
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ADMINS = (('amc203', 'amc203@cam.ac.uk'), )
-SERVER_EMAIL = "mws-support@uis.cam.ac.uk"
+ADMINS = (('automation', 'automation@uis.cam.ac.uk'), )
+SERVER_EMAIL = "mws-support+test@uis.cam.ac.uk"
 
 TEMPLATE_DEBUG = False
 

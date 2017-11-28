@@ -1,4 +1,4 @@
-from common_settings import *
+from mws.common_settings import *
 
 # Tolerate the absence of secrets (but some parts of the system will break).
 try:

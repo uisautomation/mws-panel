@@ -1,0 +1,39 @@
+The architecture compromises the list of all components used in MWS3. This include external components no developed or maintained by InfoSys.
+
+This is a first approach of the complete architecture
+
+[[File:MWS3Architecture.png|800px]]
+
+== APIs ==
+
+=== Raven ===
+
+Communications with the Raven webauth API are done using the [https://pypi.python.org/pypi/django-ucamwebauth django-ucamwebauth] python package. django-ucamwebauth follows the protocol defined by [http://raven.cam.ac.uk/project/waa2wls-protocol.txt Raven Web Auth API]. The information exchanged allows a user to identify itself agains the service.
+
+=== Lookup ===
+
+Communications with Lookup are done using the web the [https://pypi.python.org/pypi/django-ucamlookup django-ucamlookup] python package. django-ucamlookup follows the protocol defined by the [http://www.ucs.cam.ac.uk/lookup/ws Lookup web service API]. This API provides some additional data of the user like its name, its institution, or the list of groups where they are member of. This is later used to give the user the appropriate permissions in the service.
+
+=== Bes++ ===
+
+A JSON object is generated containing information about all MWS sites. This information is then stored in bes++ and can be accessed through that service. The JSON file is consulted periodically in a pull way from bes++ which updates its records accordingly. The JSON object is served from the control panel server through a HTTPS address.
+
+=== Finance ===
+
+Currently Finance API consist in the generation of a CSV file with a summary of all MWS sites charges per academic year. This API could potentially be extended in the future to interact with a finance system to produce automatic billing. The CSV generated contains the purchase order number, the period to charge (with exact dates), the amount to charge, and the contact address of the user.  The CSV file is served from the control panel server through a HTTPS address.
+
+=== IP Register ===
+
+Similarly to the Bes++ API, a JSON object is generated containing all the information that the MWS3 database has about network addresses allocations and domain names requested for the MWS3 sites. IP Register responds if it is happy with the proposed allocation of the domain names in the JSON object. It is also consumed in a pull way. The JSON object is served from the control panel server through a HTTPS address.
+
+=== Jackdaw ===
+
+The Control Panel periodically downloads the list of current members of the university from Jackdaw. This list is later used to check if any MWS3 became orphan. The list contains a list of CRSID of current members of the university and their UnixID. This global unix id is used as a unix id of the user in the MWS VM.  The list is gathered from the jackdaw server through a SSH connection.
+
+=== VM API ===
+
+There are two versions of this API, the Platforms VM API, and the Xen API.
+
+The Platforms VM API is provided by Platforms but it lacks of any documentation. It is a Perl middleware between the VMWare vSphere API and the Django control panel. Its communications are based on the exchange of JSON objects/messages in an authenticated HTTPS web API. It allows to create, delete, clone, power on or off, or reset a VM. A token is used as a method of authentication, and the parameters change based on the main command you want to execute/request. The endpoint is the same for all the commands.
+
+The Xen API is provided by us (InfoSys team)

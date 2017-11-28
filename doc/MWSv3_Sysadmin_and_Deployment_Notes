@@ -1,0 +1,341 @@
+This page is intended to be a set of useful things for people interested in operating and/or developing MWSv3. Please add to it!
+
+==Overview==
+
+There are a number of [[Managed_Web_Server_version_3|MWS3 wiki pages]] that describe aspects of how MWS3 works. Briefly, though, everything is managed by ansible, with roles from [https://git.csx.cam.ac.uk/x/ucs/u/mcv21/isg_ansible.git the ISG ansible repo]. There are 4 types of machine in each cluster:
+# The 2 Xen hosts (mwsxenhost & mwspacemaker role), which are physical machines
+# 1 quorum server (mwspacemaker), which is a Platforms' VM
+# The panel server (mwsserver), which is a Platforms' VM
+# The guests (mwsclient), which run on the Xen hosts
+
+The live service runs off mwsxencluster2 (and the panel is panel.mws3.csx.cam.ac.uk), the test cluster is mwsxencluster0 (and the panel test.dev.mws3.csx.cam.ac.uk). Everything runs Debian jessie amd64. Hardware details below relate to the live service
+
+===Clustering===
+
+The 2 Xen hosts and the quorum server are a pacemaker cluster, with 2 nodes being a quorum. Each mws site is a cluster resource (with a custom XenXL resource agent, which basically is just upstream's xm-based resource modified to use the xl toochain); moving the cluster resource around automatically arranges for live migration of the Xen guest and the underlying drbd resource.
+
+===Storage===
+
+Each Xen host has underlying physical storage in the form of /dev/md0 a RAID5 array of 7 SSDs. That is an LVM PV which contains a single VG, guests. The host uses the "root" and "swap" LVs inside guests.
+
+Each guest is allocated an LV inside guests of the form mwsig-hostname (currently all mwsig-mws-priv-XXX); there's a filter directive in lvm.conf that means that these cannot be considered as possible PVs by the host. This LV is used as the underlying storage for a DRBD device (called mws-priv-XXX). That DRBD device is made an LVM PV (which the host will not see because of the filter directive). A single VG (called mws-priv-XXX-vg) is made filling that PV. Three LVs are constructed inside that VG (by xen-create-image):
+#mws-priv-XXX.mws3.csx.cam.ac.uk-replicated
+#mws-priv-XXX.mws3.csx.cam.ac.uk-root
+#mws-priv-XXX.mws3.csx.cam.ac.uk-swap
+The guest uses these for its root fs, swap, and /replicated.
+
+The theory is that everything we create and manage with ansible should be in -root and be entirely reproducible in the event of guest failure, and that everything the user might modify (and/or we need to restore from backup) should be in /replicated. Hence some of /etc and crontabs are in /replicated, along with all the docroots for the guest. Additionally, /replicated/home is bind-mounted into /home.
+
+/replicated is made from a thin pool which also includes snapshots. Nightly snapshots (named mws-snapshot-YYYY-MM-DD) and any user-created snapshots (via the panel) are made available read-only via the automounter.
+
+===Networking===
+
+Every guest has an IPv6 address; currently they also all have IPv4 addresses, but the plan is that test-guests will eventually be v6 only.
+The hosts have 2 interfaces: eth0 (for external networking) which has v6 and v4, and eth1 over which the DRBD traffic goes (this is carried on a private VLAN), which has a private (fd19::...) v6 address.
+
+===Guest Creation & Destruction===
+
+mws_vm_control.py.j2 (in mwsxenhost) is a template (to /usr/local/bin/mws_vm_control) that does VM creation and management. It should be fairly straightforward to follow its operation - control flow starts with main() at the bottom of the file.
+
+If something goes wrong, then logs appear in /var/log/daemon.log and should contain full tracebacks. Ideally, these will also have been emailed to uis-mws-robotmail. Generally, if something has gone wrong, then lock files for the relevant guest will be left in /etc/mws3/locks on both Xen hosts. These will need removing before any further operations on the affected guest can proceed.
+
+Creation sets up the entire storage stack, and deletion removes it all again. There are also options to start stop and reboot guests.
+
+===Privileges===
+
+The panel has www-data (runs the webapp) and mwsadmin (runs ansible); they use userv services to communicate. www-data should have no sight of secrets. mwsadmin has root on all the guests. The webapp uses ansible to get mwsadmin to run ansible on the guests.
+
+The Xen hosts also have mwsadmin (to which the panel's mwsadmin has access); it uservs to root to do guest management (creating and destroying guests, turning them off, etc.)
+
+===Reset MySQL Password===
+
+There are two options to reset the MySQL root password. The first one only applies if the user debian-sys-maint still has admin access to the mysql console (i.e. no one has revoked access to that user). If this is the case, executing <code>mysql --defaults-file=/etc/mysql/debian.cnf</code> should give you access to the console without asking for a password. Once in the console execute <code>SET PASSWORD FOR 'root'@'localhost' = PASSWORD('MyNewPass');</code> and that's it.
+
+If you have lost all access to the MySQL console, you need to follow these steps:
+
+#Stop MySQL
+#Create a text file containing: SET PASSWORD FOR 'root'@'localhost' = PASSWORD('MyNewPass');
+#Execute: mysqld_safe --init-file=textfilepreviouslycreated &
+#Restart MySQL
+
+
+
+If the Ansible job has failed leaving 
+     "The system is working at resetting the key, please refresh the page in a few seconds"
+in the "Change database root password" section of the server panel, you can
+reset the MySQL root password as above. You then need to get the panel to display this new password so that the site managers can see it.
+
+Go to admin panel "Ansible configurations", which is at
+https://panel.mws3.csx.cam.ac.uk/admin/apimws/ansibleconfiguration/
+and look for the mysql_root_password for the server. It will have value "Resetting" rather
+than a character string. Click on that link, and you will get a page
+where you can alter "Resetting" to the new root password you've just set
+in the database.
+
+==Git Usage==
+
+Each milestone release (currently Px, eventually Rx) should be a git branch of isg_ansible and mwsv3/webapp. The variable "repo_branch" determines which version of the MWS webapp is deployed, and the ansible_repo_branch which version of isg_ansible is deployed on the mwsclients.
+
+==Rebooting guests and/or hosts==
+
+Sometimes it is necessary to reboot the hosts or guest (typically as a result of needing to apply a security fix). Here's how!
+
+===Host reboot===
+
+See [[MWSv3 Xen Host Patching]]
+
+If the node reboots fine but doesn't rejoin the cluster, then log in to it, and start with <code>systemctl list-jobs</code>; if drbd is the thing blocking stuff, then check for drbd resources with <code>drbd-overview</code> that the other host isn't trying to use (this shouldn't happen in production, but the test cluster sometimes has unwanted test resources kicking around); using <code>drbdadm down</code> on them should let the drbd job finish, and the node re-join the cluster.
+
+===Guest reboot===
+
+Rebooting an individual guest can be done in a number of ways - the user can restart from the panel, you can log in as root and use <code>shutdown -r now</code>, or you can use <code>crm resource restart</code>. Sometimes, though, we want to be able to restart all the guests at once (e.g. because of a security patch). Notably, we don't want to restart guests that are currently turned off.
+
+ for x in $( crm_resource --list | sed -nre '/Started/s/^ (mws-priv-[0-9]+)\t.*$/\1/p' ); do crm resource restart $x ; done
+
+This takes a while (2017-01-18: about an hour), as it restarts resources one by one.
+
+Two things have been observed going wrong with this:
+
+* The pacemaker monitor script on ial is likely to catch guests while they are down for the restart and so produce spurious up/down alarms. You might want to put into scheduled maintenance while the reboot is happening.
+* On one occasion we've seen a guest fail to restart with the following message. This may have been the result of an unfortunately-timed simultaneous update to the CRM. Running <code>crm resource start mws-priv-xx</code> resolved the problem.
+  Call cib_apply_diff failed (-205): Update was older than existing configuration
+  ERROR: could not patch cib (rc=205)
+
+==Patching Intel SSD firmware==
+
+This seems to keep being necessary (I've done it twice now), so some very brief notes on how to update the drive firmware. You need to download the latest version of "Intel Solid State Drive Data Center Tool" (pick the linux version), which will be a zip file. Unzip it, and it'll contain two <code>.rpm</code>s, one of which is x86_64. Install that with <code>alien -i filename.x86_64.rpm</code>, and then list the available drives with <code>isdct show -intelssd</code>; that should tell you the firmware version installed on the drives (and that there's a newer version available). 
+
+Make the host standby and wait for the guests to migrate off (in case something goes wrong), then install the update with the <code>load</code> command, roughly thus:
+
+ for i in $(seq 0 6) ; do isdct load -f -intelssd $i ; done
+
+The <code>-f</code> means not to prompt before going ahead. Once that's done, reboot the host, check all seems well, then make it online again.
+
+==Recovering from network outages==
+
+===Pacemaker===
+
+Network disruption between MWS Xen hosts can sometimes cause something (probably Pacemaker, for reasons unclear) to shut down most or all MWS servers.
+
+Symptoms of this include lots of unresponsive web sites and
+
+  crm_mon -1 -r
+
+(or [http://ial.csi.cam.ac.uk/ the status page on the quorum server]) reporting resources in state 'FAILED (unmanaged)'.
+
+It appears to be possible to recover from this by running 'crm resouce cleanup' on all the affected resources. The following will do so on all resources in state 'FAILED': 
+
+  for x in $( crm_resource --list | sed -nre '/FAILED/s/^ (mws-priv-[0-9]+)\t.*$/\1/p' ); do crm resource cleanup $x ; done
+
+Most resources will restart after this, but note that it takes some time for the restarts to complete.
+
+Some resources may remain in the 'stopped' state, even though 'crm configure show' shows them as 'target-role=Started'. This can be resolved by running 'crm resouce cleanup' on them again:
+
+ for x in $( crm_resource --list | sed -nre '/Stopped/s/^ (mws-priv-[0-9]+)\t.*$/\1/p' ); do crm resource cleanup $x ; done
+
+Note that some resources are supposed to be stopped and won't be started by this process. You can identify them either by looking for 'target-role=Stopped' in the output of 'crm configure show' or by looking for 'Disabled' or 'Canceled' sites on the [https://panel.mws3.csx.cam.ac.uk/admin/sitesmanagement/site/ Pannel Admin sites page].
+
+===Xen===
+
+Following network disruption, Xen has been observed in a state where some clients are shown as running (at least to some extent) on both Xen hosts. 
+
+Clients can be listed by the command:
+
+  xl list
+
+Clients are normally in the state 'b' -- blocked (i.e. nothing to do, or just occasionally 'r' -- running). 
+
+An observed failure state has clients in state 'b' on the host where pacemaker thinks the client should be running and in state 'p' or 's' on the other host. Running
+
+  xl destroy <domain-id>
+
+(where <domain-id> is the number in the second column of the <tt>xl list</tt> output) on the host that shouldn't be running the client seems to correctly resolve the situation. '''''Don't''''' get this the wrong way around.
+
+Clients in this state are likely to show drbd issues as well (see below). Destroying the bogus client commonly seems to resolve the drbd problems at the same time.
+
+===DRBD===
+
+The state of DRBD can be shown by the command
+
+  drbd-overview
+
+Much the same information is available in /proc/drbd
+
+All volumes should be in state 'Connected'. Volumes for guests that are stopped should be in state 'Secondary/Secondary'. Volumes for guests running on this server should be in state 'Primary/Secondary', and for guests running on the other server 'Secondary/Primary'. All should be shown 'UpToDate/UpToDate'. Anything else is wrong.
+
+Possible fixes:
+
+'''Standalone on both servers, Primary/Unknown on the server running the guest, Secondary/Unknown on the other server'''
+
+Run 
+
+  drbd connect <resource>
+
+on both servers.
+
+'''Standalone Primary/Unknown on both servers'''
+
+; On the server '''not''' running the guest, run 
+
+  drbdadm secondary <resource>
+  drbdadm -- --discard_my_data connect <resource>
+
+and then on the server that is running the guest
+
+  drbd connect <resource>
+
+'''''Don't''''' get these the wrong way around.
+
+'''Connected Primary/Primary on both servers'''
+
+This seems to be a symptom of Xen confusion (see above) and seems to fix itself once Xen is no longer confused.
+
+After applying these fixes resources should resync and move to the correct status within a minute or two. /proc/drbd shows a progress bar while this is happening.
+
+==Restoring a cancelled server==
+
+If a guest (MWS server) gets cancelled (through non payment, or user request) it can be restored by:
+
+* Updating the panel database such that it's no longer cancelled (i.e.  https://panel.mws3.csx.cam.ac.uk/admin/sitesmanagement/site/ no longer shows it as Canceleld of Disabled)
+* Running <tt>crm resource start <resource></tt>, where <resource> is e.g. mws-priv-92
+* Triggering an Ansible run from the panel ('manage authorised users and groups' --> 'Force update' which has the right effect).
+
+==Updating and runing the Ansible code that manages the MWS servers==
+
+Note: you can easily run Ansibl against a single MWS server from the panel ('manage authorised users and groups' --> 'Force update' which has the right effect).
+
+The configuration of the MWS servers (a.k.a. Xen clients) is managed by Ansible in the isg_ansible repository (see mwsclients.yml, and the mwsclient role in particular). This is normally run automatically by the panel in response to MWS server creation and reconfiguration. To make this work, the panel supplies details of every MWS server's configuration via a dynamic inventory script.
+
+A copy of the isg_ansible repository is installed on each panel server by mwsservers.yml. Because its part of the automation, production panel get a named branch of the repository, while the test panel get a copy of master (this is managed by variables in the relevant group_vars files.
+
+Changes can be tested on the test panel server. Once ready, they can either become the Ansible part of an new release, or can be merged or cherry-picked into the current release branch.
+
+To update the copy of isg_ansible on a panel server, run ansible-playbook against that server (or servers), e.g.
+
+  ansible-playbook -l <server> -i servers site.yml
+
+To run Ansible against all the mwsclients, log in to the panel server as root, become the mws-admin user, cd into the ~/ansible diectory, and run
+
+  ansible-playbook -i ../bin/userv_inventory.sh mwsclients.yml
+
+Ansible sometimes fails on a subset of clients reporting timeouts or various sorts of resource exhaustion). Following the retry instructions (e.g. appending --limit @/home/mws-admin/mwsclients.retry) normally resolves the problem.
+
+==Disable HTTPS==
+
+HTTPS is automatically enabled when a site manager uploads a certificate, but there's no way for them to disable it (bug). We can do it by 
+
+* Find the vhost in https://panel.mws3.csx.cam.ac.uk/admin/sitesmanagement/vhost/
+* Disable the tls_enabled flag and save
+* Run Ansible on the server (most easily from the server's control panel --> mange Users and Groups -->  Force upgrade (which happens to do the right thing).
+
+== Stop servers ping-ponging ==
+
+Sometimes MWS servers seem to get stuck in a cycle of reboots, sometimes coming up on alternate Xen hosts each time. I don't know why, but stopping the server on Pacemaker, doing a cleanup and then starting it again sometimes helps:
+
+ crm resource stop mws-priv-''<nnn>''
+ crm resource cleanup mws-priv-''<nn>''
+ crm resource start mws-priv-''<nnn>''
+
+I've no idea how many of these commands are actually needed, or why it works.
+
+== Manually giving more RAM to a running MWS3 guest ==
+
+''Notes provided in an email from Matthew:''
+
+This is the live RAM-increase process. Once we have Xen >=4.5, it'll be
+easier, as the config-update step won't be necessary any more.
+
+The easier approach is to just edit the .cfg file on both hosts and
+reboot the domain, but obviously that involves downtime...
+
+* [FQDN] == fqdn of machine e.g. mws-priv-69.mws3.csx.cam.ac.uk
+* [ID] == domain ID of guest e.g. 72
+* [RID] == cluster resource id of guest e.g. mws-priv-69
+
+You want root shells on both xen hosts.
+
+ #find which host resource is running on
+ crm resource status [RID]
+ #tell cluster not to manage resource (so it isn't migrated under us)
+ crm resource unmanage [RID]
+ #following commands run on the host the guest is running on
+ #get the domain ID of guest
+ xl list [FQDN]
+ #increase RAM to 2048MB (adjust to taste)
+ xl mem-set [ID] 2048
+ 
+ #edit the .cfg file on both hosts (see below for details)
+ emacs /etc/xen/[FQDN].cfg
+ 
+ #tell Xen to update its stored version of the domain configuration
+ #dummy parameter is a bug work-around
+ xl config-update [ID] /etc/xen/[FQDN].cfg 'dummy = "foo"'
+ #give the resource back to the cluster
+ crm resource manage [RID]
+
+The xen .cfg file contains two memory configurations:
+
+ memory      = '1024'
+ maxmem      = '4096'
+
+You can adjust "memory" to any value <= "maxmem" without a guest restart
+[Xen tells the kernel that it has maxmem available to it, then a special
+driver eats the remainder]. You set "maxmem" to the value you passed to
+mem-set above.
+
+== Running a command on every guest ==
+
+You can use Ansible to run a command on every guest. To do so, log in to the panel server as root, become the mws-admin user, cd into the ~/ansible diectory, and run e.g.
+
+  ansible -i ../bin/userv_inventory.sh -u root all -a "uname -a"
+
+* 'all' is a required pattern matching all hosts
+* The 'ansible' command defaults to using the 'command' module to execute the command specified by <tt>-a</tt>. Note that 'command' executes the command directly, bypassing any shell. If you need shell functionality (pipes, redirects, etc.) use the shell module instead: <tt>-m shell</tt>.
+
+== Guest Kernels ==
+
+Xen guests (so MWS servers) boot a kernel supplied by the underlying Xen Host. Which kernel they boot is selected by the relevant <tt>.cfg</tt> file in /etc/xen/.
+
+== Stuck MySQL password change ==
+
+Attempts to reset a database root password can get stuck, with the page continuously reporting 'The system is working at resetting the key, please refresh the page in a few seconds'. This means that the panel never received the expected acknowledgement that the reset had completed.
+
+This can be fixed by going to https://panel.mws3.csx.cam.ac.uk/admin/apimws/ansibleconfiguration/ and finding the settings "mysql_root_password" for the service address that got stuck. It will have "Resetting" as value. Delete that entry and the user (or one of our administrators) will be able to reset the pwd again at https://panel.mws3.csx.cam.ac.uk/settings/vm/620/db_root_pass/
+
+== Creation of a Virtual Machine failing ==
+
+If the creation of a Virtual Machine fails, it will leave some things behind that will prevent the creation of new ones using the same name. You will have to do the following ON BOTH nodes of the cluster:
+
+* check drdb-overview to confirm that the drbd device is "Unconfigured"
+* remove the logical volume using: lvremove guests/mwsig-mws-priv-XXX
+* remove drbd configuration file at /etc/drbd.d/mws-priv-XXX.res
+* remove the lock from /etc/mws3/locks
+
+You should good to go again trying to create the vm again.
+
+== "WARNING: lvmetad is running but disabled" ==
+
+We don't run lvmetad ('use_lvmetad = 0' in /etc/lvm/lvm.conf) but somehow the demon occasionally gets started. This results in this confusing warning message from most LVM utilities
+
+  WARNING: lvmetad is running but disabled. Restart lvmetad before enabling it!
+
+It appears to be entirely safe to stop lvmetad, for example with
+
+  systemctl stop lvm2-lvmetad
+
+Current status can be checked with
+  
+  systemctl status lvm2-lvmetad
+
+== Ansible error when "gears" is being reset ==
+
+Check contents of /replicated/.mwsperms. 
+
+Check group of files in the relevant docroot.
+
+Check whether the server's panel says "gears" is on or off.
+
+Check the admin panel for that Vhost to see is "Apache owned" is on or off.
+
+If the first two have completed the reversion, but the others still show "gears" as being on,
+change the "Apache owned" setting in the admin panel to off.

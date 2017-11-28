@@ -1,0 +1,50 @@
+= VMWare Platforms VMs =
+
+Some VMs belong to MWSv3, but aren't the automatically-generated client VMs. These are listed here so we can keep track of them:
+
+* boarstall.csi.cam.ac.uk / demo.dev.mws3.csx.cam.ac.uk / panel.mws3.csx.cam.ac.uk [Production control panel machine]
+* test.dev.mws3.csx.cam.ac.uk [Development control panel machine]
+* on.csi.cam.ac.uk [Xen MWS3 quorum server]
+* qui.csi.cam.ac.uk [Xen MWS3 quorum server]
+* ial.csi.cam.ac.uk [production quorum server]
+
+old:
+
+* hale.csx.cam.ac.uk [Demonstration client machine]
+* garmr.csi.cam.ac.uk [Potential LDAP server]
+
+= Xen InfoSys VMs =
+
+xen.mws3.csx.cam.ac.uk is a vbox
+
+name:        xen.mws3.csx.cam.ac.uk<br>
+domain:      csx.cam.ac.uk<br>
+purpose:     Xen cluster for MWS3
+
+with associated boxes:
+* ophon.csi.cam.ac.uk
+* opus.csi.cam.ac.uk
+
+with no associated addresses
+
+hosting vboxes:
+
+address:     131.111.8.225<br>
+address:     2001:630:212:8::8c:d002<br>
+hostname:    ophobe.csi.cam.ac.uk
+
+address:     131.111.8.228<br>
+address:     2001:630:212:8::8c:d003<br>
+hostname:    ix.csi.cam.ac.uk
+
+address:     131.111.8.229<br>
+address:     2001:630:212:8::8c:d004<br>
+hostname:    written.csi.cam.ac.uk
+
+address:     131.111.8.230<br>
+address:     2001:630:212:8::8c:d005<br>
+hostname:    wrangler.csi.cam.ac.uk
+
+address:     131.111.8.244<br>
+address:     2001:630:212:8::8c:d006<br>
+hostname:    viva.csi.cam.ac.uk

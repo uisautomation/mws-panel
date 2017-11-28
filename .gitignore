@@ -21,3 +21,7 @@ mws/mws/production_secrets.py
 
 # VMManager installation files
 vmmanager/vmmanager.egg-info
+
+# virtualenv files
+mws/venv/*
+
