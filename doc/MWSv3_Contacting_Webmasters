@@ -1,8 +1,0 @@
-We don't have a good way of contacting all the webmasters of all MWS(v3) sites. But we do have a bad-but-usable way:
-
-* Access the page at https://panel.mws3.csx.cam.ac.uk/adminemailist/, download the content to a file
-* Access the [https://lists.cam.ac.uk/mailman/admin2/uis-mws-webmasters/members/import import/export page of the uis-mws-webmasters@lists.cam.ac.uk mailing] list (jmw11, amc203, ph448, si202 are all administrators)
-** Check that all the notification options are off
-** Upload the file created above
-* Email messages to [mailto:uis-mws-webmasters@lists.cam.ac.uk uis-mws-webmasters@lists.cam.ac.uk]
-* Approve, or get and administrator to approve, release of the message (the list is set to always require moderator approval).
