@@ -1,6 +1,6 @@
 pipelines:
-  branches:
-    master:
+  custom:
+    mirror-to-uis:
       - step:
           name: "Mirror to git.uis"
           script:
@@ -9,8 +9,9 @@ pipelines:
             - git config user.name "MWS Bitbucket Robot"
             # Ask git-uis about ourselves
             - ssh uis@git.uis.cam.ac.uk info
-            # We need a full clone when mirroring master -> git.uis
-            - git fetch origin "$BITBUCKET_BRANCH"
-            # Configure git-uis remote and push ourselves
-            - git remote add git-uis uis@git.uis.cam.ac.uk:mwsv3/webapp
-            - git push git-uis "$BITBUCKET_BRANCH"
+            # We need a full clone when mirroring -> git.uis. Change into the
+            # git directory so that we're effectively operating on a bare repo.
+            - cd .git
+            - git fetch --update-head-ok origin refs/*:refs/*
+            # Mirror ourselves to git-uis
+            - git push --mirror uis@git.uis.cam.ac.uk:mwsv3/webapp
