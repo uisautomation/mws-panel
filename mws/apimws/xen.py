@@ -76,8 +76,8 @@ def secrets_prealocation_vm(vm):
 
         pubkey = SSHPubKey(result["pubkey"])
 
-        SiteKey.objects.create(site=service.site, type=keytype, public_key=result["pubkey"],
-                               fingerprint=pubkey.hash_md5(), fingerprint2=pubkey.hash_sha256())
+        SiteKey.objects.get_or_create(site=service.site, type=keytype, public_key=result["pubkey"],
+                                      fingerprint=pubkey.hash_md5(), fingerprint2=pubkey.hash_sha256())
 
         if keytype is not "ED25519":  # "sshed25519" as of 2016 is not supported by jackdaw
             for fptype in SiteKey.FP_TYPES:
