@@ -15,6 +15,10 @@ INSTALLED_APPS = INSTALLED_APPS + (
     'debug_toolbar',
 )
 
+MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES + (
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+)
+
 # ucamwebauth configuration
 UCAMWEBAUTH_LOGIN_URL = 'https://demo.raven.cam.ac.uk/auth/authenticate.html'
 UCAMWEBAUTH_LOGOUT_URL = 'https://demo.raven.cam.ac.uk/auth/logout.html'

@@ -13,9 +13,6 @@ urlpatterns = patterns('',
     # external apps urls
     url(r'', include('ucamwebauth.urls')),
 
-    # grappelli URLS
-    url(r'^grappelli/', include('grappelli.urls')),
-
     # admin app urls
     url(r'^admin/', include(admin.site.urls)),
 
