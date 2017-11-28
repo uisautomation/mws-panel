@@ -1,7 +1,7 @@
 pipelines:
   custom:
     mirror-to-uis:
-      - step:
+      - step: &mirror-to-uis
           name: "Mirror to git.uis"
           script:
             # Tell git who we are
@@ -12,6 +12,8 @@ pipelines:
             # We need a full clone when mirroring -> git.uis. Change into the
             # git directory so that we're effectively operating on a bare repo.
             - cd .git
-            - git fetch --update-head-ok origin refs/*:refs/*
+            - git fetch --update-head-ok origin refs/heads/*:refs/heads/* refs/tags/*:refs/tags/*
             # Mirror ourselves to git-uis
-            - git push --mirror uis@git.uis.cam.ac.uk:mwsv3/webapp
+            - git push --prune uis@git.uis.cam.ac.uk:mwsv3/webapp +refs/heads/*:refs/heads/* +refs/tags/*:refs/tags/*
+  default:
+    - step: *mirror-to-uis
