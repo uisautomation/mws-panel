@@ -9,7 +9,7 @@ You will need the following installed:
 2. docker
 3. docker-compose
 
-Clone the main ``webapp`` repo and navigate to the ``mws`` directory:
+Clone the panel webapp repo and navigate to the ``mws`` directory:
 
 ```console
 git clone <...> webapp && cd webapp/mws
