@@ -2,7 +2,7 @@ PyOpenSSL
 celery>=3.1.25,<4.0
 django-celery
 django-debug-toolbar
-django-reversion>=1.8.4,<1.10
+django-reversion
 django-stronghold>=0.2.6
 django-ucamlookup>=1.1
 django-ucamprojectlight>=1.1
