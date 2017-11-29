@@ -1,6 +1,6 @@
 import sys
 import json
-from django.core.management.base import NoArgsCommand, CommandError
+from django.core.management.base import BaseCommand, CommandError
 from optparse import make_option
 from django.core.urlresolvers import reverse
 from django.db.models import Q
@@ -50,18 +50,18 @@ yzdfJ72n+1JfHGP+workciKNldgqYX6J4jPrCIEIBrtDta4QxP10Tyd9RFu13XmE
 -----END CERTIFICATE-----'''
 
 
-class Command(NoArgsCommand):
+class Command(BaseCommand):
     args = "{ --list | --host <hostname> }"
     help = "Generates a dynamic inventory for ansible from the MWS database."
     output_transaction = True
-    option_list = NoArgsCommand.option_list + (
+    option_list = BaseCommand.option_list + (
         make_option("--list", action='store_true',
                     help="emit a list of configured MWS clients"),
         make_option("--host", action='store',
                     help="emit the configuration of a single MWS client"),
         )
 
-    def handle_noargs(self, list=None, host=None, outfile=None, **options):
+    def handle(self, list=None, host=None, outfile=None, **options):
         if (not list and not host) or (list and host):
             raise CommandError("Exactly one of --list and --host must be specified.")
         outfile = outfile or sys.stdout
