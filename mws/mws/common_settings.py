@@ -95,8 +95,6 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-# Customization for the grappelli admin system
-TEMPLATE_CONTEXT_PROCESSORS = global_settings.TEMPLATE_CONTEXT_PROCESSORS + ('django.core.context_processors.request', )
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     'django.contrib.staticfiles.finders.FileSystemFinder',
