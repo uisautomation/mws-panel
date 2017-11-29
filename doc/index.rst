@@ -5,4 +5,5 @@ MWS Control Panel Web Application
     :maxdepth: 2
     :caption: Contents
 
+    gettingstarted
     sitesmanagement
