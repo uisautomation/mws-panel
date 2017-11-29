@@ -9,7 +9,8 @@ the panel "pre-allocates" VMs ahead of time.
 This section explains the life cycle of a Xen Guest Virtual Machine from
 the point of view of the web panel. It is the panel which decides if a
 particular VM is off, on, disabled, quarantined, administratively suspended,
-etc.
+etc. See :any:`data-model` for an overview of the difference between a "Site",
+"Service" and "Virtual Machine".
 
 Preallocation
 -------------
