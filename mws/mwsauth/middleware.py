@@ -43,5 +43,4 @@ class CheckBannedUsers():
         except Exception as e:
             logger.error(str(request.user) + ' user cannot be found in lookup')
             t = loader.get_template('403.html')
-            c = RequestContext(request, {})
-            return HttpResponseForbidden(t.render(c))
+            return HttpResponseForbidden(t.render())
