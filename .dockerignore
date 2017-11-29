@@ -1,0 +1,7 @@
+# ignore everything by default
+*
+
+# *except* specific directories
+!mws
+!docker
+!vmmanager

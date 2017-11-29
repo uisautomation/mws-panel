@@ -131,7 +131,6 @@ class SiteCreate(LoginRequiredMixin, FormView):
     template_name = 'mws/new.html'
     prefix = "siteform"
     success_url = reverse_lazy('listsites')
-    initial = {'type': ServerType.objects.order_by('order').first()}
 
     def get_context_data(self, **kwargs):
         context = super(SiteCreate, self).get_context_data(**kwargs)
