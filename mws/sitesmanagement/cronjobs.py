@@ -1,3 +1,10 @@
+"""
+The :py:mod:`~sitesmanagement.cronjobs` module contains functions which
+implement various scheduled tasks. These tasks are executed by celery as
+specified in the settings.
+
+"""
+
 import json
 import logging
 import subprocess
@@ -15,6 +22,10 @@ LOGGER = logging.getLogger('mws')
 
 
 class FinanceTaskWithFailure(Task):
+    """An abstract task which will log an informative error on failure. It is
+    intended to be used for tasks which send email to the finance office.
+
+    """
     abstract = True
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):
@@ -23,6 +34,10 @@ class FinanceTaskWithFailure(Task):
 
 
 class ScheduledTaskWithFailure(Task):
+    """An abstract task which will log an informative error on failure. It is
+    intended to be used for general scheduled tasks.
+
+    """
     abstract = True
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):
@@ -75,7 +90,7 @@ def send_reminder_renewal():
                  "information is still current. If you want to amend your purchase order you can upload a new one. "
                  "Your site may be cancelled if we can't successfully invoice for it.\n\nIf you no longer want "
                  "you site then please either cancel it now (under 'edit the MWS profile'), or mark "
-                 "it 'Not for renewal' in which case it will be automatically cancelled on '%s'." 
+                 "it 'Not for renewal' in which case it will be automatically cancelled on '%s'."
                  % (billing.site.name, billing.site.name, billing.site.start_date.replace(year=today.year),
                     billing.site.start_date.replace(year=today.year)),
             from_email="Managed Web Service Support <mws-support@uis.cam.ac.uk>",
@@ -189,6 +204,14 @@ def delete_cancelled():
 
 @shared_task(base=ScheduledTaskWithFailure)
 def check_num_preallocated_sites():
+    """
+    A :py:class:`~.ScheduledTaskWithFailure` which checks, for each
+    :py:class:`~sitesmanagement.models.ServerType` how many pre-allocated
+    :py:class:`~sitesmanagement.models.Site` instances there are. If that is
+    smaller than the number which should be pre-allocated, allocate a new one
+    via :py:func:`apimws.utils.preallocate_new_site`.
+
+    """
     for servertype in ServerType.objects.all():
         if Site.objects.filter(preallocated=True, type=servertype).count() < servertype.preallocated:
             preallocate_new_site(servertype=servertype)

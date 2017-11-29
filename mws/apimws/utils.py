@@ -98,6 +98,13 @@ def finished_installation_email_confirmation(site):
 
 
 def preallocate_new_site(servertype=None):
+    """
+    Create a new :py:class:`~sitesmanagement.models.Site` object with a unique
+    uuid4 as name. The new Site has two
+    :py:class:`~sitesmanagement.models.Service` instances associated with it,
+    "production" and "test".
+
+    """
     if servertype:
         site = Site.objects.create(name=uuid.uuid4(), disabled=False, preallocated=True, type=servertype)
     else:
