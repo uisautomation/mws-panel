@@ -1,6 +1,7 @@
 from datetime import datetime
 import uuid
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
@@ -43,6 +44,27 @@ LSxbGuFG9yfPFIqaSntlYMxKKB5ba/tIAMzyAOHxdEM5hi1DXRsOok3ElWjOw9oN
 6Psvk/hLUN+YfC1saaUs3oh+OTfD7I4gRTbXPgsd6JgJQ0TQtuGygJdaht9cRBHW
 wOq24EIbX5LquL9w+uvnfXw=
 -----END CERTIFICATE-----"""}):
+        # HACK: Django >= 1.10 disabled login if is_active=False and *even if*
+        # you set is_active=True on the user model, it is set *back* to False by
+        # mwsauth.models.add_name_to_user if there isn't a corresponding
+        # MWSUser for the user. Hence we, need to create both before login can
+        # proceed.
+        u, u_created = get_user_model().objects.get_or_create(username=user)
+        mu = MWSUser.objects.filter(user=u).first()
+
+        if not mu:
+            # If the MWSUser did not previously exist, set the uid by some
+            # super clever means to ensure different users get different uids.
+            # This, by the way is a HACK within the HACK above...
+            mu = MWSUser.objects.create(
+                user=u, uid=MWSUser.objects.count() + 10000)
+
+        if u_created:
+            # Now, if the user was also created, set them to active in a move
+            # which is now *not* undone but the pre-save hook.
+            u.is_active = True
+            u.save()
+
         self.client.get(reverse('raven_return'),
                         {'WLS-Response': create_wls_response(raven_issue=datetime.utcnow().strftime('%Y%m%dT%H%M%SZ'),
                                                              raven_url=settings.UCAMWEBAUTH_RETURN_URL,
