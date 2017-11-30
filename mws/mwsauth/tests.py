@@ -310,8 +310,13 @@ class AuthTestCases(TestCase):
     def test_banned_users_middleware(self):
         with self.settings(MIDDLEWARE_CLASSES=settings.MIDDLEWARE_CLASSES+('mwsauth.middleware.CheckBannedUsers',)):
             do_test_login(self, user="amc203")
+
+            # Delete the corresponding MWSUser and re-save the user
+            MWSUser.objects.filter(user__username="amc203").delete()
+            User.objects.get(username="amc203").save()
+
             response = self.client.get(reverse('listsites'))
-            self.assertEqual(response.status_code, 403)  # There user was created without its corresponding mws_user
+            self.assertEqual(response.status_code, 302)  # There user was created without its corresponding mws_user
             self.assertFalse(User.objects.get(username="amc203").is_active)  # therefore is deactivated by default
 
             User.objects.filter(username="amc203").update(is_active=True)
@@ -325,4 +330,4 @@ class AuthTestCases(TestCase):
 
             User.objects.filter(username="amc203").update(is_active=False)
             response = self.client.get(reverse('listsites'))
-            self.assertEqual(response.status_code, 403)  # There user is not active
+            self.assertEqual(response.status_code, 302)  # There user is not active
