@@ -7,7 +7,7 @@ django-stronghold>=0.2.6
 django-ucamlookup>=1.1
 django-ucamprojectlight>=1.1
 django-ucamwebauth>=1.2
-django>=1.10,<1.11
+django>=1.11,<1.12
 ecdsa
 mock>=1.0.1
 psycopg2
