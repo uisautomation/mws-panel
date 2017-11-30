@@ -51,15 +51,14 @@ yzdfJ72n+1JfHGP+workciKNldgqYX6J4jPrCIEIBrtDta4QxP10Tyd9RFu13XmE
 
 
 class Command(BaseCommand):
-    args = "{ --list | --host <hostname> }"
     help = "Generates a dynamic inventory for ansible from the MWS database."
     output_transaction = True
-    option_list = BaseCommand.option_list + (
-        make_option("--list", action='store_true',
-                    help="emit a list of configured MWS clients"),
-        make_option("--host", action='store',
-                    help="emit the configuration of a single MWS client"),
-        )
+
+    def add_arguments(self, parser):
+        parser.add_argument("--list", action='store_true',
+                            help="emit a list of configured MWS clients")
+        parser.add_argument("--host", action='store',
+                            help="emit the configuration of a single MWS client")
 
     def handle(self, list=None, host=None, outfile=None, **options):
         if (not list and not host) or (list and host):
