@@ -1,7 +1,12 @@
 from django.conf import settings
 from django.conf.urls.static import static
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 from django.contrib import admin
+import apimws.bes
+import apimws.lv
+import apimws.views
+import mwsauth.views
+import sitesmanagement.views
 from sitesmanagement.views.domains import DomainListView, DomainDelete
 from sitesmanagement.views.sites import SiteCreate, SiteShow, SiteList, SiteDisable, SiteDelete, SiteEdit, \
     SiteEditEmail, SiteDoNotRenew
@@ -9,7 +14,7 @@ from sitesmanagement.views.snapshots import SnapshotCreate, SnapshotDelete, Snap
 from sitesmanagement.views.unixgroups import UnixGroupListView, UnixGroupCreate, UnixGroupDelete, UnixGroupUpdate
 from sitesmanagement.views.vhosts import VhostListView, VhostDelete, VhostCreate, VisitVhost
 
-urlpatterns = patterns('',
+urlpatterns = [
     # external apps urls
     url(r'', include('ucamwebauth.urls')),
 
@@ -30,34 +35,34 @@ urlpatterns = patterns('',
     url(r'^site/donotrenew/(?P<site_id>[0-9]+)/$', SiteDoNotRenew.as_view(), name='donotrenew'),
 
     # Service management
-    url(r'^status/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.service_status'),
-    url(r'^settings/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.service_settings'),
-    url(r'^billing/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.billing_management', name='billing_management'),
-    url(r'^enable/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.sites.site_enable', name='enablesite'),
-    url(r'^unsuspend/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.sites.site_unsuspend', name='unsuspendsite'),
-    url(r'^vhosts/(?P<vhost_id>[0-9]+)/certificates/$', 'sitesmanagement.views.certificates'),
-    url(r'^vhosts/(?P<vhost_id>[0-9]+)/generate_csr/$', 'sitesmanagement.views.generate_csr'),
-    url(r'^system_packages/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.system_packages'),
-    url(r'^clone_vm/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.clone_vm_view'),
-    url(r'^delete_vm/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.delete_vm'),
-    url(r'^settings/vm/(?P<service_id>[0-9]+)/on/$', 'sitesmanagement.views.power_vm'),
-    url(r'^settings/vm/(?P<service_id>[0-9]+)/reset/$', 'sitesmanagement.views.reset_vm'),
-    url(r'^settings/vm/(?P<service_id>[0-9]+)/db_root_pass/$', 'sitesmanagement.views.change_db_root_password', name='change_db_root_password'),
-    url(r'^update_os/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.update_os'),
-    url(r'^apache/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.apache_modules'),
-    url(r'^phplibs/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.php_libs'),
-    url(r'^quarantine/(?P<service_id>[0-9]+)/$', 'sitesmanagement.views.quarantine'),
+    url(r'^status/(?P<service_id>[0-9]+)/$', sitesmanagement.views.service_status, name='sitesmanagement.views.service_status'),
+    url(r'^settings/(?P<service_id>[0-9]+)/$', sitesmanagement.views.service_settings, name='sitesmanagement.views.service_settings'),
+    url(r'^billing/(?P<site_id>[0-9]+)/$', sitesmanagement.views.billing_management, name='billing_management'),
+    url(r'^enable/(?P<site_id>[0-9]+)/$', sitesmanagement.views.sites.site_enable, name='enablesite'),
+    url(r'^unsuspend/(?P<site_id>[0-9]+)/$', sitesmanagement.views.sites.site_unsuspend, name='unsuspendsite'),
+    url(r'^vhosts/(?P<vhost_id>[0-9]+)/certificates/$', sitesmanagement.views.certificates, name='sitesmanagement.views.certificates'),
+    url(r'^vhosts/(?P<vhost_id>[0-9]+)/generate_csr/$', sitesmanagement.views.generate_csr, name='sitesmanagement.views.generate_csr'),
+    url(r'^system_packages/(?P<service_id>[0-9]+)/$', sitesmanagement.views.system_packages, name='sitesmanagement.views.system_packages'),
+    url(r'^clone_vm/(?P<site_id>[0-9]+)/$', sitesmanagement.views.clone_vm_view, name='sitesmanagement.views.clone_vm_view'),
+    url(r'^delete_vm/(?P<service_id>[0-9]+)/$', sitesmanagement.views.delete_vm, name='sitesmanagement.views.delete_vm'),
+    url(r'^settings/vm/(?P<service_id>[0-9]+)/on/$', sitesmanagement.views.power_vm, name='sitesmanagement.views.power_vm'),
+    url(r'^settings/vm/(?P<service_id>[0-9]+)/reset/$', sitesmanagement.views.reset_vm, name='sitesmanagement.views.reset_vm'),
+    url(r'^settings/vm/(?P<service_id>[0-9]+)/db_root_pass/$', sitesmanagement.views.change_db_root_password, name='change_db_root_password'),
+    url(r'^update_os/(?P<service_id>[0-9]+)/$', sitesmanagement.views.update_os, name='sitesmanagement.views.update_os'),
+    url(r'^apache/(?P<service_id>[0-9]+)/$', sitesmanagement.views.apache_modules, name='sitesmanagement.views.apache_modules'),
+    url(r'^phplibs/(?P<service_id>[0-9]+)/$', sitesmanagement.views.php_libs, name='sitesmanagement.views.php_libs'),
+    url(r'^quarantine/(?P<service_id>[0-9]+)/$', sitesmanagement.views.quarantine, name='sitesmanagement.views.quarantine'),
 
     # Vhosts management
     url(r'^vhosts/(?P<service_id>[0-9]+)/$', VhostListView.as_view(), name='listvhost'),
     url(r'^add_vhost/(?P<service_id>[0-9]+)/$', VhostCreate.as_view(), name='createvhost'),
     url(r'^vhosts/(?P<vhost_id>[0-9]+)/delete/$', VhostDelete.as_view(), name='deletevhost'),
     url(r'^visit_website/(?P<vhost_id>[0-9]+)/$', VisitVhost.as_view(), name='visitvhost'),
-    url(r'^vhost/(?P<vhost_id>[0-9]+)/apache_owned$', 'sitesmanagement.views.vhost_onwership', name='vhostapache'),
+    url(r'^vhost/(?P<vhost_id>[0-9]+)/apache_owned$', sitesmanagement.views.vhost_onwership, name='vhostapache'),
 
     # Domains management
-    url(r'^add_domain/(?P<vhost_id>[0-9]+)/$', 'sitesmanagement.views.add_domain'),
-    url(r'^set_dn_as_main/(?P<domain_id>[0-9]+)/$', 'sitesmanagement.views.set_dn_as_main'),
+    url(r'^add_domain/(?P<vhost_id>[0-9]+)/$', sitesmanagement.views.add_domain, name='sitesmanagement.views.add_domain'),
+    url(r'^set_dn_as_main/(?P<domain_id>[0-9]+)/$', sitesmanagement.views.set_dn_as_main, name='sitesmanagement.views.set_dn_as_main'),
     url(r'^domains/(?P<vhost_id>[0-9]+)/$', DomainListView.as_view(), name='listdomains'),
     url(r'^delete_domain/(?P<domain_id>[0-9]+)/$', DomainDelete.as_view(), name='deletedomain'),
 
@@ -73,43 +78,43 @@ urlpatterns = patterns('',
     url(r'^backups/(?P<service_id>[0-9]+)/$', SnapshotListView.as_view(), name='backups'),
 
     # bes++ api
-    url(r'^bes/$', 'apimws.bes.bes'),
+    url(r'^bes/$', apimws.bes.bes, name='apimws.bes.bes'),
 
     # update snapshots
-    url(r'^update_lv_list/$', 'apimws.lv.update_lv_list'),
+    url(r'^update_lv_list/$', apimws.lv.update_lv_list, name='apimws.lv.update_lv_list'),
 
     # apimws app
-    url(r'^api/confirm_dns/(?P<dn_id>[0-9]+)/(?P<token>.+)/$', 'apimws.views.confirm_dns'),
-    url(r'^api/finance/billing/$', 'apimws.views.billing_total'),
-    url(r'^api/finance/billing/(?P<year>20[0-9]{2})/(?P<month>[0-9]{1,2})/$', 'apimws.views.billing_month'),
-    url(r'^confirm_email/(?P<ec_id>[0-9]+)/(?P<token>(\w|\-)+)/$', 'apimws.views.confirm_email'),
-    url(r'^api/post_installation/$', 'apimws.views.post_installation'),
-    url(r'^api/post_recreate/$', 'apimws.views.post_recreate'),
-    url(r'^api/resend_email_confirmation/(?P<site_id>[0-9]+)/$', 'apimws.views.resend_email_confirmation_view'),
+    url(r'^api/confirm_dns/(?P<dn_id>[0-9]+)/(?P<token>.+)/$', apimws.views.confirm_dns, name='apimws.views.confirm_dns'),
+    url(r'^api/finance/billing/$', apimws.views.billing_total, name='apimws.views.billing_total'),
+    url(r'^api/finance/billing/(?P<year>20[0-9]{2})/(?P<month>[0-9]{1,2})/$', apimws.views.billing_month, name='apimws.views.billing_month'),
+    url(r'^confirm_email/(?P<ec_id>[0-9]+)/(?P<token>(\w|\-)+)/$', apimws.views.confirm_email, name='apimws.views.confirm_email'),
+    url(r'^api/post_installation/$', apimws.views.post_installation, name='apimws.views.post_installation'),
+    url(r'^api/post_recreate/$', apimws.views.post_recreate, name='apimws.views.post_recreate'),
+    url(r'^api/resend_email_confirmation/(?P<site_id>[0-9]+)/$', apimws.views.resend_email_confirmation_view, name='apimws.views.resend_email_confirmation_view'),
 
     # mwsauth app
-    url(r'^auth/(?P<site_id>[0-9]+)/$', 'mwsauth.views.auth_change'),
-    url(r'^auth/(?P<site_id>[0-9]+)/force_update/$', 'mwsauth.views.force_update'),
-    url(r'^auth/(?P<site_id>[0-9]+)/add_supporter/$', 'mwsauth.views.add_supporter'),
+    url(r'^auth/(?P<site_id>[0-9]+)/$', mwsauth.views.auth_change, name='mwsauth.views.auth_change'),
+    url(r'^auth/(?P<site_id>[0-9]+)/force_update/$', mwsauth.views.force_update, name='mwsauth.views.force_update'),
+    url(r'^auth/(?P<site_id>[0-9]+)/add_supporter/$', mwsauth.views.add_supporter, name='mwsauth.views.add_supporter'),
 
     # user panel
-    url(r'^user_panel/$', 'mwsauth.views.user_panel'),
+    url(r'^user_panel/$', mwsauth.views.user_panel, name='mwsauth.views.user_panel'),
 
     # file serve for purchase order files
-   url(r'^media/billing/(?P<filename>[^/]+)$', 'sitesmanagement.views.po_file_serve'),
+    url(r'^media/billing/(?P<filename>[^/]+)$', sitesmanagement.views.po_file_serve, name='sitesmanagement.views.po_file_serve'),
 
     # Global
-    url(r'^privacy/$', 'sitesmanagement.views.privacy'),
-    url(r'^termsandconditions/$', 'sitesmanagement.views.termsconds'),
+    url(r'^privacy/$', sitesmanagement.views.privacy, name='sitesmanagement.views.privacy'),
+    url(r'^termsandconditions/$', sitesmanagement.views.termsconds, name='sitesmanagement.views.termsconds'),
 
     # Admin
-    url(r'^searchadmin/$', 'sitesmanagement.views.admin_search', name='searchadmin'),
-    url(r'^adminemailist/$', 'sitesmanagement.views.others.admin_email_list', name='adminemailist'),
+    url(r'^searchadmin/$', sitesmanagement.views.admin_search, name='searchadmin'),
+    url(r'^adminemailist/$', sitesmanagement.views.others.admin_email_list, name='adminemailist'),
 
     # Stats
-    url(r'^stats/$', 'apimws.views.stats', name='stats'),
-    url(r'^stats/datainuse$', 'apimws.views.statsdatainuse'),
-    url(r'^stats/datarequests$', 'apimws.views.statsdatarequests'),
-    url(r'^stats/dataactive$', 'apimws.views.statsdataactive'),
+    url(r'^stats/$', apimws.views.stats, name='stats'),
+    url(r'^stats/datainuse$', apimws.views.statsdatainuse, name='apimws.views.statsdatainuse'),
+    url(r'^stats/datarequests$', apimws.views.statsdatarequests, name='apimws.views.statsdatarequests'),
+    url(r'^stats/dataactive$', apimws.views.statsdataactive, name='apimws.views.statsdataactive'),
 
-) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
