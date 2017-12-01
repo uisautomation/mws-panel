@@ -13,4 +13,5 @@ mock>=1.0.1
 psycopg2
 pycrypto>=2.6.1
 pyyaml
+redis
 requests
