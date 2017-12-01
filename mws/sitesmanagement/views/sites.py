@@ -101,6 +101,7 @@ class SiteList(LoginRequiredMixin, ListView):
     separated in sites where the user is authorised as the admin and sites where the user is authorised as a simple
     user (only SSH access)"""
     template_name = 'index.html'
+    fields = '__all__'
 
     def get_context_data(self, **kwargs):
         context = super(SiteList, self).get_context_data(**kwargs)
@@ -131,6 +132,7 @@ class SiteCreate(LoginRequiredMixin, FormView):
     template_name = 'mws/new.html'
     prefix = "siteform"
     success_url = reverse_lazy('listsites')
+    fields = '__all__'
 
     def get_context_data(self, **kwargs):
         context = super(SiteCreate, self).get_context_data(**kwargs)
@@ -174,6 +176,7 @@ class SiteCreate(LoginRequiredMixin, FormView):
 class SiteShow(SitePriviledgeCheck, DetailView):
     """View(Controller) to see the main menu of a Site with all its options. It also shows messages to the user."""
     template_name = 'mws/show.html'
+    fields = '__all__'
 
     def get_context_data(self, **kwargs):
         context = super(SiteShow, self).get_context_data(**kwargs)
@@ -216,6 +219,7 @@ class SiteEdit(SitePriviledgeAndBusyCheck, UpdateView):
 class SiteEditEmail(SitePriviledgeCheck, UpdateView):
     """View(Controller) to edit the email associated to a site"""
     form_class = SiteEmailForm
+    fields = '__all__'
 
     def render_to_response(self, context, **response_kwargs):
         return redirect(self.object)
@@ -241,6 +245,7 @@ class SiteDelete(SitePriviledgeCheck, UpdateView):
     to this Site are switched off but eventually they are deleted. We maintain the Site object to report and
     billing options."""
     template_name = 'mws/delete.html'
+    fields = '__all__'
 
     def get_context_data(self, **kwargs):
         context = super(SiteDelete, self).get_context_data(**kwargs)
@@ -264,6 +269,7 @@ class SiteDelete(SitePriviledgeCheck, UpdateView):
 class SiteDisable(SitePriviledgeCheck, UpdateView):
     """View(Controller) to disable a Site object. The VMs are switched off."""
     template_name = 'mws/disable.html'
+    fields = '__all__'
 
     def get_context_data(self, **kwargs):
         context = super(SiteDisable, self).get_context_data(**kwargs)
