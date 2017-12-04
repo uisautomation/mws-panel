@@ -15,4 +15,3 @@ psycopg2
 pycrypto>=2.6.1
 pyyaml
 requests
-vmmanager
