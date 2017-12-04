@@ -8,7 +8,7 @@ from django.test import TestCase
 import mock
 from ucamwebauth.tests import create_wls_response
 
-from apimws.models import Cluster, Host
+from apimws.models import Cluster, Host, AnsibleConfiguration
 from apimws.xen import which_cluster
 from mwsauth import views
 from mwsauth.models import MWSUser
@@ -154,6 +154,7 @@ class AuthTestCases(TestCase):
                                                       type=ServerType.objects.get(id=1))
         service_a = Service.objects.create(type='production', network_configuration=NetworkConfig.
                                            get_free_prod_service_config(), site=site_without_auth_users, status='ready')
+        AnsibleConfiguration.objects.create(service=service_a, key='os', value='jessie')
         VirtualMachine.objects.create(token=uuid.uuid4(), service=service_a,
                                       network_configuration=NetworkConfig.get_free_host_config(),
                                       cluster=which_cluster())
@@ -197,10 +198,10 @@ class AuthTestCases(TestCase):
                 'groupids': "101888"
                 # we authorise amc203 user and 101888 group
             })
-            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
-                                                             site_with_auth_users.production_service
-                                                            .virtual_machines.first().network_configuration.name],
-                                                            stderr=mock_subprocess.STDOUT)
+            mock_subprocess.check_output.assert_called_with([
+                "userv", "mws-admin", "mws_ansible_host",
+                site_with_auth_users.production_service.virtual_machines.first().network_configuration.name, "jessie"
+            ], stderr=mock_subprocess.STDOUT)
         self.assertRedirects(response, expected_url=site_with_auth_users.get_absolute_url())
         self.assertEqual(len(site_with_auth_users.users.all()), 1)
         self.assertEqual(site_with_auth_users.users.first(), amc203_user)
@@ -211,10 +212,10 @@ class AuthTestCases(TestCase):
             mock_subprocess.check_output.return_value.returncode = 0
             # remove all users and groups authorised, we do not send any crsids or groupids
             response = self.client.post(reverse(views.auth_change, kwargs={'site_id': site_with_auth_users.id}), {})
-            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
-                                                             site_with_auth_users.production_service
-                                                            .virtual_machines.first().network_configuration.name],
-                                                            stderr=mock_subprocess.STDOUT)
+            mock_subprocess.check_output.assert_called_with([
+                "userv", "mws-admin", "mws_ansible_host",
+                site_with_auth_users.production_service.virtual_machines.first().network_configuration.name, "jessie"
+            ], stderr=mock_subprocess.STDOUT)
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith(site_with_auth_users.get_absolute_url()))
         self.assertEqual(self.client.get(response.url).status_code, 403)  # User is no longer authorised
@@ -240,6 +241,7 @@ class AuthTestCases(TestCase):
         service_a = Service.objects.create(type='production', network_configuration=NetworkConfig.
                                            get_free_prod_service_config(), site=site_with_auth_groups,
                                            status='ready')
+        AnsibleConfiguration.objects.create(service=service_a, key='os', value='jessie')
         VirtualMachine.objects.create(token=uuid.uuid4(), service=service_a,
                                       network_configuration=NetworkConfig.get_free_host_config(),
                                       cluster=which_cluster())
@@ -261,10 +263,10 @@ class AuthTestCases(TestCase):
                 'groupids': "101888"
                 # we authorise amc203 user and 101888 group
             })
-            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
-                                                             site_with_auth_groups.production_service
-                                                            .virtual_machines.first().network_configuration.name],
-                                                            stderr=mock_subprocess.STDOUT)
+            mock_subprocess.check_output.assert_called_with([
+                "userv", "mws-admin", "mws_ansible_host",
+                site_with_auth_groups.production_service.virtual_machines.first().network_configuration.name, "jessie"
+            ], stderr=mock_subprocess.STDOUT)
         self.assertRedirects(response, expected_url=site_with_auth_groups.get_absolute_url())
         self.assertEqual(len(site_with_auth_groups.users.all()), 1)
         self.assertEqual(site_with_auth_groups.users.first(), amc203_user)
@@ -275,10 +277,10 @@ class AuthTestCases(TestCase):
             mock_subprocess.check_output.return_value.returncode = 0
             # remove all users and groups authorised, we do not send any crsids or groupids
             response = self.client.post(reverse(views.auth_change, kwargs={'site_id': site_with_auth_groups.id}), {})
-            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
-                                                             site_with_auth_groups.production_service
-                                                            .virtual_machines.first().network_configuration.name],
-                                                            stderr=mock_subprocess.STDOUT)
+            mock_subprocess.check_output.assert_called_with([
+                "userv", "mws-admin", "mws_ansible_host",
+                site_with_auth_groups.production_service.virtual_machines.first().network_configuration.name, "jessie"
+            ], stderr=mock_subprocess.STDOUT)
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith(site_with_auth_groups.get_absolute_url()))
         self.assertEqual(self.client.get(response.url).status_code, 403)  # User is no longer authorised

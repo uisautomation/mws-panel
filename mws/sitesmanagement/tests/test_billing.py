@@ -8,7 +8,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
 
-from apimws.models import Cluster, Host
+from apimws.models import Cluster, Host, AnsibleConfiguration
 from apimws.xen import which_cluster
 from mwsauth.tests import do_test_login
 from sitesmanagement.cronjobs import send_reminder_renewal, check_subscription
@@ -46,6 +46,7 @@ class BillingTests(TestCase):
         site = Site.objects.create(name="testSite", start_date=datetime.today(), type=ServerType.objects.get(id=1))
         service = Service.objects.create(site=site, type='production', status="ready",
                                          network_configuration=NetworkConfig.get_free_prod_service_config())
+        AnsibleConfiguration.objects.create(service=service, key='os', value='jessie')
         VirtualMachine.objects.create(name="test_vm", token=uuid.uuid4(), cluster=which_cluster(),
                                       service=service, network_configuration=NetworkConfig.get_free_host_config())
         Vhost.objects.create(name="default", service=service)
@@ -142,7 +143,7 @@ class BillingTests(TestCase):
         self.assertIn('%s' % site.start_date.replace(year=today.year), mail.outbox[1].body)
         self.assertEqual(mail.outbox[1].to, [site.email])
 
-    def test_check_cacnel_if_not_paid(self):
+    def test_check_cancel_if_not_paid(self):
         ''' This test checks that if the user does not uploads a PO before 30 days, the site will be cancelled
         automatically'''
         # 1 month for renewal warning

@@ -69,11 +69,11 @@ class AnsibleTaskWithFailure(Task):
 
 @shared_task(base=AnsibleTaskWithFailure, default_retry_delay=120, max_retries=2)
 def launch_ansible_async(service, ignore_host_key=False):
-    os_version = AnsibleConfiguration.objects.get(service=service, key="os")
     while service.status != 'ready':
         try:
             for vm in service.virtual_machines.all():
-                userv_cmd = ["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name, os_version]
+                os_version = AnsibleConfiguration.objects.get(service=vm.service, key="os")
+                userv_cmd = ["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name, os_version.value]
                 if ignore_host_key:
                     userv_cmd[1:1] = ["--defvar", "ANSIBLE_HOST_KEY_CHECKING=False"]
                 subprocess.check_output(userv_cmd, stderr=subprocess.STDOUT)
@@ -92,21 +92,18 @@ def launch_ansible_async(service, ignore_host_key=False):
 
 @shared_task(base=AnsibleTaskWithFailure)
 def ansible_change_mysql_root_pwd(service):
-    cmd_root = mws_ansible_host_d_cmd_root(service)
     for vm in service.virtual_machines.all():
-        subprocess.check_output(cmd_root + [
-            vm.network_configuration.name, "--tags", "change_mysql_root_pwd", "-e", "change_mysql_root_pwd=true"
+        subprocess.check_output(mws_ansible_host_d_cmd_root(vm) + [
+            "--tags", "change_mysql_root_pwd", "-e", "change_mysql_root_pwd=true"
         ], stderr=subprocess.STDOUT)
 
 
 @shared_task(base=AnsibleTaskWithFailure)
 def ansible_create_custom_snapshot(service, snapshot):
-    cmd_root = mws_ansible_host_d_cmd_root(service)
     try:
         for vm in service.virtual_machines.all():
-            subprocess.check_output(cmd_root + [
-                vm.network_configuration.name, "--tags", "create_custom_snapshot", "-e",
-                'create_snapshot_name="%s"' % snapshot.name
+            subprocess.check_output(mws_ansible_host_d_cmd_root(vm) + [
+                "--tags", "create_custom_snapshot", "-e", 'create_snapshot_name="%s"' % snapshot.name
             ], stderr=subprocess.STDOUT)
         snapshot.date = timezone.now()
         snapshot.save()
@@ -117,28 +114,29 @@ def ansible_create_custom_snapshot(service, snapshot):
 
 @shared_task(base=AnsibleTaskWithFailure)
 def restore_snapshot(service, snapshot_name):
-    cmd_root = mws_ansible_host_d_cmd_root(service)
     for vm in service.virtual_machines.all():
-        subprocess.check_output(cmd_root + [
-            vm.network_configuration.name, "--tags", "restore_snapshot", "-e",
-            'restore_snapshot_name="%s"' % snapshot_name
+        subprocess.check_output(mws_ansible_host_d_cmd_root(vm) + [
+            "--tags", "restore_snapshot", "-e", 'restore_snapshot_name="%s"' % snapshot_name
         ], stderr=subprocess.STDOUT)
 
 
 @shared_task(base=AnsibleTaskWithFailure)
+# FIXME check this
 def delete_snapshot(service, snapshot_id):
-    cmd_root = mws_ansible_host_d_cmd_root(service)
     snapshot = Snapshot.objects.get(id=snapshot_id)
     for vm in snapshot.service.virtual_machines.all():
-        subprocess.check_output(cmd_root + [vm.network_configuration.name, "--tags", "delete_snapshot", "-e",
-                                            'delete_snapshot_name="%s"' % snapshot.name],
-                                stderr=subprocess.STDOUT)
+        subprocess.check_output(mws_ansible_host_d_cmd_root(vm) + [
+            "--tags", "delete_snapshot", "-e", 'delete_snapshot_name="%s"' % snapshot.name
+        ], stderr=subprocess.STDOUT)
     snapshot.delete()
 
 
-def mws_ansible_host_d_cmd_root(service):
-    os_version = AnsibleConfiguration.objects.get(service=service, key="os")
-    return ["userv", "--defvar", "os_version=" % os_version, "mws-admin", "mws_ansible_host_d"]
+def mws_ansible_host_d_cmd_root(vm):
+    os_version = AnsibleConfiguration.objects.get(service=vm.service, key="os")
+    return [
+        "userv", "--defvar", "os_version=%s" % os_version.value, "mws-admin", "mws_ansible_host_d",
+        vm.network_configuration.name
+    ]
 
 
 @shared_task(base=AnsibleTaskWithFailure)
