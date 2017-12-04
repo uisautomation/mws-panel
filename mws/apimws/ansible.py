@@ -121,8 +121,7 @@ def restore_snapshot(service, snapshot_name):
 
 
 @shared_task(base=AnsibleTaskWithFailure)
-# FIXME check this
-def delete_snapshot(service, snapshot_id):
+def delete_snapshot(snapshot_id):
     snapshot = Snapshot.objects.get(id=snapshot_id)
     for vm in snapshot.service.virtual_machines.all():
         subprocess.check_output(mws_ansible_host_d_cmd_root(vm) + [
