@@ -42,6 +42,9 @@ allocate the site.
 
 .. autofunction:: apimws.utils.preallocate_new_site
 
+Once the site is configured, the Xen server will call the URL associated with
+the :py:class:`apimws.views.post_installation` view.
+
 Scheduled tasks ("cronjobs")
 ----------------------------
 
