@@ -331,6 +331,7 @@ def site_unsuspend(request, site_id):
 class SiteDoNotRenew(SitePriviledgeCheck, UpdateView):
     """Schedules cancellation of the site for the end of the current billing period"""
     template_name = 'mws/donotrenew.html'
+    fields = '__all__'
 
     def get_context_data(self, **kwargs):
         context = super(SiteDoNotRenew, self).get_context_data(**kwargs)
