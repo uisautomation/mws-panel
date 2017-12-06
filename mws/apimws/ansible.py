@@ -145,10 +145,12 @@ def execute_playbook_on_vms(service, playbook_args):
 def delete_vhost_ansible(service, vhost_name, vhost_webapp):
     """delete the vhost folder and all its contents"""
     for vm in service.virtual_machines.all():
-        subprocess.check_output(["userv", "mws-admin", "mws_delete_vhost", vm.network_configuration.name,
-                                 "--tags", "delete_vhost", "-e", "delete_vhost_name=%s delete_vhost_webapp=%s" %
-                                 (vhost_name, vhost_webapp)],
-                                stderr=subprocess.STDOUT)
+        os_version = AnsibleConfiguration.objects.get(service=vm.service, key="os")
+        subprocess.check_output([
+            "userv", "--defvar", "os_version=%s" % os_version.value, "mws-admin", "mws_delete_vhost",
+            vm.network_configuration.name, "--tags", "delete_vhost",
+            "-e", "delete_vhost_name=%s delete_vhost_webapp=%s" % (vhost_name, vhost_webapp)
+        ], stderr=subprocess.STDOUT)
     launch_ansible(service)
     return
 
