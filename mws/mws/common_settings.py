@@ -131,3 +131,6 @@ FINANCE_EMAIL = 'fh103@cam.ac.uk'
 CELERY_IMPORTS = ('apimws.platforms', 'apimws.xen', 'apimws.utils', 'apimws.jackdaw', 'apimws.ansible',
                   'sitesmanagement.cronjobs', 'apimws.ipreg')
 IP_REG_API_END_POINT = ['userv', 'mws-admin', 'mws_ipreg']
+
+# Maximum length of time which a domain can remain unapproved.
+MWS_DOMAIN_NAME_GRACE_DAYS = 30
