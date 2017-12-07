@@ -1,42 +1,19 @@
+# Import base settings
 from mws.common_settings import *
 
-# Tolerate the absence of secrets (but some parts of the system will break).
-try:
-    from production_secrets import *
-except ImportError:
-    pass
+DEBUG = True
+TEMPLATE_DEBUG = True
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '$a2byg9*bc5rcc_e5d5#3+mp^s=v0y_vz18ke-tzy_u!*&!txw'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-TEMPLATE_DEBUG = True
-
-ALLOWED_HOSTS = []
-
-ADMINS = (('Abraham', 'amc203@cam.ac.uk'), )
-SERVER_EMAIL = "mws-support@uis.cam.ac.uk"
+SERVER_EMAIL = 'mws-panel@example.com'
 
 MAIN_DOMAIN = 'http://localhost:8000'
 
 INSTALLED_APPS = INSTALLED_APPS + (
     'debug_toolbar',
 )
-
-# Database
-# https://docs.djangoproject.com/en/dev/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
-
-EMAIL_HOST = 'localhost'
-EMAIL_PORT = 1025
 
 # ucamwebauth configuration
 UCAMWEBAUTH_LOGIN_URL = 'https://demo.raven.cam.ac.uk/auth/authenticate.html'
@@ -68,13 +45,10 @@ wOq24EIbX5LquL9w+uvnfXw=
 """}
 
 BROKER_URL = 'django://'
-INSTALLED_APPS = INSTALLED_APPS+('kombu.transport.django', )
+INSTALLED_APPS += ('kombu.transport.django', )
 
 VM_END_POINT_COMMAND = ["vmmanager"]
-VM_API = "xen"
 
 CELERY_EAGER_PROPAGATES_EXCEPTIONS=True
 CELERY_ALWAYS_EAGER=True
 BROKER_BACKEND='memory'
-
-MWS_DOMAIN_NAME_GRACE_DAYS=30
