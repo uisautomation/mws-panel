@@ -35,6 +35,11 @@ run inside the webapp container:
 
 Now visit http://localhost:8000 and log in.
 
+.. note::
+
+    Should ``requirements.txt`` be changed, the container needs to be re-built
+    via ``sudo docker-compose build``.
+
 Manual migration
 ----------------
 
