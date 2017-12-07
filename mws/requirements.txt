@@ -1,4 +1,4 @@
-PyOpenSSL>=0.14,<17
+PyOpenSSL>=0.16
 celery>=3.1.16,<4.0
 django-celery>=3.1.16
 django-debug-toolbar<1.5
