@@ -1,5 +1,6 @@
 """Views(Controllers) for managing Snapshots"""
 import datetime
+from urllib import urlencode
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, redirect
@@ -45,7 +46,8 @@ class SnapshotCreate(ServicePriviledgeCheck, CreateView):
     def form_invalid(self, form):
         response = redirect('backups', service_id=self.service.id)
         key, value = form.errors.popitem()
-        response['Location'] += '?error_message=%s' % value.data[0].messages[0]
+        response['Location'] += (
+            '?' + urlencode({'error_message': value.data[0].messages[0]}))
         return response
 
     def get_success_url(self):

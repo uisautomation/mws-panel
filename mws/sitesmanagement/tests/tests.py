@@ -474,7 +474,7 @@ class SiteManagement2Tests(TestCase):
                                  unix_group.users.all())
 
         response = self.client.get(reverse('updateunixgroup', kwargs={'ug_id': unix_group.id}))
-        self.assertInHTML('<input id="id_name" maxlength="16" name="name" type="text" value="TESTUNIXGROUP" />',
+        self.assertInHTML('<input required id="id_name" maxlength="16" name="name" type="text" value="TESTUNIXGROUP" />',
                           response.content)
         self.assertContains(response, 'crsid: "amc203"')
         self.assertContains(response, 'crsid: "jw35"')

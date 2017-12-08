@@ -1,0 +1,4 @@
+-r ../mws/requirements.txt
+-r ../mws/requirements_jenkins.txt
+sphinx
+sphinx_rtd_theme

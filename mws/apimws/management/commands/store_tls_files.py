@@ -1,21 +1,23 @@
-from django.core.management.base import NoArgsCommand, CommandError
+from django.core.management.base import BaseCommand, CommandError
 from sitesmanagement.models import Vhost
 
 
-class Command(NoArgsCommand):
+class Command(BaseCommand):
     '''
         "requested": First time a CSR is requested, a new key hash and csr needs to be passed to the server
         "renewal": An existing CSR exists a new key and CSR is generated, new csr needs to be passed to the server
         "renewal_cert": New certificate uploaded, pass new key hash to the server
     '''
-    args = "{ <vhost_id> <hash> }"
     help = "Stores the TLS key hash and the CSR in the database"
 
+    def add_arguments(self, parser):
+        parser.add_argument('vhost_id', type=str)
+        parser.add_argument('hash', type=str)
+
     def handle(self, *args, **options):
-        if len(args) != 1:
-            raise CommandError("All arguments need to be supplied")
+        # FIXME: hash appears to be ignored
         try:
-            vhost = Vhost.objects.get(id=args[0])
+            vhost = Vhost.objects.get(id=options['vhost_id'])
         except Vhost.DoesNotExist:
             raise CommandError("Vhost not found")
 

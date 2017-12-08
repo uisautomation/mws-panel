@@ -5,7 +5,7 @@ from django.core.checks import messages
 from django.contrib.admin import helpers
 from django.template.response import TemplateResponse
 from django.utils.encoding import force_text
-from reversion import VersionAdmin
+from reversion.admin import VersionAdmin
 from .models import Site, Billing, DomainName, Suspension, VirtualMachine, EmailConfirmation, \
     Vhost, UnixGroup, NetworkConfig, SiteKey, Service, Snapshot, ServerType
 

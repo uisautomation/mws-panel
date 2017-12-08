@@ -10,7 +10,7 @@ from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpRespons
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.encoding import smart_str
 from apimws.ansible import launch_ansible, ansible_change_mysql_root_pwd
-from apimws.models import AnsibleConfiguration
+from apimws.models import AnsibleConfiguration, ApacheModule, PHPLib
 from apimws.vm import clone_vm
 from mwsauth.utils import privileges_check
 from sitesmanagement.forms import BillingForm
@@ -330,13 +330,19 @@ def apache_modules(request, service_id):
         'service': service,
         'site': site,
         'sidebar_messages': warning_messages(site),
-        'form': ApacheModuleForm(initial={'apache_modules': service.apache_modules.values_list('name', flat=True)}),
+        'form': ApacheModuleForm(initial={
+            'apache_modules': list(service.apache_modules.values_list('name', flat=True))
+        }),
     }
 
     if request.method == 'POST':
         f = ApacheModuleForm(request.POST)
         if f.is_valid():
-            service.apache_modules = f.cleaned_data['apache_modules']
+            service.apache_modules.set(
+                ApacheModule.objects.filter(
+                    name__in=f.cleaned_data['apache_modules']).all(),
+                clear=True
+            )
             service.save()
             launch_ansible(service)
 
@@ -368,13 +374,19 @@ def php_libs(request, service_id):
         'service': service,
         'site': site,
         'sidebar_messages': warning_messages(site),
-        'form': PHPLibForm(initial={'php_libs': service.php_libs.values_list('name', flat=True)}),
+        'form': PHPLibForm(initial={
+            'php_libs': list(service.php_libs.values_list('name', flat=True))
+        }),
     }
 
     if request.method == 'POST':
         f = PHPLibForm(request.POST)
         if f.is_valid():
-            service.php_libs = f.cleaned_data['php_libs']
+            service.php_libs.set(
+                PHPLib.objects.filter(
+                    name__in=f.cleaned_data['php_libs']).all(),
+                clear=True
+            )
             service.save()
             launch_ansible(service)
 

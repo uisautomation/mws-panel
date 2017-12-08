@@ -5,7 +5,7 @@ from datetime import date, timedelta
 from StringIO import StringIO
 from django.conf import settings
 from django.core.mail import EmailMessage
-from django.core.management.base import NoArgsCommand, CommandError
+from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 from django.utils.text import slugify
 from os.path import splitext
@@ -16,15 +16,16 @@ from sitesmanagement.templatetags.calcendperiod import calcendperiod
 LOGGER = logging.getLogger('mws')
 
 
-class Command(NoArgsCommand):
-    args = "{ <month> <year> }"
+class Command(BaseCommand):
     help = "Generates a financial monthly report for the month and year specified"
 
+    def add_arguments(self, parser):
+        parser.add_argument('month', type=int)
+        parser.add_argument('year', type=int)
+
     def handle(self, *args, **options):
-        if len(args) != 2:
-            raise CommandError("You need to specify a month and a year of the financial report you want")
-        month = int(args[0])
-        year = int(args[1])
+        month = options['month']
+        year = options['year']
 
         ###################
         ### NEW SERVERS ###

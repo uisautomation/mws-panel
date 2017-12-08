@@ -2,7 +2,6 @@
 from mws.common_settings import *
 
 DEBUG = True
-TEMPLATE_DEBUG = True
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '$a2byg9*bc5rcc_e5d5#3+mp^s=v0y_vz18ke-tzy_u!*&!txw'
@@ -13,6 +12,10 @@ MAIN_DOMAIN = 'http://localhost:8000'
 
 INSTALLED_APPS = INSTALLED_APPS + (
     'debug_toolbar',
+)
+
+MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES + (
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
 # ucamwebauth configuration

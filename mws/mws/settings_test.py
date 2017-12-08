@@ -11,8 +11,6 @@ DEBUG = False
 ADMINS = (('automation', 'automation@uis.cam.ac.uk'), )
 SERVER_EMAIL = "mws-support+test@uis.cam.ac.uk"
 
-TEMPLATE_DEBUG = False
-
 # ucamwebauth configuration
 UCAMWEBAUTH_LOGIN_URL = 'https://raven.cam.ac.uk/auth/authenticate.html'
 UCAMWEBAUTH_LOGOUT_URL = 'https://raven.cam.ac.uk/auth/logout.html'

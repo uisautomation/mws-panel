@@ -1,5 +1,0 @@
-
-==Testing hints==
-
-* <code>DJANGO_SETTINGS_MODULE=mws.bjh21_settings ~/mws3/testenv/bin/celery -A mws worker -l info</code>
-* If installing a VM fails at the callback stage, all the callback does is to set the status to "ready".
