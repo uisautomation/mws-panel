@@ -42,20 +42,20 @@ class SnapshotsTests(TestCase):
         # Try to submit non acceptable (empty) name for the snapshot
         response = self.client.post(reverse('createsnapshot', kwargs={'service_id': service.id}))
         self.assertRedirects(response, reverse('backups', kwargs={'service_id': service.id}) +
-                             "?error_message=This%20field%20is%20required.")
+                             "?error_message=This+field+is+required.")
         self.assertEquals(Snapshot.objects.count(), 1)
         # Try to submit non acceptable name (symbols) for the snapshot
         response = self.client.post(reverse('createsnapshot', kwargs={'service_id': service.id}), {'name': '-*&2/;'})
         self.assertRedirects(response, reverse('backups', kwargs={'service_id': service.id}) +
-                             "?error_message=Enter%20a%20valid%20'slug'%20consisting%20of%20letters,%20numbers,"
-                             "%20underscores%20or%20hyphens.")
+                             "?error_message=Enter+a+valid+%27slug%27+consisting+of+letters%2C+numbers%2C"
+                             "+underscores+or+hyphens.")
         self.assertEquals(Snapshot.objects.count(), 1)
         # Try to submit non acceptable name (symbols) for the snapshot
         with transaction.atomic():
             response = self.client.post(reverse('createsnapshot',
                                                 kwargs={'service_id': service.id}), {'name': snapshot_name})
         self.assertRedirects(response, reverse('backups', kwargs={'service_id': service.id}) +
-                             "?error_message=Name%20for%20that%20snapshot%20already%20exists")
+                             "?error_message=Name+for+that+snapshot+already+exists")
         self.assertEquals(Snapshot.objects.count(), 1)
 
     def test_limit_snapshot_number(self):
@@ -80,7 +80,7 @@ class SnapshotsTests(TestCase):
             response = self.client.post(reverse('createsnapshot', kwargs={'service_id': service.id}),
                                         {'name': snapshot_name})
             self.assertRedirects(response, reverse('backups', kwargs={'service_id': service.id}) +
-                                 "?error_message=You%20can%20only%20create%20two%20snapshots")
+                                 "?error_message=You+can+only+create+two+snapshots")
             self.assertEquals(Snapshot.objects.count(), 2)
 
     def test_delete_snapshot(self):

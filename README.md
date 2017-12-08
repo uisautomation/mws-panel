@@ -1,8 +1,11 @@
-		  Managed Web Service Control Panel
+# Managed Web Service Control Panel
 
 This code is the Django Control Panel for the Managed Web Service
 (known as MWS3 during development). For information about the service,
-see http://mws-help.uis.cam.ac.uk/
+see http://mws-help.uis.cam.ac.uk/.
+
+Developer documentation lives at
+https://uis-mws-panel.readthedocs.io/en/latest/.
 
 This software is Copyright (C) University of Cambridge 2014-2016. It
 is free software; you can redistribute it and/or modify it under the

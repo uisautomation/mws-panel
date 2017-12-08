@@ -14,17 +14,13 @@ class SimpleCommandTests(TestCase):
 
     def test_options(self):
         with self.assertRaises(CommandError):
-            Command().handle_noargs(list=None, host=None)
+            Command().handle(list=None, host=None)
         with self.assertRaises(CommandError):
-            Command().handle_noargs(list=True, host="foo")
-
-    def test_args(self):
-        with self.assertRaises(CommandError):
-            Command().handle("foo", list=True)
+            Command().handle(list=True, host="foo")
 
     def test_list_minimal(self):
         s = StringIO()
-        Command().handle_noargs(list=True, outfile=s)
+        Command().handle(list=True, outfile=s)
         r = json.loads(s.getvalue())
         self.assertTrue('_meta' in r)
         self.assertTrue('hostvars' in r['_meta'])
@@ -55,7 +51,7 @@ class TestsWithData(TestCase):
 
     def test_list(self):
         s = StringIO()
-        Command().handle_noargs(list=True, outfile=s)
+        Command().handle(list=True, outfile=s)
         r = json.loads(s.getvalue())
         self.assertTrue('_meta' in r)
         self.assertTrue('hostvars' in r['_meta'])
@@ -71,13 +67,13 @@ class TestsWithData(TestCase):
         s = StringIO()
         self.service.status = "ansible_queued"
         self.service.save()
-        Command().handle_noargs(list=True, outfile=s)
+        Command().handle(list=True, outfile=s)
         r = json.loads(s.getvalue())
         self.assertEqual(len(r['mwsclients']), 1)
 
     def test_vars(self):
         s = StringIO()
-        Command().handle_noargs(list=True, outfile=s)
+        Command().handle(list=True, outfile=s)
         r = json.loads(s.getvalue())
         v = r['_meta']['hostvars'][r['mwsclients'][0]]
         # Make sure that SSH target is some kind of a name for the host.

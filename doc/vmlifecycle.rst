@@ -1,0 +1,141 @@
+The VM Lifecycle
+================
+
+The MWS panel allows users to provision Virtual Machines (VMs) for themselves.
+From the point of view of the user, this process is very fast. From the point of
+view of the panel, this is very slow. In order to provide the illusion of speed,
+the panel "pre-allocates" VMs ahead of time.
+
+This section explains the life cycle of a Xen Guest Virtual Machine from
+the point of view of the web panel. It is the panel which decides if a
+particular VM is off, on, disabled, quarantined, administratively suspended,
+etc. See :any:`data-model` for an overview of the difference between a "Site",
+"Service" and "Virtual Machine".
+
+Preallocation
+-------------
+
+The web panel checks each night (using a celery beat cronjob) how many VMs MWS3
+have preallocated (precreated and put to sleep). If they are less than a
+threshold, then a call to :py:func:`~apimws.utils.preallocate_new_site` will be
+made.
+
+The :py:func:`preallocate_new_site` function creates a new
+:py:class:`~sitesmanagement.models.Site` object (with a unique uuid4 as name)
+with two :py:class:`~sitesmanagement.models.Service` instances associated,
+production and test. A :py:class:`~sitesmanagement.models.Service` has a
+:py:class:`~sitesmanagement.models.NetworkConfig` object associated to it which,
+in essence, is the service address of the MWS Server. I.e., the service name,
+public IPv4 address and public IPv6 address.
+
+A :py:class:`~sitesmanagement.models.Service` can have one or more
+:py:class:`~sitesmanagement.models.VirtualMachine` instances associated and VMs
+can also move from one service to another. Advantages being that we can migrate
+a service from different VMs without causing downtime and that we can swap test
+and production VMs by only changing to which
+:py:class:`~sitesmanagement.models.Service` they belong to.
+
+Once the two service are created, a VM is created for the production service.
+The VM has its own NetworkConfig which has the network configuration of the VM
+(hostname + IPv6). All these NetworkConfig objects have been previously
+pre-allocated/pre-created in the web control panel and in the DNS. Thus the
+association hostname-IP is already present in the DNS.
+
+.. note::
+
+    An admin has to take care to add more NetworkConfig objects when they
+    start to run out.
+
+We won't be creating a VM for a test Service at this moment.  NetworkConf for a
+test Service is a service name + private IPv4
+
+The VM for the production service is created using the Xen VM API with the
+following parameters:
+
+site-id
+    A string of the form “mwssite-%d” and the site id which is the pk of the
+    database for that Site object.
+os
+    os version, currently “jessie”
+netconf
+    the network configuration for the VM (which currently is an IPv6 and a
+    hostname
+token
+    a uuid4 that is used for communications between the VM and the panel. When
+    the VM communicated with the web control panel we check that it is using the
+    corresponding token (that we use a shared secret) and that it is
+    communicated from the corresponding IP.
+callback
+    the URL that VM should POST to once the installation has finished. This URL
+    corresponds to a page in the web control panel with the security checks
+    mentioned in the previous point and that actions the next steps required
+    after the installation has finished.
+
+We launch the Xen VM API command to create the VM and change the status of its
+Service to 'installing'. We also store in the AnsibleConfiguration table which
+os corresponds to this VM/Service.  And finally we create a default Vhost for
+that service, called “default”, which will contain as a main\_domain, the
+service address.  This Vhost and the association of the “default” vhost and the
+service address as a main\_domain cannot be deleted by the user. Thus, we can be
+sure that the user will get a pre-configured and ready to use web server service
+once they acquire a MWS server.
+
+While the VM is being created, secrets\_prealocation is called and it will
+create the private keys for the MWS Server. It generates 4 different host keys:
+RSA, DSA, ECDSA, and ED25519. A copy of the key is stored in the web panel and
+another copy is install in the VM.  SSHFP records are generated from those keys
+(except with ED25519 because ipreg still does not support SSHFP ED25519 records)
+and sent to the ipreg API.
+
+When the VM has finished installing the OS, the installation script will poke a
+URL that we passed using the VM API in the previous step (callback). This will
+let know the web panel that the VM has a OS installed and that now needs
+configuring. The web panel that the URL contains the secret token, thus taking
+this call as an authenticated/authorised one, will change the status of the
+service to “postinstall”, and launch ansible against this VM to configure it.
+
+Ansible will extract the configuration it need to apply to the VM from the
+dynamic inventory generated by the web panel.
+
+Once ansible has finished configuring the VM, the mysql root password will be
+changed from the default empty one to a random one. This password will be stored
+in the panel temporary until the user can see it. The panel will promote the
+user to change the default random generated one by one of their choice.
+
+Now the VM is pre-configured and ready for someone to use it, so the panel
+powers it off to not waste resources until a user requests a new MWS3 server.
+
+Allocation to a user
+--------------------
+
+Once a user requests a new MWS3 server, then the following process
+applies.
+
+The panel gets a VM from the list of preallocated VMs. It assigns to the Site
+the user that has requested the new MWS3 server as an admin.  The panel powers
+back on again the VM and executes ansible against it in order to update the VM
+to the last changes and also create a new user (the requestor).
+
+The user will then have access to VM in just a few seconds and it will be ready
+to use.
+
+Statuses of a VM once it's being used by a user:
+
+Normal:
+    The VM is ready to use (Green message to the user)
+Ansible:
+    The VM is being configured by ansible (Yellow message to the user)
+Ansible queue:
+    The VM is being configured by ansible but while it was being configured, the
+    user introduced an additional change through the panel (Yellow message to
+    the user)
+Quarantined:
+    Web and mail servers are switched off. This is useful in case the website is
+    compromised. User can dequarantine once they have fixed the problem (unless
+    the site is administratively suspended).  Admins can also quarantine a site.
+Disabled:
+    VM is powered off driven by the user which can power it on again (unless the
+    site is administratively suspended). Admins can also disabled a site.
+Canceled:
+    When the site is being cancelled by the user (they no longer want it). The
+    VM is powered off and after a month it will be permanently deleted.

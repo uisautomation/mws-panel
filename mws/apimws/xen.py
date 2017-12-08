@@ -96,7 +96,7 @@ def secrets_prealocation(vm):
                               fp)
                 except Exception as e:
                     LOGGER.error("Error while trying to set up sshfp records. \nkeytype: %s\nfptype: %s\nexception: %s"
-                                 % (keytype, fptype, str(e.__class__)+" "+e.message))
+                                 % (keytype, fptype, str(e.__class__)+" "+str(e)))
                     pass
 
 

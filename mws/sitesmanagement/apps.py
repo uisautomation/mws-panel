@@ -24,3 +24,8 @@ class SitesManagementConfig(AppConfig):
         for name, value in self._DEFAULT_SETTINGS.items():
             if not hasattr(settings, name):
                 setattr(settings, name, value)
+
+        # import (and, hence, register) signal handlers. The import is done
+        # within ready() to minimise disruption from importing application
+        # code. See: https://docs.djangoproject.com/en/1.8/topics/signals/.
+        from . import signals
