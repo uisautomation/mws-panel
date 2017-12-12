@@ -9,7 +9,7 @@ from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpRespons
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.encoding import smart_str
 from apimws.ansible import launch_ansible, ansible_change_mysql_root_pwd
-from apimws.models import AnsibleConfiguration
+from apimws.models import AnsibleConfiguration, PHPLib
 from apimws.vm import clone_vm_api_call
 from apimws.views import post_installOS
 from mwsauth.utils import privileges_check
@@ -229,8 +229,8 @@ def change_db_root_password(request, service_id):
         'sidebar_messages': warning_messages(site),
         'ansibleconf': ansibleconf,
     })
-#
-#
+
+
 # @login_required
 # def apache_modules(request, service_id):
 #     service = get_object_or_404(Service, pk=service_id)
@@ -256,13 +256,19 @@ def change_db_root_password(request, service_id):
 #         'service': service,
 #         'site': site,
 #         'sidebar_messages': warning_messages(site),
-#         'form': ApacheModuleForm(initial={'apache_modules': service.apache_modules.values_list('name', flat=True)}),
+#         'form': ApacheModuleForm(initial={
+#             'apache_modules': list(service.apache_modules.values_list('name', flat=True))
+#         }),
 #     }
 #
 #     if request.method == 'POST':
 #         f = ApacheModuleForm(request.POST)
 #         if f.is_valid():
-#             service.apache_modules = f.cleaned_data['apache_modules']
+#             service.apache_modules.set(
+#                 ApacheModule.objects.filter(
+#                     name__in=f.cleaned_data['apache_modules']).all(),
+#                 clear=True
+#             )
 #             service.save()
 #             launch_ansible(service)
 #
@@ -294,13 +300,19 @@ def php_libs(request, service_id):
         'service': service,
         'site': site,
         'sidebar_messages': warning_messages(site),
-        'form': PHPLibForm(initial={'php_libs': service.php_libs.values_list('name', flat=True)}),
+        'form': PHPLibForm(initial={
+            'php_libs': list(service.php_libs.values_list('name', flat=True))
+        }),
     }
 
     if request.method == 'POST':
         f = PHPLibForm(request.POST)
         if f.is_valid():
-            service.php_libs = f.cleaned_data['php_libs']
+            service.php_libs.set(
+                PHPLib.objects.filter(
+                    name__in=f.cleaned_data['php_libs']).all(),
+                clear=True
+            )
             service.save()
             launch_ansible(service)
 

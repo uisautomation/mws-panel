@@ -15,8 +15,6 @@ PROJECT_APPS = (
 )
 
 INSTALLED_APPS = (
-    # Customization for the grappelli admin system
-    'grappelli',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -32,6 +30,7 @@ INSTALLED_APPS = (
 ) + PROJECT_APPS
 
 MIDDLEWARE_CLASSES = (
+    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -52,6 +51,22 @@ AUTHENTICATION_BACKENDS = (
 ROOT_URLCONF = 'mws.urls'
 
 WSGI_APPLICATION = 'mws.wsgi.application'
+
+# Database configuration is, by default, from the environment.
+DATABASES = {
+    'default': {
+        'ENGINE': os.environ.get('DJANGO_DB_ENGINE'),
+        'NAME': os.environ.get('DJANGO_DB_NAME'),
+        'HOST': os.environ.get('DJANGO_DB_HOST'),
+        'PORT': os.environ.get('DJANGO_DB_PORT'),
+        'USER': os.environ.get('DJANGO_DB_USER'),
+        'PASSWORD': os.environ.get('DJANGO_DB_PASSWORD'),
+    }
+}
+
+# Email configuration is, by default, from the environment
+EMAIL_HOST = os.environ.get('DJANGO_EMAIL_HOST', 'localhost')
+EMAIL_PORT = int(os.environ.get('DJANGO_EMAIL_PORT', '25'))
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/
@@ -76,13 +91,29 @@ STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-TEMPLATE_DIRS = (os.path.join(BASE_DIR, 'templates'),)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.request',
+                'django.template.context_processors.tz',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    }
+]
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-# Customization for the grappelli admin system
-TEMPLATE_CONTEXT_PROCESSORS = global_settings.TEMPLATE_CONTEXT_PROCESSORS + ('django.core.context_processors.request', )
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -130,3 +161,6 @@ FINANCE_EMAIL = 'fh103@cam.ac.uk'
 CELERY_IMPORTS = ('apimws.platforms', 'apimws.xen', 'apimws.utils', 'apimws.jackdaw', 'apimws.ansible',
                   'sitesmanagement.cronjobs', 'apimws.ipreg')
 IP_REG_API_END_POINT = ['userv', 'mws-admin', 'mws_ipreg']
+
+# Maximum length of time which a domain can remain unapproved.
+MWS_DOMAIN_NAME_GRACE_DAYS = 30

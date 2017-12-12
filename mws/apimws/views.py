@@ -117,6 +117,10 @@ def post_installOS(service):
 @public
 @csrf_exempt
 def post_installation(request):
+    """Endpoint called by Xen host to inform us that a VM installation has
+    finished.
+
+    """
     if request.method == 'POST':
         vm_id = request.POST['vm']
         token = request.POST['token']

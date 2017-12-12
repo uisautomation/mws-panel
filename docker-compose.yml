@@ -1,0 +1,36 @@
+version: '3'
+services:
+  devel-apache: &devel
+    build:
+      context: .
+    expose:
+      - "80"
+    ports:
+      - "8000:80"
+    links:
+      - "db"
+      - "debugsmtp"
+    volumes:
+      - ./mws/:/usr/src/app
+      - ./vmmanager/:/usr/src/vmmanager
+    environment:
+      - DJANGO_SETTINGS_MODULE=mws.settings_developer
+      - DJANGO_DB_PASSWORD=databasePass
+      - DJANGO_EMAIL_HOST=debugsmtp
+      - DJANGO_EMAIL_PORT=1025
+  devel:
+    <<: *devel
+    entrypoint: ["wait-for-it", "db:5432", "-t", "5", "--"]
+    command: ["./manage.py", "runserver", "0.0.0.0:80"]
+  db:
+    image: postgres
+    environment:
+      # Note: these values match those in mws/Dockerfile.
+      # TODO: make use of, e.g., docker-compose secrets to poke password in
+      - POSTGRES_DB=mws
+      - POSTGRES_USER=panel
+      - POSTGRES_PASSWORD=databasePass
+  debugsmtp:
+    image: mailhog/mailhog
+    ports:
+      - "8025:8025"

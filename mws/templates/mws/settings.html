@@ -1,4 +1,5 @@
 {% extends 'project-light/campl-mws.html' %}
+{% extends 'project-light/campl-mws.html' %}
 {% load static %}
 {% block page_content %}
     {{ block.super }}
@@ -149,7 +150,7 @@
 
             <div class="campl-column3">
                 <div class="campl-content-container campl-side-padding">
-                    <a href="{% url 'sitesmanagement.views.change_db_root_password' service_id=service.id %}">
+                    <a href="{% url 'change_db_root_password' service_id=service.id %}">
                         <article class="node node-external-link view-mode-focus_on clearfix
                                         campl-horizontal-teaser campl-teaser campl-focus-teaser">
                             <div class="campl-focus-teaser-img">

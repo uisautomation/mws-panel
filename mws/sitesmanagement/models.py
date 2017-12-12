@@ -67,46 +67,73 @@ class ServerType(models.Model):
 
 
 class Site(models.Model):
-    # Mark if the Site is preallocated or not
+    """
+    The site which is purchased by a user. It is the primary object which a
+    user interacts with.
+
+    :py:class:`.Site` object have the following fields:
+
+    preallocated
+        Is this a "preallocated" site as described in :any:`vmlifecycle`.
+    name
+        Human-friendly name of the site
+    description
+        Human-friendly description of the site
+    institution_id
+        The owning institution (retrieved using lookup)
+    start_date
+        Start date of the site
+    end_date
+        End date of the site (when the site will be cancelled, scheduled by the user or other reasons)
+    deleted
+        Is the site deleted?
+    email
+        Webmaster email
+    subscription
+        Indicates if the user wants to renew or their MWS3 subscription
+    type
+        Server type (amount of CPU, RAM, and disk)
+    users
+        Administrator users of a site
+    ssh_users
+        SSH only users of a site
+    groups
+        A set of :py:class:`.LookupGroup` instances representing the
+        administrator groups of a site.
+    ssh_groups
+        SSH only groups
+    supporters
+        Supporters list (list of MWS support admins temporary added to the user list)
+    disabled
+        Indicates if the site is disabled by the user
+    days_without_admin
+        Number of days since the site lost its last admin
+    exmws2
+        Flag to mark Grandfathered MWS2 sites (Real date of start)
+
+    """
     preallocated = models.BooleanField(default=False)
-    # Name of the site
     name = models.CharField(max_length=100, unique=True)
-    # Description of the site
     description = models.CharField(max_length=250, blank=True)
-    # The institution (retrieved using lookup)
     institution_id = models.CharField(max_length=100, blank=True, null=True)
-    # Start date of the site
     start_date = models.DateField(null=True, blank=True)
-    # End date of the site (when the site will be cancelled, scheduled by the user or other reasons)
     end_date = models.DateField(null=True, blank=True)
-    # is the site deleted?
     deleted = models.BooleanField(default=False)
-    # webmaster email
     email = models.EmailField(null=False, blank=False)
-    # Indicates if the user wants to renew or not their MWS3 subscription
     subscription = models.BooleanField(default=True)
 
-    # Server type (amount of CPU, RAM, and disk)
     type = models.ForeignKey(ServerType)
 
-    # Administrator users of a site
     users = models.ManyToManyField(User, related_name='sites')
-    # SSH only users of a site
     ssh_users = models.ManyToManyField(User, related_name='sites_auth_as_user', blank=True)
-    # Administrator groups of a site
     groups = models.ManyToManyField(LookupGroup, related_name='sites', blank=True)
-    # SSH only groups
     ssh_groups = models.ManyToManyField(LookupGroup, related_name='sites_auth_as_user', blank=True)
-    # Supporters list (list of MWS support admins temporary added to the user list)
     supporters = models.ManyToManyField(User, related_name='sites_auth_as_supporter', blank=True)
 
-    # Indicates if the site is disabled by the user
     disabled = models.BooleanField(default=False)
 
-    # Number of days since the site lost its last admin
     days_without_admin = models.IntegerField(default=0)
 
-    # Flag to mark Grandfathered MWS2 sites (Real date of start)
     exmws2 = models.DateField(null=True, blank=True)
 
     class Meta:
@@ -118,6 +145,7 @@ class Site(models.Model):
     #         raise ValidationError('start date cannot be null if the site is not a preallocated one')
 
     def get_absolute_url(self):
+        """Return an absolute URL for this site's control panel."""
         from django.core.urlresolvers import reverse
         return reverse('showsite', args=[str(self.id)])
 
