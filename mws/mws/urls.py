@@ -3,6 +3,8 @@ from django.conf.urls.static import static
 from django.conf.urls import include, url
 from django.contrib import admin
 import apimws.views
+import apimws.bes
+import apimws.lv
 import mwsauth.views
 import sitesmanagement.views
 from sitesmanagement.views.domains import DomainListView, DomainDelete
@@ -87,9 +89,9 @@ urlpatterns = [
     url(r'^api/resend_email_confirmation/(?P<site_id>[0-9]+)/$', apimws.views.resend_email_confirmation_view, name='apimws.views.resend_email_confirmation_view'),
 
     # test os updates
-    url(r'^clone_vm/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.clone_vm_view'),
-    url(r'^switch_services/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.switch_services'),
-    url(r'^resync/(?P<site_id>[0-9]+)/$', 'sitesmanagement.views.resync'),
+    url(r'^clone_vm/(?P<site_id>[0-9]+)/$', sitesmanagement.views.clone_vm_view, 'sitesmanagement.views.clone_vm_view'),
+    url(r'^switch_services/(?P<site_id>[0-9]+)/$', sitesmanagement.views.switch_services, 'sitesmanagement.views.switch_services'),
+    url(r'^resync/(?P<site_id>[0-9]+)/$', sitesmanagement.views.resync, 'sitesmanagement.views.resync'),
 
     # mwsauth app
     url(r'^auth/(?P<site_id>[0-9]+)/$', mwsauth.views.auth_change, name='mwsauth.views.auth_change'),
