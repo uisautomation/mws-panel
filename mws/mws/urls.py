@@ -89,9 +89,9 @@ urlpatterns = [
     url(r'^api/resend_email_confirmation/(?P<site_id>[0-9]+)/$', apimws.views.resend_email_confirmation_view, name='apimws.views.resend_email_confirmation_view'),
 
     # test os updates
-    url(r'^clone_vm/(?P<site_id>[0-9]+)/$', sitesmanagement.views.clone_vm_view, 'sitesmanagement.views.clone_vm_view'),
-    url(r'^switch_services/(?P<site_id>[0-9]+)/$', sitesmanagement.views.switch_services, 'sitesmanagement.views.switch_services'),
-    url(r'^resync/(?P<site_id>[0-9]+)/$', sitesmanagement.views.resync, 'sitesmanagement.views.resync'),
+    url(r'^clone_vm/(?P<site_id>[0-9]+)/$', sitesmanagement.views.clone_vm_view, name='sitesmanagement.views.clone_vm_view'),
+    url(r'^switch_services/(?P<site_id>[0-9]+)/$', sitesmanagement.views.switch_services, name='sitesmanagement.views.switch_services'),
+    url(r'^resync/(?P<site_id>[0-9]+)/$', sitesmanagement.views.resync, name='sitesmanagement.views.resync'),
 
     # mwsauth app
     url(r'^auth/(?P<site_id>[0-9]+)/$', mwsauth.views.auth_change, name='mwsauth.views.auth_change'),

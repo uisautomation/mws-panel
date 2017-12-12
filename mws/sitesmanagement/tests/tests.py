@@ -359,7 +359,7 @@ class SiteManagement2Tests(TestCase):
         self.assertEqual(self.client.get(reverse('listvhost',
                                                  kwargs={'service_id': service.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse('createvhost', kwargs={'service_id': service.id})).status_code, 403)
-        self.assertEqual(self.client.get(reverse(views.clone_vm_view, kwargs={'site_id': site.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse('sitesmanagement.views.clone_vm_view', kwargs={'site_id': site.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse('mwsauth.views.auth_change',
                                                  kwargs={'site_id': site.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse(views.delete_vm, kwargs={'service_id': service.id})).status_code, 403)
