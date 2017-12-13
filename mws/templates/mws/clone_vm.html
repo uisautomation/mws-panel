@@ -9,9 +9,9 @@
             <form action={% url 'sitesmanagement.views.clone_vm_view' site_id=site.id %} method="post">{% csrf_token %}
                 <fieldset>
                         <div>
-                            <h3>Test the OS upgrade of the production server onto a test server</h3>
+                            <h3>Test the OS upgrade of the production server by creating a test server</h3>
                             <p>
-                                <input type="submit" value="Clone Production server onto Test server" class="campl-btn campl-primary-cta">
+                                <input type="submit" value="Clone Production server as Test server" class="campl-btn campl-primary-cta">
                             </p>
                         </div>
                 </fieldset>
@@ -21,9 +21,14 @@
                 <form action={% url 'sitesmanagement.views.switch_services' site_id=site.id %} method="post">{% csrf_token %}
                     <fieldset>
                         <div>
-                            <h3>Switch the Test server for the Production server and make the OS upgrade permanent</h3>
+                            <h3>Swap the Test and Production servers</h3>
                             <p>
-                                <input type="submit" value="Make the Test server the Production one" class="campl-btn campl-primary-cta">
+                                <input type="submit" value="Swap the Test and Production servers" class="campl-btn campl-primary-cta">
+                            </p>
+                            <p>
+                                After this, you can still swap them back.
+                                However, once you are happy then you can delete the test server using the control panel.
+                                Deleting the test server is permanent.
                             </p>
                         </div>
                     </fieldset>
