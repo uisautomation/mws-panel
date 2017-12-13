@@ -17,6 +17,7 @@ def check_main_domain_name(instance, **kwargs):
 
 @receiver(pre_delete, sender=SiteKey)
 def delete_sshfp_from_dns(instance, **kwargs):
+    '''Delete SSHFP records from the DNS using the DNS API when a SiteKey is deleted from the database'''
     if instance.type != "ED25519":
         for service in instance.site.services.all():
             for fptype in SiteKey.FP_TYPES:
@@ -30,6 +31,8 @@ def delete_sshfp_from_dns(instance, **kwargs):
 
 @receiver(pre_delete, sender=DomainName)
 def delete_cname_from_dns(instance, **kwargs):
+    """Delete the hostname entry from the DNS using the DNS API when a the DomainName is deleted from
+    the database and it is an internal cam.ac.uk hostname accepted by the owner of the domain."""
     if instance.status == "accepted":
         delete_cname.delay(instance.name)
 

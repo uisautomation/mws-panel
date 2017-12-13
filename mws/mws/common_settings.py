@@ -153,7 +153,6 @@ STRONGHOLD_PUBLIC_NAMED_URLS = ('raven_login', 'raven_return')
 #CELERY_ACCEPT_CONTENT = ['json'] # TODO
 
 OS_VERSION = "jessie"
-OS_VERSION_VMAPI = "Debian 8RC1 x86_64 preseed"
 OS_VERSION_VMXENAPI = "jessie"
 OS_DUE_UPGRADE = []
 

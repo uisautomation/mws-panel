@@ -359,9 +359,7 @@ class SiteManagement2Tests(TestCase):
         self.assertEqual(self.client.get(reverse('listvhost',
                                                  kwargs={'service_id': service.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse('createvhost', kwargs={'service_id': service.id})).status_code, 403)
-        self.assertEqual(self.client.get(reverse(views.system_packages,
-                                                 kwargs={'service_id': service.id})).status_code, 403)
-        self.assertEqual(self.client.get(reverse(views.clone_vm_view, kwargs={'site_id': site.id})).status_code, 403)
+        self.assertEqual(self.client.get(reverse('sitesmanagement.views.clone_vm_view', kwargs={'site_id': site.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse('mwsauth.views.auth_change',
                                                  kwargs={'site_id': site.id})).status_code, 403)
         self.assertEqual(self.client.get(reverse(views.delete_vm, kwargs={'service_id': service.id})).status_code, 403)
@@ -414,10 +412,6 @@ class SiteManagement2Tests(TestCase):
                              expected_url=site.get_absolute_url())
         self.assertRedirects(self.client.get(reverse('createvhost', kwargs={'service_id': service.id})),
                              expected_url=site.get_absolute_url())
-        self.assertRedirects(self.client.get(reverse(views.system_packages, kwargs={'service_id': service.id})),
-                             expected_url=site.get_absolute_url())
-        self.assertRedirects(self.client.get(reverse(views.clone_vm_view, kwargs={'site_id': site.id})),
-                             expected_url=site.get_absolute_url())
         self.assertRedirects(self.client.get(reverse('mwsauth.views.auth_change', kwargs={'site_id': site.id})),
                              expected_url=site.get_absolute_url())
         self.assertEqual(self.client.get(reverse(views.delete_vm, kwargs={'service_id': service.id})).status_code, 403)
@@ -438,9 +432,8 @@ class SiteManagement2Tests(TestCase):
                              expected_url=site.get_absolute_url())
         self.assertRedirects(self.client.get(reverse('deletevhost', kwargs={'vhost_id': vhost.id})),
                              expected_url=site.get_absolute_url())
-        # TODO: Certificates actually suppressed until R2
-        # self.assertRedirects(self.client.get(reverse(views.certificates, kwargs={'vhost_id': vhost.id})),
-        #                      expected_url=site.get_absolute_url())
+        self.assertRedirects(self.client.get(reverse(views.certificates, kwargs={'vhost_id': vhost.id})),
+                             expected_url=site.get_absolute_url())
         self.assertRedirects(self.client.get(reverse(views.add_domain, kwargs={'vhost_id': vhost.id})),
                              expected_url=site.get_absolute_url())
         self.assertRedirects(self.client.get(reverse('deletedomain', kwargs={'domain_id': dn.id})),
@@ -688,43 +681,6 @@ class SiteManagement2Tests(TestCase):
                         </td>
                     </tr>
                 </tbody>''', response.content, count=1)
-
-    def test_system_packages(self):
-        site = self.create_site()
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
-            mock_subprocess.check_output.return_value.returncode = 0
-            response = self.client.post(reverse(views.system_packages,
-                                                kwargs={'service_id': site.production_service.id}),
-                                        {'package_number': 1})
-            self.assertEqual(response.status_code, 200)
-            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
-                                                             site.production_service.virtual_machines.first()
-                                                                 .network_configuration.name],
-                                                            stderr=mock_subprocess.STDOUT)
-        self.assertEqual(AnsibleConfiguration.objects.get(key="system_packages").value, "1")
-        self.assertContains(response, "Wordpress &lt;installed&gt;")
-
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
-            mock_subprocess.check_output.return_value.returncode = 0
-            response = self.client.post(reverse(views.system_packages,
-                                                kwargs={'service_id': site.production_service.id}),
-                                        {'package_number': 2})
-            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
-                                                             site.production_service.virtual_machines.first()
-                                                                 .network_configuration.name],
-                                                            stderr=mock_subprocess.STDOUT)
-        self.assertEqual(AnsibleConfiguration.objects.get(key="system_packages").value, "1,2")
-        self.assertContains(response, "Wordpress &lt;installed&gt;")
-        self.assertContains(response, "Drupal &lt;installed&gt;")
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
-            mock_subprocess.check_output.return_value.returncode = 0
-            self.client.post(reverse(views.system_packages, kwargs={'service_id': site.production_service.id}),
-                             {'package_number': 1})
-            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
-                                                             site.production_service.virtual_machines.first()
-                                                                 .network_configuration.name],
-                                                            stderr=mock_subprocess.STDOUT)
-        self.assertEqual(AnsibleConfiguration.objects.get(key="system_packages").value, "2")
 
     # def test_certificates(self):
     #     site = self.create_site()
