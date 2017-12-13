@@ -234,39 +234,6 @@
                     </a>
                 </div>
             </div>
-
-            {% comment unable to demonstrate that this works %}
-            <div class="campl-column3">
-                <div class="campl-content-container campl-side-padding">
-                    <a class="resync" href="#">
-                        <article class="node node-external-link view-mode-focus_on clearfix
-                                        campl-horizontal-teaser campl-teaser campl-focus-teaser">
-                            <div class="campl-focus-teaser-img">
-                                <div class="campl-content-container campl-horizontal-teaser-img">
-                                    <div class="field field-name-field-external-url-image field-type-image
-                                                field-label-hidden">
-                                        <div class="field-items">
-                                            <div class="field-item even">
-                                                <img class="campl-scale-with-grid" src="{% static "icons/restart.png" %}"
-                                                     height="128" style="margin: 10px;" alt="">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="campl-focus-teaser-txt">
-                                <div class="campl-content-container campl-horizontal-teaser-txt">
-                                    <h3 class="campl-teaser-title"{% if not site.is_ready %} style="color: orangered"{% endif %}>
-                                        Copy production filesystem to test{% if not site.is_ready %} (disabled while any of the servers are being configured){% endif %}
-                                    </h3>
-                                    <span class="ir campl-focus-link"></span>
-                                </div>
-                            </div>
-                        </article>
-                    </a>
-                </div>
-            </div>
-            {% endcomment %}
         {% endif %}
 
         <div class="campl-column3">
@@ -388,25 +355,6 @@
         </div>
     </div>
 
-    <!-- Modal resync -->
-    <div class="modal fade" id="resync_modal" tabindex="-1" role="dialog" aria-labelledby="resync_modal_label" aria-hidden="true">
-        <div class="modal-dialog modal-sm">
-            <div class="modal-content">
-                <div class="modal-body">
-                    Are you sure you want to resync your filesystem?
-                </div>
-                <div class="modal-footer" style="padding: 10px 20px 10px;">
-                    <form action="{% url 'sitesmanagement.views.resync' site_id=service.site.id %}" method="post">
-                        {% csrf_token %}
-                        <button type="button" class="campl-btn campl-primary-cta" data-dismiss="modal">Cancel</button>
-                        <input type="submit" value="Resync" class="campl-btn campl-primary-cta campl-primary-red">
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
     <!-- Modal restart os -->
     <div class="modal fade" id="restart_modal" tabindex="-1" role="dialog" aria-labelledby="restart_modal_label" aria-hidden="true">
         <div class="modal-dialog modal-sm">
@@ -430,20 +378,11 @@
 
 {% block campl_foot_js %}
     <script>
-        {% if not service.primary %}
-            $('.delete_vm').click(function() {
-                $('#delete_modal').modal();
-            });
-            {% if site.is_ready %}
-                $('.resync').click(function() {
-                    $('#resync_modal').modal();
-                });
-            {% endif %}
-        {% endif %}
-        {% if site.is_ready %}
-            $('.restart_vm').click(function() {
-                $('#restart_modal').modal();
-            });
-        {% endif %}
+        $('.delete_vm').click(function() {
+            $('#delete_modal').modal();
+        });
+        $('.restart_vm').click(function() {
+            $('#restart_modal').modal();
+        });
     </script>
 {% endblock %}
