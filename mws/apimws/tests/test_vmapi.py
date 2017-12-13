@@ -2,7 +2,7 @@ import mock
 import os
 from django.conf import settings
 from django.test import TestCase, override_settings
-from mock import patch
+from mock import patch, call
 
 from mwsauth.tests import do_test_login
 from sitesmanagement.models import VirtualMachine
@@ -19,10 +19,11 @@ class XenAPITests(TestCase):
         assign_a_site(self)
 
     @staticmethod
+    @patch("apimws.xen.launch_ansible")
     @patch("apimws.xen.secrets_prealocation_vm")
     @patch("apimws.xen.app")
     @patch("apimws.xen.vm_api_request")
-    def test_xen_api(mock_vm_api_request, mock_xen_app, secrets_prealocation_vm):
+    def test_xen_api(mock_vm_api_request, mock_xen_app, secrets_prealocation_vm, launch_ansible):
         # We retrieve the VM created by the create Xen API call
         vm = VirtualMachine.objects.first()
         mock_xen_app.control.inspect.active.values.return_value = []
@@ -36,6 +37,10 @@ class XenAPITests(TestCase):
         # We clone the production VM to a test VM
         site = vm.site
         clone_vm_api_call(site)
+
+        secrets_prealocation_vm.assert_called_once_with(site.secondary_vm)
+        launch_ansible.assert_has_calls([call(site.production_service), call(site.test_service)])
+
         # We try the deletion of both VMs through a Xen API call
         destroy_vm(site.secondary_vm.id)
         destroy_vm(site.primary_vm.id)
