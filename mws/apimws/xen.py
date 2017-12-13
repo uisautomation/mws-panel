@@ -1,14 +1,14 @@
 from __future__ import absolute_import
 import copy
 import logging
-import re
-import tempfile
 import uuid
 import json
 import subprocess
 from celery import shared_task, Task
 from django.conf import settings
 from django.core.urlresolvers import reverse
+
+from apimws.ansible import launch_ansible
 from apimws.ipreg import set_sshfp
 from apimws.models import Cluster
 from apimws.views import post_installation, post_recreate
@@ -312,6 +312,10 @@ def clone_vm_api_call(site):
     # PHPLibs
     for phplib in site.production_service.php_libs.all():
         phplib.services.add(site.test_service)
+
+    # Call Ansible to update the state of the machine
+    launch_ansible(site.production_service)
+    launch_ansible(site.test_service)
 
     return True
 
