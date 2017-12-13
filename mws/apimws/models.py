@@ -24,16 +24,16 @@ class AnsibleConfiguration(models.Model):
 
     class Meta:
         unique_together = ("service", "key")
-
-
-class ApacheModule(models.Model):
-    name = models.CharField(max_length=150, primary_key=True)
-    description = models.CharField(max_length=250)
-    available = models.BooleanField(default=True)
-    services = models.ManyToManyField(Service, related_name='apache_modules', blank=True)
-
-    def __unicode__(self):
-        return self.name
+#
+#
+# class ApacheModule(models.Model):
+#     name = models.CharField(max_length=150, primary_key=True)
+#     description = models.CharField(max_length=250)
+#     available = models.BooleanField(default=True)
+#     services = models.ManyToManyField(Service, related_name='apache_modules', blank=True)
+#
+#     def __unicode__(self):
+#         return self.name
 
 
 class PHPLib(models.Model):

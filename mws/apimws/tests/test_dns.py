@@ -241,14 +241,14 @@ class DNSTests(TestCase):
         reject_or_accepted_old_domain_names_requests()
         domain_name_created = DomainName.objects.get(id=domain_name_created.id)  # Refresh object from DB
         self.assertEquals(domain_name_created.status, 'requested')
-        domain_name_created.requested_at = date.today() - timedelta(days=11)
+        domain_name_created.requested_at = date.today() - timedelta(days=31)
         domain_name_created.save()
 
         # Test that the domain name gets automatically accepted after the right
         # number of days
 
         # check the settings are what we think they are
-        self.assertEqual(settings.MWS_DOMAIN_NAME_GRACE_DAYS, 10)
+        self.assertEqual(settings.MWS_DOMAIN_NAME_GRACE_DAYS, 30)
 
         with mock.patch("apimws.ipreg.get_nameinfo") as mock_get_nameinfo:
             # Now test accept a changeable domain name
@@ -264,7 +264,7 @@ class DNSTests(TestCase):
 
     def test_automation_internal_non_acceptable_cam_domain(self):
         # check the settings are what we think they are
-        self.assertEqual(settings.MWS_DOMAIN_NAME_GRACE_DAYS, 10)
+        self.assertEqual(settings.MWS_DOMAIN_NAME_GRACE_DAYS, 30)
 
         domain_name_created = self.add_internal_non_existing_cam_domain()
         # Test that the domain name doesn't get automatically accepted
@@ -277,7 +277,7 @@ class DNSTests(TestCase):
         reject_or_accepted_old_domain_names_requests()
         domain_name_created = DomainName.objects.get(id=domain_name_created.id)  # Refresh object from DB
         self.assertEquals(domain_name_created.status, 'requested')
-        domain_name_created.requested_at = date.today() - timedelta(days=11)
+        domain_name_created.requested_at = date.today() - timedelta(days=31)
         domain_name_created.save()
         # Test that the domain name gets automatically accepted after 10 days
         with mock.patch("apimws.ipreg.get_nameinfo") as mock_get_nameinfo:

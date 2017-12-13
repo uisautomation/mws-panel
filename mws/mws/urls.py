@@ -2,9 +2,9 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.conf.urls import include, url
 from django.contrib import admin
+import apimws.views
 import apimws.bes
 import apimws.lv
-import apimws.views
 import mwsauth.views
 import sitesmanagement.views
 from sitesmanagement.views.domains import DomainListView, DomainDelete
@@ -12,7 +12,7 @@ from sitesmanagement.views.sites import SiteCreate, SiteShow, SiteList, SiteDisa
     SiteEditEmail, SiteDoNotRenew
 from sitesmanagement.views.snapshots import SnapshotCreate, SnapshotDelete, SnapshotListView
 from sitesmanagement.views.unixgroups import UnixGroupListView, UnixGroupCreate, UnixGroupDelete, UnixGroupUpdate
-from sitesmanagement.views.vhosts import VhostListView, VhostDelete, VhostCreate, VisitVhost
+from sitesmanagement.views.vhosts import VhostListView, VhostDelete, VhostCreate
 
 urlpatterns = [
     # external apps urls
@@ -42,14 +42,11 @@ urlpatterns = [
     url(r'^unsuspend/(?P<site_id>[0-9]+)/$', sitesmanagement.views.sites.site_unsuspend, name='unsuspendsite'),
     url(r'^vhosts/(?P<vhost_id>[0-9]+)/certificates/$', sitesmanagement.views.certificates, name='sitesmanagement.views.certificates'),
     url(r'^vhosts/(?P<vhost_id>[0-9]+)/generate_csr/$', sitesmanagement.views.generate_csr, name='sitesmanagement.views.generate_csr'),
-    url(r'^system_packages/(?P<service_id>[0-9]+)/$', sitesmanagement.views.system_packages, name='sitesmanagement.views.system_packages'),
-    url(r'^clone_vm/(?P<site_id>[0-9]+)/$', sitesmanagement.views.clone_vm_view, name='sitesmanagement.views.clone_vm_view'),
     url(r'^delete_vm/(?P<service_id>[0-9]+)/$', sitesmanagement.views.delete_vm, name='sitesmanagement.views.delete_vm'),
     url(r'^settings/vm/(?P<service_id>[0-9]+)/on/$', sitesmanagement.views.power_vm, name='sitesmanagement.views.power_vm'),
     url(r'^settings/vm/(?P<service_id>[0-9]+)/reset/$', sitesmanagement.views.reset_vm, name='sitesmanagement.views.reset_vm'),
     url(r'^settings/vm/(?P<service_id>[0-9]+)/db_root_pass/$', sitesmanagement.views.change_db_root_password, name='change_db_root_password'),
-    url(r'^update_os/(?P<service_id>[0-9]+)/$', sitesmanagement.views.update_os, name='sitesmanagement.views.update_os'),
-    url(r'^apache/(?P<service_id>[0-9]+)/$', sitesmanagement.views.apache_modules, name='sitesmanagement.views.apache_modules'),
+    # url(r'^apache/(?P<service_id>[0-9]+)/$', sitesmanagement.views.apache_modules, name='sitesmanagement.views.apache_modules'),
     url(r'^phplibs/(?P<service_id>[0-9]+)/$', sitesmanagement.views.php_libs, name='sitesmanagement.views.php_libs'),
     url(r'^quarantine/(?P<service_id>[0-9]+)/$', sitesmanagement.views.quarantine, name='sitesmanagement.views.quarantine'),
 
@@ -57,7 +54,6 @@ urlpatterns = [
     url(r'^vhosts/(?P<service_id>[0-9]+)/$', VhostListView.as_view(), name='listvhost'),
     url(r'^add_vhost/(?P<service_id>[0-9]+)/$', VhostCreate.as_view(), name='createvhost'),
     url(r'^vhosts/(?P<vhost_id>[0-9]+)/delete/$', VhostDelete.as_view(), name='deletevhost'),
-    url(r'^visit_website/(?P<vhost_id>[0-9]+)/$', VisitVhost.as_view(), name='visitvhost'),
     url(r'^vhost/(?P<vhost_id>[0-9]+)/apache_owned$', sitesmanagement.views.vhost_onwership, name='vhostapache'),
 
     # Domains management
@@ -91,6 +87,10 @@ urlpatterns = [
     url(r'^api/post_installation/$', apimws.views.post_installation, name='apimws.views.post_installation'),
     url(r'^api/post_recreate/$', apimws.views.post_recreate, name='apimws.views.post_recreate'),
     url(r'^api/resend_email_confirmation/(?P<site_id>[0-9]+)/$', apimws.views.resend_email_confirmation_view, name='apimws.views.resend_email_confirmation_view'),
+
+    # test os updates
+    url(r'^clone_vm/(?P<site_id>[0-9]+)/$', sitesmanagement.views.clone_vm_view, name='sitesmanagement.views.clone_vm_view'),
+    url(r'^switch_services/(?P<site_id>[0-9]+)/$', sitesmanagement.views.switch_services, name='sitesmanagement.views.switch_services'),
 
     # mwsauth app
     url(r'^auth/(?P<site_id>[0-9]+)/$', mwsauth.views.auth_change, name='mwsauth.views.auth_change'),

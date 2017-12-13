@@ -1,8 +1,6 @@
 """Views(Controllers) for other purposes not in other files"""
 
-import bisect
 import json
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.urlresolvers import reverse
@@ -10,11 +8,10 @@ from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpRespons
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.encoding import smart_str
 from apimws.ansible import launch_ansible, ansible_change_mysql_root_pwd
-from apimws.models import AnsibleConfiguration, ApacheModule, PHPLib
-from apimws.vm import clone_vm
+from apimws.models import AnsibleConfiguration, PHPLib
+from apimws.vm import clone_vm_api_call
 from mwsauth.utils import privileges_check
 from sitesmanagement.forms import BillingForm
-from sitesmanagement.utils import get_object_or_None
 from sitesmanagement.models import Service, Billing, Site, ServerType
 from sitesmanagement.views.sites import warning_messages
 
@@ -60,15 +57,10 @@ def billing_management(request, site_id):
 
 @login_required
 def clone_vm_view(request, site_id):
-    if getattr(settings, 'DEMO', False):
-        return HttpResponseRedirect(reverse('listsites'))
     site = privileges_check(site_id, request.user)
 
     if site is None:
         return HttpResponseForbidden()
-
-    if not site.is_ready:
-        return redirect(site)
 
     breadcrumbs = {
         0: dict(name='Managed Web Service server: ' + str(site.name), url=site.get_absolute_url()),
@@ -76,11 +68,16 @@ def clone_vm_view(request, site_id):
     }
 
     if request.method == 'POST':
-        if request.POST.get('primary_vm') == "true":
-            clone_vm(site, True)
-        if request.POST.get('primary_vm') == "false":
-            clone_vm(site, False)
-
+        if site.is_ready and site.test_service:
+            clone_vm_api_call.delay(site)
+            messages.info(request, 'The test server is being created. This will usually take around 10 minutes. '
+                                   'You will need to refresh the page.')
+        elif not site.is_ready:
+            messages.error(request,
+                           'The test server cannot be created while the production server is being configured.')
+        elif not site.test_service:
+            messages.error(request,
+                           'The test server cannot be created at this moment, please contact mws-support@uis.cam.ac.uk')
         return redirect(site)
 
     return render(request, 'mws/clone_vm.html', {
@@ -137,57 +134,6 @@ def service_settings(request, service_id):
 
 
 @login_required
-def system_packages(request, service_id):
-    if getattr(settings, 'DEMO', False):
-        return HttpResponseRedirect(reverse('listsites'))
-    service = get_object_or_404(Service, pk=service_id)
-    site = privileges_check(service.site.id, request.user)
-
-    if site is None:
-        return HttpResponseForbidden()
-
-    if not service or not service.active or service.is_busy:
-        return redirect(site)
-
-    ansible_configuraton = get_object_or_None(AnsibleConfiguration, service=service, key="system_packages") \
-                           or AnsibleConfiguration.objects.create(service=service, key="system_packages", value="")
-
-    packages_installed = list(int(x) for x in ansible_configuraton.value.split(",")) \
-        if ansible_configuraton.value != '' else []
-
-    breadcrumbs = {
-        0: dict(name='Managed Web Service server: ' + str(site.name), url=site.get_absolute_url()),
-        1: dict(name='Server settings' if service.primary else 'Test server settings',
-                url=reverse(service_settings, kwargs={'service_id': service.id})),
-        2: dict(name='System packages', url=reverse(system_packages, kwargs={'service_id': service.id}))
-    }
-
-    package_number_list = [1, 2, 3, 4]  # TODO extract this to settings
-
-    if request.method == 'POST':
-        package_number = int(request.POST['package_number'])
-        if package_number in package_number_list:
-            if package_number in packages_installed:
-                packages_installed.remove(package_number)
-                ansible_configuraton.value = ",".join(str(x) for x in packages_installed)
-                ansible_configuraton.save()
-            else:
-                bisect.insort_left(packages_installed, package_number)
-                ansible_configuraton.value = ",".join(str(x) for x in packages_installed)
-                ansible_configuraton.save()
-
-            launch_ansible(service)  # to install or delete new/old packages selected by the user
-
-    return render(request, 'mws/system_packages.html', {
-        'breadcrumbs': breadcrumbs,
-        'packages_installed': packages_installed,
-        'site': site,
-        'sidebar_messages': warning_messages(site),
-        'service': service
-    })
-
-
-@login_required
 def delete_vm(request, service_id):
     service = get_object_or_404(Service, pk=service_id)
     site = privileges_check(service.site.id, request.user)
@@ -198,7 +144,7 @@ def delete_vm(request, service_id):
     if not service or not service.active or service.is_busy:
         return redirect(site)
 
-    if request.method == 'DELETE':
+    if request.method == 'POST':
         for vm in service.virtual_machines.all():
             vm.delete()
         return redirect(site)
@@ -231,37 +177,18 @@ def reset_vm(request, service_id):
         return HttpResponseForbidden()
 
     if not service or not service.active or service.is_busy:
+        messages.error(request, 'Any of the two server is busy during configuration, wait until both of them are ready')
         return redirect(site)
 
     if request.method == 'POST':
         if service.do_reset():
-            messages.success(request, "Your site will be restarted shortly")
+            messages.success(request, "Your server will be restarted shortly")
         else:
-            messages.error(request, "Your site couldn't be restarted")
+            messages.error(request, "Your server couldn't be restarted")
+    else:
+        messages.error(request, "An error happened")
 
-    return redirect(service_settings, service_id=service.id)
-
-
-@login_required
-def update_os(request, service_id):
-    if getattr(settings, 'DEMO', False):
-        return HttpResponseRedirect(reverse('listsites'))
-    service = get_object_or_404(Service, pk=service_id)
-    site = privileges_check(service.site.id, request.user)
-
-    if site is None:
-        return HttpResponseForbidden()
-
-    if not service or not service.active or service.is_busy:
-    # TODO change the button format (disabled) if the vm is not ready
-        return redirect(site)
-
-    # TODO 1) Warn about the secondary VM if exists
-    # TODO 2) Delete secondary VM if exists
-    # TODO 3) Create a new VM with the new OS and launch an ansible task to restore the state of the DB
-    # TODO 4) Put it as a secondary VM?
-
-    return HttpResponse('')
+    return redirect(site)
 
 
 @login_required
@@ -305,48 +232,48 @@ def change_db_root_password(request, service_id):
     })
 
 
-@login_required
-def apache_modules(request, service_id):
-    service = get_object_or_404(Service, pk=service_id)
-    site = privileges_check(service.site.id, request.user)
-
-    if site is None:
-        return HttpResponseForbidden()
-
-    if not service or not service.active or service.is_busy:
-        return redirect(site)
-
-    breadcrumbs = {
-        0: dict(name='Managed Web Service server: ' + str(site.name), url=site.get_absolute_url()),
-        1: dict(name='Server settings' if service.primary else 'Test server settings',
-                url=reverse(service_settings, kwargs={'service_id': service.id})),
-        2: dict(name='Apache modules', url=reverse(apache_modules, kwargs={'service_id': service.id})),
-    }
-
-    from apimws.forms import ApacheModuleForm
-
-    parameters = {
-        'breadcrumbs': breadcrumbs,
-        'service': service,
-        'site': site,
-        'sidebar_messages': warning_messages(site),
-        'form': ApacheModuleForm(initial={
-            'apache_modules': list(service.apache_modules.values_list('name', flat=True))
-        }),
-    }
-
-    if request.method == 'POST':
-        f = ApacheModuleForm(request.POST)
-        if f.is_valid():
-            service.apache_modules.set(
-                ApacheModule.objects.filter(
-                    name__in=f.cleaned_data['apache_modules']).all(),
-                clear=True
-            )
-            service.save()
-            launch_ansible(service)
-
-    return render(request, 'mws/apache.html', parameters)
+# @login_required
+# def apache_modules(request, service_id):
+#     service = get_object_or_404(Service, pk=service_id)
+#     site = privileges_check(service.site.id, request.user)
+#
+#     if site is None:
+#         return HttpResponseForbidden()
+#
+#     if not service or not service.active or service.is_busy:
+#         return redirect(site)
+#
+#     breadcrumbs = {
+#         0: dict(name='Managed Web Service server: ' + str(site.name), url=site.get_absolute_url()),
+#         1: dict(name='Server settings' if service.primary else 'Test server settings',
+#                 url=reverse(service_settings, kwargs={'service_id': service.id})),
+#         2: dict(name='Apache modules', url=reverse(apache_modules, kwargs={'service_id': service.id})),
+#     }
+#
+#     from apimws.forms import ApacheModuleForm
+#
+#     parameters = {
+#         'breadcrumbs': breadcrumbs,
+#         'service': service,
+#         'site': site,
+#         'sidebar_messages': warning_messages(site),
+#         'form': ApacheModuleForm(initial={
+#             'apache_modules': list(service.apache_modules.values_list('name', flat=True))
+#         }),
+#     }
+#
+#     if request.method == 'POST':
+#         f = ApacheModuleForm(request.POST)
+#         if f.is_valid():
+#             service.apache_modules.set(
+#                 ApacheModule.objects.filter(
+#                     name__in=f.cleaned_data['apache_modules']).all(),
+#                 clear=True
+#             )
+#             service.save()
+#             launch_ansible(service)
+#
+#     return render(request, 'mws/apache.html', parameters)
 
 
 @login_required
@@ -447,3 +374,19 @@ def quarantine(request, service_id):
 def admin_email_list(request):
     return render(request, 'mws/admin/email_list.html',
                   {'site_list': Site.objects.filter(deleted=False, preallocated=False, end_date__isnull=True)})
+
+
+@login_required
+def switch_services(request, site_id):
+    """This function swiches the production and test services"""
+    site = get_object_or_404(Site, pk=site_id)
+    site = privileges_check(site.id, request.user)
+
+    if site is None:
+        return HttpResponseForbidden()
+
+    if site.switch_services():
+        return redirect(site)
+    else:
+        messages.error(request, 'An error happened while trying to switch the test server with the production server')
+        return redirect(site)

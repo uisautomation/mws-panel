@@ -1,7 +1,7 @@
 import uuid
 import re
 import reversion
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from itertools import chain
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -10,6 +10,7 @@ from django.core.validators import validate_slug
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
+from django.db import transaction
 from django.utils import timezone
 from django.utils.timezone import now
 from os.path import splitext
@@ -244,6 +245,46 @@ class Site(models.Model):
             self.production_service.power_on()
         if self.test_service:
             self.test_service.power_on()
+        return True
+
+    def switch_services(self):
+        prod_service = self.production_service
+        test_service = self.test_service
+        netconf_prod = prod_service.network_configuration
+        netconf_test = test_service.network_configuration
+        vhost_prod = prod_service.vhosts.all()
+        ug_prod = prod_service.unix_groups.all()
+
+        with transaction.atomic():
+            # Switch vhosts, test service has no vhosts
+            for vhost in vhost_prod:
+                vhost.service = test_service
+                vhost.save()
+
+            # Switch unix groups, test service has no UG
+            for ug in ug_prod:
+                ug.service = test_service
+                ug.save()
+
+            # Switch network configuration
+            test_service.network_configuration = NetworkConfig.get_free_test_service_config()
+            test_service.type = "production"
+            test_service.site = None
+            test_service.save()
+            prod_service.network_configuration = netconf_test
+            prod_service.type = "test"
+            prod_service.save()
+            test_service.site = self
+            test_service.network_configuration = netconf_prod
+            test_service.save()
+
+            from apimws.models import AnsibleConfiguration
+            AnsibleConfiguration.objects.update_or_create(service=test_service, key="backup_first_date",
+                                                          value=date.today().isoformat())
+
+        from apimws.ansible import launch_ansible
+        launch_ansible(prod_service)
+        launch_ansible(test_service)
         return True
 
     @property
@@ -551,10 +592,21 @@ class Vhost(models.Model):
     def sorted_domain_names(self):
         return sorted(set(self.domain_names.all()))
 
+    def get_url(self):
+        if self.main_domain:
+            if self.tls_enabled:
+                return "https://%s" % self.main_domain.name
+            else:
+                return "http://%s" % self.main_domain.name
+        else:
+            return "#"
+
     class Meta:
         unique_together = ("name", "service")
 
     def __unicode__(self):
+        if self.service and self.service.network_configuration:
+            return self.name + ' - ' + self.service.network_configuration.name
         return self.name
 
 

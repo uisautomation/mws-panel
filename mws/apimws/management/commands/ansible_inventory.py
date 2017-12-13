@@ -6,10 +6,10 @@ from django.core.management.base import BaseCommand, CommandError
 from optparse import make_option
 from django.core.urlresolvers import reverse
 from django.db.models import Q
-from django.conf import settings
 from apimws.lv import update_lv_list
-from apimws.models import ApacheModule, PHPLib, AnsibleConfiguration
+from apimws.models import PHPLib, AnsibleConfiguration
 from sitesmanagement.models import VirtualMachine, Site, UnixGroup
+from django.conf import settings
 
 
 group = "mwsclients"
@@ -109,8 +109,8 @@ class Command(BaseCommand):
         def user_vars(user, service):
             uv = {}
             uv['username'] = user.username
-            uv['groups'] = list(UnixGroup.objects.filter(service=service, users__in=[user], to_be_deleted=False)
-                                .values_list('name', flat=True))
+            uv['groups'] = list(UnixGroup.objects.filter(service__site=service.site, users__in=[user],
+                                                         to_be_deleted=False).values_list('name', flat=True))
             if hasattr(user, "mws_user") and user.mws_user.uid is not None:
                 uv['uid'] = user.mws_user.uid
                 if user.mws_user.ssh_public_key:
@@ -149,8 +149,9 @@ class Command(BaseCommand):
             vhv['webapp'] = vh.webapp
             return vhv
 
-        # List of Vhosts
-        v['mws_vhosts'] = [vhost_vars(vh) for vh in vm.service.vhosts.all()]
+        # List of Vhosts of the production service (the test service uses the production one)
+        v['mws_vhosts'] = [vhost_vars(vh) for vh in vm.service.vhosts.all()] if vm.service.primary else \
+            [vhost_vars(vh) for vh in vm.service.site.production_service.vhosts.all()]
 
         # Is the VM the production or the test one?
         v['mws_is_primary'] = vm.primary
@@ -184,22 +185,12 @@ class Command(BaseCommand):
 
         # mws_service_group refers to the Ansible host group representing
         # this host's service.
-        if vm.service.type == "production":
-            # Only output mws_service_* if the VM is in the prod service, do not use/show test service addresses
-            v['mws_service_group'] = self.servicegroup(vm.service)
-            v['mws_service_fqdn'] = vm.service.network_configuration.name
-            v['mws_service_ipv4'] = vm.service.network_configuration.IPv4
-            v['mws_service_ipv4_netmask'] = vm.service.network_configuration.IPv4_netmask
-            v['mws_service_ipv4_gateway'] = vm.service.network_configuration.IPv4_gateway
-            v['mws_service_ipv6'] = vm.service.network_configuration.IPv6
-
-        # List of Apache modules to be installed and enable
-        v['mws_apache_mods_enabled'] = list(ApacheModule.objects.filter(services__id=vm.service.id, available=True)
-                                            .values_list('name', flat=True))
-
-        # List of Apache modules to be disabled
-        v['mws_apache_mods_disabled'] = list(ApacheModule.objects.exclude(services__id=vm.service.id)
-                                             .values_list('name', flat=True))
+        v['mws_service_group'] = self.servicegroup(vm.service)
+        v['mws_service_fqdn'] = vm.service.network_configuration.name
+        v['mws_service_ipv4'] = vm.service.network_configuration.IPv4
+        v['mws_service_ipv4_netmask'] = vm.service.network_configuration.IPv4_netmask
+        v['mws_service_ipv4_gateway'] = vm.service.network_configuration.IPv4_gateway
+        v['mws_service_ipv6'] = vm.service.network_configuration.IPv6
 
         # List of PHP libraries to be installed
         v['mws_php_libs_enabled'] = list(PHPLib.objects.filter(services__id=vm.service.id, available=True)
@@ -211,12 +202,12 @@ class Command(BaseCommand):
 
         # List of Unix groups and their associated gids
         v['mws_unix_groups'] = []
-        for unix_group in UnixGroup.objects.filter(service=vm.service, to_be_deleted=False):
+        for unix_group in UnixGroup.objects.filter(service__site=vm.service.site, to_be_deleted=False):
             v['mws_unix_groups'].append({'name': unix_group.name, 'gid': INITIAL_GID-unix_group.id})
 
         # List of Unix Groups to be deleted
         v['mws_delete_unix_groups'] = []
-        for unix_group in UnixGroup.objects.filter(service=vm.service, to_be_deleted=True):
+        for unix_group in UnixGroup.objects.filter(service__site=vm.service.site, to_be_deleted=True):
             v['mws_delete_unix_groups'].append({'name': unix_group.name})
 
         # Let ansible know if the VM should be quarantined (apache and exim services disabled)

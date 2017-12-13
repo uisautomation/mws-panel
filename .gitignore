@@ -25,3 +25,5 @@ vmmanager/vmmanager.egg-info
 # virtualenv files
 mws/venv/*
 
+# django static dependencies
+mws/static_dep/*
