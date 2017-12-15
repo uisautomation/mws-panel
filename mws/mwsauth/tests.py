@@ -176,7 +176,6 @@ class AuthTestCases(TestCase):
                                                       type=ServerType.objects.get(id=1))
         service_a = Service.objects.create(type='production', network_configuration=NetworkConfig.
                                            get_free_prod_service_config(), site=site_without_auth_users, status='ready')
-        AnsibleConfiguration.objects.create(service=service_a, key='os', value='jessie')
         VirtualMachine.objects.create(token=uuid.uuid4(), service=service_a,
                                       network_configuration=NetworkConfig.get_free_host_config(),
                                       cluster=which_cluster())
@@ -222,7 +221,7 @@ class AuthTestCases(TestCase):
             })
             mock_subprocess.check_output.assert_called_with([
                 "userv", "mws-admin", "mws_ansible_host",
-                site_with_auth_users.production_service.virtual_machines.first().network_configuration.name, "jessie"
+                site_with_auth_users.production_service.virtual_machines.first().network_configuration.name
             ], stderr=mock_subprocess.STDOUT)
         self.assertRedirects(response, expected_url=site_with_auth_users.get_absolute_url())
         self.assertEqual(len(site_with_auth_users.users.all()), 1)
@@ -236,7 +235,7 @@ class AuthTestCases(TestCase):
             response = self.client.post(reverse(views.auth_change, kwargs={'site_id': site_with_auth_users.id}), {})
             mock_subprocess.check_output.assert_called_with([
                 "userv", "mws-admin", "mws_ansible_host",
-                site_with_auth_users.production_service.virtual_machines.first().network_configuration.name, "jessie"
+                site_with_auth_users.production_service.virtual_machines.first().network_configuration.name
             ], stderr=mock_subprocess.STDOUT)
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith(site_with_auth_users.get_absolute_url()))
@@ -263,7 +262,6 @@ class AuthTestCases(TestCase):
         service_a = Service.objects.create(type='production', network_configuration=NetworkConfig.
                                            get_free_prod_service_config(), site=site_with_auth_groups,
                                            status='ready')
-        AnsibleConfiguration.objects.create(service=service_a, key='os', value='jessie')
         VirtualMachine.objects.create(token=uuid.uuid4(), service=service_a,
                                       network_configuration=NetworkConfig.get_free_host_config(),
                                       cluster=which_cluster())
@@ -287,7 +285,7 @@ class AuthTestCases(TestCase):
             })
             mock_subprocess.check_output.assert_called_with([
                 "userv", "mws-admin", "mws_ansible_host",
-                site_with_auth_groups.production_service.virtual_machines.first().network_configuration.name, "jessie"
+                site_with_auth_groups.production_service.virtual_machines.first().network_configuration.name
             ], stderr=mock_subprocess.STDOUT)
         self.assertRedirects(response, expected_url=site_with_auth_groups.get_absolute_url())
         self.assertEqual(len(site_with_auth_groups.users.all()), 1)
@@ -301,7 +299,7 @@ class AuthTestCases(TestCase):
             response = self.client.post(reverse(views.auth_change, kwargs={'site_id': site_with_auth_groups.id}), {})
             mock_subprocess.check_output.assert_called_with([
                 "userv", "mws-admin", "mws_ansible_host",
-                site_with_auth_groups.production_service.virtual_machines.first().network_configuration.name, "jessie"
+                site_with_auth_groups.production_service.virtual_machines.first().network_configuration.name
             ], stderr=mock_subprocess.STDOUT)
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.endswith(site_with_auth_groups.get_absolute_url()))

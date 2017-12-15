@@ -358,5 +358,5 @@ class DNSTests(TestCase):
 def assert_host_ansible_call(mock_subprocess, vhost):
     mock_subprocess.check_output.assert_called_once_with([
         "userv", "mws-admin", "mws_ansible_host",
-        vhost.service.virtual_machines.first().network_configuration.name, 'jessie'
+        vhost.service.virtual_machines.first().network_configuration.name
     ], stderr=mock_subprocess.STDOUT)

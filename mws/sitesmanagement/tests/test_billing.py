@@ -46,7 +46,6 @@ class BillingTests(TestCase):
         site = Site.objects.create(name="testSite", start_date=datetime.today(), type=ServerType.objects.get(id=1))
         service = Service.objects.create(site=site, type='production', status="ready",
                                          network_configuration=NetworkConfig.get_free_prod_service_config())
-        AnsibleConfiguration.objects.create(service=service, key='os', value='jessie')
         VirtualMachine.objects.create(name="test_vm", token=uuid.uuid4(), cluster=which_cluster(),
                                       service=service, network_configuration=NetworkConfig.get_free_host_config())
         Vhost.objects.create(name="default", service=service)

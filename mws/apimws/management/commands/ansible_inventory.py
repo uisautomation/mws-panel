@@ -1,13 +1,11 @@
 import sys
 import json
 
-import os
 from django.core.management.base import BaseCommand, CommandError
-from optparse import make_option
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from apimws.lv import update_lv_list
-from apimws.models import PHPLib, AnsibleConfiguration
+from apimws.models import PHPLib
 from sitesmanagement.models import VirtualMachine, Site, UnixGroup
 from django.conf import settings
 
@@ -70,9 +68,6 @@ class Command(BaseCommand):
             vms = VirtualMachine.objects.filter(
                 service__status__in=('ansible', 'ansible_queued', 'ready', 'postinstall'),
                 service__site__disabled=False, service__site__deleted=False, service__site__end_date__isnull=True)
-            if 'ANSIBLE_INVENTORY_OS' in os.environ:
-                # if ANSIBLE_INVENTORY_OS is set, filter the list of hosts based on the OS
-                vms = [vm for vm in vms if vm.operating_system == os.environ['ANSIBLE_INVENTORY_OS']]
             result = {'_meta': {'hostvars': {}}, group: [self.hostid(vm) for vm in vms]}
             for site in Site.objects.all():
                 if not site.is_canceled():

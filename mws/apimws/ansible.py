@@ -74,7 +74,7 @@ def launch_ansible_async(service, ignore_host_key=False):
                 userv_cmd = ["userv"]
                 if ignore_host_key:
                     userv_cmd.extend(["--defvar", "ANSIBLE_HOST_KEY_CHECKING=False"])
-                userv_cmd.extend(["mws-admin", "mws_ansible_host", vm.network_configuration.name, vm.operating_system])
+                userv_cmd.extend(["mws-admin", "mws_ansible_host", vm.network_configuration.name])
                 subprocess.check_output(userv_cmd, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             raise launch_ansible_async.retry(exc=e)
@@ -129,10 +129,7 @@ def execute_playbook_on_vms(service, playbook_args):
     :param playbook_args: ansible playbook arguments
     """
     for vm in service.virtual_machines.all():
-        cmd = [
-            "userv", "--defvar", "os_version=%s" % vm.operating_system, "mws-admin", "mws_ansible_host_d",
-            vm.network_configuration.name
-        ]
+        cmd = ["userv", "mws-admin", "mws_ansible_host_d", vm.network_configuration.name]
         cmd.extend(playbook_args)
         subprocess.check_output(cmd, stderr=subprocess.STDOUT)
     return
@@ -143,8 +140,7 @@ def delete_vhost_ansible(service, vhost_name, vhost_webapp):
     """delete the vhost folder and all its contents"""
     for vm in service.virtual_machines.all():
         subprocess.check_output([
-            "userv", "--defvar", "os_version=%s" % vm.operating_system, "mws-admin", "mws_delete_vhost",
-            vm.network_configuration.name, "--tags", "delete_vhost",
+            "userv", "mws-admin", "mws_delete_vhost", vm.network_configuration.name, "--tags", "delete_vhost",
             "-e", "delete_vhost_name=%s delete_vhost_webapp=%s" % (vhost_name, vhost_webapp)
         ], stderr=subprocess.STDOUT)
     launch_ansible(service)

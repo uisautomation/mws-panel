@@ -330,7 +330,6 @@ class SiteManagement2Tests(TestCase):
         site.users.add(User.objects.get(username='test0001'))
         service = Service.objects.create(site=site, type='production', status="ready",
                                          network_configuration=NetworkConfig.get_free_prod_service_config())
-        AnsibleConfiguration.objects.create(service=service, key='os', value='jessie')
         VirtualMachine.objects.create(name="test_vm", token=uuid.uuid4(), cluster=which_cluster(),
                                       service=service, network_configuration=NetworkConfig.get_free_host_config())
         return site
@@ -458,7 +457,7 @@ class SiteManagement2Tests(TestCase):
             self.assertIn(response.status_code, [200, 302])
             mock_subprocess.check_output.assert_called_with([
                 "userv", "mws-admin", "mws_ansible_host",
-                site.production_service.virtual_machines.first().network_configuration.name, 'jessie'
+                site.production_service.virtual_machines.first().network_configuration.name
             ], stderr=mock_subprocess.STDOUT)
         response = self.client.get(response.url)
         self.assertInHTML('<td>TESTUNIXGROUP</td>', response.content)
@@ -479,7 +478,7 @@ class SiteManagement2Tests(TestCase):
                                         {'unix_users': 'jw35', 'name': 'NEWTEST'})
             mock_subprocess.check_output.assert_called_with([
                 "userv", "mws-admin", "mws_ansible_host",
-                site.production_service.virtual_machines.first().network_configuration.name, 'jessie'
+                site.production_service.virtual_machines.first().network_configuration.name
             ], stderr=mock_subprocess.STDOUT)
         response = self.client.get(response.url)
         self.assertInHTML('<td>NEWTEST</td>', response.content, count=1)
@@ -492,7 +491,7 @@ class SiteManagement2Tests(TestCase):
             response = self.client.delete(reverse('deleteunixgroup', kwargs={'ug_id': unix_group.id}))
             mock_subprocess.check_output.assert_called_with([
                 "userv", "mws-admin", "mws_ansible_host",
-                site.production_service.virtual_machines.first().network_configuration.name, 'jessie'
+                site.production_service.virtual_machines.first().network_configuration.name
             ], stderr=mock_subprocess.STDOUT)
         response = self.client.get(reverse('listunixgroups', kwargs={'service_id': site.production_service.id}))
         self.assertInHTML('<td>NEWTEST</td>', response.content, count=0)
@@ -507,7 +506,7 @@ class SiteManagement2Tests(TestCase):
             self.assertIn(response.status_code, [200, 302])
             mock_subprocess.check_output.assert_called_with([
                 "userv", "mws-admin", "mws_ansible_host",
-                site.production_service.virtual_machines.first().network_configuration.name, 'jessie'
+                site.production_service.virtual_machines.first().network_configuration.name
             ], stderr=mock_subprocess.STDOUT)
         self.assertRedirects(response,
                              expected_url=reverse('listvhost', kwargs={'service_id': site.production_service.id}))
@@ -521,7 +520,7 @@ class SiteManagement2Tests(TestCase):
             response = self.client.delete(reverse('deletevhost', kwargs={'vhost_id': vhost.id}))
             mock_subprocess.check_output.assert_called_with([
                 "userv", "mws-admin", "mws_ansible_host",
-                site.production_service.virtual_machines.first().network_configuration.name, 'jessie'
+                site.production_service.virtual_machines.first().network_configuration.name
             ], stderr=mock_subprocess.STDOUT)
         self.assertEqual(response.status_code, 200)
         response = self.client.get(reverse('listvhost', kwargs={'service_id': site.production_service.id}))
@@ -551,7 +550,7 @@ class SiteManagement2Tests(TestCase):
             self.assertIn(response.status_code, [200, 302])
             mock_subprocess.check_output.assert_called_with([
                 "userv", "mws-admin", "mws_ansible_host",
-                site.production_service.virtual_machines.first().network_configuration.name, 'jessie'
+                site.production_service.virtual_machines.first().network_configuration.name
             ], stderr=mock_subprocess.STDOUT)
 
         response = self.client.get(reverse('listdomains', kwargs={'vhost_id': vhost.id}))
@@ -609,7 +608,7 @@ class SiteManagement2Tests(TestCase):
             response = self.client.post(reverse(views.set_dn_as_main, kwargs={'domain_id': 1}))
             mock_subprocess.check_output.assert_called_with([
                 "userv", "mws-admin", "mws_ansible_host",
-                site.production_service.virtual_machines.first().network_configuration.name, 'jessie'
+                site.production_service.virtual_machines.first().network_configuration.name
             ], stderr=mock_subprocess.STDOUT)
         response = self.client.get(reverse('listdomains', kwargs={'vhost_id': vhost.id}))
         self.assertInHTML(
@@ -643,7 +642,7 @@ class SiteManagement2Tests(TestCase):
             response = self.client.delete(reverse('deletedomain', kwargs={'domain_id': 1}))
             mock_subprocess.check_output.assert_called_with([
                 "userv", "mws-admin", "mws_ansible_host",
-                site.production_service.virtual_machines.first().network_configuration.name, 'jessie'
+                site.production_service.virtual_machines.first().network_configuration.name
             ], stderr=mock_subprocess.STDOUT)
         response = self.client.get(reverse('listdomains', kwargs={'vhost_id': vhost.id}))
         self.assertInHTML('''test.mws3test.csx.cam.ac.uk''', response.content, count=0)
@@ -653,7 +652,7 @@ class SiteManagement2Tests(TestCase):
                                         {'name': 'externaldomain.com'})
             mock_subprocess.check_output.assert_called_with([
                 "userv", "mws-admin", "mws_ansible_host",
-                site.production_service.virtual_machines.first().network_configuration.name, 'jessie'
+                site.production_service.virtual_machines.first().network_configuration.name
             ], stderr=mock_subprocess.STDOUT)
         response = self.client.get(response.url)
         self.assertInHTML(
@@ -682,44 +681,6 @@ class SiteManagement2Tests(TestCase):
                         </td>
                     </tr>
                 </tbody>''', response.content, count=1)
-
-    # TODO views.system_packages doesn't exist
-    # def test_system_packages(self):
-    #     site = self.create_site()
-    #     with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
-    #         mock_subprocess.check_output.return_value.returncode = 0
-    #         response = self.client.post(reverse(views.system_packages,
-    #                                             kwargs={'service_id': site.production_service.id}),
-    #                                     {'package_number': 1})
-    #         self.assertEqual(response.status_code, 200)
-    #         mock_subprocess.check_output.assert_called_with([
-    #             "userv", "mws-admin", "mws_ansible_host",
-    #             site.production_service.virtual_machines.first().network_configuration.name, 'jessie'
-    #         ], stderr=mock_subprocess.STDOUT)
-    #     self.assertEqual(AnsibleConfiguration.objects.get(key="system_packages").value, "1")
-    #     self.assertContains(response, "Wordpress &lt;installed&gt;")
-    #
-    #     with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
-    #         mock_subprocess.check_output.return_value.returncode = 0
-    #         response = self.client.post(reverse(views.system_packages,
-    #                                             kwargs={'service_id': site.production_service.id}),
-    #                                     {'package_number': 2})
-    #         mock_subprocess.check_output.assert_called_with([
-    #             "userv", "mws-admin", "mws_ansible_host",
-    #             site.production_service.virtual_machines.first().network_configuration.name, 'jessie'
-    #         ], stderr=mock_subprocess.STDOUT)
-    #     self.assertEqual(AnsibleConfiguration.objects.get(key="system_packages").value, "1,2")
-    #     self.assertContains(response, "Wordpress &lt;installed&gt;")
-    #     self.assertContains(response, "Drupal &lt;installed&gt;")
-    #     with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
-    #         mock_subprocess.check_output.return_value.returncode = 0
-    #         self.client.post(reverse(views.system_packages, kwargs={'service_id': site.production_service.id}),
-    #                          {'package_number': 1})
-    #         mock_subprocess.check_output.assert_called_with([
-    #             "userv", "mws-admin", "mws_ansible_host",
-    #             site.production_service.virtual_machines.first().network_configuration.name, 'jessie'
-    #         ], stderr=mock_subprocess.STDOUT)
-    #     self.assertEqual(AnsibleConfiguration.objects.get(key="system_packages").value, "2")
 
     # def test_certificates(self):
     #     site = self.create_site()

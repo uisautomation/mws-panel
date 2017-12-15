@@ -137,10 +137,7 @@ class SnapshotsTests(TestCase):
             self.assertRedirects(response, reverse('backups', kwargs={'service_id': service.id}))
 
 def assert_host_ansible_call(mock_subprocess, service, playbook_args, once=True):
-    args = [
-        "userv", "--defvar", "os_version=jessie", "mws-admin", "mws_ansible_host_d",
-        service.virtual_machines.first().network_configuration.name,
-    ]
+    args = ["userv", "mws-admin", "mws_ansible_host_d", service.virtual_machines.first().network_configuration.name]
     args.extend(playbook_args)
     if once:
         mock_subprocess.check_output.assert_called_once_with(args, stderr=mock_subprocess.STDOUT)
