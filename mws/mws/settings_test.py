@@ -71,7 +71,7 @@ EMAIL_TIMEOUT = 60
 
 IP_REG_API_END_POINT = IP_REG_API_END_POINT + ['dev']
 
-OS_VERSION_VMXENAPI = "stretch"
-OS_DUE_UPGRADE = ["jessie"]
+OS_VERSION_VMXENAPI = "jessie"
+OS_DUE_UPGRADE = []
 
 from mws.logging_configuration import *
