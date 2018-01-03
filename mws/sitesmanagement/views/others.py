@@ -125,10 +125,13 @@ def service_settings(request, service_id):
                 url=reverse(service_settings, kwargs={'service_id': service.id}))
     }
 
+    service_conf = AnsibleConfiguration.objects.filter(service=service, key='os')
+
     return render(request, 'mws/settings.html', {
         'breadcrumbs': breadcrumbs,
         'site': site,
         'service': service,
+        'os': service_conf.value if service_conf else None,
         'sidebar_messages': warning_messages(site),
     })
 
@@ -199,7 +202,9 @@ def change_db_root_password(request, service_id):
     if site is None:
         return HttpResponseForbidden()
 
-    if not service or not service.active or service.is_busy:
+    service_conf = AnsibleConfiguration.objects.filter(service=service, key='os')
+
+    if (service_conf and service_conf.value == 'stretch') or not service or not service.active or service.is_busy:
         return redirect(site)
 
     breadcrumbs = {
