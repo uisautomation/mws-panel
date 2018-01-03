@@ -198,7 +198,7 @@ class SiteManagementTests(TestCase):
                                                          'siteform-email': 'amc203@cam.ac.uk'})
         self.assertContains(response, "This field is required.")  # Empty name, error
 
-        test_site= assign_a_site(self, pre_create=False)
+        test_site = assign_a_site(self, pre_create=False)
 
         # TODO test email check
         # TODO test dns api
@@ -455,10 +455,10 @@ class SiteManagement2Tests(TestCase):
                                                 kwargs={'service_id': site.production_service.id}),
                                         {'unix_users': 'amc203,jw35', 'name': 'TESTUNIXGROUP'})
             self.assertIn(response.status_code, [200, 302])
-            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
-                                                             site.production_service.virtual_machines.first()
-                                                                 .network_configuration.name],
-                                                            stderr=mock_subprocess.STDOUT)
+            mock_subprocess.check_output.assert_called_with([
+                "userv", "mws-admin", "mws_ansible_host",
+                site.production_service.virtual_machines.first().network_configuration.name
+            ], stderr=mock_subprocess.STDOUT)
         response = self.client.get(response.url)
         self.assertInHTML('<td>TESTUNIXGROUP</td>', response.content)
         self.assertInHTML('<td>amc203, jw35</td>', response.content)
@@ -476,10 +476,10 @@ class SiteManagement2Tests(TestCase):
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse('updateunixgroup', kwargs={'ug_id': unix_group.id}),
                                         {'unix_users': 'jw35', 'name': 'NEWTEST'})
-            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
-                                                             site.production_service.virtual_machines.first()
-                                                                 .network_configuration.name],
-                                                            stderr=mock_subprocess.STDOUT)
+            mock_subprocess.check_output.assert_called_with([
+                "userv", "mws-admin", "mws_ansible_host",
+                site.production_service.virtual_machines.first().network_configuration.name
+            ], stderr=mock_subprocess.STDOUT)
         response = self.client.get(response.url)
         self.assertInHTML('<td>NEWTEST</td>', response.content, count=1)
         self.assertInHTML('<td>TESTUNIXGROUP</td>', response.content, count=0)
@@ -489,10 +489,10 @@ class SiteManagement2Tests(TestCase):
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.delete(reverse('deleteunixgroup', kwargs={'ug_id': unix_group.id}))
-            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
-                                                             site.production_service.virtual_machines.first()
-                                                                 .network_configuration.name],
-                                                            stderr=mock_subprocess.STDOUT)
+            mock_subprocess.check_output.assert_called_with([
+                "userv", "mws-admin", "mws_ansible_host",
+                site.production_service.virtual_machines.first().network_configuration.name
+            ], stderr=mock_subprocess.STDOUT)
         response = self.client.get(reverse('listunixgroups', kwargs={'service_id': site.production_service.id}))
         self.assertInHTML('<td>NEWTEST</td>', response.content, count=0)
         self.assertInHTML('<td>jw35</td>', response.content, count=0)
@@ -504,10 +504,10 @@ class SiteManagement2Tests(TestCase):
             response = self.client.post(reverse('createvhost', kwargs={'service_id': site.production_service.id}),
                                         {'name': 'testVhost'})
             self.assertIn(response.status_code, [200, 302])
-            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
-                                                             site.production_service.virtual_machines.first()
-                                                                 .network_configuration.name],
-                                                            stderr=mock_subprocess.STDOUT)
+            mock_subprocess.check_output.assert_called_with([
+                "userv", "mws-admin", "mws_ansible_host",
+                site.production_service.virtual_machines.first().network_configuration.name
+            ], stderr=mock_subprocess.STDOUT)
         self.assertRedirects(response,
                              expected_url=reverse('listvhost', kwargs={'service_id': site.production_service.id}))
         response = self.client.get(reverse('listvhost', kwargs={'service_id': site.production_service.id}))
@@ -518,10 +518,10 @@ class SiteManagement2Tests(TestCase):
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.delete(reverse('deletevhost', kwargs={'vhost_id': vhost.id}))
-            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
-                                                             site.production_service.virtual_machines.first()
-                                                                 .network_configuration.name],
-                                                            stderr=mock_subprocess.STDOUT)
+            mock_subprocess.check_output.assert_called_with([
+                "userv", "mws-admin", "mws_ansible_host",
+                site.production_service.virtual_machines.first().network_configuration.name
+            ], stderr=mock_subprocess.STDOUT)
         self.assertEqual(response.status_code, 200)
         response = self.client.get(reverse('listvhost', kwargs={'service_id': site.production_service.id}))
         self.assertInHTML('<td>testVhost</td>', response.content, count=0)
@@ -548,10 +548,10 @@ class SiteManagement2Tests(TestCase):
                 response = self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}),
                                             {'name': 'test.mws3test.csx.cam.ac.uk'})
             self.assertIn(response.status_code, [200, 302])
-            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
-                                                             site.production_service.virtual_machines.first()
-                                                                 .network_configuration.name],
-                                                            stderr=mock_subprocess.STDOUT)
+            mock_subprocess.check_output.assert_called_with([
+                "userv", "mws-admin", "mws_ansible_host",
+                site.production_service.virtual_machines.first().network_configuration.name
+            ], stderr=mock_subprocess.STDOUT)
 
         response = self.client.get(reverse('listdomains', kwargs={'vhost_id': vhost.id}))
         self.assertInHTML(
@@ -606,10 +606,10 @@ class SiteManagement2Tests(TestCase):
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse(views.set_dn_as_main, kwargs={'domain_id': 1}))
-            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
-                                                             site.production_service.virtual_machines.first()
-                                                                 .network_configuration.name],
-                                                            stderr=mock_subprocess.STDOUT)
+            mock_subprocess.check_output.assert_called_with([
+                "userv", "mws-admin", "mws_ansible_host",
+                site.production_service.virtual_machines.first().network_configuration.name
+            ], stderr=mock_subprocess.STDOUT)
         response = self.client.get(reverse('listdomains', kwargs={'vhost_id': vhost.id}))
         self.assertInHTML(
             '''<tbody>
@@ -640,20 +640,20 @@ class SiteManagement2Tests(TestCase):
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.delete(reverse('deletedomain', kwargs={'domain_id': 1}))
-            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
-                                                             site.production_service.virtual_machines.first()
-                                                                 .network_configuration.name],
-                                                            stderr=mock_subprocess.STDOUT)
+            mock_subprocess.check_output.assert_called_with([
+                "userv", "mws-admin", "mws_ansible_host",
+                site.production_service.virtual_machines.first().network_configuration.name
+            ], stderr=mock_subprocess.STDOUT)
         response = self.client.get(reverse('listdomains', kwargs={'vhost_id': vhost.id}))
         self.assertInHTML('''test.mws3test.csx.cam.ac.uk''', response.content, count=0)
         with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}),
                                         {'name': 'externaldomain.com'})
-            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
-                                                             site.production_service.virtual_machines.first()
-                                                                 .network_configuration.name],
-                                                            stderr=mock_subprocess.STDOUT)
+            mock_subprocess.check_output.assert_called_with([
+                "userv", "mws-admin", "mws_ansible_host",
+                site.production_service.virtual_machines.first().network_configuration.name
+            ], stderr=mock_subprocess.STDOUT)
         response = self.client.get(response.url)
         self.assertInHTML(
             ''' <tbody>

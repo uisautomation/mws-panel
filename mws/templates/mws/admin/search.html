@@ -78,7 +78,7 @@
                     </tbody>
                 </table>
             {% else %}
-            <form action="{% url 'sitesmanagement.views.admin_search' %}" method="post">
+            <form action="{% url 'searchadmin' %}" method="post">
                 <fieldset>
                     {% csrf_token %}
                     <div id="site_form">

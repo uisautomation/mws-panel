@@ -13,6 +13,7 @@ from sitesmanagement.tests.tests import assign_a_site
 @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
 class SnapshotsTests(TestCase):
     fixtures = [os.path.join(settings.BASE_DIR, 'sitesmanagement/fixtures/amc203_test_IPs.yaml'), ]
+
     def setUp(self):
         do_test_login(self, user="test0001")
         assign_a_site(self)
@@ -29,11 +30,9 @@ class SnapshotsTests(TestCase):
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse('createsnapshot', kwargs={'service_id': service.id}),
                                         {'name': snapshot_name})
-            mock_subprocess.check_output.assert_called_once_with(["userv", "mws-admin", "mws_ansible_host_d",
-                                                                  service.virtual_machines.first().network_configuration.name,
-                                                                  "--tags", "create_custom_snapshot", "-e",
-                                                                  'create_snapshot_name="%s"' % snapshot_name],
-                                                                 stderr=mock_subprocess.STDOUT)
+            assert_host_ansible_call(mock_subprocess, service, [
+                "--tags", "create_custom_snapshot", "-e", 'create_snapshot_name="%s"' % snapshot_name
+            ])
         self.assertRedirects(response, reverse('backups', kwargs={'service_id': service.id}))
         self.assertEquals(Snapshot.objects.count(), 1)
         self.assertEquals(Snapshot.objects.first().name, snapshot_name)
@@ -53,7 +52,8 @@ class SnapshotsTests(TestCase):
         self.assertEquals(Snapshot.objects.count(), 1)
         # Try to submit non acceptable name (symbols) for the snapshot
         with transaction.atomic():
-            response = self.client.post(reverse('createsnapshot', kwargs={'service_id': service.id}), {'name': snapshot_name})
+            response = self.client.post(reverse('createsnapshot',
+                                                kwargs={'service_id': service.id}), {'name': snapshot_name})
         self.assertRedirects(response, reverse('backups', kwargs={'service_id': service.id}) +
                              "?error_message=Name+for+that+snapshot+already+exists")
         self.assertEquals(Snapshot.objects.count(), 1)
@@ -66,11 +66,9 @@ class SnapshotsTests(TestCase):
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse('createsnapshot', kwargs={'service_id': service.id}),
                                         {'name': snapshot_name})
-            mock_subprocess.check_output.assert_called_once_with(["userv", "mws-admin", "mws_ansible_host_d",
-                                                                  service.virtual_machines.first().network_configuration.name,
-                                                                  "--tags", "create_custom_snapshot", "-e",
-                                                                  'create_snapshot_name="%s"' % snapshot_name],
-                                                                 stderr=mock_subprocess.STDOUT)
+            assert_host_ansible_call(mock_subprocess, service, [
+                "--tags", "create_custom_snapshot", "-e", 'create_snapshot_name="%s"' % snapshot_name
+            ])
             self.assertRedirects(response, reverse('backups', kwargs={'service_id': service.id}))
             self.assertEquals(Snapshot.objects.count(), 1)
             snapshot_name = "snapshot2"
@@ -81,7 +79,7 @@ class SnapshotsTests(TestCase):
             snapshot_name = "snapshot3"
             response = self.client.post(reverse('createsnapshot', kwargs={'service_id': service.id}),
                                         {'name': snapshot_name})
-            self.assertRedirects(response, reverse('backups', kwargs={'service_id': service.id})+
+            self.assertRedirects(response, reverse('backups', kwargs={'service_id': service.id}) +
                                  "?error_message=You+can+only+create+two+snapshots")
             self.assertEquals(Snapshot.objects.count(), 2)
 
@@ -93,11 +91,9 @@ class SnapshotsTests(TestCase):
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse('createsnapshot', kwargs={'service_id': service.id}),
                                         {'name': snapshot_name})
-            mock_subprocess.check_output.assert_called_once_with(["userv", "mws-admin", "mws_ansible_host_d",
-                                                                  service.virtual_machines.first().network_configuration.name,
-                                                                  "--tags", "create_custom_snapshot", "-e",
-                                                                  'create_snapshot_name="%s"' % snapshot_name],
-                                                                 stderr=mock_subprocess.STDOUT)
+            assert_host_ansible_call(mock_subprocess, service, [
+                "--tags", "create_custom_snapshot", "-e", 'create_snapshot_name="%s"' % snapshot_name
+            ])
             self.assertRedirects(response, reverse('backups', kwargs={'service_id': service.id}))
             self.assertEquals(Snapshot.objects.count(), 1)
             # a get should redirect to backups page
@@ -106,11 +102,9 @@ class SnapshotsTests(TestCase):
             self.assertEquals(Snapshot.objects.count(), 1)
             snapshot = Snapshot.objects.first()
             response = self.client.post(reverse('deletesnapshot', kwargs={'snapshot_id': snapshot.id}))
-            mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host_d",
-                                                             service.virtual_machines.first().network_configuration.name,
-                                                             "--tags", "delete_snapshot", "-e",
-                                                             'delete_snapshot_name="%s"' % snapshot.name],
-                                                            stderr=mock_subprocess.STDOUT)
+            assert_host_ansible_call(mock_subprocess, service, [
+                "--tags", "delete_snapshot", "-e", 'delete_snapshot_name="%s"' % snapshot_name
+            ], once=False)
             self.assertRedirects(response, reverse('backups', kwargs={'service_id': service.id}))
 
     def test_restore_snapshot(self):
@@ -141,3 +135,11 @@ class SnapshotsTests(TestCase):
                                                                  datetime.timedelta(days=2)).isoformat())
             self.assertContains(response, "Your backup is being restored")
             self.assertRedirects(response, reverse('backups', kwargs={'service_id': service.id}))
+
+def assert_host_ansible_call(mock_subprocess, service, playbook_args, once=True):
+    args = ["userv", "mws-admin", "mws_ansible_host_d", service.virtual_machines.first().network_configuration.name]
+    args.extend(playbook_args)
+    if once:
+        mock_subprocess.check_output.assert_called_once_with(args, stderr=mock_subprocess.STDOUT)
+    else:
+        mock_subprocess.check_output.assert_called_with(args, stderr=mock_subprocess.STDOUT)

@@ -103,7 +103,11 @@ def confirm_email(request, ec_id, token):
 
 @shared_task(base=AnsibleTaskWithFailure, default_retry_delay=120, max_retries=2)
 def post_installOS(service):
-    launch_ansible_async(service, ignore_host_key=True)
+    try:
+        launch_ansible_async(service, ignore_host_key=True)
+    except:
+        # In case the previous task fail because we didn't leave enough time for the machine to reboot
+        launch_ansible_async(service, ignore_host_key=True)
     if service.type == 'production':
         ansible_change_mysql_root_pwd(service)
     if service.type == 'test':
@@ -135,8 +139,8 @@ def post_installation(request):
                 raise Exception("The service wasn't in the OS installation process")  # TODO raise custom exception
             service.status = 'postinstall'
             service.save()
-            post_installOS.apply_async((service,), countdown=90)
-            # Wait 90 seconds before launching ansible, this will allow the machine have time to complete the reboot
+            post_installOS.apply_async((service,), countdown=180)
+            # Wait 180 seconds before launching ansible, this will allow the machine have time to complete the reboot
             return HttpResponse()
 
     return HttpResponseForbidden()
