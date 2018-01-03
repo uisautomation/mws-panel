@@ -204,7 +204,8 @@ def change_db_root_password(request, service_id):
 
     service_conf = AnsibleConfiguration.objects.filter(service=service, key='os')
 
-    if (service_conf and service_conf.value == 'stretch') or not service or not service.active or service.is_busy:
+    if (service_conf is not None and service_conf[0].value == 'stretch') \
+            or not service or not service.active or service.is_busy:
         return redirect(site)
 
     breadcrumbs = {
