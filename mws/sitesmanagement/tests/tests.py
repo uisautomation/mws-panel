@@ -117,7 +117,7 @@ def assign_a_site(test_interface, pre_create=True):
 
 @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
 class SiteManagementTests(TestCase):
-    fixtures = [os.path.join(settings.BASE_DIR, 'sitesmanagement/fixtures/amc203_test_IPs.yaml'), ]
+    fixtures = [os.path.join(settings.BASE_DIR, 'sitesmanagement/fixtures/network_configuration_dev.yaml'), ]
 
     def test_is_camacuk_helper(self):
         self.assertTrue(is_camacuk("www.cam.ac.uk"))
