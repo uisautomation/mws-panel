@@ -131,7 +131,7 @@ def service_settings(request, service_id):
         'breadcrumbs': breadcrumbs,
         'site': site,
         'service': service,
-        'os': service_conf.value if service_conf else None,
+        'os': service_conf[0].value if service_conf else None,
         'sidebar_messages': warning_messages(site),
     })
 
