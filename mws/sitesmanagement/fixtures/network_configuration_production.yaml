@@ -1384,3 +1384,521 @@
 - fields: {IPv4: 172.28.18.240, IPv4_gateway: 172.28.19.254, IPv4_netmask: 255.255.254.0,
     name: mws-81307.mws3.csx.private.cam.ac.uk, type: ipv4priv}
   model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:1', name: mws-priv-1.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:2', name: mws-priv-2.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:3', name: mws-priv-3.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:4', name: mws-priv-4.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:5', name: mws-priv-5.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:6', name: mws-priv-6.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:7', name: mws-priv-7.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:8', name: mws-priv-8.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:9', name: mws-priv-9.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:10', name: mws-priv-10.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:11', name: mws-priv-11.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:12', name: mws-priv-12.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:13', name: mws-priv-13.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:14', name: mws-priv-14.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:15', name: mws-priv-15.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:16', name: mws-priv-16.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:17', name: mws-priv-17.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:18', name: mws-priv-18.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:19', name: mws-priv-19.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:20', name: mws-priv-20.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:31', name: mws-priv-31.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:32', name: mws-priv-32.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:33', name: mws-priv-33.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:34', name: mws-priv-34.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:35', name: mws-priv-35.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:36', name: mws-priv-36.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:37', name: mws-priv-37.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:38', name: mws-priv-38.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:39', name: mws-priv-39.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:40', name: mws-priv-40.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:41', name: mws-priv-41.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:42', name: mws-priv-42.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:43', name: mws-priv-43.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:44', name: mws-priv-44.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:45', name: mws-priv-45.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:46', name: mws-priv-46.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:47', name: mws-priv-47.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:48', name: mws-priv-48.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:49', name: mws-priv-49.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:50', name: mws-priv-50.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:51', name: mws-priv-51.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:52', name: mws-priv-52.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:53', name: mws-priv-53.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:54', name: mws-priv-54.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:55', name: mws-priv-55.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:56', name: mws-priv-56.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:57', name: mws-priv-57.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:58', name: mws-priv-58.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:59', name: mws-priv-59.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:60', name: mws-priv-60.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:61', name: mws-priv-61.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:62', name: mws-priv-62.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:63', name: mws-priv-63.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:64', name: mws-priv-64.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:65', name: mws-priv-65.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:66', name: mws-priv-66.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:67', name: mws-priv-67.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:68', name: mws-priv-68.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:69', name: mws-priv-69.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:70', name: mws-priv-70.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:71', name: mws-priv-71.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:72', name: mws-priv-72.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:73', name: mws-priv-73.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:74', name: mws-priv-74.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:75', name: mws-priv-75.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:76', name: mws-priv-76.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:77', name: mws-priv-77.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:78', name: mws-priv-78.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:79', name: mws-priv-79.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:80', name: mws-priv-80.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:81', name: mws-priv-81.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:82', name: mws-priv-82.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:83', name: mws-priv-83.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:84', name: mws-priv-84.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:85', name: mws-priv-85.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:86', name: mws-priv-86.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:87', name: mws-priv-87.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:88', name: mws-priv-88.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:89', name: mws-priv-89.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:90', name: mws-priv-90.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:91', name: mws-priv-91.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:92', name: mws-priv-92.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:93', name: mws-priv-93.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:94', name: mws-priv-94.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:95', name: mws-priv-95.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:96', name: mws-priv-96.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:97', name: mws-priv-97.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:98', name: mws-priv-98.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:99', name: mws-priv-99.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:100', name: mws-priv-100.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:101', name: mws-priv-101.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:102', name: mws-priv-102.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:103', name: mws-priv-103.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:104', name: mws-priv-104.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:105', name: mws-priv-105.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:106', name: mws-priv-106.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:107', name: mws-priv-107.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:108', name: mws-priv-108.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:109', name: mws-priv-109.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:110', name: mws-priv-110.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:111', name: mws-priv-111.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:112', name: mws-priv-112.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:113', name: mws-priv-113.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:114', name: mws-priv-114.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:115', name: mws-priv-115.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:116', name: mws-priv-116.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:117', name: mws-priv-117.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:118', name: mws-priv-118.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:119', name: mws-priv-119.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:120', name: mws-priv-120.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:121', name: mws-priv-121.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:122', name: mws-priv-122.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:123', name: mws-priv-123.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:124', name: mws-priv-124.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:125', name: mws-priv-125.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:126', name: mws-priv-126.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:127', name: mws-priv-127.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:128', name: mws-priv-128.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:129', name: mws-priv-129.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:130', name: mws-priv-130.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:131', name: mws-priv-131.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:132', name: mws-priv-132.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:133', name: mws-priv-133.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:134', name: mws-priv-134.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:135', name: mws-priv-135.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:136', name: mws-priv-136.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:137', name: mws-priv-137.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:138', name: mws-priv-138.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:139', name: mws-priv-139.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:140', name: mws-priv-140.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:141', name: mws-priv-141.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:142', name: mws-priv-142.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:143', name: mws-priv-143.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:144', name: mws-priv-144.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:145', name: mws-priv-145.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:146', name: mws-priv-146.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:147', name: mws-priv-147.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:148', name: mws-priv-148.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:149', name: mws-priv-149.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:150', name: mws-priv-150.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:151', name: mws-priv-151.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:152', name: mws-priv-152.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:153', name: mws-priv-153.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:154', name: mws-priv-154.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:155', name: mws-priv-155.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:156', name: mws-priv-156.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:157', name: mws-priv-157.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:158', name: mws-priv-158.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:159', name: mws-priv-159.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:160', name: mws-priv-160.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:161', name: mws-priv-161.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:162', name: mws-priv-162.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:163', name: mws-priv-163.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:164', name: mws-priv-164.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:165', name: mws-priv-165.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:166', name: mws-priv-166.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:167', name: mws-priv-167.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:168', name: mws-priv-168.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:169', name: mws-priv-169.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:170', name: mws-priv-170.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:171', name: mws-priv-171.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:172', name: mws-priv-172.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:173', name: mws-priv-173.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:174', name: mws-priv-174.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:175', name: mws-priv-175.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:176', name: mws-priv-176.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:177', name: mws-priv-177.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:178', name: mws-priv-178.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:179', name: mws-priv-179.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:180', name: mws-priv-180.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:181', name: mws-priv-181.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:182', name: mws-priv-182.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:183', name: mws-priv-183.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:184', name: mws-priv-184.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:185', name: mws-priv-185.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:186', name: mws-priv-186.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:187', name: mws-priv-187.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:188', name: mws-priv-188.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:189', name: mws-priv-189.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:190', name: mws-priv-190.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:191', name: mws-priv-191.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:192', name: mws-priv-192.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:193', name: mws-priv-193.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:194', name: mws-priv-194.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:195', name: mws-priv-195.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:196', name: mws-priv-196.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:197', name: mws-priv-197.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:198', name: mws-priv-198.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:199', name: mws-priv-199.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:200', name: mws-priv-200.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:201', name: mws-priv-201.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:202', name: mws-priv-202.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:203', name: mws-priv-203.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:204', name: mws-priv-204.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:205', name: mws-priv-205.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:206', name: mws-priv-206.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:207', name: mws-priv-207.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:208', name: mws-priv-208.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:209', name: mws-priv-209.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:210', name: mws-priv-210.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:211', name: mws-priv-211.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:212', name: mws-priv-212.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:213', name: mws-priv-213.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:214', name: mws-priv-214.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:215', name: mws-priv-215.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:216', name: mws-priv-216.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:217', name: mws-priv-217.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:218', name: mws-priv-218.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:219', name: mws-priv-219.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:220', name: mws-priv-220.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:221', name: mws-priv-221.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:222', name: mws-priv-222.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:223', name: mws-priv-223.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:224', name: mws-priv-224.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:225', name: mws-priv-225.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:226', name: mws-priv-226.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:227', name: mws-priv-227.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:228', name: mws-priv-228.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:229', name: mws-priv-229.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:230', name: mws-priv-230.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:231', name: mws-priv-231.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:232', name: mws-priv-232.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:233', name: mws-priv-233.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:234', name: mws-priv-234.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:235', name: mws-priv-235.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:236', name: mws-priv-236.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:237', name: mws-priv-237.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:238', name: mws-priv-238.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:239', name: mws-priv-239.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:240', name: mws-priv-240.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:241', name: mws-priv-241.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:242', name: mws-priv-242.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:243', name: mws-priv-243.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:244', name: mws-priv-244.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:245', name: mws-priv-245.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:246', name: mws-priv-246.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:247', name: mws-priv-247.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:248', name: mws-priv-248.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:249', name: mws-priv-249.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:250', name: mws-priv-250.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:251', name: mws-priv-251.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:252', name: mws-priv-252.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:253', name: mws-priv-253.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:254', name: mws-priv-254.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:255', name: mws-priv-255.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:256', name: mws-priv-256.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:257', name: mws-priv-257.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:258', name: mws-priv-258.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:259', name: mws-priv-259.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:260', name: mws-priv-260.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:261', name: mws-priv-261.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:262', name: mws-priv-262.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:263', name: mws-priv-263.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:264', name: mws-priv-264.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:265', name: mws-priv-265.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:266', name: mws-priv-266.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:267', name: mws-priv-267.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:268', name: mws-priv-268.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
+- fields: {IPv6: '2001:630:212:8::8e:269', name: mws-priv-269.mws3.csx.cam.ac.uk, type: ipv6}
+  model: sitesmanagement.NetworkConfig
