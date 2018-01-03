@@ -1,7 +1,7 @@
 import sys
 import json
+
 from django.core.management.base import BaseCommand, CommandError
-from optparse import make_option
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from apimws.lv import update_lv_list

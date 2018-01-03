@@ -2,6 +2,7 @@ import logging
 import subprocess
 from celery import shared_task, Task
 from django.utils import timezone
+
 from sitesmanagement.models import Site, Snapshot, Service, Vhost
 
 
@@ -47,7 +48,7 @@ def launch_ansible_site(site):
 
 
 class AnsibleTaskWithFailure(Task):
-    ''' If you want to use this task with failure be sure that the first argument is the Service'''
+    """If you want to use this task with failure be sure that the first argument is the Service"""
     abstract = True
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):
@@ -70,13 +71,11 @@ def launch_ansible_async(service, ignore_host_key=False):
     while service.status != 'ready':
         try:
             for vm in service.virtual_machines.all():
+                userv_cmd = ["userv"]
                 if ignore_host_key:
-                    subprocess.check_output(["userv", "--defvar", "ANSIBLE_HOST_KEY_CHECKING=False", "mws-admin",
-                                             "mws_ansible_host", vm.network_configuration.name],
-                                            stderr=subprocess.STDOUT)
-                else:
-                    subprocess.check_output(["userv", "mws-admin", "mws_ansible_host", vm.network_configuration.name],
-                                        stderr=subprocess.STDOUT)
+                    userv_cmd.extend(["--defvar", "ANSIBLE_HOST_KEY_CHECKING=False"])
+                userv_cmd.extend(["mws-admin", "mws_ansible_host", vm.network_configuration.name])
+                subprocess.check_output(userv_cmd, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             raise launch_ansible_async.retry(exc=e)
         service = refresh_object(service)
@@ -92,19 +91,15 @@ def launch_ansible_async(service, ignore_host_key=False):
 
 @shared_task(base=AnsibleTaskWithFailure)
 def ansible_change_mysql_root_pwd(service):
-    for vm in service.virtual_machines.all():
-        subprocess.check_output(["userv", "mws-admin", "mws_ansible_host_d", vm.network_configuration.name,
-                                 "--tags", "change_mysql_root_pwd", "-e", "change_mysql_root_pwd=true"],
-                                stderr=subprocess.STDOUT)
+    execute_playbook_on_vms(service, ["--tags", "change_mysql_root_pwd", "-e", "change_mysql_root_pwd=true"])
 
 
 @shared_task(base=AnsibleTaskWithFailure)
 def ansible_create_custom_snapshot(service, snapshot):
     try:
-        for vm in service.virtual_machines.all():
-            subprocess.check_output(["userv", "mws-admin", "mws_ansible_host_d", vm.network_configuration.name,
-                                     "--tags", "create_custom_snapshot", "-e",
-                                     'create_snapshot_name="%s"' % snapshot.name], stderr=subprocess.STDOUT)
+        execute_playbook_on_vms(service, [
+            "--tags", "create_custom_snapshot", "-e", 'create_snapshot_name="%s"' % snapshot.name
+        ])
         snapshot.date = timezone.now()
         snapshot.save()
     except Exception as e:
@@ -114,49 +109,59 @@ def ansible_create_custom_snapshot(service, snapshot):
 
 @shared_task(base=AnsibleTaskWithFailure)
 def restore_snapshot(service, snapshot_name):
-    for vm in service.virtual_machines.all():
-        subprocess.check_output(["userv", "mws-admin", "mws_ansible_host_d", vm.network_configuration.name,
-                                 "--tags", "restore_snapshot", "-e", 'restore_snapshot_name="%s"' % snapshot_name],
-                                stderr=subprocess.STDOUT)
+    execute_playbook_on_vms(service, ["--tags", "restore_snapshot", "-e", 'restore_snapshot_name="%s"' % snapshot_name])
 
 
 @shared_task(base=AnsibleTaskWithFailure)
-def delete_snapshot(service, snapshot_id):
+def delete_snapshot(snapshot_id):
     snapshot = Snapshot.objects.get(id=snapshot_id)
-    for vm in snapshot.service.virtual_machines.all():
-        subprocess.check_output(["userv", "mws-admin", "mws_ansible_host_d", vm.network_configuration.name,
-                                 "--tags", "delete_snapshot", "-e", 'delete_snapshot_name="%s"' % snapshot.name],
-                                stderr=subprocess.STDOUT)
+    execute_playbook_on_vms(snapshot.service, [
+        "--tags", "delete_snapshot", "-e", 'delete_snapshot_name="%s"' % snapshot.name
+    ])
     snapshot.delete()
+
+
+def execute_playbook_on_vms(service, playbook_args):
+    """
+    Execute the ansible MWS guest role against all VMs for a specified Service instance.
+
+    :param service: the service of the target VMs
+    :param playbook_args: ansible playbook arguments
+    """
+    for vm in service.virtual_machines.all():
+        cmd = ["userv", "mws-admin", "mws_ansible_host_d", vm.network_configuration.name]
+        cmd.extend(playbook_args)
+        subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+    return
 
 
 @shared_task(base=AnsibleTaskWithFailure)
 def delete_vhost_ansible(service, vhost_name, vhost_webapp):
-    '''delete the vhost folder and all its contents '''
+    """delete the vhost folder and all its contents"""
     for vm in service.virtual_machines.all():
-        subprocess.check_output(["userv", "mws-admin", "mws_delete_vhost", vm.network_configuration.name,
-                                 "--tags", "delete_vhost", "-e", "delete_vhost_name=%s delete_vhost_webapp=%s" %
-                                 (vhost_name, vhost_webapp)],
-                                stderr=subprocess.STDOUT)
+        subprocess.check_output([
+            "userv", "mws-admin", "mws_delete_vhost", vm.network_configuration.name, "--tags", "delete_vhost",
+            "-e", "delete_vhost_name=%s delete_vhost_webapp=%s" % (vhost_name, vhost_webapp)
+        ], stderr=subprocess.STDOUT)
     launch_ansible(service)
     return
 
 
 @shared_task(base=AnsibleTaskWithFailure)
 def vhost_enable_apache_owned(vhost_id):
-    '''Changes ownership of the docroot folder to the user www-data'''
+    """Changes ownership of the docroot folder to the user www-data"""
     vhost = Vhost.objects.get(id=vhost_id)
     for vm in vhost.service.virtual_machines.all():
         subprocess.check_output(["userv", "mws-admin", "mws_vhost_owner", vm.network_configuration.name,
                                  vhost.name, "enable"], stderr=subprocess.STDOUT)
     vhost.apache_owned = True
     vhost.save()
-    vhost_disable_apache_owned.apply_async(args=(vhost_id,), countdown=3600) # Leave an hour to the user
+    vhost_disable_apache_owned.apply_async(args=(vhost_id,), countdown=3600)  # Leave an hour to the user
 
 
 @shared_task(base=AnsibleTaskWithFailure)
 def vhost_disable_apache_owned(vhost_id):
-    '''Revert the ownership of the docroot folder back to site-admin'''
+    """Revert the ownership of the docroot folder back to site-admin"""
     vhost = Vhost.objects.get(id=vhost_id)
     for vm in vhost.service.virtual_machines.all():
         subprocess.check_output(["userv", "mws-admin", "mws_vhost_owner", vm.network_configuration.name,
