@@ -12,7 +12,7 @@ from apimws.xen import change_vm_power_state, reset_vm, destroy_vm, clone_vm_api
 
 @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
 class XenAPITests(TestCase):
-    fixtures = [os.path.join(settings.BASE_DIR, 'sitesmanagement/fixtures/amc203_test_IPs.yaml'), ]
+    fixtures = [os.path.join(settings.BASE_DIR, 'sitesmanagement/fixtures/network_configuration_dev.yaml'), ]
 
     def setUp(self):
         do_test_login(self, "test0001")

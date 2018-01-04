@@ -117,7 +117,7 @@ def assign_a_site(test_interface, pre_create=True):
 
 @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
 class SiteManagementTests(TestCase):
-    fixtures = [os.path.join(settings.BASE_DIR, 'sitesmanagement/fixtures/amc203_test_IPs.yaml'), ]
+    fixtures = [os.path.join(settings.BASE_DIR, 'sitesmanagement/fixtures/network_configuration_dev.yaml'), ]
 
     def test_is_camacuk_helper(self):
         self.assertTrue(is_camacuk("www.cam.ac.uk"))
@@ -681,6 +681,31 @@ class SiteManagement2Tests(TestCase):
                         </td>
                     </tr>
                 </tbody>''', response.content, count=1)
+
+    def test_root_pwd_message(self):
+        site = self.create_site()
+
+        # Test Jessie response
+        AnsibleConfiguration.objects.update_or_create(service=site.production_service, key='os',
+                                                      defaults={'value': 'jessie'})
+        response = self.client.get(reverse('sitesmanagement.views.service_settings',
+                                           kwargs={'service_id': site.production_service.id}))
+        self.assertContains(response=response, text="Change database root password")
+        response = self.client.get(reverse('change_db_root_password',
+                                           kwargs={'service_id': site.production_service.id}))
+        self.assertEqual(response.status_code, 200)
+
+        # Test Stretch response
+        AnsibleConfiguration.objects.update_or_create(service=site.production_service, key='os',
+                                                      defaults={'value': 'stretch'})
+        response = self.client.get(reverse('sitesmanagement.views.service_settings',
+                                           kwargs={'service_id': site.production_service.id}))
+        self.assertContains(response=response, text="""Root database passwords no longer apply to your version of the Operation
+                                            System, for more information, please read the MWS documentation""")
+        response = self.client.get(reverse('change_db_root_password',
+                                           kwargs={'service_id': site.production_service.id}))
+        self.assertRedirects(response=response, expected_url=reverse('showsite', args=[str(site.id)]))
+
 
     # def test_certificates(self):
     #     site = self.create_site()
