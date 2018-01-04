@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
-from apimws.models import AnsibleConfiguration, Cluster, Host
+from apimws.models import Cluster, Host
 from apimws.utils import preallocate_new_site
 from apimws.views import post_installation
 from apimws.xen import which_cluster
@@ -17,7 +17,7 @@ from sitesmanagement.models import Site, VirtualMachine, UnixGroup, Vhost, Domai
 from sitesmanagement.utils import is_camacuk, get_object_or_None
 
 
-def pre_create_site(test_interface):
+def pre_create_site():
     NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
                                                name="mws-66424.mws3.csx.cam.ac.uk")
     NetworkConfig.objects.create(IPv4='172.28.18.253', type='ipv4priv',
@@ -60,12 +60,15 @@ def pre_create_site(test_interface):
             mock_subprocess.check_output.return_value.returncode = 0
             mock_change_vm_power_state.return_value = True
             mock_change_vm_power_state.delay.return_value = True
-            test_interface.client.post(reverse(post_installation), {'vm': vm.id, 'token': vm.token})
+            mock_request = mock.Mock()
+            mock_request.method = 'POST'
+            mock_request.POST = {'vm': vm.id, 'token': vm.token}
+            post_installation(mock_request)
 
 
 def assign_a_site(test_interface, pre_create=True):
     if pre_create:
-        pre_create_site(test_interface)
+        pre_create_site()
     response = test_interface.client.get(reverse('listsites'))
     test_interface.assertInHTML("<p><a href=\"%s\" class=\"campl-primary-cta\">Register new server</a></p>" %
                                 reverse('newsite'), response.content)
@@ -189,7 +192,7 @@ class SiteManagementTests(TestCase):
         response = self.client.get(reverse('newsite'))
         self.assertRedirects(response, expected_url=reverse('listsites'))
 
-        pre_create_site(self)
+        pre_create_site()
 
         response = self.client.get(reverse('newsite'))
         self.assertContains(response, "Request new server")
