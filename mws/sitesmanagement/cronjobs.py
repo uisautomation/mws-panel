@@ -64,25 +64,9 @@ REMINDER_RENEWAL_BODY = (
 
 @shared_task(base=FinanceTaskWithFailure)
 def send_reminder_renewal():
-    today = now().date()
-
-    def renewal_sites_billing(lower, upper=0):
-        """
-        :param lower: lower bound in days of the reminder period (less than the end date)
-        :param upper: upper bound in days of the reminder period (less than the end date)
-        :return: a list of Billing accounts that need a renewal reminder and the period end date for that reminder
-        """
-        due = []
-        for billing in Billing.objects.filter(site__end_date__isnull=True, site__subscription=True):
-            # increment the start_date in years until it exceeds now to calculate the period_end_date
-            period_end_date = billing.site.start_date
-            while period_end_date < today:
-                period_end_date = period_end_date + relativedelta(months=+12)
-            # subtract the lower and upper days values and use this as a range to test whether a reminder is due
-            if period_end_date - relativedelta(days=lower) < today < period_end_date - relativedelta(days=upper):
-                due.append((billing, period_end_date))
-        return due
-
+    """
+    Periodically called to send any warnings about about accounts that are due for renewal.
+    """
     support_email = getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')
 
     kwargs = {
@@ -90,19 +74,41 @@ def send_reminder_renewal():
         'headers': {'Return-Path': support_email}
     }
 
-    for remindee, end_date in renewal_sites_billing(62, 31):
+    # reminder for all accounts requiring renewal 1 to 2 months in the future
+    for billing, end_date in renewal_sites_billing(62, 31):
         EmailMessage(
             subject=REMINDER_RENEWAL_SUBJECT % end_date,
-            body=REMINDER_RENEWAL_BODY % (remindee.site.name, remindee.site.name, end_date, end_date, end_date),
-            to=[remindee.site.email], **kwargs
+            body=REMINDER_RENEWAL_BODY % (billing.site.name, billing.site.name, end_date, end_date, end_date),
+            to=[billing.site.email], **kwargs
         ).send()
 
-    for remindee, end_date in renewal_sites_billing(31):
+    # reminder for all accounts requiring renewal less than a month in the future
+    for billing, end_date in renewal_sites_billing(31):
         EmailMessage(
             subject="REMINDER: " + REMINDER_RENEWAL_SUBJECT % end_date,
-            body=REMINDER_RENEWAL_BODY % (remindee.site.name, remindee.site.name, end_date, end_date, end_date),
-            to=[remindee.site.email], **kwargs
+            body=REMINDER_RENEWAL_BODY % (billing.site.name, billing.site.name, end_date, end_date, end_date),
+            to=[billing.site.email], **kwargs
         ).send()
+
+
+def renewal_sites_billing(lower, upper=0):
+    """
+    :param lower: lower bound in days of the reminder period (less than the end date)
+    :param upper: upper bound in days of the reminder period (less than the end date)
+    :return: a list of Billing accounts that need a renewal reminder and the period end date for that reminder
+    """
+    today = now().date()
+
+    due = []
+    for billing in Billing.objects.filter(site__end_date__isnull=True, site__subscription=True):
+        # increment the start_date in years until it exceeds now to calculate the period_end_date
+        period_end_date = billing.site.start_date
+        while period_end_date < today:
+            period_end_date = period_end_date + relativedelta(months=+12)
+        # subtract the lower and upper days values and use this as a range to test whether a reminder is due
+        if period_end_date - relativedelta(days=lower) < today < period_end_date - relativedelta(days=upper):
+            due.append((billing, period_end_date))
+    return due
 
 
 @shared_task(base=FinanceTaskWithFailure)
