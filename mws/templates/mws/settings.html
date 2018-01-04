@@ -147,6 +147,7 @@
             </div>
             {% endif %}
 
+            {% with service.operating_system as os %}
             <div class="campl-column3">
                 <div class="campl-content-container campl-side-padding">
                     <a href="{% if os == 'stretch' %}https://mws-help.uis.cam.ac.uk/provided-software/mysql{%
@@ -184,6 +185,7 @@
                     </a>
                 </div>
             </div>
+            {% endwith %}
 
         {% if service.primary %}
             <div class="campl-column3">
