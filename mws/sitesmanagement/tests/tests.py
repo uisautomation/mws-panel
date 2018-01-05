@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
-from apimws.models import Cluster, Host
+from apimws.models import Cluster, Host, AnsibleConfiguration
 from apimws.utils import preallocate_new_site
 from apimws.views import post_installation
 from apimws.xen import which_cluster
