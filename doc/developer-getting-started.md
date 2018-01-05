@@ -25,7 +25,8 @@ At this point, the website will be live on http://localhost:8000 but there is no
 data in the database. The ``initialise-developer-site.sh`` script performs an
 initial database migration and installs some test data in the site. Two users
 are created, ``test0001`` and ``test0002``. The ``test0001`` user is configured
-as a superuser. The script can be run inside the webapp container:
+as a superuser. A pre-allocated Site and associated entities is also created. 
+The script can be run inside the webapp container:
 
 ```
 sudo docker-compose exec devel bash -xe ./scripts/initialise-developer-site.sh
@@ -35,6 +36,13 @@ There are several web endpoints now:
 
 * http://localhost:8000/ - the login portal itself
 * http://localhost:8025/ - "fake" mailbox showing mails sent by server
+
+At this point the portal is still pretty useless because all xen/ansible calls
+will fail. You can mock these calls by using the following django settings:
+
+* VM_API = "apimws.xen_mock"
+* ANSIBLE_IMPL = "apimws.ansible_mock"
+
 
 ## Running tests
 

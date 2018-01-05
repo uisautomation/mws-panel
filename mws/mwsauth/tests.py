@@ -205,14 +205,14 @@ class AuthTestCases(TestCase):
         with mock.patch("apimws.vm.change_vm_power_state") as mock_change_vm_power_state:
             mock_change_vm_power_state.return_value = True
             mock_change_vm_power_state.delay.return_value = True
-            with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
                 mock_subprocess.check_output.return_value.returncode = 0
                 site_with_auth_users.enable()
 
         self.assertEqual(len(site_with_auth_users.users.all()), 1)
         self.assertEqual(site_with_auth_users.users.first(), amc203_user)
         self.assertEqual(len(site_with_auth_users.groups.all()), 0)
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse(views.auth_change, kwargs={'site_id': site_with_auth_users.id}), {
                 'users_crsids': "amc203",
@@ -229,7 +229,7 @@ class AuthTestCases(TestCase):
         self.assertEqual(len(site_with_auth_users.groups.all()), 1)
         self.assertEqual(site_with_auth_users.groups.first(), information_systems_group)
 
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             # remove all users and groups authorised, we do not send any crsids or groupids
             response = self.client.post(reverse(views.auth_change, kwargs={'site_id': site_with_auth_users.id}), {})
@@ -276,7 +276,7 @@ class AuthTestCases(TestCase):
         self.assertEqual(len(site_with_auth_groups.users.all()), 0)
         self.assertEqual(len(site_with_auth_groups.groups.all()), 1)
         self.assertEqual(site_with_auth_groups.groups.first(), information_systems_group)
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse(views.auth_change, kwargs={'site_id': site_with_auth_groups.id}), {
                 'users_crsids': "amc203",
@@ -293,7 +293,7 @@ class AuthTestCases(TestCase):
         self.assertEqual(len(site_with_auth_groups.groups.all()), 1)
         self.assertEqual(site_with_auth_groups.groups.first(), information_systems_group)
 
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             # remove all users and groups authorised, we do not send any crsids or groupids
             response = self.client.post(reverse(views.auth_change, kwargs={'site_id': site_with_auth_groups.id}), {})
