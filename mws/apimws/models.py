@@ -24,23 +24,19 @@ class AnsibleConfiguration(models.Model):
 
     class Meta:
         unique_together = ("service", "key")
-#
-#
-# class ApacheModule(models.Model):
-#     name = models.CharField(max_length=150, primary_key=True)
-#     description = models.CharField(max_length=250)
-#     available = models.BooleanField(default=True)
-#     services = models.ManyToManyField(Service, related_name='apache_modules', blank=True)
-#
-#     def __unicode__(self):
-#         return self.name
 
 
 class PHPLib(models.Model):
     name = models.CharField(max_length=150, primary_key=True)
+    name_stretch = models.CharField(max_length=150, blank=True)
     description = models.CharField(max_length=250)
     available = models.BooleanField(default=True)
     services = models.ManyToManyField(Service, related_name='php_libs', blank=True)
+
+    def os_dep_name(self, service):
+        if service.operating_system == 'stretch':
+            return self.name_stretch
+        return self.name
 
     def __unicode__(self):
         return self.name

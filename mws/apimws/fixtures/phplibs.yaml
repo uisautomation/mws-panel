@@ -1,320 +1,400 @@
 - model: apimws.PHPLib
   fields:
     name: libawl-php
+    name_stretch: libawl-php FIXME
     description: Andrew's Web Libraries - PHP Utility Libraries
 - model: apimws.PHPLib
   fields:
     name: php5-exactimage
+    name_stretch: php5-exactimage FIXME
     description: fast image manipulation library (PHP bindings)
 - model: apimws.PHPLib
   fields:
     name: php5-gdcm
+    name_stretch: php5-gdcm FIXME
     description: Grassroots DICOM PHP5 bindings
 - model: apimws.PHPLib
   fields:
     name: php5-vtkgdcm
+    name_stretch: php5-vtkgdcm FIXME
     description: Grassroots DICOM VTK PHP bindings
 - model: apimws.PHPLib
   fields:
     name: php5-geos
+    name_stretch: php5-geos FIXME
     description: GEOS bindings for PHP
 - model: apimws.PHPLib
   fields:
     name: libgv-php5
+    name_stretch: libgv-php5 FIXME
     description: PHP5 bindings for graphviz
 - model: apimws.PHPLib
   fields:
     name: php5-lasso
+    name_stretch: php5-lasso FIXME
     description: Library for Liberty Alliance and SAML protocols - PHP 5 bindings
 - model: apimws.PHPLib
   fields:
     name: libfpdf-tpl-php
+    name_stretch: libfpdf-tpl-php FIXME
     description: PHP library to use PDF templates with FPDF
 - model: apimws.PHPLib
   fields:
     name: libfpdi-php
+    name_stretch: libfpdi-php FIXME
     description: PHP library for importing existing PDF documents into FPDF
 - model: apimws.PHPLib
   fields:
     name: libgraphite-php
+    name_stretch: libgraphite-php FIXME
     description: PHP Linked Data Library
 - model: apimws.PHPLib
   fields:
     name: libkohana2-modules-php
+    name_stretch: libkohana2-modules-php FIXME
     description: lightweight PHP5 MVC framework (extension modules)
 - model: apimws.PHPLib
   fields:
     name: libkohana2-php
+    name_stretch: libkohana2-php FIXME
     description: lightweight PHP5 MVC framework
 - model: apimws.PHPLib
   fields:
     name: libmarkdown-php
+    name_stretch: libmarkdown-php FIXME
     description: PHP library for rendering Markdown data
 - model: apimws.PHPLib
   fields:
     name: liboauth-php
+    name_stretch: liboauth-php FIXME
     description: PHP library implementing the OAuth secure authentication protocol
 - model: apimws.PHPLib
   fields:
     name: libpuzzle-php
+    name_stretch: libpuzzle-php FIXME
     description: quick similar image finder - PHP bindings
 - model: apimws.PHPLib
   fields:
     name: php5-libvirt-php
+    name_stretch: php5-libvirt-php FIXME
     description: libvirt bindings for PHP
 - model: apimws.PHPLib
   fields:
     name: php5-mapscript
+    name_stretch: php5-mapscript FIXME
     description: php5-cgi module for MapServer
 - model: apimws.PHPLib
   fields:
     name: libnusoap-php
+    name_stretch: libnusoap-php FIXME
     description: SOAP toolkit for PHP
 - model: apimws.PHPLib
   fields:
     name: libow-php5
+    name_stretch: libow-php5 FIXME
     description: "Dallas 1-wire support: PHP5 bindings"
 - model: apimws.PHPLib
   fields:
     name: libownet-php
+    name_stretch: libownet-php FIXME
     description: "Dallas 1-wire support: PHP OWNet library"
 - model: apimws.PHPLib
   fields:
     name: php5-adodb
+    name_stretch: php5-adodb FIXME
     description: Extension optimising the ADOdb database abstraction library
 - model: apimws.PHPLib
   fields:
     name: php5-apcu
+    name_stretch: php5-apcu FIXME
     description: APC User Cache for PHP 5
 - model: apimws.PHPLib
   fields:
     name: libarc-php
+    name_stretch: libarc-php FIXME
     description: Flexible RDF system for semantic web and PHP practitioners
 - model: apimws.PHPLib
   fields:
     name: php5-gearman
+    name_stretch: php5-gearman FIXME
     description: PHP wrapper to libgearman
 - model: apimws.PHPLib
   fields:
     name: php5-geoip
+    name_stretch: php5-geoip FIXME
     description: GeoIP module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-gnupg
+    name_stretch: php5-gnupg FIXME
     description: wrapper around the gpgme library
 - model: apimws.PHPLib
   fields:
     name: php5-igbinary
+    name_stretch: php5-igbinary FIXME
     description: igbinary extension
 - model: apimws.PHPLib
   fields:
     name: php5-imagick
+    name_stretch: php5-imagick FIXME
     description: Provides a wrapper to the ImageMagick library
 - model: apimws.PHPLib
   fields:
     name: php5-mcrypt
+    name_stretch: php5-mcrypt FIXME
     description: MCrypt module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-memcache
+    name_stretch: php5-memcache FIXME
     description: memcache extension module for PHP5
 - model: apimws.PHPLib
   fields:
     name: php5-memcached
+    name_stretch: php5-memcached FIXME
     description: memcached extension module for PHP5, uses libmemcached
 - model: apimws.PHPLib
   fields:
     name: php5-mongo
+    name_stretch: php5-mongo FIXME
     description: MongoDB database driver
 - model: apimws.PHPLib
   fields:
     name: php5-msgpack
+    name_stretch: php5-msgpack FIXME
     description: PHP extension for interfacing with MessagePack
 - model: apimws.PHPLib
   fields:
     name: php5-mysqlnd-ms
+    name_stretch: php5-mysqlnd-ms FIXME
     description: MySQL replication and load balancing module for PHP
 - model: apimws.PHPLib
   fields:
     name: php5-oauth
+    name_stretch: php5-oauth FIXME
     description: OAuth 1.0 consumer and provider extension
 - model: apimws.PHPLib
   fields:
     name: php5-pecl-http
+    name_stretch: php5-pecl-http FIXME
     description: pecl_http module for PHP 5 Extended HTTP Support
 - model: apimws.PHPLib
   fields:
     name: php5-pecl-http-dev
+    name_stretch: php5-pecl-http-dev FIXME
     description: pecl_http module for PHP 5 Extended HTTP Support development headers
 - model: apimws.PHPLib
   fields:
     name: php5-pinba
+    name_stretch: php5-pinba FIXME
     description: Pinba module for PHP 5
 - model: apimws.PHPLib
   fields:
     name: php5-propro
+    name_stretch: php5-propro FIXME
     description: propro module for PHP 5
 - model: apimws.PHPLib
   fields:
     name: php5-propro-dev
+    name_stretch: php5-propro-dev FIXME
     description: propro module for PHP 5 development headers
 - model: apimws.PHPLib
   fields:
     name: php5-radius
+    name_stretch: php5-radius FIXME
     description: PECL radius module for PHP 5
 - model: apimws.PHPLib
   fields:
     name: php5-raphf
+    name_stretch: php5-raphf FIXME
     description: raphf module for PHP 5
 - model: apimws.PHPLib
   fields:
     name: php5-raphf-dev
+    name_stretch: php5-raphf-dev FIXME
     description: raphf module for PHP 5 development headers
 - model: apimws.PHPLib
   fields:
     name: php5-redis
+    name_stretch: php5-redis FIXME
     description: PHP extension for interfacing with Redis
 - model: apimws.PHPLib
   fields:
     name: php5-rrd
+    name_stretch: php5-rrd FIXME
     description: PHP bindings to rrd tool system
 - model: apimws.PHPLib
   fields:
     name: php5-sasl
+    name_stretch: php5-sasl FIXME
     description: Cyrus SASL Extension
 - model: apimws.PHPLib
   fields:
     name: php5-solr
+    name_stretch: php5-solr FIXME
     description: solr module for PHP 5
 - model: apimws.PHPLib
   fields:
     name: php5-ssh2
+    name_stretch: php5-ssh2 FIXME
     description: Bindings for the libssh2 library
 - model: apimws.PHPLib
   fields:
     name: php5-stomp
+    name_stretch: php5-stomp FIXME
     description: Streaming Text Oriented Messaging Protocol (STOMP) client module for PHP 5
 - model: apimws.PHPLib
   fields:
     name: php5-svn
+    name_stretch: php5-svn FIXME
     description: PHP Bindings for the Subversion Revision control system
 - model: apimws.PHPLib
   fields:
     name: php5-tokyo-tyrant
+    name_stretch: php5-tokyo-tyrant FIXME
     description: PHP interface to Tokyo Cabinet's network interface, Tokyo Tyrant
 - model: apimws.PHPLib
   fields:
     name: php5-yac
+    name_stretch: php5-yac FIXME
     description: YAC (Yet Another Cache) for PHP 5
 - model: apimws.PHPLib
   fields:
     name: php5-zmq
+    name_stretch: php5-zmq FIXME
     description: ZeroMQ messaging
 - model: apimws.PHPLib
   fields:
     name: php5-cgi
+    name_stretch: php5-cgi FIXME
     description: server-side, HTML-embedded scripting language (CGI binary)
 - model: apimws.PHPLib
   fields:
     name: php5-dbg
+    name_stretch: php5-dbg FIXME
     description: Debug symbols for PHP5
 - model: apimws.PHPLib
   fields:
     name: php5-dev
+    name_stretch: php5-dev FIXME
     description: Files for PHP5 module development
 - model: apimws.PHPLib
   fields:
     name: php5-enchant
+    name_stretch: php5-enchant FIXME
     description: Enchant module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-fpm
+    name_stretch: php5-fpm FIXME
     description: server-side, HTML-embedded scripting language (FPM-CGI binary)
 - model: apimws.PHPLib
   fields:
     name: php5-gmp
+    name_stretch: php5-gmp FIXME
     description: GMP module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-imap
+    name_stretch: php5-imap FIXME
     description: IMAP module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-interbase
+    name_stretch: php5-interbase FIXME
     description: interbase/firebird module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-intl
+    name_stretch: php5-intl FIXME
     description: internationalisation module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-odbc
+    name_stretch: php5-odbc FIXME
     description: ODBC module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-pgsql
+    name_stretch: php5-pgsql FIXME
     description: PostgreSQL module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-phpdbg
+    name_stretch: php5-phpdbg FIXME
     description: server-side, HTML-embedded scripting language (PHPDBG binary)
 - model: apimws.PHPLib
   fields:
     name: php5-pspell
+    name_stretch: php5-pspell FIXME
     description: pspell module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-recode
+    name_stretch: php5-recode FIXME
     description: recode module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-snmp
+    name_stretch: php5-snmp FIXME
     description: SNMP module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-sybase
+    name_stretch: php5-sybase FIXME
     description: Sybase / MS SQL Server module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-tidy
+    name_stretch: php5-tidy FIXME
     description: tidy module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-xmlrpc
+    name_stretch: php5-xmlrpc FIXME
     description: XML-RPC module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-xsl
+    name_stretch: php5-xsl FIXME
     description: XSL module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-librdf
+    name_stretch: php5-librdf FIXME
     description: PHP5 language bindings for the Redland RDF library
 - model: apimws.PHPLib
   fields:
     name: php5-remctl
+    name_stretch: php5-remctl FIXME
     description: PECL module for Kerberos-authenticated command execution
 - model: apimws.PHPLib
   fields:
     name: libsparkline-php
+    name_stretch: libsparkline-php FIXME
     description: sparkline graphing library for php
 - model: apimws.PHPLib
   fields:
     name: php5-twig
+    name_stretch: php5-twig FIXME
     description: Enhance performance of the Twig template engine
 - model: apimws.PHPLib
   fields:
     name: php5-uprofiler
+    name_stretch: php5-uprofiler FIXME
     description: hierarchical profiler for PHP (extension)
 - model: apimws.PHPLib
   fields:
     name: php5-xcache
+    name_stretch: php5-xcache FIXME
     description: Fast, stable PHP opcode cacher
 - model: apimws.PHPLib
   fields:
     name: php5-xdebug
+    name_stretch: php5-xdebug FIXME
     description: Xdebug Module for PHP 5
 - model: apimws.PHPLib
   fields:
     name: php5-xhprof
+    name_stretch: php5-xhprof FIXME
     description: Hierarchical Profiler for PHP5
