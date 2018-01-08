@@ -7,7 +7,6 @@ import subprocess
 from celery import shared_task, Task
 from django.conf import settings
 from django.core.urlresolvers import reverse
-
 from apimws.ansible import launch_ansible
 from apimws.ipreg import set_sshfp
 from apimws.models import Cluster

@@ -13,7 +13,7 @@ from sitesmanagement.tests.tests import assign_a_site
 
 @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
 class DNSTests(TestCase):
-    fixtures = [os.path.join(settings.BASE_DIR, 'sitesmanagement/fixtures/amc203_test_IPs.yaml'), ]
+    fixtures = [os.path.join(settings.BASE_DIR, 'sitesmanagement/fixtures/network_configuration_dev.yaml'), ]
     def setUp(self):
         do_test_login(self, user="test0001")
         assign_a_site(self)
@@ -26,10 +26,7 @@ class DNSTests(TestCase):
             mock_subprocess.check_output.return_value.returncode = 0
             self.client.post(reverse('sitesmanagement.views.add_domain', kwargs={'vhost_id': vhost.id}),
                              {'name': test_external_domain})
-            mock_subprocess.check_output.assert_called_once_with(["userv", "mws-admin", "mws_ansible_host",
-                                                                  vhost.service.virtual_machines.first()
-                                                                 .network_configuration.name],
-                                                                 stderr=mock_subprocess.STDOUT)
+            assert_host_ansible_call(mock_subprocess, vhost)
         domain_name_created = DomainName.objects.get(name=test_external_domain)
         vhost = Vhost.objects.get(id=vhost.id)
         self.assertEqual(vhost.main_domain, domain_name_created)
@@ -51,10 +48,7 @@ class DNSTests(TestCase):
                 mock_set_cname.return_value = True
                 self.client.post(reverse('sitesmanagement.views.add_domain', kwargs={'vhost_id': vhost.id}),
                                  {'name': test_internal_mws3_domain})
-                mock_subprocess.check_output.assert_called_once_with(["userv", "mws-admin", "mws_ansible_host",
-                                                                      vhost.service.virtual_machines.first()
-                                                                     .network_configuration.name],
-                                                                     stderr=mock_subprocess.STDOUT)
+                assert_host_ansible_call(mock_subprocess, vhost)
                 mock_set_cname.check_output.assert_not_called()
         domain_name_created = DomainName.objects.get(name=test_internal_mws3_domain)
         vhost = Vhost.objects.get(id=vhost.id)
@@ -77,10 +71,7 @@ class DNSTests(TestCase):
                 mock_set_cname.return_value = True
                 self.client.post(reverse('sitesmanagement.views.add_domain', kwargs={'vhost_id': vhost.id}),
                                  {'name': test_internal_mws3_domain})
-                mock_subprocess.check_output.assert_called_once_with(["userv", "mws-admin", "mws_ansible_host",
-                                                                      vhost.service.virtual_machines.first()
-                                                                     .network_configuration.name],
-                                                                     stderr=mock_subprocess.STDOUT)
+                assert_host_ansible_call(mock_subprocess, vhost)
                 mock_set_cname.check_output.assert_not_called()
         domain_name_created = DomainName.objects.get(name=test_internal_mws3_domain)
         vhost = Vhost.objects.get(id=vhost.id)
@@ -103,10 +94,7 @@ class DNSTests(TestCase):
                 mock_get_nameinfo.return_value = {'exists': [], 'delegated': 'Y'}
                 self.client.post(reverse('sitesmanagement.views.add_domain', kwargs={'vhost_id': vhost.id}),
                                  {'name': test_internal_delegated_domain})
-                mock_subprocess.check_output.assert_called_once_with(["userv", "mws-admin", "mws_ansible_host",
-                                                                      vhost.service.virtual_machines.first()
-                                                                     .network_configuration.name],
-                                                                     stderr=mock_subprocess.STDOUT)
+                assert_host_ansible_call(mock_subprocess, vhost)
         domain_name_created = DomainName.objects.get(name=test_internal_delegated_domain)
         vhost = Vhost.objects.get(id=vhost.id)
         if vhost.name != "default":
@@ -129,10 +117,7 @@ class DNSTests(TestCase):
                 mock_get_nameinfo.return_value = {'exists': []}
                 self.client.post(reverse('sitesmanagement.views.add_domain', kwargs={'vhost_id': vhost.id}),
                                  {'name': test_internal_special_domain, 'special_case': True})
-                mock_subprocess.check_output.assert_called_once_with(["userv", "mws-admin", "mws_ansible_host",
-                                                                      vhost.service.virtual_machines.first()
-                                                                     .network_configuration.name],
-                                                                     stderr=mock_subprocess.STDOUT)
+                assert_host_ansible_call(mock_subprocess, vhost)
         domain_name_created = DomainName.objects.get(name=test_internal_special_domain)
         vhost = Vhost.objects.get(id=vhost.id)
         if vhost.name != "default":
@@ -205,10 +190,7 @@ class DNSTests(TestCase):
             mock_subprocess.check_output.return_value.returncode = 0
             self.client.post(reverse('sitesmanagement.views.add_domain', kwargs={'vhost_id': vhost.id}),
                              {'name': test_camacuk_subdomain})
-            mock_subprocess.check_output.assert_called_once_with(["userv", "mws-admin", "mws_ansible_host",
-                                                                  vhost.service.virtual_machines.first()
-                                                                 .network_configuration.name],
-                                                                 stderr=mock_subprocess.STDOUT)
+            assert_host_ansible_call(mock_subprocess, vhost)
         domain_name_created = DomainName.objects.get(name='domaintest.cam.ac.uk')
         vhost = Vhost.objects.get(id=vhost.id)
         if vhost.name != "default":
@@ -242,10 +224,7 @@ class DNSTests(TestCase):
                     self.client.post(reverse('apimws.views.confirm_dns',
                                              kwargs={'dn_id': domain_name_created.id,
                                                      'token': domain_name_created.token}), {'accepted': '1'})
-                    mock_subprocess.check_output.assert_called_once_with(["userv", "mws-admin", "mws_ansible_host",
-                                                      Vhost.objects.first().service.virtual_machines.first()
-                                                     .network_configuration.name],
-                                                     stderr=mock_subprocess.STDOUT)
+                    assert_host_ansible_call(mock_subprocess, Vhost.objects.first())
         domain_name_created = DomainName.objects.get(id=domain_name_created.id)  # Refresh object from DB
         self.assertEquals(domain_name_created.status, 'accepted')
         self.assertEquals(domain_name_created.authorised_by.username, 'test0001')
@@ -279,10 +258,7 @@ class DNSTests(TestCase):
                 with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
                     mock_subprocess.check_output.return_value.returncode = 0
                     reject_or_accepted_old_domain_names_requests()
-                    mock_subprocess.check_output.assert_called_once_with(["userv", "mws-admin", "mws_ansible_host",
-                                                      Vhost.objects.first().service.virtual_machines.first()
-                                                     .network_configuration.name],
-                                                     stderr=mock_subprocess.STDOUT)
+                    assert_host_ansible_call(mock_subprocess, Vhost.objects.first())
         domain_name_created = DomainName.objects.get(id=domain_name_created.id)  # Refresh object from DB
         self.assertEquals(domain_name_created.status, 'accepted')
 
@@ -341,10 +317,7 @@ class DNSTests(TestCase):
                 mock_ip_reg_call.return_value = {}
                 self.client.post(reverse('deletedomain', kwargs={'domain_id': dn.id}))
                 mock_ip_reg_call.assert_called_once_with(['delete', 'cname', test_internal_mws3_domain])
-            mock_subprocess.check_output.assert_called_once_with(["userv", "mws-admin", "mws_ansible_host",
-                                                                  Vhost.objects.first().service.virtual_machines.first()
-                                                                 .network_configuration.name],
-                                                                 stderr=mock_subprocess.STDOUT)
+            assert_host_ansible_call(mock_subprocess, Vhost.objects.first())
         with self.assertRaises(DomainName.DoesNotExist):
             DomainName.objects.get(pk=dn.pk)
 
@@ -361,10 +334,7 @@ class DNSTests(TestCase):
                 mock_ip_reg_call.return_value = {}
                 self.client.post(reverse('deletedomain', kwargs={'domain_id': dn.id}))
                 assert not mock_ip_reg_call.called
-            mock_subprocess.check_output.assert_called_once_with(["userv", "mws-admin", "mws_ansible_host",
-                                                                  Vhost.objects.first().service.virtual_machines.first()
-                                                                 .network_configuration.name],
-                                                                 stderr=mock_subprocess.STDOUT)
+            assert_host_ansible_call(mock_subprocess, Vhost.objects.first())
         with self.assertRaises(DomainName.DoesNotExist):
             DomainName.objects.get(pk=dn.pk)
 
@@ -381,9 +351,12 @@ class DNSTests(TestCase):
                 mock_ip_reg_call.return_value = {}
                 self.client.post(reverse('deletedomain', kwargs={'domain_id': dn.id}))
                 assert not mock_ip_reg_call.called
-            mock_subprocess.check_output.assert_called_once_with(["userv", "mws-admin", "mws_ansible_host",
-                                                                  Vhost.objects.first().service.virtual_machines.first()
-                                                                 .network_configuration.name],
-                                                                 stderr=mock_subprocess.STDOUT)
+            assert_host_ansible_call(mock_subprocess, Vhost.objects.first())
         with self.assertRaises(DomainName.DoesNotExist):
             DomainName.objects.get(pk=dn.pk)
+
+def assert_host_ansible_call(mock_subprocess, vhost):
+    mock_subprocess.check_output.assert_called_once_with([
+        "userv", "mws-admin", "mws_ansible_host",
+        vhost.service.virtual_machines.first().network_configuration.name
+    ], stderr=mock_subprocess.STDOUT)

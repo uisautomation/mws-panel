@@ -199,7 +199,8 @@ def change_db_root_password(request, service_id):
     if site is None:
         return HttpResponseForbidden()
 
-    if not service or not service.active or service.is_busy:
+    if (service.operating_system == 'stretch') \
+            or not service or not service.active or service.is_busy:
         return redirect(site)
 
     breadcrumbs = {
