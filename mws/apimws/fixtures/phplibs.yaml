@@ -6,22 +6,18 @@
 - model: apimws.PHPLib
   fields:
     name: php5-exactimage
-    name_next_os: php5-exactimage FIXME
     description: fast image manipulation library (PHP bindings)
 - model: apimws.PHPLib
   fields:
     name: php5-gdcm
-    name_next_os: php5-gdcm FIXME
     description: Grassroots DICOM PHP5 bindings
 - model: apimws.PHPLib
   fields:
     name: php5-vtkgdcm
-    name_next_os: php5-vtkgdcm FIXME
     description: Grassroots DICOM VTK PHP bindings
 - model: apimws.PHPLib
   fields:
     name: php5-geos
-    name_next_os: php5-geos FIXME
     description: GEOS bindings for PHP
 - model: apimws.PHPLib
   fields:
@@ -31,32 +27,26 @@
 - model: apimws.PHPLib
   fields:
     name: php5-lasso
-    name_next_os: php5-lasso FIXME
     description: Library for Liberty Alliance and SAML protocols - PHP 5 bindings
 - model: apimws.PHPLib
   fields:
     name: libfpdf-tpl-php
-    name_next_os: libfpdf-tpl-php FIXME
     description: PHP library to use PDF templates with FPDF
 - model: apimws.PHPLib
   fields:
     name: libfpdi-php
-    name_next_os: libfpdi-php FIXME
     description: PHP library for importing existing PDF documents into FPDF
 - model: apimws.PHPLib
   fields:
     name: libgraphite-php
-    name_next_os: libgraphite-php FIXME
     description: PHP Linked Data Library
 - model: apimws.PHPLib
   fields:
     name: libkohana2-modules-php
-    name_next_os: libkohana2-modules-php FIXME
     description: lightweight PHP5 MVC framework (extension modules)
 - model: apimws.PHPLib
   fields:
     name: libkohana2-php
-    name_next_os: libkohana2-php FIXME
     description: lightweight PHP5 MVC framework
 - model: apimws.PHPLib
   fields:
@@ -66,12 +56,10 @@
 - model: apimws.PHPLib
   fields:
     name: liboauth-php
-    name_next_os: liboauth-php FIXME
     description: PHP library implementing the OAuth secure authentication protocol
 - model: apimws.PHPLib
   fields:
     name: libpuzzle-php
-    name_next_os: libpuzzle-php FIXME
     description: quick similar image finder - PHP bindings
 - model: apimws.PHPLib
   fields:
@@ -81,7 +69,6 @@
 - model: apimws.PHPLib
   fields:
     name: php5-mapscript
-    name_next_os: php5-mapscript FIXME
     description: php5-cgi module for MapServer
 - model: apimws.PHPLib
   fields:
@@ -91,7 +78,6 @@
 - model: apimws.PHPLib
   fields:
     name: libow-php5
-    name_next_os: libow-php5 FIXME
     description: "Dallas 1-wire support: PHP5 bindings"
 - model: apimws.PHPLib
   fields:
@@ -111,7 +97,6 @@
 - model: apimws.PHPLib
   fields:
     name: libarc-php
-    name_next_os: libarc-php FIXME
     description: Flexible RDF system for semantic web and PHP practitioners
 - model: apimws.PHPLib
   fields:
@@ -166,7 +151,6 @@
 - model: apimws.PHPLib
   fields:
     name: php5-mysqlnd-ms
-    name_next_os: php5-mysqlnd-ms FIXME
     description: MySQL replication and load balancing module for PHP
 - model: apimws.PHPLib
   fields:
@@ -176,7 +160,7 @@
 - model: apimws.PHPLib
   fields:
     name: php5-pecl-http
-    name_next_os: php5-pecl-http
+    name_next_os: php-pecl-http
     description: pecl_http module for PHP 5 Extended HTTP Support
 - model: apimws.PHPLib
   fields:
@@ -246,12 +230,10 @@
 - model: apimws.PHPLib
   fields:
     name: php5-svn
-    name_next_os: php5-svn FIXME
     description: PHP Bindings for the Subversion Revision control system
 - model: apimws.PHPLib
   fields:
     name: php5-tokyo-tyrant
-    name_next_os: php5-tokyo-tyrant FIXME
     description: PHP interface to Tokyo Cabinet's network interface, Tokyo Tyrant
 - model: apimws.PHPLib
   fields:
@@ -362,7 +344,6 @@
 - model: apimws.PHPLib
   fields:
     name: php5-librdf
-    name_next_os: php5-librdf FIXME
     description: PHP5 language bindings for the Redland RDF library
 - model: apimws.PHPLib
   fields:
@@ -372,7 +353,6 @@
 - model: apimws.PHPLib
   fields:
     name: libsparkline-php
-    name_next_os: libsparkline-php FIXME
     description: sparkline graphing library for php
 - model: apimws.PHPLib
   fields:
@@ -382,12 +362,10 @@
 - model: apimws.PHPLib
   fields:
     name: php5-uprofiler
-    name_next_os: php5-uprofiler FIXME
     description: hierarchical profiler for PHP (extension)
 - model: apimws.PHPLib
   fields:
     name: php5-xcache
-    name_next_os: php5-xcache FIXME
     description: Fast, stable PHP opcode cacher
 - model: apimws.PHPLib
   fields:
@@ -397,5 +375,4 @@
 - model: apimws.PHPLib
   fields:
     name: php5-xhprof
-    name_next_os: php5-xhprof FIXME
     description: Hierarchical Profiler for PHP5
