@@ -91,17 +91,15 @@ class TestsWithData(TestCase):
         self.assertEqual(v['mws_ipv6'], self.vm.network_configuration.IPv6)
         self.assertEqual(v['mws_service_fqdn'], self.vm.service.network_configuration.name)
         self.assertEqual(v['mws_php_libs_enabled'], [])
-        self.assertEqual(v['mws_php_libs_disabled'], [])
+        self.assertEqual(len(v['mws_php_libs_disabled']), 80)
 
     def test_os_dependent_php_libs(self):
         """tests that ansible_inventory supplies the correct os dependent php lib name"""
 
-        PHPLib.objects.create(name='php5-geos', name_next_os='php5-geos-stretch', description='GEOS bindings for PHP')
-        lasso = PHPLib.objects.create(
-            name='php5-lasso', name_next_os='php5-lasso-stretch',
-            description='Library for Liberty Alliance and SAML protocols - PHP 5 bindings'
-        )
+        lasso = PHPLib.objects.get(name='php5-lasso')
         lasso.services.add(self.service)
+        adodb = PHPLib.objects.get(name='php5-adodb')
+        adodb.services.add(self.service)
 
         # test for jessie
         s = StringIO()
@@ -109,8 +107,8 @@ class TestsWithData(TestCase):
         r = json.loads(s.getvalue())
         v = r['_meta']['hostvars'][r['mwsclients'][0]]
 
-        self.assertEqual(v['mws_php_libs_enabled'], ['php5-lasso'])
-        self.assertEqual(v['mws_php_libs_disabled'], ['php5-geos'])
+        self.assertEqual(v['mws_php_libs_enabled'], ['php5-lasso', 'php5-adodb'])
+        self.assertEqual(len(v['mws_php_libs_disabled']), PHPLib.objects.count() - 2)
 
         AnsibleConfiguration.objects.create(service=self.service, key='os', value='stretch')
 
@@ -120,5 +118,5 @@ class TestsWithData(TestCase):
         r = json.loads(s.getvalue())
         v = r['_meta']['hostvars'][r['mwsclients'][0]]
 
-        self.assertEqual(v['mws_php_libs_enabled'], ['php5-lasso-stretch'])
-        self.assertEqual(v['mws_php_libs_disabled'], ['php5-geos-stretch'])
+        self.assertEqual(v['mws_php_libs_enabled'], ['libphp-adodb'])
+        self.assertEqual(len(v['mws_php_libs_disabled']), PHPLib.objects.filter(name_next_os__isnull=False).count() - 1)
