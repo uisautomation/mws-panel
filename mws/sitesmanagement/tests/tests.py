@@ -703,8 +703,7 @@ class SiteManagement2Tests(TestCase):
                                                       defaults={'value': 'stretch'})
         response = self.client.get(reverse('sitesmanagement.views.service_settings',
                                            kwargs={'service_id': site.production_service.id}))
-        self.assertContains(response=response, text="""Root database passwords no longer apply to your version of the Operation
-                                            System, for more information, please read the MWS documentation""")
+        self.assertContains(response=response, text="""Root database passwords no longer apply, check mws help page""")
         response = self.client.get(reverse('change_db_root_password',
                                            kwargs={'service_id': site.production_service.id}))
         self.assertRedirects(response=response, expected_url=reverse('showsite', args=[str(site.id)]))
