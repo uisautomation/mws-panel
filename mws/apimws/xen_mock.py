@@ -1,3 +1,6 @@
+"""
+A module to allow the testing of mws-panel locally - only updates model when performing a xen function.
+"""
 from __future__ import absolute_import
 
 import hashlib

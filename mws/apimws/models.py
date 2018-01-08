@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from sitesmanagement.models import Service
 
@@ -28,14 +29,18 @@ class AnsibleConfiguration(models.Model):
 
 class PHPLib(models.Model):
     name = models.CharField(max_length=150, primary_key=True)
-    name_stretch = models.CharField(max_length=150, blank=True)
+    name_next_os = models.CharField(max_length=150, blank=True)
     description = models.CharField(max_length=250)
     available = models.BooleanField(default=True)
     services = models.ManyToManyField(Service, related_name='php_libs', blank=True)
 
     def os_dep_name(self, service):
-        if service.operating_system == 'stretch':
-            return self.name_stretch
+        """
+        :param service: the target Service
+        :return: the correct name of the php lib for the OS version of a service
+        """
+        if service.operating_system == settings.NEXT_OS:
+            return self.name_next_os
         return self.name
 
     def __unicode__(self):

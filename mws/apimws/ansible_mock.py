@@ -1,3 +1,6 @@
+"""
+A module to allow the testing of mws-panel locally - only updates model when performing an ansible function.
+"""
 import logging
 from time import timezone
 

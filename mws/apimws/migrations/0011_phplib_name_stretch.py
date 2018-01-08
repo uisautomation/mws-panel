@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='phplib',
-            name='name_stretch',
+            name='name_next_os',
             field=models.CharField(blank=True, max_length=150),
         ),
     ]

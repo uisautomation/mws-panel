@@ -156,6 +156,8 @@ OS_VERSION = "jessie"
 OS_VERSION_VMXENAPI = "jessie"
 OS_DUE_UPGRADE = []
 
+NEXT_OS = 'stretch'
+
 FINANCE_EMAIL = 'fh103@cam.ac.uk'
 
 CELERY_IMPORTS = ('apimws.platforms', 'apimws.xen', 'apimws.utils', 'apimws.jackdaw', 'apimws.ansible',

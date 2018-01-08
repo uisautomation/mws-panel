@@ -1,2 +1,8 @@
 from django.conf import settings
-exec('from %s import *' % getattr(settings, 'ANSIBLE_IMPL', "apimws.ansible_impl"))
+
+VM_API = getattr(settings, 'ANSIBLE_IMPL', "apimws.ansible_impl")
+
+if VM_API == "apimws.ansible_mock":
+    from apimws.ansible_mock import *
+else:
+    from apimws.ansible_impl import *
