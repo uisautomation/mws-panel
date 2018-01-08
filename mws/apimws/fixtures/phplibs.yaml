@@ -1,7 +1,7 @@
 - model: apimws.PHPLib
   fields:
     name: libawl-php
-    name_next_os: libawl-php FIXME
+    name_next_os: libawl-php
     description: Andrew's Web Libraries - PHP Utility Libraries
 - model: apimws.PHPLib
   fields:
@@ -26,7 +26,7 @@
 - model: apimws.PHPLib
   fields:
     name: libgv-php5
-    name_next_os: libgv-php5 FIXME
+    name_next_os: libgvc6
     description: PHP5 bindings for graphviz
 - model: apimws.PHPLib
   fields:
@@ -61,7 +61,7 @@
 - model: apimws.PHPLib
   fields:
     name: libmarkdown-php
-    name_next_os: libmarkdown-php FIXME
+    name_next_os: libmarkdown-php
     description: PHP library for rendering Markdown data
 - model: apimws.PHPLib
   fields:
@@ -86,7 +86,7 @@
 - model: apimws.PHPLib
   fields:
     name: libnusoap-php
-    name_next_os: libnusoap-php FIXME
+    name_next_os: libnusoap-php
     description: SOAP toolkit for PHP
 - model: apimws.PHPLib
   fields:
@@ -96,7 +96,7 @@
 - model: apimws.PHPLib
   fields:
     name: libownet-php
-    name_next_os: libownet-php FIXME
+    name_next_os: libownet-php
     description: "Dallas 1-wire support: PHP OWNet library"
 - model: apimws.PHPLib
   fields:
