@@ -150,8 +150,8 @@
             {% with service.operating_system as os %}
             <div class="campl-column3">
                 <div class="campl-content-container campl-side-padding">
-                    <a href="{% if os == 'stretch' %}https://mws-help.uis.cam.ac.uk/provided-software/mysql{%
-                            else %}{% url 'change_db_root_password' service_id=service.id %}{% endif %}">
+                    <a href="{% if os == 'stretch' %}https://mws-help.uis.cam.ac.uk/provided-software/mysql{% else %}
+                            {% url 'change_db_root_password' service_id=service.id %}{% endif %}">
                         <article class="node node-external-link view-mode-focus_on clearfix
                                         campl-horizontal-teaser campl-teaser campl-focus-teaser">
                             <div class="campl-focus-teaser-img">
