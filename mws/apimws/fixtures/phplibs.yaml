@@ -176,12 +176,12 @@
 - model: apimws.PHPLib
   fields:
     name: php5-pecl-http
-    name_next_os: php5-pecl-http FIXME
+    name_next_os: php5-pecl-http
     description: pecl_http module for PHP 5 Extended HTTP Support
 - model: apimws.PHPLib
   fields:
     name: php5-pecl-http-dev
-    name_next_os: php5-pecl-http-dev FIXME
+    name_next_os: php-pecl-http-dev
     description: pecl_http module for PHP 5 Extended HTTP Support development headers
 - model: apimws.PHPLib
   fields:
@@ -196,7 +196,7 @@
 - model: apimws.PHPLib
   fields:
     name: php5-propro-dev
-    name_next_os: php5-propro-dev FIXME
+    name_next_os: php-propro-dev
     description: propro module for PHP 5 development headers
 - model: apimws.PHPLib
   fields:
@@ -211,7 +211,7 @@
 - model: apimws.PHPLib
   fields:
     name: php5-raphf-dev
-    name_next_os: php5-raphf-dev FIXME
+    name_next_os: php-raphf-dev
     description: raphf module for PHP 5 development headers
 - model: apimws.PHPLib
   fields:
