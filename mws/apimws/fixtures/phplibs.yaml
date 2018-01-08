@@ -76,7 +76,7 @@
 - model: apimws.PHPLib
   fields:
     name: php5-libvirt-php
-    name_next_os: php5-libvirt-php FIXME
+    name_next_os: php-libvirt-php
     description: libvirt bindings for PHP
 - model: apimws.PHPLib
   fields:
@@ -101,12 +101,12 @@
 - model: apimws.PHPLib
   fields:
     name: php5-adodb
-    name_next_os: php5-adodb FIXME
+    name_next_os: libphp-adodb
     description: Extension optimising the ADOdb database abstraction library
 - model: apimws.PHPLib
   fields:
     name: php5-apcu
-    name_next_os: php5-apcu FIXME
+    name_next_os: php5-apcu
     description: APC User Cache for PHP 5
 - model: apimws.PHPLib
   fields:
@@ -116,52 +116,52 @@
 - model: apimws.PHPLib
   fields:
     name: php5-gearman
-    name_next_os: php5-gearman FIXME
+    name_next_os: php-gearman
     description: PHP wrapper to libgearman
 - model: apimws.PHPLib
   fields:
     name: php5-geoip
-    name_next_os: php5-geoip FIXME
+    name_next_os: php-geoip
     description: GeoIP module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-gnupg
-    name_next_os: php5-gnupg FIXME
+    name_next_os: php-gnupg
     description: wrapper around the gpgme library
 - model: apimws.PHPLib
   fields:
     name: php5-igbinary
-    name_next_os: php5-igbinary FIXME
+    name_next_os: php-igbinary
     description: igbinary extension
 - model: apimws.PHPLib
   fields:
     name: php5-imagick
-    name_next_os: php5-imagick FIXME
+    name_next_os: php-imagick
     description: Provides a wrapper to the ImageMagick library
 - model: apimws.PHPLib
   fields:
     name: php5-mcrypt
-    name_next_os: php5-mcrypt FIXME
+    name_next_os: php-mcrypt
     description: MCrypt module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-memcache
-    name_next_os: php5-memcache FIXME
+    name_next_os: php-memcache
     description: memcache extension module for PHP5
 - model: apimws.PHPLib
   fields:
     name: php5-memcached
-    name_next_os: php5-memcached FIXME
+    name_next_os: php-memcached
     description: memcached extension module for PHP5, uses libmemcached
 - model: apimws.PHPLib
   fields:
     name: php5-mongo
-    name_next_os: php5-mongo FIXME
+    name_next_os: php-mongodb
     description: MongoDB database driver
 - model: apimws.PHPLib
   fields:
     name: php5-msgpack
-    name_next_os: php5-msgpack FIXME
+    name_next_os: php-msgpack
     description: PHP extension for interfacing with MessagePack
 - model: apimws.PHPLib
   fields:
@@ -171,7 +171,7 @@
 - model: apimws.PHPLib
   fields:
     name: php5-oauth
-    name_next_os: php5-oauth FIXME
+    name_next_os: php-oauth
     description: OAuth 1.0 consumer and provider extension
 - model: apimws.PHPLib
   fields:
@@ -186,12 +186,12 @@
 - model: apimws.PHPLib
   fields:
     name: php5-pinba
-    name_next_os: php5-pinba FIXME
+    name_next_os: php-pinba
     description: Pinba module for PHP 5
 - model: apimws.PHPLib
   fields:
     name: php5-propro
-    name_next_os: php5-propro FIXME
+    name_next_os: php-propro
     description: propro module for PHP 5
 - model: apimws.PHPLib
   fields:
@@ -201,12 +201,12 @@
 - model: apimws.PHPLib
   fields:
     name: php5-radius
-    name_next_os: php5-radius FIXME
+    name_next_os: php-radius
     description: PECL radius module for PHP 5
 - model: apimws.PHPLib
   fields:
     name: php5-raphf
-    name_next_os: php5-raphf FIXME
+    name_next_os: php-raphf
     description: raphf module for PHP 5
 - model: apimws.PHPLib
   fields:
@@ -216,32 +216,32 @@
 - model: apimws.PHPLib
   fields:
     name: php5-redis
-    name_next_os: php5-redis FIXME
+    name_next_os: php-redis
     description: PHP extension for interfacing with Redis
 - model: apimws.PHPLib
   fields:
     name: php5-rrd
-    name_next_os: php5-rrd FIXME
+    name_next_os: php-rrd
     description: PHP bindings to rrd tool system
 - model: apimws.PHPLib
   fields:
     name: php5-sasl
-    name_next_os: php5-sasl FIXME
+    name_next_os: php-auth-sasl
     description: Cyrus SASL Extension
 - model: apimws.PHPLib
   fields:
     name: php5-solr
-    name_next_os: php5-solr FIXME
+    name_next_os: php-solr
     description: solr module for PHP 5
 - model: apimws.PHPLib
   fields:
     name: php5-ssh2
-    name_next_os: php5-ssh2 FIXME
+    name_next_os: php-ssh2
     description: Bindings for the libssh2 library
 - model: apimws.PHPLib
   fields:
     name: php5-stomp
-    name_next_os: php5-stomp FIXME
+    name_next_os: php-stomp
     description: Streaming Text Oriented Messaging Protocol (STOMP) client module for PHP 5
 - model: apimws.PHPLib
   fields:
@@ -256,107 +256,108 @@
 - model: apimws.PHPLib
   fields:
     name: php5-yac
-    name_next_os: php5-yac FIXME
+    name_next_os: php-yac
     description: YAC (Yet Another Cache) for PHP 5
 - model: apimws.PHPLib
   fields:
     name: php5-zmq
-    name_next_os: php5-zmq FIXME
+    name_next_os: php-zmq
     description: ZeroMQ messaging
 - model: apimws.PHPLib
   fields:
     name: php5-cgi
-    name_next_os: php5-cgi FIXME
+    name_next_os: php-cgi
     description: server-side, HTML-embedded scripting language (CGI binary)
 - model: apimws.PHPLib
   fields:
     name: php5-dbg
-    name_next_os: php5-dbg FIXME
+    name_next_os: php-phpdbg
     description: Debug symbols for PHP5
 - model: apimws.PHPLib
   fields:
     name: php5-dev
-    name_next_os: php5-dev FIXME
+    name_next_os: php-all-dev
     description: Files for PHP5 module development
 - model: apimws.PHPLib
   fields:
     name: php5-enchant
-    name_next_os: php5-enchant FIXME
+    name_next_os: php-enchant
     description: Enchant module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-fpm
-    name_next_os: php5-fpm FIXME
+    name_next_os: php-fpm
     description: server-side, HTML-embedded scripting language (FPM-CGI binary)
 - model: apimws.PHPLib
   fields:
     name: php5-gmp
-    name_next_os: php5-gmp FIXME
+    name_next_os: php-gmp
     description: GMP module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-imap
-    name_next_os: php5-imap FIXME
+    # TODO php-net-imap ?
+    name_next_os: php-imap
     description: IMAP module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-interbase
-    name_next_os: php5-interbase FIXME
+    name_next_os: php-interbase
     description: interbase/firebird module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-intl
-    name_next_os: php5-intl FIXME
+    name_next_os: php-intl
     description: internationalisation module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-odbc
-    name_next_os: php5-odbc FIXME
+    name_next_os: php-odbc
     description: ODBC module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-pgsql
-    name_next_os: php5-pgsql FIXME
+    name_next_os: php-pgsql
     description: PostgreSQL module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-phpdbg
-    name_next_os: php5-phpdbg FIXME
+    name_next_os: php-phpdbg
     description: server-side, HTML-embedded scripting language (PHPDBG binary)
 - model: apimws.PHPLib
   fields:
     name: php5-pspell
-    name_next_os: php5-pspell FIXME
+    name_next_os: php-pspell
     description: pspell module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-recode
-    name_next_os: php5-recode FIXME
+    name_next_os: php-recode
     description: recode module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-snmp
-    name_next_os: php5-snmp FIXME
+    name_next_os: php-snmp
     description: SNMP module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-sybase
-    name_next_os: php5-sybase FIXME
+    name_next_os: php-sybase
     description: Sybase / MS SQL Server module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-tidy
-    name_next_os: php5-tidy FIXME
+    name_next_os: php-tidy
     description: tidy module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-xmlrpc
-    name_next_os: php5-xmlrpc FIXME
+    name_next_os: php-xmlrpc
     description: XML-RPC module for php5
 - model: apimws.PHPLib
   fields:
     name: php5-xsl
-    name_next_os: php5-xsl FIXME
+    name_next_os: php-fxsl
     description: XSL module for php5
 - model: apimws.PHPLib
   fields:
@@ -366,7 +367,7 @@
 - model: apimws.PHPLib
   fields:
     name: php5-remctl
-    name_next_os: php5-remctl FIXME
+    name_next_os: php-remctl
     description: PECL module for Kerberos-authenticated command execution
 - model: apimws.PHPLib
   fields:
@@ -376,7 +377,7 @@
 - model: apimws.PHPLib
   fields:
     name: php5-twig
-    name_next_os: php5-twig FIXME
+    name_next_os: php-twig
     description: Enhance performance of the Twig template engine
 - model: apimws.PHPLib
   fields:
@@ -391,7 +392,7 @@
 - model: apimws.PHPLib
   fields:
     name: php5-xdebug
-    name_next_os: php5-xdebug FIXME
+    name_next_os: php-xdebug
     description: Xdebug Module for PHP 5
 - model: apimws.PHPLib
   fields:
