@@ -4,8 +4,20 @@ This code is the Django Control Panel for the Managed Web Service
 (known as MWS3 during development). For information about the service,
 see http://mws-help.uis.cam.ac.uk/.
 
+## Documentation
+
 Developer documentation lives at
 https://uis-mws-panel.readthedocs.io/en/latest/.
+
+It can be built locally via:
+
+```shell
+$ sphinx-build -a -v -b html doc/ build/doc/
+$ open build/doc/index.htm      # OS X
+$ xdg-open build/doc/index.htm  # Linux-y
+```
+
+## License
 
 This software is Copyright (C) University of Cambridge 2014-2016. It
 is free software; you can redistribute it and/or modify it under the
