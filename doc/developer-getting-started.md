@@ -25,7 +25,7 @@ At this point, the website will be live on http://localhost:8000 but there is no
 data in the database. The ``initialise-developer-site.sh`` script performs an
 initial database migration and installs some test data in the site. Two users
 are created, ``test0001`` and ``test0002``. The ``test0001`` user is configured
-as a superuser. A pre-allocated Site and associated entities is also created. 
+as a superuser. A pre-allocated :py:mod:`~sitesmanagement.models.Site` and associated entities is also created. 
 The script can be run inside the webapp container:
 
 ```
