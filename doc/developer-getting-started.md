@@ -37,12 +37,10 @@ There are several web endpoints now:
 * http://localhost:8000/ - the login portal itself
 * http://localhost:8025/ - "fake" mailbox showing mails sent by server
 
-At this point the portal is still pretty useless because all xen/ansible calls
-will fail. You can mock these calls by using the following django settings:
+At this point all xen/ansible calls will fail. You can mock these calls by using the following django settings:
 
 * VM_API = "apimws.xen_mock"
 * ANSIBLE_IMPL = "apimws.ansible_mock"
-
 
 ## Running tests
 
