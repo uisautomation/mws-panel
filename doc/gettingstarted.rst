@@ -20,7 +20,7 @@ Build the development container and launch the development server:
 
 ::
 
-    sudo docker-compose up app
+    sudo docker-compose up devel
 
 At this point, the website will be live on http://localhost:8000 but
 there is no data in the database. The ``initialise-developer-site.sh``
@@ -31,7 +31,7 @@ run inside the webapp container:
 
 ::
 
-    sudo docker-compose exec app bash -xe ./docker/initialise-developer-site.sh
+    sudo docker-compose exec devel bash -xe ./docker/initialise-developer-site.sh
 
 Now visit http://localhost:8000 and log in.
 
@@ -47,7 +47,7 @@ Database migrations may be run manually via the migrate command:
 
 ::
 
-    sudo docker-compose exec app ./manage.py migrate
+    sudo docker-compose exec devel ./manage.py migrate
 
 Python and database shells
 --------------------------
@@ -57,8 +57,8 @@ initialised with the Django environment:
 
 ::
 
-    sudo docker-compose exec app pip install --upgrade ipython
-    sudo docker-compose exec app ./manage.py shell
+    sudo docker-compose exec devel pip install --upgrade ipython
+    sudo docker-compose exec devel ./manage.py shell
 
 The ``dbshell`` subcommand will launch a direct Postgres shell. You'll
 need the Postgres password which can be read from the
@@ -66,5 +66,20 @@ need the Postgres password which can be read from the
 
 ::
 
-    sudo docker-compose exec app apt install postgresql-client
-    sudo docker-compose exec app ./manage.py dbshell
+    sudo docker-compose exec devel apt install postgresql-client
+    sudo docker-compose exec devel ./manage.py dbshell
+
+Apache deployment
+-----------------
+
+The container supports Apache 2 as a web server. Run via:
+
+.. code::
+
+    sudo docker-compose up devel-apache
+
+.. note::
+
+    The Apache service name is different so if you want to run programs inside
+    the container, make sure to change ``devel`` to ``devel-apache`` as
+    appropriate when issuing commands from this document.
