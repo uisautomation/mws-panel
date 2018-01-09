@@ -146,7 +146,7 @@ php_lib_mappings = [
     ('php5-xmlrpc', 'php-xmlrpc'),
     ('php5-yac', 'php-yac'),
     ('php5-zmq', 'php-zmq'),
-    ('php5-apcu', 'php5-apcu'),
+    ('php5-apcu', 'php-apcu'),
 ]
 
 
