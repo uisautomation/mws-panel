@@ -403,7 +403,6 @@ def resync(request, site_id):
         return redirect(site)
 
     if request.method == 'POST':
-        # TODO should site.test_service be passed here?
-        post_installOS.delay(site.production_service)
+        post_installOS.delay(site.test_service)
     messages.info(request, 'The filesystem started to synchronise')
     return redirect(site)
