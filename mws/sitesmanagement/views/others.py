@@ -1,6 +1,7 @@
 """Views(Controllers) for other purposes not in other files"""
 
 import json
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.urlresolvers import reverse
@@ -10,6 +11,7 @@ from django.utils.encoding import smart_str
 from apimws.ansible import launch_ansible, ansible_change_mysql_root_pwd
 from apimws.models import AnsibleConfiguration, PHPLib
 from apimws.vm import clone_vm_api_call
+from apimws.views import post_installOS
 from mwsauth.utils import privileges_check
 from sitesmanagement.forms import BillingForm
 from sitesmanagement.models import Service, Billing, Site, ServerType
@@ -70,14 +72,11 @@ def clone_vm_view(request, site_id):
     if request.method == 'POST':
         if site.is_ready and site.test_service:
             clone_vm_api_call.delay(site)
-            messages.info(request, 'The test server is being created. This will usually take around 10 minutes. '
-                                   'You will need to refresh the page.')
+            messages.info(request, 'The test server is being created. This will usually take around 10 minutes. You will need to refresh the page.')
         elif not site.is_ready:
-            messages.error(request,
-                           'The test server cannot be created while the production server is being configured.')
+            messages.error(request, 'The test server cannot be created while the production server is being configured.')
         elif not site.test_service:
-            messages.error(request,
-                           'The test server cannot be created at this moment, please contact mws-support@uis.cam.ac.uk')
+            messages.error(request, 'The test server cannot be created at this moment, please contact mws-support@uis.cam.ac.uk')
         return redirect(site)
 
     return render(request, 'mws/clone_vm.html', {
@@ -379,7 +378,7 @@ def admin_email_list(request):
 
 @login_required
 def switch_services(request, site_id):
-    """This function swiches the production and test services"""
+    '''This function swiches the production and test services'''
     site = get_object_or_404(Site, pk=site_id)
     site = privileges_check(site.id, request.user)
 
@@ -391,3 +390,20 @@ def switch_services(request, site_id):
     else:
         messages.error(request, 'An error happened while trying to switch the test server with the production server')
         return redirect(site)
+
+
+@login_required
+def resync(request, site_id):
+    '''This function syncs production file system with the test one'''
+    site = get_object_or_404(Site, pk=site_id)
+    site = privileges_check(site.id, request.user)
+
+    if not site.is_ready:
+        messages.error(request, 'Any of the two server is busy during configuration, wait until both of them are ready')
+        return redirect(site)
+
+    if request.method == 'POST':
+        # TODO should site.test_service be passed here?
+        post_installOS.delay(site.production_service)
+    messages.info(request, 'The filesystem started to synchronise')
+    return redirect(site)
