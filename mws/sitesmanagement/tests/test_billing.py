@@ -7,7 +7,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
 from mock import patch
 
-from apimws.models import Cluster, Host
+from apimws.models import Cluster, Host, AnsibleConfiguration
 from apimws.xen import which_cluster
 from mwsauth.tests import do_test_login
 from sitesmanagement.cronjobs import send_reminder_renewal, check_subscription
@@ -147,7 +147,7 @@ class BillingTests(TestCase):
         send_reminder_renewal()
         self.assertEqual(len(mail.outbox), 2)
 
-    def test_check_cacnel_if_not_paid(self):
+    def test_check_cancel_if_not_paid(self):
         ''' This test checks that if the user does not uploads a PO before 30 days, the site will be cancelled
         automatically'''
         # 1 month for renewal warning
