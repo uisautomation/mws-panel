@@ -8,6 +8,9 @@ class PHPLibForm(forms.Form):
         service = kwargs.pop('service')
         super(PHPLibForm, self).__init__(*args, **kwargs)
         self.fields["php_libs"] = forms.MultipleChoiceField(
-            choices=tuple((phplib.name, phplib.os_dep_name(service) + " - " + phplib.description)
-                          for phplib in PHPLib.objects.filter(available=True).order_by('name')),
+            choices=tuple(
+                (phplib.name, phplib.os_dep_name(service) + " - " + phplib.description)
+                for phplib in PHPLib.objects.filter(available=True).order_by('name')
+                if phplib.os_dep_name(service)
+            ),
             label='', widget=forms.SelectMultiple(), required=False)
