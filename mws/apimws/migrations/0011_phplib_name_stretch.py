@@ -153,7 +153,7 @@ php_lib_mappings = [
 def populate_php_lib(apps, schema_editor):
     PHPLib = apps.get_model('apimws', 'PHPLib')
     for values in php_lib_values:
-        PHPLib.objects.create(name=values[0], description=values[1])
+        PHPLib.objects.get_or_create(name=values[0], defaults={"description": values[1]})
 
 
 def populate_name_next_os(apps, schema_editor):
