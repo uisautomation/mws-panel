@@ -1,14 +1,13 @@
-import unittest
 import uuid
-import mock
 from datetime import datetime, timedelta, date
 from django.contrib.auth.models import User
 from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
+from mock import patch
 
-from apimws.models import Cluster, Host, AnsibleConfiguration
+from apimws.models import Cluster, Host
 from apimws.xen import which_cluster
 from mwsauth.tests import do_test_login
 from sitesmanagement.cronjobs import send_reminder_renewal, check_subscription
@@ -59,7 +58,7 @@ class BillingTests(TestCase):
         response = self.client.get(site.get_absolute_url())
         self.assertContains(response, "No billing details are available")
 
-        with mock.patch("apimws.vm.change_vm_power_state") as mock_change_vm_power_state:
+        with patch("apimws.vm.change_vm_power_state") as mock_change_vm_power_state:
             mock_change_vm_power_state.return_value = True
             mock_change_vm_power_state.delay.return_value = True
             site.disable()
@@ -68,10 +67,10 @@ class BillingTests(TestCase):
         response = self.client.get(reverse('billing_management', kwargs={'site_id': site.id}))
         self.assertEqual(response.status_code, 403)  # The site is suspended
 
-        with mock.patch("apimws.vm.change_vm_power_state") as mock_change_vm_power_state:
+        with patch("apimws.vm.change_vm_power_state") as mock_change_vm_power_state:
             mock_change_vm_power_state.return_value = True
             mock_change_vm_power_state.delay.return_value = True
-            with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
+            with patch("apimws.ansible_impl.subprocess") as mock_subprocess:
                 mock_subprocess.check_output.return_value.returncode = 0
                 site.enable()
 
@@ -115,20 +114,20 @@ class BillingTests(TestCase):
         self.assertNotContains(response, "No Billing, please add one.")
         site_changed.billing.purchase_order.delete()
 
-    @unittest.expectedFailure
-    # FIXME don't understand the complexities of this
-    def test_renewals_emails(self):
+    @patch("sitesmanagement.cronjobs.now")
+    def test_renewals_emails(self, mock_now):
+        mock_now.return_value = datetime(year=2018, month=1, day=3)
+
         # 1 month for renewal warning
         today = datetime.today()
         site = Site.objects.create(name="testSite", email='amc203@cam.ac.uk', type=ServerType.objects.get(id=1),
-                                   start_date=date(year=today.year-1 if today.month != 12 else today.year, day=15,
-                                                   month=today.month+1 if today.month != 12 else 1))
+                                   start_date=date(year=2016, month=2, day=20))
         pofile = SimpleUploadedFile("file.pdf", "file_content")
         Billing.objects.create(site=site, purchase_order_number='0000', purchase_order=pofile, group='test')
         send_reminder_renewal()
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject,
-                         'The annual charge for your managed web server is due next month')
+                         "The annual charge for your managed web server is due on '2018-02-20'")
         self.assertIn('%s' % site.start_date.replace(year=today.year), mail.outbox[0].body)
         self.assertEqual(mail.outbox[0].to, [site.email])
 
@@ -138,13 +137,19 @@ class BillingTests(TestCase):
         send_reminder_renewal()
         self.assertEqual(len(mail.outbox), 2)
         self.assertEqual(mail.outbox[1].subject,
-                         'REMINDER: the annual charge for your managed web server is due this month')
+                         "REMINDER: The annual charge for your managed web server is due on '2018-01-20'")
         self.assertIn('%s' % site.start_date.replace(year=today.year), mail.outbox[1].body)
         self.assertEqual(mail.outbox[1].to, [site.email])
 
+        # no renewal warning
+        site.start_date = site.start_date - timedelta(days=31)
+        site.save()
+        send_reminder_renewal()
+        self.assertEqual(len(mail.outbox), 2)
+
     def test_check_cancel_if_not_paid(self):
-        ''' This test checks that if the user does not uploads a PO before 30 days, the site will be cancelled
-        automatically'''
+        """ This test checks that if the user does not uploads a PO before 30 days, the site will be cancelled
+        automatically """
         # 1 month for renewal warning
         today = datetime.today()
         site = Site.objects.create(name="testSite", email='amc203@cam.ac.uk', type=ServerType.objects.get(id=1),
@@ -216,8 +221,8 @@ class BillingTests(TestCase):
         self.assertFalse(site.users.exists())
 
     def test_check_not_cancel_if_paid(self):
-        ''' This test checks that if the user does not uploads a PO before 30 days, the site will be cancelled
-        automatically'''
+        """ This test checks that if the user does not uploads a PO before 30 days, the site will be cancelled
+        automatically """
         today = datetime.today()
         do_test_login(self, user="test0001")
         # Create site (more than 30 days ago start date)

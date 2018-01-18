@@ -10,10 +10,12 @@ import logging
 import subprocess
 from datetime import date, timedelta, datetime
 from celery import shared_task, Task
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.core.mail import EmailMessage
 from django.db.models import Q
-from django.utils import timezone
+from django.utils.timezone import now
+
 from apimws.utils import preallocate_new_site
 from sitesmanagement.models import Billing, Site, VirtualMachine, DomainName, ServerType
 
@@ -45,63 +47,73 @@ class ScheduledTaskWithFailure(Task):
                      "The parameters passed to the task were: %s\n\nThe traceback is:\n%s\n", task_id, args, einfo)
 
 
+REMINDER_RENEWAL_SUBJECT = "The annual charge for your managed web server is due on '%s'"
+REMINDER_RENEWAL_BODY = (
+    "You are receiving this message because your email address, or an email alias that includes you as a recipient, "
+    "has been configured as the contact address for the UIS Managed Web Server '%s'.\n\n"
+    "The annual charge for your managed web server '%s' is due on '%s'. "
+    "Unless you tell us otherwise we will automatically issue an invoice for this on '%s' "
+    "based on information from the most recent purchase order you have given us. "
+    "Please use the web control panel (under 'billing settings') to check that this information is still current. "
+    "If you want to amend your purchase order you can upload a new one. "
+    "Your site may be cancelled if we can't successfully invoice for it.\n\n"
+    "If you no longer want you site then please either cancel it now (under 'edit the MWS profile'), "
+    "or mark it 'Not for renewal' in which case it will be automatically cancelled on '%s'."
+)
+
+
 @shared_task(base=FinanceTaskWithFailure)
 def send_reminder_renewal():
-    today = timezone.now().date()
-    # Billings of sites that haven't been canceled (end_date is null), that hasn't expressed to want to cancel
-    # their subscription, and that started in the previous month of the current one of a previous year
-    renewal_sites_billing = Billing.objects.filter(site__start_date__month=today.month+1 if today.month != 12 else 1,
-                                                   site__start_date__lt=date(today.year, 1, 1),
-                                                   site__end_date__isnull=True,
-                                                   site__subscription=True)
-    for billing in renewal_sites_billing:
+    """
+    Periodically called to send any warnings about about accounts that are due for renewal.
+    """
+    support_email = getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')
+
+    kwargs = {
+        'from_email': 'Managed Web Service Support <%s>' % support_email,
+        'headers': {'Return-Path': support_email}
+    }
+
+    # reminder for all accounts requiring renewal 1 to 2 months in the future
+    for billing, end_date in renewal_sites_billing(62, 31):
         EmailMessage(
-            subject="The annual charge for your managed web server is due next month",
-            body="You are receiving this message because your email address, or an email alias that includes "
-                 "you as a recipient, has been configured as the contact address for the UIS Managed Web "
-                 "Server '%s'.\n\nThe annual charge for your managed web server '%s' is due next month on %s. "
-                 "Unless you tell us otherwise we will automatically issue an invoice for this at the end of next "
-                 "month based on information from the most recent purchase order you have given us. Please use the "
-                 "web control panel (under 'billing settings') to check that this information is still current. If "
-                 "you want to amend your purchase order you can upload a new one. Your site may be cancelled if we "
-                 "can't successfully invoice for it.\n\nIf you no longer want you site then please either cancel "
-                 "it now (under 'edit the MWS profile'), or mark it 'Not for renewal' in which case it will be "
-                 "automatically cancelled on '%s'."
-                 % (billing.site.name, billing.site.name, billing.site.start_date.replace(year=today.year),
-                    billing.site.start_date.replace(year=today.year)),
-            from_email="Managed Web Service Support <%s>"
-                       % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
-            to=[billing.site.email],
-            headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')}
+            subject=REMINDER_RENEWAL_SUBJECT % end_date,
+            body=REMINDER_RENEWAL_BODY % (billing.site.name, billing.site.name, end_date, end_date, end_date),
+            to=[billing.site.email], **kwargs
         ).send()
 
-    renewal_sites_billing = Billing.objects.filter(site__start_date__month=today.month, site__subscription=True,
-                                                   site__start_date__lt=date(today.year, 1, 1),
-                                                   site__end_date__isnull=True)
-    for billing in renewal_sites_billing:
+    # reminder for all accounts requiring renewal less than a month in the future
+    for billing, end_date in renewal_sites_billing(31):
         EmailMessage(
-            subject="REMINDER: the annual charge for your managed web server is due this month",
-            body="You are receiving this message because your email address, or an email alias that includes "
-                 "you as a recipient, has been configured as the contact address for the UIS Managed Web "
-                 "Server '%s'.\n\nThe annual charge for your managed web server '%s' is due this month on %s. "
-                 "Unless you tell us otherwise we will automatically issue an invoice for this at the end of this "
-                 "month based on information from the most recent purchase order you have given us. If you "
-                 "haven't already, please use the web control panel (under 'billing settings') to check that this "
-                 "information is still current. If you want to amend your purchase order you can upload a new one. "
-                 "Your site may be cancelled if we can't successfully invoice for it.\n\nIf you no longer want "
-                 "you site then please either cancel it now (under 'edit the MWS profile'), or mark "
-                 "it 'Not for renewal' in which case it will be automatically cancelled on '%s'."
-                 % (billing.site.name, billing.site.name, billing.site.start_date.replace(year=today.year),
-                    billing.site.start_date.replace(year=today.year)),
-            from_email="Managed Web Service Support <mws-support@uis.cam.ac.uk>",
-            to=[billing.site.email],
-            headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')}
+            subject="REMINDER: " + REMINDER_RENEWAL_SUBJECT % end_date,
+            body=REMINDER_RENEWAL_BODY % (billing.site.name, billing.site.name, end_date, end_date, end_date),
+            to=[billing.site.email], **kwargs
         ).send()
+
+
+def renewal_sites_billing(lower, upper=0):
+    """
+    :param lower: lower bound in days of the reminder period (less than the end date)
+    :param upper: upper bound in days of the reminder period (less than the end date)
+    :return: a list of Billing accounts that need a renewal reminder and the period end date for that reminder
+    """
+    today = now().date()
+
+    due = []
+    for billing in Billing.objects.filter(site__end_date__isnull=True, site__subscription=True):
+        # increment the start_date in years until it exceeds now to calculate the period_end_date
+        period_end_date = billing.site.start_date
+        while period_end_date < today:
+            period_end_date = period_end_date + relativedelta(months=+12)
+        # subtract the lower and upper days values and use this as a range to test whether a reminder is due
+        if period_end_date - relativedelta(days=lower) < today < period_end_date - relativedelta(days=upper):
+            due.append((billing, period_end_date))
+    return due
 
 
 @shared_task(base=FinanceTaskWithFailure)
 def check_subscription():
-    today = timezone.now().date()
+    today = now().date()
     # Check which sites still do not have a billing associated, warn or cancel them based on
     # how many days ago they were created
     sites = Site.objects.filter(billing__isnull=True, end_date__isnull=True, start_date__isnull=False)
@@ -177,9 +189,10 @@ def check_backups():
 
     for vm in VirtualMachine.objects.filter(Q(service__site__deleted=False, service__site__disabled=False,
                                               service__site__start_date__lt=(date.today() - timedelta(days=1)),
-                                              service__status__in=('ansible', 'ansible_queued', 'ready'))
-                                                & (Q(service__site__end_date__isnull=True) |
-                                                   Q(service__site__end_date__gt=date.today()))):
+                                              service__status__in=('ansible', 'ansible_queued', 'ready')) & (
+                                                Q(service__site__end_date__isnull=True) |
+                                                Q(service__site__end_date__gt=date.today()))
+                                            ):
         if not filter(lambda host: host.startswith(vm.name), result['ok']+result['failed']):
             LOGGER.error("A backup for the host %s did not complete last night", vm.name)
 
@@ -267,8 +280,10 @@ def send_warning_last_or_none_admin():
                          "you as a recipient, has been configured as the contact address for the UIS Managed Web "
                          "Server '%s'.\n\nThe Managed Web Server '%s' has no administrators and it will be suspended "
                          "in %s days if you do not contact %s and arrange to have at lease one administrator "
-                         "added.\n\n" % (site.name, site.name, str(8-site.days_without_admin),
-                                          getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')),
+                         "added.\n\n" % (
+                            site.name, site.name, str(8-site.days_without_admin),
+                            getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')
+                         ),
                     from_email="Managed Web Service Support <%s>"
                                % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
                     to=[site.email],
@@ -285,7 +300,7 @@ def reject_or_accepted_old_domain_names_requests():
     grace_days = settings.MWS_DOMAIN_NAME_GRACE_DAYS
 
     for domain_name in DomainName.objects.filter(status='requested',
-                                                 requested_at__lt=(timezone.now()-timedelta(days=grace_days))):
+                                                 requested_at__lt=(now()-timedelta(days=grace_days))):
         from apimws.ipreg import get_nameinfo
         nameinfo = get_nameinfo(domain_name.name)
         if nameinfo['exists'] and "C" not in nameinfo['exists']:
