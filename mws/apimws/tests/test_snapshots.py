@@ -26,7 +26,7 @@ class SnapshotsTests(TestCase):
         response = self.client.get(reverse('createsnapshot', kwargs={'service_id': service.id}))
         self.assertRedirects(response, reverse('backups', kwargs={'service_id': service.id}))
         self.assertEquals(Snapshot.objects.count(), 0)
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse('createsnapshot', kwargs={'service_id': service.id}),
                                         {'name': snapshot_name})
@@ -62,7 +62,7 @@ class SnapshotsTests(TestCase):
         site = Site.objects.last()
         service = site.production_service
         snapshot_name = "snapshot1"
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse('createsnapshot', kwargs={'service_id': service.id}),
                                         {'name': snapshot_name})
@@ -87,7 +87,7 @@ class SnapshotsTests(TestCase):
         site = Site.objects.last()
         service = site.production_service
         snapshot_name = "snapshot1"
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse('createsnapshot', kwargs={'service_id': service.id}),
                                         {'name': snapshot_name})

@@ -4,7 +4,7 @@ from django.core.management.base import CommandError
 import json
 from StringIO import StringIO
 from datetime import datetime
-from apimws.models import Cluster, Host
+from apimws.models import Cluster, Host, PHPLib, AnsibleConfiguration
 from apimws.xen import which_cluster
 from sitesmanagement.models import (Site, VirtualMachine, NetworkConfig, Service, ServerType)
 from .commands.ansible_inventory import Command
@@ -90,3 +90,33 @@ class TestsWithData(TestCase):
             self.assertEqual(v['mws_ipv4'], self.vm.network_configuration.IPv4)
         self.assertEqual(v['mws_ipv6'], self.vm.network_configuration.IPv6)
         self.assertEqual(v['mws_service_fqdn'], self.vm.service.network_configuration.name)
+        self.assertEqual(v['mws_php_libs_enabled'], [])
+        self.assertEqual(len(v['mws_php_libs_disabled']), 80)
+
+    def test_os_dependent_php_libs(self):
+        """tests that ansible_inventory supplies the correct os dependent php lib name"""
+
+        lasso = PHPLib.objects.get(name='php5-lasso')
+        lasso.services.add(self.service)
+        adodb = PHPLib.objects.get(name='php5-adodb')
+        adodb.services.add(self.service)
+
+        # test for jessie
+        s = StringIO()
+        Command().handle(list=True, outfile=s)
+        r = json.loads(s.getvalue())
+        v = r['_meta']['hostvars'][r['mwsclients'][0]]
+
+        self.assertEqual(v['mws_php_libs_enabled'], ['php5-lasso', 'php5-adodb'])
+        self.assertEqual(len(v['mws_php_libs_disabled']), PHPLib.objects.count() - 2)
+
+        AnsibleConfiguration.objects.create(service=self.service, key='os', value='stretch')
+
+        # test for stretch
+        s = StringIO()
+        Command().handle(list=True, outfile=s)
+        r = json.loads(s.getvalue())
+        v = r['_meta']['hostvars'][r['mwsclients'][0]]
+
+        self.assertEqual(v['mws_php_libs_enabled'], ['libphp-adodb'])
+        self.assertEqual(len(v['mws_php_libs_disabled']), PHPLib.objects.filter(name_next_os__isnull=False).count() - 1)

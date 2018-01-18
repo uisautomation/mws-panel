@@ -90,7 +90,7 @@ MIDDLEWARE_CLASSES += (
 )
 
 VM_END_POINT_COMMAND = ["userv", "mws-admin", "mws_xen_vm_api"]
-VM_API = "xen"
+VM_API = "apimws.xen"
 
 EMAIL_TIMEOUT = 60
 

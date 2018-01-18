@@ -22,7 +22,7 @@ class DNSTests(TestCase):
         vhost = Vhost.objects.first()
         test_external_domain = 'externaldomain.com'
         self.assertEqual(vhost.main_domain.name, vhost.service.network_configuration.name)
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             self.client.post(reverse('sitesmanagement.views.add_domain', kwargs={'vhost_id': vhost.id}),
                              {'name': test_external_domain})
@@ -42,7 +42,7 @@ class DNSTests(TestCase):
         vhost = Vhost.objects.first()
         test_internal_mws3_domain = 'test.mws3.csx.cam.ac.uk'
         self.assertEqual(vhost.main_domain.name, vhost.service.network_configuration.name)
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             with mock.patch("sitesmanagement.views.domains.set_cname") as mock_set_cname:
                 mock_set_cname.return_value = True
@@ -65,7 +65,7 @@ class DNSTests(TestCase):
         vhost = Vhost.objects.first()
         self.assertEqual(vhost.main_domain.name, vhost.service.network_configuration.name)
         test_internal_mws3_domain = 'test.usertest.mws3.csx.cam.ac.uk'
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             with mock.patch("apimws.ipreg.set_cname") as mock_set_cname:
                 mock_set_cname.return_value = True
@@ -88,7 +88,7 @@ class DNSTests(TestCase):
         vhost = Vhost.objects.first()
         self.assertEqual(vhost.main_domain.name, vhost.service.network_configuration.name)
         test_internal_delegated_domain = 'test.foo.bar.cam.ac.uk'
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             with mock.patch("apimws.ipreg.get_nameinfo") as mock_get_nameinfo:
                 mock_get_nameinfo.return_value = {'exists': [], 'delegated': 'Y'}
@@ -111,7 +111,7 @@ class DNSTests(TestCase):
         vhost = Vhost.objects.first()
         self.assertEqual(vhost.main_domain.name, vhost.service.network_configuration.name)
         test_internal_special_domain = 'test.foo.bar.cam.ac.uk'
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             with mock.patch("apimws.ipreg.get_nameinfo") as mock_get_nameinfo:
                 mock_get_nameinfo.return_value = {'exists': []}
@@ -135,7 +135,7 @@ class DNSTests(TestCase):
         vhost = Vhost.objects.first()
         num_domains = DomainName.objects.count()
         test_duplicate_domain = 'test.usertest.mws3.csx.cam.ac.uk'
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             with mock.patch("apimws.ipreg.set_cname") as mock_set_cname:
                 mock_set_cname.return_value = True
@@ -150,7 +150,7 @@ class DNSTests(TestCase):
         vhost = Vhost.objects.first()
         test_internal_cam_domain = 'domaintest.uis.cam.ac.uk'
         test_email = 'amc203@cam.ac.uk'
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             with mock.patch("apimws.ipreg.get_nameinfo") as mock_get_nameinfo:
                 mock_get_nameinfo.return_value = {'emails': [test_email], 'domain': test_internal_cam_domain, 'exists':
@@ -177,7 +177,7 @@ class DNSTests(TestCase):
         self.assertEqual(domain.vhost.main_domain.name, domain.vhost.service.network_configuration.name)
         with mock.patch("apimws.ipreg.set_cname") as mock_set_cname:
             mock_set_cname.return_value = True
-            with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
                 mock_subprocess.check_output.return_value.returncode = 0
                 domain.accept_it()
         self.assertEqual(domain.vhost.main_domain, domain)
@@ -186,7 +186,7 @@ class DNSTests(TestCase):
         vhost = Vhost.objects.first()
         test_camacuk_subdomain = 'domaintest.cam.ac.uk'
         self.assertEqual(vhost.main_domain.name, vhost.service.network_configuration.name)
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             self.client.post(reverse('sitesmanagement.views.add_domain', kwargs={'vhost_id': vhost.id}),
                              {'name': test_camacuk_subdomain})
@@ -219,7 +219,7 @@ class DNSTests(TestCase):
             mock_get_nameinfo.return_value = {'exists': ['C']}
             with mock.patch("apimws.ipreg.set_cname") as mock_set_cname:
                 mock_set_cname.return_value = True
-                with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+                with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
                     mock_subprocess.check_output.return_value.returncode = 0
                     self.client.post(reverse('apimws.views.confirm_dns',
                                              kwargs={'dn_id': domain_name_created.id,
@@ -255,7 +255,7 @@ class DNSTests(TestCase):
             mock_get_nameinfo.return_value = {'exists': ['C']}
             with mock.patch("apimws.ipreg.set_cname") as mock_set_cname:
                 mock_set_cname.return_value = True
-                with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+                with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
                     mock_subprocess.check_output.return_value.returncode = 0
                     reject_or_accepted_old_domain_names_requests()
                     assert_host_ansible_call(mock_subprocess, Vhost.objects.first())
@@ -285,7 +285,7 @@ class DNSTests(TestCase):
             mock_get_nameinfo.return_value = {'exists': ['V']}
             with mock.patch("apimws.ipreg.set_cname") as mock_set_cname:
                 mock_set_cname.return_value = True
-                with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+                with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
                     mock_subprocess.check_output.return_value.returncode = 0
                     reject_or_accepted_old_domain_names_requests()
                     mock_subprocess.check_output.assert_not_called()
@@ -311,7 +311,7 @@ class DNSTests(TestCase):
         self.client.get(reverse('deletedomain', kwargs={'domain_id': dn.id}))
         DomainName.objects.get(pk=dn.pk)
         # Test deletion of accepted domain
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             with mock.patch("apimws.ipreg.ip_reg_call") as mock_ip_reg_call:
                 mock_ip_reg_call.return_value = {}
@@ -328,7 +328,7 @@ class DNSTests(TestCase):
         self.client.get(reverse('deletedomain', kwargs={'domain_id': dn.id}))
         DomainName.objects.get(pk=dn.pk)
         # Test deletion of external domain
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             with mock.patch("apimws.ipreg.ip_reg_call") as mock_ip_reg_call:
                 mock_ip_reg_call.return_value = {}
@@ -345,7 +345,7 @@ class DNSTests(TestCase):
         self.client.get(reverse('deletedomain', kwargs={'domain_id': dn.id}))
         DomainName.objects.get(pk=dn.pk)
         # Test deletion of requested domain
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             with mock.patch("apimws.ipreg.ip_reg_call") as mock_ip_reg_call:
                 mock_ip_reg_call.return_value = {}

@@ -55,7 +55,7 @@ def pre_create_site():
 
     # We simulate the VM finishing installing
     vm = VirtualMachine.objects.first()
-    with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+    with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
         with mock.patch("apimws.vm.change_vm_power_state") as mock_change_vm_power_state:
             mock_subprocess.check_output.return_value.returncode = 0
             mock_change_vm_power_state.return_value = True
@@ -95,7 +95,7 @@ def assign_a_site(test_interface, pre_create=True):
                 return True
             mock_subprocess2.side_effect = fake_output_api
 
-            with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+            with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
                 with mock.patch("apimws.vm.change_vm_power_state") as mock_change_vm_power_state:
                     mock_subprocess.check_output.return_value.returncode = 0
                     mock_change_vm_power_state.return_value = True
@@ -223,7 +223,7 @@ class SiteManagementTests(TestCase):
         # TODO test that views are restricted
         self.assertTrue(Site.objects.get(pk=test_site.id).disabled)
         # Enable site
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             with mock.patch("apimws.vm.change_vm_power_state") as mock_change_vm_power_state:
                 mock_subprocess.check_output.return_value.returncode = 0
                 mock_change_vm_power_state.return_value = True
@@ -452,7 +452,7 @@ class SiteManagement2Tests(TestCase):
         site = self.create_site()
         site.users.add(User.objects.create(username='amc203'))
         site.users.add(User.objects.create(username='jw35'))
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse('createunixgroup',
                                                 kwargs={'service_id': site.production_service.id}),
@@ -475,7 +475,7 @@ class SiteManagement2Tests(TestCase):
         self.assertContains(response, 'crsid: "amc203"')
         self.assertContains(response, 'crsid: "jw35"')
 
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse('updateunixgroup', kwargs={'ug_id': unix_group.id}),
                                         {'unix_users': 'jw35', 'name': 'NEWTEST'})
@@ -489,7 +489,7 @@ class SiteManagement2Tests(TestCase):
         self.assertInHTML('<td>jw35</td>', response.content, count=1)
         self.assertInHTML('<td>amc203</td>', response.content, count=0)
 
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.delete(reverse('deleteunixgroup', kwargs={'ug_id': unix_group.id}))
             mock_subprocess.check_output.assert_called_with([
@@ -502,7 +502,7 @@ class SiteManagement2Tests(TestCase):
 
     def test_vhosts_list(self):
         site = self.create_site()
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse('createvhost', kwargs={'service_id': site.production_service.id}),
                                         {'name': 'testVhost'})
@@ -518,7 +518,7 @@ class SiteManagement2Tests(TestCase):
         vhost = Vhost.objects.get(name='testVhost')
         self.assertSequenceEqual([vhost], site.production_service.vhosts.all())
 
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.delete(reverse('deletevhost', kwargs={'vhost_id': vhost.id}))
             mock_subprocess.check_output.assert_called_with([
@@ -532,7 +532,7 @@ class SiteManagement2Tests(TestCase):
     def test_domains_management(self):
         site = self.create_site()
 
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             self.client.post(reverse('createvhost', kwargs={'service_id': site.production_service.id}),
                              {'name': 'testVhost'})
@@ -606,7 +606,7 @@ class SiteManagement2Tests(TestCase):
                         </td>
                     </tr>
                 </tbody>''', response.content, count=1)
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse(views.set_dn_as_main, kwargs={'domain_id': 1}))
             mock_subprocess.check_output.assert_called_with([
@@ -640,7 +640,7 @@ class SiteManagement2Tests(TestCase):
                         </td>
                     </tr>
                 </tbody>''', response.content, count=1)
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.delete(reverse('deletedomain', kwargs={'domain_id': 1}))
             mock_subprocess.check_output.assert_called_with([
@@ -649,7 +649,7 @@ class SiteManagement2Tests(TestCase):
             ], stderr=mock_subprocess.STDOUT)
         response = self.client.get(reverse('listdomains', kwargs={'vhost_id': vhost.id}))
         self.assertInHTML('''test.mws3test.csx.cam.ac.uk''', response.content, count=0)
-        with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
+        with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}),
                                         {'name': 'externaldomain.com'})
@@ -707,107 +707,3 @@ class SiteManagement2Tests(TestCase):
         response = self.client.get(reverse('change_db_root_password',
                                            kwargs={'service_id': site.production_service.id}))
         self.assertRedirects(response=response, expected_url=reverse('showsite', args=[str(site.id)]))
-
-
-    # def test_certificates(self):
-    #     site = self.create_site()
-    #
-    #     with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
-    #         mock_subprocess.check_output.return_value.returncode = 0
-    #         response = self.client.post(reverse('createvhost', kwargs={'service_id': site.production_service.id}),
-    #                                     {'name': 'testVhost'})
-    #         self.assertIn(response.status_code, [200, 302])
-    #         mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
-    #
-    #     vhost = Vhost.objects.get(name='testVhost')
-    #     response = self.client.post(reverse(views.generate_csr, kwargs={'vhost_id': vhost.id}))
-    #     self.assertContains(response, "A CSR couldn't be generated because you don't have a master domain "
-    #                                   "assigned to this vhost.")
-    #     self.assertIsNone(vhost.csr)
-    #
-    #     with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
-    #         mock_subprocess.check_output.return_value.returncode = 0
-    #         self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}), {'name': 'randomdomain.co.uk'})
-    #         self.assertEqual(response.status_code, 200)
-    #         mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible"])
-    #
-    #     vhost = Vhost.objects.get(name='testVhost')
-    #     self.assertIsNone(vhost.csr)
-    #     self.assertIsNone(vhost.certificate)
-    #     self.assertIsNotNone(vhost.main_domain)
-    #     self.client.post(reverse(views.generate_csr, kwargs={'vhost_id': vhost.id}))
-    #     vhost = Vhost.objects.get(name='testVhost')
-    #     self.assertIsNotNone(vhost.csr)
-    #
-    #     privatekeyfile = tempfile.NamedTemporaryFile()
-    #     csrfile = tempfile.NamedTemporaryFile()
-    #     certificatefile = tempfile.NamedTemporaryFile()
-    #     subprocess.check_output(["openssl", "req", "-new", "-newkey", "rsa:2048", "-nodes", "-keyout",
-    #                              privatekeyfile.name, "-subj", "/C=GB/CN=%s" % vhost.main_domain.name,
-    #                              "-out", csrfile.name])
-    #     subprocess.check_output(["openssl", "x509", "-req", "-days", "365", "-in", csrfile.name, "-signkey",
-    #                              privatekeyfile.name, "-out", certificatefile.name])
-    #
-    #     certificatefiledesc = open(certificatefile.name, 'r')
-    #     privatekeyfiledesc = open(privatekeyfile.name, 'r')
-    #     self.client.post(reverse(views.certificates, kwargs={'vhost_id': vhost.id}),
-    #                      {'key': privatekeyfile, 'cert': certificatefile})
-    #     certificatefiledesc.close()
-    #     privatekeyfiledesc.close()
-    #     vhost = Vhost.objects.get(name='testVhost')
-    #     self.assertIsNotNone(vhost.certificate)
-    #
-    #     certificatefile.seek(0)
-    #     self.assertEqual(vhost.certificate, certificatefile.read())
-    #
-    #     privatekeyfile.seek(0)
-    #     response = self.client.post(reverse(views.certificates, kwargs={'vhost_id': vhost.id}),
-    #                                 {'cert': privatekeyfile})
-    #     self.assertContains(response, "The certificate file is invalid")
-    #
-    #     certificatefile.seek(0)
-    #     response = self.client.post(reverse(views.certificates, kwargs={'vhost_id': vhost.id}),
-    #                                 {'key': certificatefile})
-    #     self.assertContains(response, "The key file is invalid")
-    #
-    #     privatekeyfile.close()
-    #     privatekeyfile = tempfile.NamedTemporaryFile()
-    #     subprocess.check_output(["openssl", "genrsa", "-out", privatekeyfile.name, "2048"])
-    #
-    #     certificatefile.seek(0)
-    #     response = self.client.post(reverse(views.certificates, kwargs={'vhost_id': vhost.id}),
-    #                                 {'key': privatekeyfile, 'cert': certificatefile})
-    #     self.assertContains(response, "The key doesn&#39;t match the certificate")
-    #
-    #     privatekeyfile.close()
-    #     csrfile.close()
-    #     certificatefile.close()
-
-    # def test_backups(self):
-    #     site = self.create_site()
-    #
-    #     with mock.patch("apimws.ansible.subprocess") as mock_subprocess:
-    #         mock_subprocess.check_output.return_value.returncode = 0
-    #         response = self.client.post(reverse('createvhost', kwargs={'service_id': site.production_service.id}),
-    #                                     {'name': 'testVhost'})
-    #         self.assertIn(response.status_code, [200, 302])
-    #         vhost = Vhost.objects.get(name='testVhost')
-    #         response = self.client.post(reverse(views.add_domain, kwargs={'vhost_id': vhost.id}),
-    #                                     {'name': 'testDomain.cam.ac.uk'})
-    #         self.assertIn(response.status_code, [200, 302])
-    #         mock_subprocess.check_output.assert_called_with(["userv", "mws-admin", "mws_ansible_host",
-    #                                                          site.production_service.virtual_machines.first()
-    #                                                              .network_configuration.name])
-    #
-    #     restore_date = datetime.now()
-    #
-    #     with reversion.create_revision():
-    #         domain = DomainName.objects.get(name='testDomain.cam.ac.uk')
-    #         domain.name = "error"
-    #         domain.status = 'accepted'
-    #         domain.save()
-    #
-    #     self.client.post(reverse(views.backups, kwargs={'service_id': vhost.service.id}), {'backupdate': restore_date})
-    #     domain = DomainName.objects.get(name='testDomain.cam.ac.uk')
-    #     self.assertEqual(domain.status, 'accepted')
-    #     self.assertEqual(domain.name, 'testDomain.cam.ac.uk')

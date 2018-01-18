@@ -7,7 +7,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
 from mock import patch
 
-from apimws.models import Cluster, Host, AnsibleConfiguration
+from apimws.models import Cluster, Host
 from apimws.xen import which_cluster
 from mwsauth.tests import do_test_login
 from sitesmanagement.cronjobs import send_reminder_renewal, check_subscription
@@ -70,7 +70,7 @@ class BillingTests(TestCase):
         with patch("apimws.vm.change_vm_power_state") as mock_change_vm_power_state:
             mock_change_vm_power_state.return_value = True
             mock_change_vm_power_state.delay.return_value = True
-            with patch("apimws.ansible.subprocess") as mock_subprocess:
+            with patch("apimws.ansible_impl.subprocess") as mock_subprocess:
                 mock_subprocess.check_output.return_value.returncode = 0
                 site.enable()
 
@@ -148,8 +148,8 @@ class BillingTests(TestCase):
         self.assertEqual(len(mail.outbox), 2)
 
     def test_check_cancel_if_not_paid(self):
-        ''' This test checks that if the user does not uploads a PO before 30 days, the site will be cancelled
-        automatically'''
+        """ This test checks that if the user does not uploads a PO before 30 days, the site will be cancelled
+        automatically """
         # 1 month for renewal warning
         today = datetime.today()
         site = Site.objects.create(name="testSite", email='amc203@cam.ac.uk', type=ServerType.objects.get(id=1),
@@ -221,8 +221,8 @@ class BillingTests(TestCase):
         self.assertFalse(site.users.exists())
 
     def test_check_not_cancel_if_paid(self):
-        ''' This test checks that if the user does not uploads a PO before 30 days, the site will be cancelled
-        automatically'''
+        """ This test checks that if the user does not uploads a PO before 30 days, the site will be cancelled
+        automatically """
         today = datetime.today()
         do_test_login(self, user="test0001")
         # Create site (more than 30 days ago start date)

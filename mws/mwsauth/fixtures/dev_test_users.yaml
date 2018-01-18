@@ -1,0 +1,8 @@
+- model: auth.User
+  fields: { username: test0001, is_superuser: True, is_staff: True }
+- model: mwsauth.MWSUser
+  fields: { uid: 10000001, user: test0001 }
+- model: auth.User
+  fields: { username: test0002 }
+- model: mwsauth.MWSUser
+  fields: { uid: 10000002, user: test0002 }

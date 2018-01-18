@@ -303,15 +303,14 @@ def php_libs(request, service_id):
         'sidebar_messages': warning_messages(site),
         'form': PHPLibForm(initial={
             'php_libs': list(service.php_libs.values_list('name', flat=True))
-        }),
+        }, service=service),
     }
 
     if request.method == 'POST':
-        f = PHPLibForm(request.POST)
+        f = PHPLibForm(request.POST, service=service)
         if f.is_valid():
             service.php_libs.set(
-                PHPLib.objects.filter(
-                    name__in=f.cleaned_data['php_libs']).all(),
+                PHPLib.objects.filter(name__in=f.cleaned_data['php_libs']).all(),
                 clear=True
             )
             service.save()

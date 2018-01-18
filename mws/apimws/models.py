@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from sitesmanagement.models import Service
 
@@ -24,23 +25,23 @@ class AnsibleConfiguration(models.Model):
 
     class Meta:
         unique_together = ("service", "key")
-#
-#
-# class ApacheModule(models.Model):
-#     name = models.CharField(max_length=150, primary_key=True)
-#     description = models.CharField(max_length=250)
-#     available = models.BooleanField(default=True)
-#     services = models.ManyToManyField(Service, related_name='apache_modules', blank=True)
-#
-#     def __unicode__(self):
-#         return self.name
 
 
 class PHPLib(models.Model):
     name = models.CharField(max_length=150, primary_key=True)
+    name_next_os = models.CharField(max_length=150, blank=True)
     description = models.CharField(max_length=250)
     available = models.BooleanField(default=True)
     services = models.ManyToManyField(Service, related_name='php_libs', blank=True)
+
+    def os_dep_name(self, service):
+        """
+        :param service: the target Service
+        :return: the correct name of the php lib for the OS version of a service
+        """
+        if service.operating_system == settings.NEXT_OS:
+            return self.name_next_os
+        return self.name
 
     def __unicode__(self):
         return self.name
