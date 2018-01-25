@@ -1,0 +1,6 @@
+- model: apimws.host
+  pk: ophobe.csi.cam.ac.uk
+  fields: {cluster: mws-cluster-dev-1}
+- model: apimws.host
+  pk: ix.csi.cam.ac.uk
+  fields: {cluster: mws-cluster-dev-1}

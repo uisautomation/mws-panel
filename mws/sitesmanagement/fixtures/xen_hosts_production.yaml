@@ -1,0 +1,6 @@
+- model: apimws.host
+  pk: odochium.csi.cam.ac.uk
+  fields: {cluster: mws-cluster-1}
+- model: apimws.host
+  pk: agogue.csi.cam.ac.uk
+  fields: {cluster: mws-cluster-1}
