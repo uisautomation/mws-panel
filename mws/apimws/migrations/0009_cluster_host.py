@@ -3,23 +3,6 @@ from __future__ import unicode_literals
 from django.db import models, migrations
 
 
-def add_mws_cluster_1(apps, schema_editor):
-    # We can't import the Person model directly as it may be a newer
-    # version than this migration expects. We use the historical version.
-    Cluster = apps.get_model("apimws", "Cluster")
-    Host = apps.get_model("apimws", "Host")
-    cluster1 = Cluster.objects.create(name="mws-cluster-1")
-    host1 = Host.objects.create(hostname="agogue.csi.cam.ac.uk", cluster=cluster1)
-    host2 = Host.objects.create(hostname="odochium.csi.cam.ac.uk", cluster=cluster1)
-
-
-def no_op(apps, schema_editor):
-    """
-    Nothing to do
-    """
-    pass
-
-
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -46,5 +29,4 @@ class Migration(migrations.Migration):
             },
             bases=(models.Model,),
         ),
-        migrations.RunPython(add_mws_cluster_1, no_op),
     ]
