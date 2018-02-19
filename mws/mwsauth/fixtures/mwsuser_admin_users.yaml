@@ -1,0 +1,12 @@
+- model: mwsauth.MWSUser
+  fields: { uid: 178460, user: amc203 }
+- model: mwsauth.MWSUser
+  fields: { uid: 53956, user: rjw53 }
+- model: mwsauth.MWSUser
+  fields: { uid: 225226, user: ph448 }
+- model: mwsauth.MWSUser
+  fields: { uid: 1125, user: jmw11 }
+- model: mwsauth.MWSUser
+  fields: { uid: 34933, user: si202 }
+- model: mwsauth.MWSUser
+  fields: { uid: 279937, user: mb2174 }
