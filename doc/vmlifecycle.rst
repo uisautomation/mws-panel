@@ -84,7 +84,6 @@ While the VM is being created, secrets\_prealocation is called and it will
 create the private keys for the MWS Server. It generates 4 different host keys:
 RSA, DSA, ECDSA, and ED25519. A copy of the key is stored in the web panel and
 another copy is install in the VM.  SSHFP records are generated from those keys
-(except with ED25519 because ipreg still does not support SSHFP ED25519 records)
 and sent to the ipreg API.
 
 When the VM has finished installing the OS, the installation script will poke a
