@@ -244,8 +244,8 @@ class SSHPubKey(object):  # pylint:disable=too-many-instance-attributes
         self.bits = int(curve_information.replace(b"nistp", b""))  # TODO: this is rather ugly way to extract bit length
         self.ecdsa = ecdsa_key
 
-    def _process_ed25516(self):
-        """ Parses ed25516 keys.
+    def _process_ed25519(self):
+        """ Parses ed25519 keys.
 
         There is no (apparent) way to validate ed25519 keys. This only
         checks data length (256 bits), but does not try to validate
@@ -271,7 +271,7 @@ class SSHPubKey(object):  # pylint:disable=too-many-instance-attributes
         elif self.key_type.strip().startswith(b"ecdsa-sha"):
             self._process_ecdsa_sha()
         elif self.key_type == b"ssh-ed25519":
-            self._process_ed25516()
+            self._process_ed25519()
         else:
             raise NotImplementedError("Invalid key type: %s" % self.key_type)
 
