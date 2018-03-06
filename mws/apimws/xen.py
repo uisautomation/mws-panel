@@ -78,18 +78,23 @@ def secrets_prealocation_vm(vm):
         SiteKey.objects.get_or_create(site=service.site, type=keytype, public_key=result["pubkey"],
                                       fingerprint=pubkey.hash_md5(), fingerprint2=pubkey.hash_sha256())
 
-        try:
-            fptype == 'SHA256'
-            set_sshfp(service.network_configuration.name, SiteKey.ALGORITHMS[keytype],
-                      SiteKey.FP_TYPES[fptype], fp)
-            set_sshfp(service.site.test_service.network_configuration.name, SiteKey.ALGORITHMS[keytype],
-                      SiteKey.FP_TYPES[fptype], fp)
-            set_sshfp(vm.network_configuration.name, SiteKey.ALGORITHMS[keytype], SiteKey.FP_TYPES[fptype],
-                      fp)
-        except Exception as e:
-            LOGGER.error("Error while trying to set up sshfp records. \nkeytype: %s\nfptype: %s\nexception: %s"
-                         % (keytype, fptype, str(e.__class__)+" "+str(e)))
-            pass
+        for fptype in SiteKey.FP_TYPES:
+            if not fptype == "SHA1":
+                try:
+                    if fptype == "SHA256":
+                        fp = pubkey.sshfp_sha256()
+                    else:
+                        raise Exception("fptype %s is not supported" % fptype)
+                    set_sshfp(service.network_configuration.name, SiteKey.ALGORITHMS[keytype],
+                              SiteKey.FP_TYPES[fptype], fp)
+                    set_sshfp(service.site.test_service.network_configuration.name, SiteKey.ALGORITHMS[keytype],
+                              SiteKey.FP_TYPES[fptype], fp)
+                    set_sshfp(vm.network_configuration.name, SiteKey.ALGORITHMS[keytype], SiteKey.FP_TYPES[fptype],
+                              fp)
+                except Exception as e:
+                    LOGGER.error("Error while trying to set up sshfp records. \nkeytype: %s\nfptype: %s\nexception: %s"
+                                 % (keytype, fptype, str(e.__class__)+" "+str(e)))
+                    pass
 
 
 @shared_task(base=XenWithFailure)
