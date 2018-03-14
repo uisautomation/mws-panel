@@ -17,3 +17,4 @@ redis
 requests
 python-dateutil
 ansible<2.5
+dnspython

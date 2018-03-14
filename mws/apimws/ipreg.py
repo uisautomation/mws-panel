@@ -65,9 +65,17 @@ def delete_cname(hostname):
 
 
 def find_sshfp(hostname):
+    result = []
+
+    r = dns.resolver.Resolver()
+    r.use_edns(0, dns.flags.DO, 4096) # DNSSEC query
+
     try:
-        result = ip_reg_call(['find', 'sshfp', str(hostname)])
-    except subprocess.CalledProcessError as excp:
+        answer = r.query(hostname, 'SSHFP')
+        for record in [rr.to_text() for rr in answer]:
+            (algorithm, fptype, fingerprint) = record.split()
+            result.append({'algorithm': algorithm, 'fptype': fptype, 'fingerprint': fingerprint})
+    except Exception as excp:
         raise excp
     return result
 
