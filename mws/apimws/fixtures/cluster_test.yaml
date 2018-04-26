@@ -1,0 +1,3 @@
+- model: apimws.cluster
+  pk: mws-cluster-test-1
+  fields: {name: mws-cluster-test-1}
