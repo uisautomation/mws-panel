@@ -4,8 +4,6 @@ import subprocess
 from celery import shared_task
 from django.conf import settings
 from apimws.jackdaw import SSHTaskWithFailure
-import dns.resolver
-import dns.flags
 
 LOGGER = logging.getLogger('mws')
 
