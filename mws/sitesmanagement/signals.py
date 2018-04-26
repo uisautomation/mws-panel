@@ -19,13 +19,13 @@ def check_main_domain_name(instance, **kwargs):
 def delete_sshfp_from_dns(instance, **kwargs):
     '''Delete SSHFP records from the DNS using the DNS API when a SiteKey is deleted from the database'''
     for service in instance.site.services.all():
-        for rr in find_sshfp(service.network_configuration.name):
-            delete_sshfp(service.network_configuration.name, rr['algorithm'], rr['fptype'])
-            
+        for fptype in SiteKey.FP_TYPES:
+            delete_sshfp(service.network_configuration.name, SiteKey.ALGORITHMS[instance.type],
+                         SiteKey.FP_TYPES[fptype])
         for vm in service.virtual_machines.all():
-            for rr in find_sshfp(vm.network_configuration.name):
-                delete_sshfp(vm.network_configuration.name, rr['algorithm'], rr['fptype'])
-
+            for fptype in SiteKey.FP_TYPES:
+                delete_sshfp(vm.network_configuration.name, SiteKey.ALGORITHMS[instance.type],
+                             SiteKey.FP_TYPES[fptype])
 
 @receiver(pre_delete, sender=DomainName)
 def delete_cname_from_dns(instance, **kwargs):
