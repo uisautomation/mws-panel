@@ -1,7 +1,7 @@
 import logging
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
-from apimws.ipreg import find_sshfp, delete_sshfp, delete_cname
+from apimws.ipreg import delete_sshfp, delete_cname
 from sitesmanagement.models import DomainName, SiteKey, Site, VirtualMachine
 
 LOGGER = logging.getLogger('mws')
