@@ -10,7 +10,7 @@ django-ucamwebauth>=1.2
 django>=1.11,<1.12
 ecdsa
 mock>=1.0.1
-psycopg2
+psycopg2-binary
 pycrypto>=2.6.1
 pyyaml
 redis
