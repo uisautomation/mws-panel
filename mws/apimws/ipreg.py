@@ -5,7 +5,6 @@ from celery import shared_task
 from django.conf import settings
 from apimws.jackdaw import SSHTaskWithFailure
 
-
 LOGGER = logging.getLogger('mws')
 
 
@@ -64,9 +63,9 @@ def delete_cname(hostname):
     return result
 
 
-def find_sshfp(hostname):
+def get_sshfp(hostname):
     try:
-        result = ip_reg_call(['find', 'sshfp', str(hostname)])
+        result = ip_reg_call(['get', 'sshfp', str(hostname)])
     except subprocess.CalledProcessError as excp:
         raise excp
     return result

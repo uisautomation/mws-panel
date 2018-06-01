@@ -78,15 +78,13 @@ def secrets_prealocation_vm(vm):
         SiteKey.objects.get_or_create(site=service.site, type=keytype, public_key=result["pubkey"],
                                       fingerprint=pubkey.hash_md5(), fingerprint2=pubkey.hash_sha256())
 
-        if keytype is not "ED25519":  # "sshed25519" as of 2016 is not supported by jackdaw
-            for fptype in SiteKey.FP_TYPES:
+        for fptype in SiteKey.FP_TYPES:
+            if not fptype == "SHA1":
                 try:
-                    if fptype == "SHA1":
-                        fp = pubkey.sshfp_sha1()
-                    elif fptype == "SHA256":
+                    if fptype == "SHA256":
                         fp = pubkey.sshfp_sha256()
                     else:
-                        raise Exception("fptype %s do not exists" % fptype)
+                        raise Exception("fptype %s is not supported" % fptype)
                     set_sshfp(service.network_configuration.name, SiteKey.ALGORITHMS[keytype],
                               SiteKey.FP_TYPES[fptype], fp)
                     set_sshfp(service.site.test_service.network_configuration.name, SiteKey.ALGORITHMS[keytype],
