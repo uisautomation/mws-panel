@@ -63,7 +63,7 @@ class SSHTaskWithFailure(Task):
 
 @shared_task(base=SSHTaskWithFailure)
 def jackdaw_api():
-    jackdaw_response = subprocess.check_output(["ssh", "-q", "-i", "~/.ssh/jackdawmwsuser-api", "mwsv3@jackdaw.csi.cam.ac.uk", "p", "get_people"],
+    jackdaw_response = subprocess.check_output(["ssh", "-q", "-i", "/home/www-data/.ssh/jackdawmwsuser-api", "mwsv3@jackdaw.csi.cam.ac.uk", "p", "get_people"],
                                                stderr=subprocess.STDOUT)
     jackdaw_response_parsed = jackdaw_response.splitlines()  # TODO Raise a custom exception if response is empty
     jackdaw_users = map(extract_crsid_and_uuid, jackdaw_response_parsed)
