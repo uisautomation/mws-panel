@@ -12,10 +12,8 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('vhost_id', type=str)
-        parser.add_argument('hash', type=str)
 
     def handle(self, *args, **options):
-        # FIXME: hash appears to be ignored
         try:
             vhost = Vhost.objects.get(id=options['vhost_id'])
         except Vhost.DoesNotExist:
