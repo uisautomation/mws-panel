@@ -38,8 +38,7 @@ def recreate_vm(modeladmin, request, queryset):
         objects_name = force_text(opts.verbose_name_plural)
 
     context = dict(
-        # modeladmin.admin_site.each_context(request), TODO Only Django 1.8
-        modeladmin.admin_site.each_context(),
+        modeladmin.admin_site.each_context(request),
         title="Are you sure?",
         objects_name=objects_name,
         list_objects=[queryset],
