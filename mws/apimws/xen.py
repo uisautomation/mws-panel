@@ -75,8 +75,12 @@ def secrets_prealocation_vm(vm):
 
         pubkey = SSHPubKey(result["pubkey"])
 
-        SiteKey.objects.get_or_create(site=service.site, type=keytype, public_key=result["pubkey"],
-                                      fingerprint=pubkey.hash_md5(), fingerprint2=pubkey.hash_sha256())
+        SiteKey.objects.get_or_create(site=service.site, type=keytype, 
+                                      defaults={
+                                          'public_key': result["pubkey"], 
+                                          'fingerprint': pubkey.hash_md5(),
+                                          'fingerprint2': pubkey.hash_sha256()
+                                      })
 
         for fptype in SiteKey.FP_TYPES:
             if not fptype == "SHA1":
