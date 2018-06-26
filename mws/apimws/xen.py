@@ -105,7 +105,7 @@ def secrets_prealocation_vm(vm):
 def new_site_primary_vm(service, host_network_configuration=None):
     parameters = {}
     parameters["site-id"] = "mwssite-%d" % service.site.id
-    parameters["os"] = getattr(settings, 'OS_VERSION_VMXENAPI', "jessie")
+    parameters["os"] = getattr(settings, 'OS_VERSION', "jessie")
 
     if host_network_configuration:
         netconf = {}
@@ -157,7 +157,7 @@ def new_site_primary_vm(service, host_network_configuration=None):
     from apimws.models import AnsibleConfiguration
     AnsibleConfiguration.objects.update_or_create(service=service, key='os',
                                                   defaults={'value': getattr(settings,
-                                                                             "OS_VERSION_VMXENAPI", "jessie")})
+                                                                             "OS_VERSION", "jessie")})
 
     # Create a default Vhost and associate the service name
     default_vhost = Vhost.objects.create(service=service, name="default")
@@ -261,7 +261,7 @@ def clone_vm_api_call(site):
     host_network_configuration = NetworkConfig.get_free_host_config()
     parameters = {}
     parameters["site-id"] = "mwssite-%d" % service.site.id
-    parameters["os"] = getattr(settings, 'OS_VERSION_VMXENAPI', "jessie")
+    parameters["os"] = getattr(settings, 'OS_VERSION', "jessie")
 
     if host_network_configuration:
         netconf = {}
@@ -307,7 +307,7 @@ def clone_vm_api_call(site):
     from apimws.models import AnsibleConfiguration
     AnsibleConfiguration.objects.update_or_create(service=service, key='os',
                                                   defaults={'value': getattr(settings,
-                                                                             "OS_VERSION_VMXENAPI", "jessie")})
+                                                                             "OS_VERSION", "jessie")})
     secrets_prealocation_vm(vm)
 
     # PHPLibs
