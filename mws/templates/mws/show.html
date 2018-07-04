@@ -109,7 +109,7 @@
                 </div>
             </div>
 
-            {% if site.production_service.due_update %}
+            {% if site.production_service.due_update or site.production_service.active and site.test_service.active %}
                 {% if site.test_service and site.test_service.status != 'installing' and site.test_service.status != 'postinstall'  %}
                     <div class="campl-column4">
                         <div class="campl-content-container campl-side-padding">
