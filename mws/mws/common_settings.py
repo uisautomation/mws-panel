@@ -152,7 +152,7 @@ UCAMWEBAUTH_LOGOUT_REDIRECT = 'http://www.cam.ac.uk/'
 STRONGHOLD_PUBLIC_NAMED_URLS = ('raven_login', 'raven_return')
 #CELERY_ACCEPT_CONTENT = ['json'] # TODO
 
-OS_VERSION = "jessie"
+OS_VERSION = "stretch"
 OS_DUE_UPGRADE = []
 
 NEXT_OS = 'stretch'

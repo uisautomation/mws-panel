@@ -7,7 +7,7 @@ from jsonschema import validate
 
 
 default_options = {
-    'os': 'jessie',
+    'os': 'stretch',
     'features': {
         'cpu': 1,
         'maxmem': 2048,
@@ -17,7 +17,7 @@ default_options = {
 }
 
 
-OS_SUPPORTED = ['jessie']
+OS_SUPPORTED = ['jessie', 'stretch']
 BUTTON_ACTIONS_ALLOWED = ['shutdown', 'reboot', 'poweroff', 'poweron']
 
 
