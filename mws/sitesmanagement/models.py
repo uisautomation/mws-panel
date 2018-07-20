@@ -200,6 +200,10 @@ class Site(models.Model):
         return Service.objects.filter(type='test', site=self).first()
 
     @property
+    def in_testing(self):
+        return self.production_service.active and self.test_service.active
+
+    @property
     @deprecated
     def primary_vm(self):
         return self.vms.filter(service__type='production').first()
