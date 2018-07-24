@@ -283,6 +283,12 @@ def clone_vm_api_call(site):
         "secret": str(vm.token),
     }
 
+    parameters["features"] = {
+        "cpu": service.site.type.numcpu,
+        "ram": service.site.type.sizeram*1024,
+        "disk": service.site.type.sizedisk,
+    }
+
     service.status = 'installing'
     service.save()
 
