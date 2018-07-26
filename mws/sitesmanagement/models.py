@@ -517,10 +517,19 @@ class VirtualMachine(models.Model):
     token = models.CharField(max_length=50)
 
     network_configuration = models.OneToOneField(NetworkConfig, related_name="vm", unique=True)
+    numcpu = models.IntegerField()
+    sizeram = models.IntegerField()  # In GB
     service = models.ForeignKey(Service, related_name='virtual_machines')
 
     from apimws.models import Cluster
     cluster = models.ForeignKey(Cluster, related_name='guests')
+
+    def save(self, *args, **kwargs):
+        # the primary VM may have had its parameters changed
+        vm = self if self.service.primary else self.service.site.production_service.virtual_machines.first()
+        self.numcpu = vm.numcpu if vm.numcpu is not None else self.service.site.type.numcpu
+        self.sizeram = vm.sizeram if vm.sizeram is not None else self.service.site.type.sizeram
+        super(VirtualMachine, self).save(*args, **kwargs)
 
     @property
     def site(self):
@@ -573,7 +582,7 @@ class VirtualMachine(models.Model):
 @receiver(pre_delete, sender=VirtualMachine)
 def api_call_to_delete_vm(instance, **kwargs):
     if instance.name:
-        from apimws.xen import destroy_vm
+        from apimws.vm import destroy_vm
         destroy_vm(instance.id)
 
 
