@@ -266,6 +266,7 @@
                                     IPv4: {{ site.production_service.ipv4 }}<br/>
                                     IPv6: {{ site.production_service.ipv6 }}<br/>
                                     hostname: {{ site.production_service.hostname }}<br/>
+                                    Operating System: {{ site.production_service.operating_system }}<br/>
                                     {% if main_website %}
                                     default website: <a href="http{% if main_website.tls_enabled %}s{% endif %}://{{ main_website.main_domain.name }}">{{ main_website.main_domain.name }}</a>
                                     {% endif %}
@@ -277,6 +278,7 @@
                                     Test Server info<br/>
                                     IPv4: {{ site.test_service.ipv4 }}<br/>
                                     hostname: {{ site.test_service.hostname }}<br/>
+                                    Operating System: {{ site.test_service.operating_system }}
                             </div>
                         </div>
                         {% endif %}
