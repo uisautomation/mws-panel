@@ -67,8 +67,8 @@ def new_site_primary_vm(service, host_network_configuration=None):
         raise AttributeError("No host network configuration")
 
     parameters["features"] = {
-        "cpu": service.site.type.numcpu,
-        "ram": service.site.type.sizeram*1024,
+        "cpu": vm.numcpu,
+        "ram": vm.sizeram*1024,
         "disk": service.site.type.sizedisk,
     }
 
@@ -156,3 +156,7 @@ def which_cluster():
     At present we only have one cluster, so the decision algorithm is pretty obvious. Returns a Cluster object.
     """
     return Cluster.objects.first()
+
+@shared_task(base=XenWithFailure)
+def destroy_vm(vm_id):
+    return True

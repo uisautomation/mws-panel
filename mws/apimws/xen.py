@@ -121,8 +121,8 @@ def new_site_primary_vm(service, host_network_configuration=None):
         raise AttributeError("No host network configuration")
 
     parameters["features"] = {
-        "cpu": service.site.type.numcpu,
-        "ram": service.site.type.sizeram*1024,
+        "cpu": vm.numcpu,
+        "ram": vm.sizeram*1024,
         "disk": service.site.type.sizedisk,
     }
 
@@ -187,8 +187,8 @@ def recreate_vm(vm_id):
     parameters["netconf"] = netconf
 
     parameters["features"] = {
-        "cpu": service.site.type.numcpu,
-        "ram": service.site.type.sizeram*1024,
+        "cpu": vm.numcpu,
+        "ram": vm.sizeram*1024,
         "disk": service.site.type.sizedisk,
     }
 
@@ -276,17 +276,17 @@ def clone_vm_api_call(site):
     else:
         raise AttributeError("No host network configuration")
 
+    parameters["features"] = {
+        "cpu": vm.numcpu,
+        "ram": vm.sizeram*1024,
+        "disk": service.site.type.sizedisk,
+    }
+
     parameters["netconf"] = netconf
     parameters["callback"] = {
         "endpoint": "%s%s" % (settings.MAIN_DOMAIN, reverse(post_installation)),
         "vm_id": vm.id,
         "secret": str(vm.token),
-    }
-
-    parameters["features"] = {
-        "cpu": service.site.type.numcpu,
-        "ram": service.site.type.sizeram*1024,
-        "disk": service.site.type.sizedisk,
     }
 
     service.status = 'installing'
