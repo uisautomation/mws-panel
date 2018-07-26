@@ -525,8 +525,10 @@ class VirtualMachine(models.Model):
     cluster = models.ForeignKey(Cluster, related_name='guests')
 
     def save(self, *args, **kwargs):
-        self.numcpu = self.numcpu if self.numcpu is not None else self.service.site.type.numcpu
-        self.sizeram = self.sizeram if self.sizeram is not None else self.service.site.type.sizeram
+        # the primary VM may have had its parameters changed
+        vm = self if self.service.primary else self.service.site.production_service.virtual_machines.first()
+        self.numcpu = vm.numcpu if vm.numcpu is not None else self.service.site.type.numcpu
+        self.sizeram = vm.sizeram if vm.sizeram is not None else self.service.site.type.sizeram
         super(VirtualMachine, self).save(*args, **kwargs)
 
     @property
