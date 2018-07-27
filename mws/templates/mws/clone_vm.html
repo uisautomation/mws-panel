@@ -6,16 +6,20 @@
         <div class="campl-content-container">
             <h1 id="page-title">Production and test server management</h1>
             {% if site.production_service and site.production_service.virtual_machines.count > 0 and site.test_service and site.test_service.virtual_machines.count == 0 %}
-            <form action={% url 'sitesmanagement.views.clone_vm_view' site_id=site.id %} method="post">{% csrf_token %}
-                <fieldset>
-                        <div>
-                            <h3>Test the OS upgrade of the production server by creating a test server</h3>
-                            <p>
-                                <input type="submit" value="Clone Production server as Test server" class="campl-btn campl-primary-cta">
-                            </p>
-                        </div>
-                </fieldset>
-            </form>
+            {% if can_upgrade %}
+                <form action={% url 'sitesmanagement.views.clone_vm_view' site_id=site.id %} method="post">{% csrf_token %}
+                    <fieldset>
+                            <div>
+                                <h3>Test the OS upgrade of the production server by creating a test server</h3>
+                                <p>
+                                    <input type="submit" value="Clone Production server as Test server" class="campl-btn campl-primary-cta">
+                                </p>
+                            </div>
+                    </fieldset>
+                </form>
+            {% else %}
+                <h3>We cannot create a test server right now, please try again later</h3>
+            {% endif %}
             {% endif %}
             {% if site.test_service and site.test_service.virtual_machines.count != 0 %}
                 <form action={% url 'sitesmanagement.views.switch_services' site_id=site.id %} method="post">{% csrf_token %}
