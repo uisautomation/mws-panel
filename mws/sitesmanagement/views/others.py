@@ -66,7 +66,7 @@ def clone_vm_view(request, site_id):
 
     can_upgrade = False
     if settings.MAX_PENDING_UPGRADES:
-        pending_upgrades = len([x for x in Service.objects.filter(type='test') if x.active])
+        pending_upgrades = len([x for x in Service.objects.filter(type='test').prefetch_related('virtual_machines') if x.active])
         if pending_upgrades < settings.MAX_PENDING_UPGRADES:
             can_upgrade = True
 
