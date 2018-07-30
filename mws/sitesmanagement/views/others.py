@@ -64,6 +64,12 @@ def clone_vm_view(request, site_id):
     if site is None:
         return HttpResponseForbidden()
 
+    can_upgrade = False
+    if settings.MAX_PENDING_UPGRADES:
+        pending_upgrades = len([x for x in Service.objects.filter(type='test').prefetch_related('virtual_machines') if x.active])
+        if pending_upgrades < settings.MAX_PENDING_UPGRADES:
+            can_upgrade = True
+
     breadcrumbs = {
         0: dict(name='Managed Web Service server: ' + str(site.name), url=site.get_absolute_url()),
         1: dict(name='Production and test servers management', url=reverse(clone_vm_view, kwargs={'site_id': site.id}))
@@ -82,6 +88,7 @@ def clone_vm_view(request, site_id):
     return render(request, 'mws/clone_vm.html', {
         'breadcrumbs': breadcrumbs,
         'site': site,
+        'can_upgrade': can_upgrade,
     })
 
 
