@@ -153,7 +153,7 @@ STRONGHOLD_PUBLIC_NAMED_URLS = ('raven_login', 'raven_return')
 #CELERY_ACCEPT_CONTENT = ['json'] # TODO
 
 OS_VERSION = "stretch"
-OS_DUE_UPGRADE = []
+OS_DUE_UPGRADE = ["jessie"]
 MAX_PENDING_UPGRADES = 20
 NEXT_OS = 'stretch'
 
