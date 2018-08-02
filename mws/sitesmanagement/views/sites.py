@@ -219,7 +219,6 @@ class SiteEdit(SitePriviledgeAndBusyCheck, UpdateView):
 class SiteEditEmail(SitePriviledgeCheck, UpdateView):
     """View(Controller) to edit the email associated to a site"""
     form_class = SiteEmailForm
-    fields = '__all__'
 
     def render_to_response(self, context, **response_kwargs):
         return redirect(self.object)
