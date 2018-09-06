@@ -157,7 +157,7 @@ OS_DUE_UPGRADE = ["jessie"]
 MAX_PENDING_UPGRADES = 20
 NEXT_OS = 'stretch'
 
-FINANCE_EMAIL = 'fh103@cam.ac.uk'
+FINANCE_EMAIL = 'finance@uis.cam.ac.uk'
 
 CELERY_IMPORTS = ('apimws.xen', 'apimws.utils', 'apimws.jackdaw', 'apimws.ansible',
                   'sitesmanagement.cronjobs', 'apimws.ipreg')
