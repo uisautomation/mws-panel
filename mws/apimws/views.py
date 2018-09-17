@@ -113,7 +113,7 @@ def post_installOS(service):
     if service.type == 'test':
         subprocess.check_output(["userv", "mws-admin", "mws_clone",
                                  service.site.production_service.virtual_machines.first().name,
-                                 service.virtual_machines.first().name])
+                                 service.site.test_service.virtual_machines.first().name])
     if service.site.preallocated:
         service.site.disable()
 
