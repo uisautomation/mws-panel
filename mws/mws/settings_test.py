@@ -69,6 +69,6 @@ VM_API = "apimws.xen"
 
 EMAIL_TIMEOUT = 60
 
-IP_REG_API_END_POINT = IP_REG_API_END_POINT + ['dev']
+IP_REG_API_END_POINT = IP_REG_API_END_POINT + ['live']
 
 from mws.logging_configuration import *
