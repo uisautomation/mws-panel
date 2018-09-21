@@ -108,8 +108,6 @@ def post_installOS(service):
     except:
         # In case the previous task fail because we didn't leave enough time for the machine to reboot
         launch_ansible_async(service, ignore_host_key=True)
-    if service.type == 'production':
-        ansible_change_mysql_root_pwd(service)
     if service.type == 'test':
         subprocess.check_output(["userv", "mws-admin", "mws_clone",
                                  service.site.production_service.virtual_machines.first().name,
