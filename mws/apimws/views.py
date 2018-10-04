@@ -102,11 +102,11 @@ def confirm_email(request, ec_id, token):
 
 
 @shared_task(base=AnsibleTaskWithFailure, default_retry_delay=120, max_retries=2)
-def post_installOS(service):
+def post_installOS(service, initial=True):
     if service.type == 'test':
         subprocess.check_output(["userv", "mws-admin", "mws_clone",
                                  service.site.production_service.virtual_machines.first().name,
-                                 service.site.test_service.virtual_machines.first().name])
+                                 service.site.test_service.virtual_machines.first().name, initial])
     try:
         launch_ansible_async(service, ignore_host_key=True)
     except:

@@ -409,6 +409,6 @@ def resync(request, site_id):
         return redirect(site)
 
     if request.method == 'POST':
-        post_installOS.delay(site.test_service)
+        post_installOS.delay(site.test_service, initial=False)
     messages.info(request, 'The filesystem started to synchronise')
     return redirect(site)
