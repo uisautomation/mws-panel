@@ -106,7 +106,7 @@ def post_installOS(service, initial=True):
     if service.type == 'test':
         subprocess.check_output(["userv", "mws-admin", "mws_clone",
                                  service.site.production_service.virtual_machines.first().name,
-                                 service.site.test_service.virtual_machines.first().name, initial])
+                                 service.site.test_service.virtual_machines.first().name, str(initial)])
     try:
         launch_ansible_async(service, ignore_host_key=True)
     except:
