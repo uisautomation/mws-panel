@@ -102,16 +102,19 @@ def confirm_email(request, ec_id, token):
 
 
 @shared_task(base=AnsibleTaskWithFailure, default_retry_delay=120, max_retries=2)
-def post_installOS(service):
+def post_installOS(service, initial=True):
+    if service.type == 'test':
+        command = ["userv", "mws-admin", "mws_clone",
+                   service.site.production_service.virtual_machines.first().name,
+                   service.site.test_service.virtual_machines.first().name]
+        if initial:
+            command.append('--initial')
+        subprocess.check_output(command)
     try:
         launch_ansible_async(service, ignore_host_key=True)
     except:
         # In case the previous task fail because we didn't leave enough time for the machine to reboot
         launch_ansible_async(service, ignore_host_key=True)
-    if service.type == 'test':
-        subprocess.check_output(["userv", "mws-admin", "mws_clone",
-                                 service.site.production_service.virtual_machines.first().name,
-                                 service.site.test_service.virtual_machines.first().name])
     if service.site.preallocated:
         service.site.disable()
 
