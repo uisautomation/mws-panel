@@ -9,6 +9,7 @@ from django.core.urlresolvers import reverse
 from apimws.vm import new_site_primary_vm
 from sitesmanagement.models import EmailConfirmation, NetworkConfig, Site, Service, ServerType
 from sitesmanagement.utils import is_camacuk_subdomain
+from apimws.ansible import AnsibleTaskWithFailure
 
 LOGGER = logging.getLogger('mws')
 
@@ -137,3 +138,10 @@ def domain_confirmation_user(domain_name):
         to=[domain_name.vhost.service.site.email],
         headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')}
     ).send()
+
+@shared_task(base=AnsibleTaskWithFailure)
+def configure_domain(domain_name):
+    service = domain_name.vhost.service
+    from apimws.ansible import launch_ansible
+    launch_ansible(service)
+    domain_confirmation_user.apply_async(args=[domain_name, ])

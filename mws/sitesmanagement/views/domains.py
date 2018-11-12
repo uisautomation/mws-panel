@@ -96,7 +96,6 @@ def add_domain(request, vhost_id, socket_error=None):
                                     vhost.main_domain.name == vhost.service.network_configuration.name:
                         vhost.main_domain = new_domain
                         vhost.save()
-                launch_ansible(vhost.service)  # to add the new domain name to the vhost apache configuration
         else:
             breadcrumbs = {
                 0: dict(name='Managed Web Service server: ' + str(site.name), url=site.get_absolute_url()),
