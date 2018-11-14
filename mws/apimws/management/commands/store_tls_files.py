@@ -29,6 +29,6 @@ class Command(BaseCommand):
         csr_file = open("/home/mws-admin/files_repo/vhost_tls/%d/csr" % vhost.id, "r")
         vhost.csr = csr_file.read()
         csr_file.close()
-        if vhost.csr == "Requested via ACME":
+        if vhost.csr.startswith("Requested via ACME"):
             vhost.tls_enable = True
         vhost.save()
