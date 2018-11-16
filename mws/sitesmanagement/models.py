@@ -653,19 +653,8 @@ class DomainName(models.Model):
             set_cname(self.name, self.vhost.service.network_configuration.name)
         except DomainNameDelegatedException:
             return self.reject_it("Domain delegated")
-        now = datetime.now()
-        # Check if the set_cname was executed before the DNS refresh of the current hour.
-        # DNS refreshes happen at 53 minutes of each hour
-        if now.minute > 55:
-            # If it was executed after the DNS refresh of the current hour, send the email to the user when
-            # the next refresh happens
-            eta = now.replace(minute=54) + timedelta(hours=1)
-        else:
-            # If it was executed before the DNS refresh of the current hour, send the email to the user when
-            # the refresh happens
-            eta = now.replace(minute=54)
-        from apimws.utils import configure_domain
-        configure_domain.apply_async(args=[self, ], eta=eta)
+        from apimws.utils import configure_domain, next_update
+        configure_domain.apply_async(args=[self, ], eta=next_update())
 
     def reject_it(self, reason=""):
         self.status = 'denied'

@@ -139,6 +139,18 @@ def domain_confirmation_user(domain_name):
         headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')}
     ).send()
 
+def next_update(time=None):
+    """
+    Return a time by which we can be reasonably sure the DNS update has run.
+    """
+    from datetime import datetime
+    if not time:
+        time = datetime.now()
+    return time.replace(minute=54, second=0, microsecond=0) + timedelta(hours=1) \
+        if time.minute > 55 \
+        else time.replace(minqute=54, second=0, microsecond=0)
+
+
 @shared_task(base=AnsibleTaskWithFailure)
 def configure_domain(domain_name):
     service = domain_name.vhost.service

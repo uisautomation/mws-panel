@@ -96,6 +96,8 @@ def add_domain(request, vhost_id, socket_error=None):
                                     vhost.main_domain.name == vhost.service.network_configuration.name:
                         vhost.main_domain = new_domain
                         vhost.save()
+                from apimws.utils import configure_domain, next_update
+                configure_domain.apply_async(args=[self, ], eta=next_update())
         else:
             breadcrumbs = {
                 0: dict(name='Managed Web Service server: ' + str(site.name), url=site.get_absolute_url()),
