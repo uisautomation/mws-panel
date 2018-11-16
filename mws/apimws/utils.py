@@ -144,7 +144,7 @@ def next_update(time=None):
     Return a time by which we can be reasonably sure the DNS update has run.
     """
     from datetime import datetime
-    if not time:
+    if time is None:
         time = datetime.now()
     return time.replace(minute=54, second=0, microsecond=0) + timedelta(hours=1) \
         if time.minute > 55 \
