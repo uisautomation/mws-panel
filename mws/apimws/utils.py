@@ -143,12 +143,12 @@ def next_update(time=None):
     """
     Return a time by which we can be reasonably sure the DNS update has run.
     """
-    from datetime import datetime
+    from datetime import datetime, timedelta
     if time is None:
         time = datetime.now()
     return time.replace(minute=54, second=0, microsecond=0) + timedelta(hours=1) \
         if time.minute > 55 \
-        else time.replace(minqute=54, second=0, microsecond=0)
+        else time.replace(minute=54, second=0, microsecond=0)
 
 
 @shared_task(base=AnsibleTaskWithFailure)
