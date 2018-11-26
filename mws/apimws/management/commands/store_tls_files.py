@@ -30,5 +30,5 @@ class Command(BaseCommand):
         vhost.csr = csr_file.read()
         csr_file.close()
         if vhost.csr.startswith("Requested via ACME"):
-            vhost.tls_enable = True
+            vhost.tls_enabled = True
         vhost.save()
