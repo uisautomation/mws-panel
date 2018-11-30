@@ -154,9 +154,10 @@ def next_update(time=None):
 @shared_task(base=AnsibleTaskWithFailure)
 def configure_domain(domain_name):
     try:
-        service = domain_name.vhost.service
+        domain = DomainName.objects.get(name=domain_name.name)
+        service = domain.vhost.service
     except Exception as e:
         raise Exception(e, domain_name.__class__)
     from apimws.ansible import launch_ansible
     launch_ansible(service)
-    domain_confirmation_user.apply_async(args=[domain_name, ])
+    domain_confirmation_user.apply_async(args=[domain, ])
