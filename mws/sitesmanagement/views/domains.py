@@ -85,7 +85,7 @@ def add_domain(request, vhost_id, socket_error=None):
                         new_domain = DomainName.objects.create(name=domain_requested.name, status='special',
                                                                vhost=vhost, requested_by=request.user,
                                                                reject_reason="User marked as special")
-                    launch_ansible(service)
+                        launch_ansible(service)
                     else:
                         new_domain = DomainName.objects.create(name=domain_requested.name, status='requested',
                                                                vhost=vhost, requested_by=request.user)
