@@ -85,6 +85,7 @@ def add_domain(request, vhost_id, socket_error=None):
                         new_domain = DomainName.objects.create(name=domain_requested.name, status='special',
                                                                vhost=vhost, requested_by=request.user,
                                                                reject_reason="User marked as special")
+                    launch_ansible(service)
                     else:
                         new_domain = DomainName.objects.create(name=domain_requested.name, status='requested',
                                                                vhost=vhost, requested_by=request.user)
@@ -96,8 +97,7 @@ def add_domain(request, vhost_id, socket_error=None):
                                     vhost.main_domain.name == vhost.service.network_configuration.name:
                         vhost.main_domain = new_domain
                         vhost.save()
-                from apimws.utils import configure_domain, next_update
-                configure_domain.apply_async(args=[domain_requested, ], eta=next_update())
+                    launch_ansible(service)
         else:
             breadcrumbs = {
                 0: dict(name='Managed Web Service server: ' + str(site.name), url=site.get_absolute_url()),
