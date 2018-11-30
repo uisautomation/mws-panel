@@ -7,7 +7,7 @@ from django.core.mail import EmailMessage
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from apimws.vm import new_site_primary_vm
-from sitesmanagement.models import EmailConfirmation, NetworkConfig, Site, Service, ServerType
+from sitesmanagement.models import EmailConfirmation, NetworkConfig, Site, Service, ServerType, DomainName
 from sitesmanagement.utils import is_camacuk_subdomain
 from apimws.ansible import AnsibleTaskWithFailure
 
