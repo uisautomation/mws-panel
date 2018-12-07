@@ -28,6 +28,9 @@ class AnsibleConfiguration(models.Model):
 
 
 class PHPLib(models.Model):
+    """
+    A model to represent a PHP library
+    """
     name = models.CharField(max_length=150, primary_key=True)
     name_next_os = models.CharField(max_length=150, blank=True)
     description = models.CharField(max_length=250)
@@ -42,6 +45,24 @@ class PHPLib(models.Model):
         if service.operating_system == settings.NEXT_OS:
             return self.name_next_os
         return self.name
+
+    def __unicode__(self):
+        return self.name
+
+class PHPPackage(models.Model):
+    """
+    A model representing a PHP library operating system package
+    """
+    OS_CHOICES = (
+        ('jessie', 'Debian 8 (jessie)'),
+        ('stretch', 'Debian 9 (stretch)'),
+    )
+    name = models.CharField(max_length=150, blank=False, null=False)
+    library = models.ForeignKey(PHPLib, related_name='packages')
+    os = models.CharField(max_length=40, choices=OS_CHOICES, blank=False, null=False)
+
+    class Meta:
+        unique_together = ("name", "os")
 
     def __unicode__(self):
         return self.name
