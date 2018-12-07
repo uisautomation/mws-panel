@@ -654,6 +654,9 @@ class DomainName(models.Model):
         except DomainNameDelegatedException:
             return self.reject_it("Domain delegated")
         from apimws.utils import configure_domain, next_update
+        service = self.vhost.service
+        service.status = 'ansible_queued'
+        service.save()
         configure_domain.apply_async(args=[self, ], eta=next_update())
 
     def reject_it(self, reason=""):

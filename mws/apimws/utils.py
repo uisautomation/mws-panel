@@ -155,6 +155,6 @@ def next_update(time=None):
 def configure_domain(domain_name):
     domain = DomainName.objects.get(name=domain_name.name)
     service = domain.vhost.service
-    from apimws.ansible import launch_ansible
-    launch_ansible(service)
+    from apimws.ansible import launch_ansible_async
+    launch_ansible_async(service)
     domain_confirmation_user.apply_async(args=[domain, ])
