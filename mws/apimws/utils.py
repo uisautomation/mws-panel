@@ -158,7 +158,7 @@ def check_cname(hostname):
     import dns.resolver
     try:
         # there should be only one canonical name, we also remove the trailing dot
-        return dns.resolver.query(hostname, 'CNAME')[0].to_text()[-1]
+        return dns.resolver.query(hostname, 'CNAME')[0].to_text()[:-1]
     except NoAnswer, NXDOMAIN:
         return None
 
