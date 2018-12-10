@@ -150,11 +150,25 @@ def next_update(time=None):
         if time.minute > 55 \
         else time.replace(minute=54, second=0, microsecond=0)
 
+def check_cname(hostname):
+    """
+    Check whether a hostname is in DNS (cf. apimws.ipreg.get_cname, which checks Jackdaw)
+    and return its canonical name or None
+    """
+    import dns.resolver
+    try:
+        # there should be only one canonical name, we also remove the trailing dot
+        return dns.resolver.query(hostname, 'CNAME')[0].to_text()[-1]
+    except NoAnswer, NXDOMAIN:
+        return None
 
 @shared_task(base=AnsibleTaskWithFailure)
 def configure_domain(domain_name):
     domain = DomainName.objects.get(name=domain_name.name)
     service = domain.vhost.service
-    from apimws.ansible import launch_ansible_async
-    launch_ansible_async(service)
-    domain_confirmation_user.apply_async(args=[domain, ])
+    if check_cname(domain.name) == service.hostname:
+        from apimws.ansible import launch_ansible_async
+        launch_ansible_async(service)
+        domain_confirmation_user.apply_async(args=[domain, ])
+    else:
+        raise Exception("{cname} does not point to {service}".format(cname=domain.name, service=service.hostname))
