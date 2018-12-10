@@ -159,7 +159,7 @@ def check_cname(hostname):
     try:
         # there should be only one canonical name, we also remove the trailing dot
         return dns.resolver.query(hostname, 'CNAME')[0].to_text()[:-1]
-    except dns.resolver.NoAnswer, dns.resolver.NXDOMAIN:
+    except (dns.resolver.NoAnswer, dns.resolver.NXDOMAIN):
         return None
 
 @shared_task(base=AnsibleTaskWithFailure)
