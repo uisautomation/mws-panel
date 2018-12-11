@@ -166,9 +166,12 @@ def check_cname(hostname):
 def configure_domain(domain_name):
     domain = DomainName.objects.get(name=domain_name.name)
     service = domain.vhost.service
-    if check_cname(domain.name) == service.hostname:
+    realname = check_cname(domain.name)
+    if realname is None:
+        raise Exception("{cname} does not seem to be registered".format(cname=domain.name))
+    elif realname == service.hostname:
         from apimws.ansible import launch_ansible_async
         launch_ansible_async(service)
         domain_confirmation_user.apply_async(args=[domain, ])
     else:
-        raise Exception("{cname} does not point to {service}".format(cname=domain.name, service=service.hostname))
+        raise Exception("{cname} points to {realname}, not {service}".format(cname=domain.name, service=service.hostname, realname=realname))
