@@ -13,8 +13,7 @@ RUN apt-get -y update && apt-get upgrade -y && apt-get install -y \
 # in the sources are reflected within the container.
 COPY mws/requirements.txt ./
 COPY vmmanager /usr/src/vmmanager
-RUN pip install --upgrade pip && pip --version && \
-        pip install /usr/src/vmmanager && \
+RUN pip install /usr/src/vmmanager && \
         pip install --upgrade -r requirements.txt
 
 # Provide wait-for-it within the container
