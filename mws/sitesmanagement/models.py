@@ -627,9 +627,12 @@ class DomainName(models.Model):
     STATUS_CHOICES = (
         ('requested', 'Requested'),
         ('accepted', 'Accepted'),
+        ('private', 'Private'),
+        ('global', 'Global'),
         ('external', 'External'),
         ('special', 'Special'),
         ('denied', 'Denied'),
+        ('deleted', 'Deleted'),
     )
 
     name = models.CharField(max_length=250, unique=True, validators=[full_domain_validator])
