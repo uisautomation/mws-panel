@@ -309,3 +309,25 @@ def reject_or_accepted_old_domain_names_requests():
                                    "%s days.") % (grace_days,))
         else:
             domain_name.accept_it()
+
+
+@shared_task
+def validate_domains():
+    '''
+    Iterate over DomainName objects that we manage and set them to:
+     - private if they are only available to the Cambridge nameservers
+     - global if they are visible to (currently) Google's nameservers
+     - deleted if they are visible to none of the above.
+
+    Names that stay 'deleted' for grace_days are removed from the database.
+    An Ansible run is triggered for services that had DomainName status changes.
+    '''
+    # TODO: make the Ansible run only update Let's Encrypt, so it runs quicker.
+    grace_days = settings.MWS_DOMAIN_NAME_GRACE_DAYS
+    active_states = ['accepted', 'private', 'global']
+
+    for site in Site.objects.filter(deleted=False, preallocated=False, disabled=False):
+        for service in site.services.filter(type='production'):
+            for vhost in service.vhosts.all():
+                for domainname in vhost.domain_names.filter(status__in=active_states):                                                                               
+                    pass
