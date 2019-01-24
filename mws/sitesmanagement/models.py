@@ -686,6 +686,29 @@ class DomainName(models.Model):
         self.save()
         # TODO send email as special
 
+    def validate(self, update=False):
+        import dns.resolver
+        import dns.name
+        resolvers = settings.MWS_RESOLVERS
+        hostname = dns.name.from_text(self.name)
+        netname = dns.name.from_text(self.vhost.service.network_configuration.name)
+        ip4 = self.vhost.service.network_configuration.IPv4
+        ip6 = self.vhost.service.network_configuration.IPv6
+        status = self.status
+
+        for resolver in resolvers:
+            try:
+                answer = resolver['RESOLVER'].query(hostname)
+                if answer.canonical_name == netname or ip4 in answer.rrset.items or ip6 in answer.rrset.items:
+                    if status not in ['external', 'special']:
+                        status = resolver['SCOPE']
+            except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer, dns.resolver.NoNameservers):
+                status = 'deleted'
+        if update and self.status != status:
+            self.status = status
+            self.save()
+        return status
+
     def __unicode__(self):
         return self.name
 

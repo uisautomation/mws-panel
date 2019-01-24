@@ -166,3 +166,28 @@ IP_REG_API_END_POINT = ['userv', 'mws-admin', 'mws_ipreg']
 
 # Maximum length of time which a domain can remain unapproved.
 MWS_DOMAIN_NAME_GRACE_DAYS = 30
+
+# nameservers to validate hostnames against, with tighter scopes first
+# SCOPEs actually correspond to the items in DomainName.STATUS_CHOICES
+MWS_RESOLVERS = [
+    {
+        'SCOPE': 'private',
+        'SERVERS': [
+            '131.111.12.20',
+            '131.111.8.42',
+        ],
+        'RESOLVER': dns.resolver.Resolver()
+    },
+    {
+        'SCOPE': 'global',
+        'SERVERS': [
+            '8.8.8.8',
+            '8.8.4.4',
+        ],
+        'RESOLVER': dns.resolver.Resolver()
+    },
+]
+
+# there is no other way to add nameservers to a Resolver()
+for resolver in MWS_RESOLVERS:
+    resolver['RESOLVER'].nameservers = resolver['SERVERS']
