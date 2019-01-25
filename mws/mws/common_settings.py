@@ -1,5 +1,6 @@
 import os
 from django.conf import global_settings
+import dns.resolver
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
