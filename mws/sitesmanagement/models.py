@@ -689,6 +689,7 @@ class DomainName(models.Model):
     def validate(self, update=False):
         import dns.resolver
         import dns.name
+        import dns.rdatatype
         resolvers = settings.MWS_RESOLVERS
         hostname = dns.name.from_text(self.name)
         netname = dns.name.from_text(self.vhost.service.network_configuration.name)
@@ -699,7 +700,9 @@ class DomainName(models.Model):
         for resolver in resolvers:
             try:
                 answer = resolver['RESOLVER'].query(hostname)
-                if answer.canonical_name == netname or ip4 in answer.rrset.items or ip6 in answer.rrset.items:
+                if any([answer.canonical_name.to_text()[:-1] == netname, # have to strip trailing dot
+                        ip4 in [A.to_text() for A in answer.rrset.items if A.rdtype == dns.rdatatype.A],
+                        ip6 in [AAAA.to_text() for AAAA in answer.rrset.items if AAAA.rdtype == dns.rdatatype.AAAA],]):
                     if status not in ['external', 'special']:
                         status = resolver['SCOPE']
             except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer, dns.resolver.NoNameservers):
