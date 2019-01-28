@@ -699,10 +699,18 @@ class DomainName(models.Model):
 
         for resolver in resolvers:
             try:
-                answer = resolver['RESOLVER'].query(hostname)
-                if any([answer.canonical_name.to_text()[:-1] == netname, # have to strip trailing dot
-                        ip4 in [A.to_text() for A in answer.rrset.items if A.rdtype == dns.rdatatype.A],
-                        ip6 in [AAAA.to_text() for AAAA in answer.rrset.items if AAAA.rdtype == dns.rdatatype.AAAA],]):
+                r = resolver['RESOLVER']
+                if any([
+                    netname in [CNAME.to_text()
+                        for CNAME in r.query(hostname, 'CNAME').rrset.items
+                        if CNAME.rdtype == dns.rdatatype.CNAME],
+                    ip4 in [A.to_text()
+                        for A in r.query(hostname, 'A').rrset.items
+                        if A.rdtype == dns.rdatatype.A],
+                    ip6 in [AAAA.to_text()
+                        for AAAA in r.query(hostname, 'AAAA').rrset.items
+                        if AAAA.rdtype == dns.rdatatype.AAAA],
+                    ]):
                     if status not in ['external', 'special']:
                         status = resolver['SCOPE']
             except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer, dns.resolver.NoNameservers):
