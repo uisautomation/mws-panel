@@ -714,7 +714,7 @@ class DomainName(models.Model):
                     if status not in ['external', 'special']:
                         status = resolver['SCOPE']
             except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer, dns.resolver.NoNameservers):
-                status = 'deleted'
+                status = 'deleted' if status == 'deleted' else status
         if update and self.status != status:
             self.status = status
             self.save()
