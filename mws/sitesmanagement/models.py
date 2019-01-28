@@ -701,7 +701,7 @@ class DomainName(models.Model):
             try:
                 r = resolver['RESOLVER']
                 if any([
-                    netname in [CNAME.to_text()
+                    netname in [CNAME.to_text()[:-1]
                         for CNAME in r.query(hostname, 'CNAME').rrset.items
                         if CNAME.rdtype == dns.rdatatype.CNAME],
                     ip4 in [A.to_text()
