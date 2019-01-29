@@ -720,6 +720,8 @@ class DomainName(models.Model):
         # nameservers to validate hostnames against, with tighter scopes last
         # SCOPEs should be named after the items in DomainName.STATUS_CHOICES
         status = self.status
+        if status in ['requested', 'denied']:
+            return status
         for resolver in settings.MWS_RESOLVERS:
             if self.resolve(resolver=resolver['RESOLVER']):
                 status = resolver['SCOPE'] if status not in ['external', 'special'] else status
