@@ -697,7 +697,7 @@ class DomainName(models.Model):
         import dns.name
         import dns.rdatatype
 
-        if all(resolver, nameservers):
+        if resolver and nameservers:
             raise ValueError('resolver and nameservers are mutually exclusive')
 
         r = resolver if resolver and callable(resolver) else dns.resolver.Resolver()
