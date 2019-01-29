@@ -686,35 +686,45 @@ class DomainName(models.Model):
         self.save()
         # TODO send email as special
 
-    def validate(self, update=False):
+    def resolve(self, resolver=None, nameservers=None):
+        '''
+        Attempt to resolve DomainName, using either specified or default nameservers
+        or a custom resolver callable.
+        Return True if there are any A or AAAA records that match IPv4/6 addresses
+        configured on the DomainName's Vhost's Service.
+        '''
         import dns.resolver
         import dns.name
         import dns.rdatatype
-        resolvers = settings.MWS_RESOLVERS
-        hostname = dns.name.from_text(self.name)
-        netname = dns.name.from_text(self.vhost.service.network_configuration.name)
+
+        if all(resolver, nameservers):
+            raise ValueError('resolver and nameservers are mutually exclusive')
+
+        r = resolver if resolver and callable(resolver) else dns.resolver.Resolver()
+        r.nameservers = nameservers if nameservers
+        dnsname = dns.name.from_text(self.name)
         ip4 = self.vhost.service.network_configuration.IPv4
         ip6 = self.vhost.service.network_configuration.IPv6
-        status = self.status
 
-        for resolver in resolvers:
+        try:
+            answer = r.query(dnsname, 'AAAA')
+            return ip6 in [AAAA.to_text() for AAAA in answer.rrset.items if AAAA.rdtype == dns.rdatatype.AAAA]
+        except:
             try:
-                r = resolver['RESOLVER']
-                if any([
-                    netname in [CNAME.to_text()[:-1]
-                        for CNAME in r.query(hostname, 'CNAME').rrset.items
-                        if CNAME.rdtype == dns.rdatatype.CNAME],
-                    ip4 in [A.to_text()
-                        for A in r.query(hostname, 'A').rrset.items
-                        if A.rdtype == dns.rdatatype.A],
-                    ip6 in [AAAA.to_text()
-                        for AAAA in r.query(hostname, 'AAAA').rrset.items
-                        if AAAA.rdtype == dns.rdatatype.AAAA],
-                    ]):
-                    if status not in ['external', 'special']:
-                        status = resolver['SCOPE']
-            except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer, dns.resolver.NoNameservers):
-                status = 'deleted' if status == 'deleted' else status
+                answer = r.query(dnsname, 'A')
+                return ip4 in [A.to_text() for A in answer.rrset.items if A.rdtype == dns.rdatatype.A]
+            except:
+                return False
+
+    def validate(self, update=False):
+        # nameservers to validate hostnames against, with tighter scopes last
+        # SCOPEs should be named after the items in DomainName.STATUS_CHOICES
+        status = self.status
+        for resolver in MWS_RESOLVERS:
+            if resolve(resolver=resolver['RESOLVER']):
+                status = resolver['SCOPE'] if status not in ['external', 'special'] else status
+            else:
+                status = 'deleted'
         if update and self.status != status:
             self.status = status
             self.save()
