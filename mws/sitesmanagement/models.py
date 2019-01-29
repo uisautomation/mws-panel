@@ -701,7 +701,7 @@ class DomainName(models.Model):
             raise ValueError('resolver and nameservers are mutually exclusive')
 
         r = resolver if resolver and callable(resolver) else dns.resolver.Resolver()
-        r.nameservers = nameservers if nameservers
+        r.nameservers = nameservers if nameservers else r.nameservers
         dnsname = dns.name.from_text(self.name)
         ip4 = self.vhost.service.network_configuration.IPv4
         ip6 = self.vhost.service.network_configuration.IPv6
