@@ -720,7 +720,7 @@ class DomainName(models.Model):
         # nameservers to validate hostnames against, with tighter scopes last
         # SCOPEs should be named after the items in DomainName.STATUS_CHOICES
         status = self.status
-        for resolver in MWS_RESOLVERS:
+        for resolver in settings.MWS_RESOLVERS:
             if resolve(resolver=resolver['RESOLVER']):
                 status = resolver['SCOPE'] if status not in ['external', 'special'] else status
             else:
