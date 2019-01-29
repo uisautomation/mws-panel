@@ -721,7 +721,7 @@ class DomainName(models.Model):
         # SCOPEs should be named after the items in DomainName.STATUS_CHOICES
         status = self.status
         for resolver in settings.MWS_RESOLVERS:
-            if resolve(resolver=resolver['RESOLVER']):
+            if self.resolve(resolver=resolver['RESOLVER']):
                 status = resolver['SCOPE'] if status not in ['external', 'special'] else status
             else:
                 status = 'deleted'
