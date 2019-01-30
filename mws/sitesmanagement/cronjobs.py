@@ -309,3 +309,26 @@ def reject_or_accepted_old_domain_names_requests():
                                    "%s days.") % (grace_days,))
         else:
             domain_name.accept_it()
+
+@shared_task
+def validate_domains():
+    '''
+    Iterate over DomainName objects and delete all that have been in the 'deleted' for over grace_days,
+    then set the remaining to:
+     - global if they are visible to (currently) Google's nameservers
+     - private if they are onl`y available to the Cambridge nameservers
+     - deleted if they are visible to none of the above.
+    '''
+    grace_days = settings.MWS_DOMAIN_NAME_GRACE_DAYS
+    active_states = ['accepted', 'private', 'global', 'deleted']
+
+    for domainname in DomainName.objects.filter(status__in=active_states):
+        if domainname.status == 'deleted':
+            expiry = now - (now()-timedelta(days=grace_days)):
+            if domainname.updated_at <= expiry:
+                domainname.delete()
+        else:
+            status = domainname.validate()
+            if status != domainname.status:
+                domainname.save()
+
