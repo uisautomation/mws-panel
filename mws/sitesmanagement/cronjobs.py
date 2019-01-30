@@ -313,23 +313,17 @@ def reject_or_accepted_old_domain_names_requests():
 @shared_task(base=ScheduledTaskWithFailure)
 def validate_domains():
     '''
-    Iterate over DomainName objects and delete all that have been in the 'deleted' for over grace_days,
-    then set the remaining to:
+    Iterate over DomainName objects and set them to:
      - global if they are visible to (currently) Google's nameservers
      - private if they are onl`y available to the Cambridge nameservers
      - deleted if they are visible to none of the above.
     '''
-    grace_days = settings.MWS_DOMAIN_NAME_GRACE_DAYS
     active_states = ['accepted', 'private', 'global', 'deleted']
 
     for domainname in DomainName.objects.filter(status__in=active_states):
-        if domainname.status == 'deleted':
-            expiry = now - (now()-timedelta(days=grace_days)):
-            if domainname.updated_at <= expiry:
-                domainname.delete()
-        else:
             status = domainname.validate()
             if status != domainname.status:
+                domainname.status = status
                 domainname.save()
 
 @shared_task(base=ScheduledTaskWithFailure)
@@ -342,9 +336,9 @@ def expire_domains():
     notify_days = list(range(1, grace_days, grace_days//3+1))
     support_email = settings.EMAIL_MWS3_SUPPORT
     for domainname in DomainName.objects.filter(status='deleted').annotate(expired=(now() - F('updated_at'))):
+        vhost = domainname.vhost
         service = domainname.vhost.service
-        site_name = domainname.vhost.service.site.name
-        vhost_name = domainname.vhost.name
+        site = domainname.vhost.service.site
         if domainname.expired.days >= grace_days:
             EmailMessage(
                 subject="MWS hostname %s deleted " % (domainname.name),
@@ -354,17 +348,19 @@ def expire_domains():
                       "has failed validation for %d days, therefore it has been removed from the website.\n"
                       "If you did not want this to happen you will need to make sure the hostname exists"
                       "before contacting us at %s" %
-                      (domainname.name, vhost_name, site_name, domainname.expired.days, support_email)
+                      (domainname.name, vhost.name, site.name, domainname.expired.days, support_email)
                      ),
                 from_email="Managed Web Service Support <%s>"
                            % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
                 to=[site.email],
                 headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')}
             ).send()
+            LOGGER.warning('deleting DomainName {}'.format(domainname.name))
             domainname.delete()
             launch_ansible(service)
         elif domainname.expired.days in notify_days:
             on = domainname.updated_at+timedelta(days=grace_days)
+            LOGGER.info('sending warning email for {} to {}'.format(domainname.name, site.email))
             EmailMessage(
                 subject="MWS hostname %s scheduled for deletion " % domainname.name),
                       123456789012345678901234567890123456789012345678901234567890123456789012
@@ -374,7 +370,7 @@ def expire_domains():
                       "If you do not want this to happen you will need to ensure the hostname exists"
                       "and is one of\n - a CNAME pointing to the host {};\n - an A record with address {};\n"
                       " - an AAAA record with address {}" %
-                      (domainname.name, vhost_name, site_name, on.date().isoformat(), service.hostname, service.ipv4, service.ipv6)
+                      (domainname.name, vhost.name, site.name, on.date().isoformat(), service.hostname, service.ipv4, service.ipv6)
                      ),
                 from_email="Managed Web Service Support <%s>"
                            % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
