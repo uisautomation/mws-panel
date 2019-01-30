@@ -17,6 +17,7 @@ from django.db.models import F, Q
 from django.utils.timezone import now
 
 from apimws.utils import preallocate_new_site
+from apimws.ansible import launch_ansible
 from sitesmanagement.models import Billing, Site, VirtualMachine, DomainName, ServerType
 
 
