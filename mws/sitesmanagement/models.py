@@ -700,7 +700,7 @@ class DomainName(models.Model):
         if resolver and nameservers:
             raise ValueError('resolver and nameservers are mutually exclusive')
 
-        r = resolver if resolver and callable(resolver) else dns.resolver.Resolver()
+        r = resolver if resolver else dns.resolver.Resolver()
         r.nameservers = nameservers if nameservers else r.nameservers
         dnsname = dns.name.from_text(self.name)
         ip4 = self.vhost.service.network_configuration.IPv4
@@ -727,7 +727,7 @@ class DomainName(models.Model):
                 if self.resolve(resolver=resolver['RESOLVER']):
                     results.append(resolver['SCOPE'])
             if results:
-                status = results[-1] if status not in ['external', 'special'] else status
+                status = results[0] if status not in ['external', 'special'] else status
             else:
                 status = 'deleted'
             if update and self.status != status:
