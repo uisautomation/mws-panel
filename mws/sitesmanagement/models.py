@@ -725,6 +725,7 @@ class DomainName(models.Model):
         for resolver in settings.MWS_RESOLVERS:
             if self.resolve(resolver=resolver['RESOLVER']):
                 status = resolver['SCOPE'] if status not in ['external', 'special'] else status
+                break
             else:
                 status = 'deleted'
         if update and self.status != status:
