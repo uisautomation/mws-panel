@@ -343,9 +343,9 @@ def expire_domains():
             EmailMessage(
                 subject="MWS hostname %s deleted " % (domainname.name),
                 body="This message is to inform you that the hostname\n%s\n"
-                     "associated with the %s website on the %s MWS server"
+                     "associated with the %s website on the %s MWS server "
                      "has failed validation for %d days, therefore it has been removed from the website.\n"
-                     "If you did not want this to happen you will need to make sure the hostname exists"
+                     "If you did not want this to happen you will need to make sure the hostname exists "
                      "before contacting us at %s" %
                      (domainname.name, vhost.name, site.name, domainname.expired.days, support_email),
                 from_email="Managed Web Service Support <%s>"
@@ -362,11 +362,11 @@ def expire_domains():
             EmailMessage(
                 subject="MWS hostname %s scheduled for deletion " % (domainname.name),
                 body="This message is to inform you that the hostname\n%s\n"
-                     "associated with the %s website on the %s MWS server"
+                     "associated with the %s website on the %s MWS server "
                      "has failed validation and is now scheduled for removal on %s.\n"
-                     "If you do not want this to happen you will need to ensure the hostname exists"
-                     "and is one of\n - a CNAME pointing to the host %s;\n - an A record with address %s;\n"
-                     " - an AAAA record with address %s" %
+                     "If you do not want this to happen you will need to ensure the hostname exists "
+                     "and is any one of\n - a CNAME pointing to the host %s;\n - an A record with address %s;\n"
+                     " - an AAAA record with address %s.\n" %
                      (domainname.name, vhost.name, site.name, on.date().isoformat(), service.hostname, service.ipv4, service.ipv6),
                 from_email="Managed Web Service Support <%s>"
                            % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
