@@ -717,20 +717,22 @@ class DomainName(models.Model):
                 return False
 
     def validate(self, update=False):
-        # nameservers to validate hostnames against, with tighter scopes last
-        # SCOPEs should be named after the items in DomainName.STATUS_CHOICES
+        '''
+        Validate DomainName using a set of resolvers.
+        '''
         status = self.status
-        if status in ['requested', 'denied']:
-            return status
-        for resolver in settings.MWS_RESOLVERS:
-            if self.resolve(resolver=resolver['RESOLVER']):
-                status = resolver['SCOPE'] if status not in ['external', 'special'] else status
-                break
+        results = []
+        if status not in ['requested', 'denied']:
+            for resolver in settings.MWS_RESOLVERS:
+                if self.resolve(resolver=resolver['RESOLVER']):
+                    results.append(resolver['SCOPE'])
+            if results:
+                status = results[-1] if status not in ['external', 'special'] else status
             else:
                 status = 'deleted'
-        if update and self.status != status:
-            self.status = status
-            self.save()
+            if update and self.status != status:
+                self.status = status
+                self.save()
         return status
 
     def __unicode__(self):
