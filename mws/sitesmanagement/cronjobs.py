@@ -342,14 +342,12 @@ def expire_domains():
         if domainname.expired.days >= grace_days:
             EmailMessage(
                 subject="MWS hostname %s deleted " % (domainname.name),
-                      123456789012345678901234567890123456789012345678901234567890123456789012
-                body="This message is to inform you that the hostname\n{}\n"
-                      "associated with the %s website on the %s MWS server"
-                      "has failed validation for %d days, therefore it has been removed from the website.\n"
-                      "If you did not want this to happen you will need to make sure the hostname exists"
-                      "before contacting us at %s" %
-                      (domainname.name, vhost.name, site.name, domainname.expired.days, support_email)
-                     ),
+                body="This message is to inform you that the hostname\n%s\n"
+                     "associated with the %s website on the %s MWS server"
+                     "has failed validation for %d days, therefore it has been removed from the website.\n"
+                     "If you did not want this to happen you will need to make sure the hostname exists"
+                     "before contacting us at %s" %
+                     (domainname.name, vhost.name, site.name, domainname.expired.days, support_email),
                 from_email="Managed Web Service Support <%s>"
                            % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
                 to=[site.email],
@@ -362,16 +360,14 @@ def expire_domains():
             on = domainname.updated_at+timedelta(days=grace_days)
             LOGGER.info('sending warning email for {} to {}'.format(domainname.name, site.email))
             EmailMessage(
-                subject="MWS hostname %s scheduled for deletion " % domainname.name),
-                      123456789012345678901234567890123456789012345678901234567890123456789012
+                subject="MWS hostname %s scheduled for deletion " % (domainname.name),
                 body="This message is to inform you that the hostname\n%s\n"
-                      "associated with the %s website on the %s MWS server"
-                      "has failed validation and is now scheduled for removal on %s.\n"
-                      "If you do not want this to happen you will need to ensure the hostname exists"
-                      "and is one of\n - a CNAME pointing to the host {};\n - an A record with address {};\n"
-                      " - an AAAA record with address {}" %
-                      (domainname.name, vhost.name, site.name, on.date().isoformat(), service.hostname, service.ipv4, service.ipv6)
-                     ),
+                     "associated with the %s website on the %s MWS server"
+                     "has failed validation and is now scheduled for removal on %s.\n"
+                     "If you do not want this to happen you will need to ensure the hostname exists"
+                     "and is one of\n - a CNAME pointing to the host {};\n - an A record with address {};\n"
+                     " - an AAAA record with address {}" %
+                     (domainname.name, vhost.name, site.name, on.date().isoformat(), service.hostname, service.ipv4, service.ipv6),
                 from_email="Managed Web Service Support <%s>"
                            % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
                 to=[site.email],
