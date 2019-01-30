@@ -365,8 +365,8 @@ def expire_domains():
                      "associated with the %s website on the %s MWS server"
                      "has failed validation and is now scheduled for removal on %s.\n"
                      "If you do not want this to happen you will need to ensure the hostname exists"
-                     "and is one of\n - a CNAME pointing to the host {};\n - an A record with address {};\n"
-                     " - an AAAA record with address {}" %
+                     "and is one of\n - a CNAME pointing to the host %s;\n - an A record with address %s;\n"
+                     " - an AAAA record with address %s" %
                      (domainname.name, vhost.name, site.name, on.date().isoformat(), service.hostname, service.ipv4, service.ipv6),
                 from_email="Managed Web Service Support <%s>"
                            % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
