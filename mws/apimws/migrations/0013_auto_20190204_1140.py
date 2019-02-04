@@ -5,22 +5,24 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 import django.db.models.deletion
 
+def add_package(lib, os):
+    pkg = PHPPackage()
+    pkg.name = lib.name_next_os if os == 'stretch' else lib.name
+    pkg.os = os
+    library = lib
+    pkg.save()
+
 def migrate_package_names(apps, schema_editor):
+    packages = []
     PHPLib = apps.get_model('apimws','PHPLib')
     PHPPackage = apps.get_model('apimws','PHPPackage')
     for lib in PHPLib.objects.all():
-        if lib.name_next_os:
-            pkg = PHPPackage()
-            pkg.name = lib.name_next_os
-            pkg.os = 'stretch'
-            library = lib
-            pkg.save()
-        pkg = PHPPackage()
-        pkg.name = lib.name
-        pkg.os = 'jessie'
-        library = lib
-        pkg.save()
-
+        if lib.name_next_os and (lib.name_next_os, 'stretch') not in packages:
+            packages.append((lib.name_next_os, 'stretch'))
+            add_package(lib, 'stretch')
+        if lib.name and (lib.name, 'jessie') not in packages:
+            packages.append((lib.name, 'jessie'))
+            add_package(lib, 'jessie')
 
 class Migration(migrations.Migration):
 
