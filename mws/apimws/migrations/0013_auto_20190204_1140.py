@@ -11,7 +11,7 @@ def migrate_package_names(apps, schema_editor):
         pkg = PHPPackage()
         pkg.name = lib.name_next_os if os == 'stretch' else lib.name
         pkg.os = os
-        library = lib
+        pkg.library = lib
         pkg.save()
     packages = []
     PHPPackage = apps.get_model('apimws','PHPPackage')
