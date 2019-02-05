@@ -316,16 +316,14 @@ def validate_domains():
     '''
     Iterate over DomainName objects and set them to:
      - global if they are visible to (currently) Google's nameservers
-     - private if they are onl`y available to the Cambridge nameservers
+     - private if they are only available to the Cambridge nameservers
      - deleted if they are visible to none of the above.
+    except for external and special domains which are set to deleted if invalid and not changed otherwise.
     '''
-    active_states = ['accepted', 'private', 'global', 'deleted']
+    active_states = ['accepted', 'private', 'global', 'external', 'special', 'deleted']
 
     for domainname in DomainName.objects.filter(status__in=active_states):
-            status = domainname.validate()
-            if status != domainname.status:
-                domainname.status = status
-                domainname.save()
+            domainname.validate(update=True)
 
 @shared_task(base=ScheduledTaskWithFailure)
 def expire_domains():
