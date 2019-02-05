@@ -57,7 +57,17 @@ CELERYBEAT_SCHEDULE = {
         'task': 'sitesmanagement.cronjobs.check_num_preallocated_sites',
         'schedule': timedelta(minutes=15),
         'args': ()
-    }
+    },
+    'validate_domains': {
+        'task': 'sitesmanagement.cronjobs.validate_domains',
+        'schedule': crontab(hour=0, minute=55),
+        'args': ()
+    },
+    'expire_domains': {
+        'task': 'sitesmanagement.cronjobs.expire_domains',
+        'schedule': crontab(hour=1, minute=5),
+        'args': ()
+    },
 }
 
 MIDDLEWARE_CLASSES += (
