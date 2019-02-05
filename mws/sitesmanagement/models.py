@@ -686,7 +686,7 @@ class DomainName(models.Model):
         self.save()
         # TODO send email as special
 
-    def resolve(self, resolver=None, nameservers=None):
+    def _resolve(self, resolver=None, nameservers=None):
         '''
         Attempt to resolve DomainName, using either specified or default nameservers
         or a custom resolver callable.
@@ -724,7 +724,7 @@ class DomainName(models.Model):
         results = []
         if status not in ['requested', 'denied']:
             for resolver in settings.MWS_RESOLVERS:
-                if self.resolve(resolver=resolver['RESOLVER']):
+                if self._resolve(resolver=resolver['RESOLVER']):
                     results.append(resolver['SCOPE'])
             if results:
                 status = results[0] if status not in ['external', 'special'] else status
