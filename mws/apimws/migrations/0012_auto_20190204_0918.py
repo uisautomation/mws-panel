@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='phplib',
             name='name_next_os',
-            field=models.CharField(blank=True, max_length=150),
+            field=models.CharField(blank=True, default='', max_length=150),
         ),
     ]
