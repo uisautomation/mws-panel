@@ -686,6 +686,55 @@ class DomainName(models.Model):
         self.save()
         # TODO send email as special
 
+    def _resolve(self, resolver=None, nameservers=None):
+        '''
+        Attempt to resolve DomainName, using either specified or default nameservers
+        or a custom resolver callable.
+        Return True if there are any A or AAAA records that match IPv4/6 addresses
+        configured on the DomainName's Vhost's Service.
+        '''
+        import dns.resolver
+        import dns.name
+        import dns.rdatatype
+
+        if resolver and nameservers:
+            raise ValueError('resolver and nameservers are mutually exclusive')
+
+        r = resolver if resolver else dns.resolver.Resolver()
+        r.nameservers = nameservers if nameservers else r.nameservers
+        dnsname = dns.name.from_text(self.name)
+        ip4 = self.vhost.service.network_configuration.IPv4
+        ip6 = self.vhost.service.network_configuration.IPv6
+
+        try:
+            answer = r.query(dnsname, 'AAAA')
+            return ip6 in [AAAA.to_text() for AAAA in answer.rrset.items if AAAA.rdtype == dns.rdatatype.AAAA]
+        except:
+            try:
+                answer = r.query(dnsname, 'A')
+                return ip4 in [A.to_text() for A in answer.rrset.items if A.rdtype == dns.rdatatype.A]
+            except:
+                return False
+
+    def validate(self, update=False):
+        '''
+        Validate DomainName using a set of resolvers.
+        '''
+        status = self.status
+        results = []
+        if status not in ['requested', 'denied']:
+            for resolver in settings.MWS_RESOLVERS:
+                if self._resolve(resolver=resolver['RESOLVER']):
+                    results.append(resolver['SCOPE'])
+            if results:
+                status = results[0] if status not in ['external', 'special'] else status
+            else:
+                status = 'deleted'
+            if update and self.status != status:
+                self.status = status
+                self.save()
+        return status
+
     def __unicode__(self):
         return self.name
 
