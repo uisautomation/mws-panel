@@ -88,10 +88,8 @@ PHPLIB_NEW_NAMES = {
 }
 
 def rename_phplibs(apps, schema_editor):
-    PHPPackage = apps.get_model('apimws','PHPPackage')
     PHPLib = apps.get_model('apimws','PHPLib')
-    libs = PHPLib.objects.all():
-    for lib in libs:
+    for lib in PHPLib.objects.all():
         newlib = PHPLib()
         newlib.pk = PHPLIB_NEW_NAMES[lib.pk]
         newlib.description = lib.description
