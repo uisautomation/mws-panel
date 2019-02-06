@@ -16,3 +16,4 @@ pyyaml
 redis~=2.10
 requests
 python-dateutil
+dnspython
