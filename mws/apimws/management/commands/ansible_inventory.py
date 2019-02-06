@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from apimws.lv import update_lv_list
-from apimws.models import PHPLib
+from apimws.models import PHPLib, PHPPackage
 from sitesmanagement.models import VirtualMachine, Site, UnixGroup
 from django.conf import settings
 
