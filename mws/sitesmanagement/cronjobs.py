@@ -13,10 +13,11 @@ from celery import shared_task, Task
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.core.mail import EmailMessage
-from django.db.models import Q
+from django.db.models import F, Q
 from django.utils.timezone import now
 
 from apimws.utils import preallocate_new_site
+from apimws.ansible import launch_ansible
 from sitesmanagement.models import Billing, Site, VirtualMachine, DomainName, ServerType
 
 
@@ -309,3 +310,65 @@ def reject_or_accepted_old_domain_names_requests():
                                    "%s days.") % (grace_days,))
         else:
             domain_name.accept_it()
+
+@shared_task(base=ScheduledTaskWithFailure)
+def validate_domains():
+    '''
+    Iterate over DomainName objects and set them to:
+     - global if they are visible to (currently) Google's nameservers
+     - private if they are only available to the Cambridge nameservers
+     - deleted if they are visible to none of the above.
+    except for external and special domains which are set to deleted if invalid and not changed otherwise.
+    '''
+    active_states = ['accepted', 'private', 'global', 'external', 'special', 'deleted']
+
+    for domainname in DomainName.objects.filter(status__in=active_states):
+            domainname.validate(update=True)
+
+@shared_task(base=ScheduledTaskWithFailure)
+def expire_domains():
+    '''
+    Periodically send messages to domain administrators about deleted domains and
+    delete them after grace_days
+    '''
+    grace_days = settings.MWS_DOMAIN_NAME_GRACE_DAYS
+    notify_days = list(range(1, grace_days, grace_days//3+1))
+    support_email = settings.EMAIL_MWS3_SUPPORT
+    for domainname in DomainName.objects.filter(status='deleted').annotate(expired=(now() - F('updated_at'))):
+        vhost = domainname.vhost
+        service = domainname.vhost.service
+        site = domainname.vhost.service.site
+        if domainname.expired.days >= grace_days:
+            EmailMessage(
+                subject="MWS hostname %s deleted " % (domainname.name),
+                body="This message is to inform you that the hostname\n%s\n"
+                     "associated with the %s website on the %s MWS server "
+                     "has failed validation for %d days, therefore it has been removed from the website.\n"
+                     "If you did not want this to happen you will need to make sure the hostname exists "
+                     "before contacting us at %s" %
+                     (domainname.name, vhost.name, site.name, domainname.expired.days, support_email),
+                from_email="Managed Web Service Support <%s>"
+                           % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
+                to=[site.email],
+                headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')}
+            ).send()
+            LOGGER.warning('deleting DomainName {}'.format(domainname.name))
+            domainname.delete()
+            launch_ansible(service)
+        elif domainname.expired.days in notify_days:
+            on = domainname.updated_at+timedelta(days=grace_days)
+            LOGGER.info('sending warning email for {} to {}'.format(domainname.name, site.email))
+            EmailMessage(
+                subject="MWS hostname %s scheduled for deletion " % (domainname.name),
+                body="This message is to inform you that the hostname\n%s\n"
+                     "associated with the %s website on the %s MWS server "
+                     "has failed validation and is now scheduled for removal on %s.\n"
+                     "If you do not want this to happen you will need to ensure the hostname exists "
+                     "and is any one of\n - a CNAME pointing to the host %s;\n - an A record with address %s;\n"
+                     " - an AAAA record with address %s.\n" %
+                     (domainname.name, vhost.name, site.name, on.date().isoformat(), service.hostname, service.ipv4, service.ipv6),
+                from_email="Managed Web Service Support <%s>"
+                           % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
+                to=[site.email],
+                headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')}
+            ).send()
