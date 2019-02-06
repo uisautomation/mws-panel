@@ -187,19 +187,14 @@ class Command(BaseCommand):
         v['mws_service_ipv4_gateway'] = vm.service.network_configuration.IPv4_gateway
         v['mws_service_ipv6'] = vm.service.network_configuration.IPv6
 
+        pkgs = PHPPackage.objects.filter(os=v['mws_os'])
+        libs = PHPLib.objects.filter(services=vm.service)
+
         # List of PHP libraries to be installed
-        v['mws_php_libs_enabled'] = [
-            phplib.os_dep_name(vm.service)
-            for phplib in PHPLib.objects.filter(services__id=vm.service.id, available=True)
-            if phplib.os_dep_name(vm.service)
-        ]
+        v['mws_php_libs_enabled'] = [pkg.name for pkg in pkgs.filter(library__in=libs)]
 
         # List of PHP libraries to be deleted
-        v['mws_php_libs_disabled'] = [
-            phplib.os_dep_name(vm.service)
-            for phplib in PHPLib.objects.exclude(services__id=vm.service.id)
-            if phplib.os_dep_name(vm.service)
-        ]
+        v['mws_php_libs_disabled'] = [pkg.name for pkg in pkgs.exclude(library__in=libs)]
 
         # List of Unix groups and their associated gids
         v['mws_unix_groups'] = []
