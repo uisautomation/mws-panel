@@ -32,19 +32,9 @@ class PHPLib(models.Model):
     A model to represent a PHP library
     """
     name = models.CharField(max_length=150, primary_key=True)
-    name_next_os = models.CharField(max_length=150, blank=True)
     description = models.CharField(max_length=250)
     available = models.BooleanField(default=True)
     services = models.ManyToManyField(Service, related_name='php_libs', blank=True)
-
-    def os_dep_name(self, service):
-        """
-        :param service: the target Service
-        :return: the correct name of the php lib for the OS version of a service
-        """
-        if service.operating_system == settings.NEXT_OS:
-            return self.name_next_os
-        return self.name
 
     def __unicode__(self):
         return self.name
