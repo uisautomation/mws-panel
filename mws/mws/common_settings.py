@@ -195,8 +195,6 @@ for resolver in MWS_RESOLVERS:
 
 # IP addresses of hosts we want to allow to proxy for the MWS
 MWS_ALLOWED_PROXIES = [
-    # primary.admin.cam.ac.uk
-    131.111.150.25,
     # doitpoms.admin.cam.ac.uk
     131.111.150.168,
 ]
