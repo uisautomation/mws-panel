@@ -192,3 +192,11 @@ MWS_RESOLVERS = [
 # there is no other way to add nameservers to a Resolver()
 for resolver in MWS_RESOLVERS:
     resolver['RESOLVER'].nameservers = resolver['SERVERS']
+
+# IP addresses of hosts we want to allow to proxy for the MWS
+MWS_ALLOWED_PROXIES = [
+    # primary.admin.cam.ac.uk
+    131.111.150.25,
+    # doitpoms.admin.cam.ac.uk
+    131.111.150.168,
+]
