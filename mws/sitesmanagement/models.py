@@ -709,13 +709,13 @@ class DomainName(models.Model):
 
         try:
             answer = r.query(dnsname, 'AAAA')
-            return ip6 in [AAAA.to_text() for AAAA in answer.rrset.items if AAAA.rdtype == dns.rdatatype.AAAA] or
-                   ip6 in proxies
+            return ip6 in [AAAA.to_text() for AAAA in answer.rrset.items if AAAA.rdtype == dns.rdatatype.AAAA] or \
+                   any([AAAA.to_text() in proxies for AAAA in answer.rrset.items if AAAA.rdtype == dns.rdatatype.AAAA])
         except:
             try:
                 answer = r.query(dnsname, 'A')
-                return ip4 in [A.to_text() for A in answer.rrset.items if A.rdtype == dns.rdatatype.A] or
-                       ip4 in proxies
+                return ip4 in [A.to_text() for A in answer.rrset.items if A.rdtype == dns.rdatatype.A] or \
+                       any([A.to_text() in proxies for A in answer.rrset.items if A.rdtype == dns.rdatatype.A])
             except:
                 return False
 
