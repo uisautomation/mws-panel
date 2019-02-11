@@ -702,17 +702,20 @@ class DomainName(models.Model):
 
         r = resolver if resolver else dns.resolver.Resolver()
         r.nameservers = nameservers if nameservers else r.nameservers
+        proxies = getattr(settings, 'MWS_ALLOWED_PROXIES', [])
         dnsname = dns.name.from_text(self.name)
         ip4 = self.vhost.service.network_configuration.IPv4
         ip6 = self.vhost.service.network_configuration.IPv6
 
         try:
             answer = r.query(dnsname, 'AAAA')
-            return ip6 in [AAAA.to_text() for AAAA in answer.rrset.items if AAAA.rdtype == dns.rdatatype.AAAA]
+            return ip6 in [AAAA.to_text() for AAAA in answer.rrset.items if AAAA.rdtype == dns.rdatatype.AAAA] or
+                   ip6 in proxies
         except:
             try:
                 answer = r.query(dnsname, 'A')
-                return ip4 in [A.to_text() for A in answer.rrset.items if A.rdtype == dns.rdatatype.A]
+                return ip4 in [A.to_text() for A in answer.rrset.items if A.rdtype == dns.rdatatype.A] or
+                       ip4 in proxies
             except:
                 return False
 
