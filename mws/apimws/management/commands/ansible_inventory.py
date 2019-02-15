@@ -121,9 +121,17 @@ class Command(BaseCommand):
             vhv = {}
             vhv['id'] = vh.id
             vhv['name'] = vh.name
-            # List of domain names associated to the vhost (only those already accepted or external [non cam.ac.uk])
+            # List of all hostnames accepted at least once.
             vhv['domains'] = {dom.name: dom.status for dom in
-                              vh.domain_names.filter(status__in=['accepted', 'private', 'global', 'external', 'special'])}
+                              vh.domain_names.exclude(status__in=['denied', 'requested'])}
+            # Dict of lists of hostnames that certain providers can support, keyed by provider
+            vhv['cert_domains'] = {
+                'acme': [dom.name for dom in
+                         vh.domain_names.filter(status__in=['global', 'external', 'special']).exclude(
+                         name=vh.service.network_configuration.name)],
+                'qv': [dom.name for dom in
+                       vh.domain_names.filter(status__in=['accepted', 'private', 'global', 'external', 'special'])],
+            }
             # The main domain where all the domain names associated will redirect to
             if vh.main_domain:
                 vhv['main_domain'] = vh.main_domain.name
