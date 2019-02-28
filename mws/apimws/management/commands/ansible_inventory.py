@@ -124,11 +124,13 @@ class Command(BaseCommand):
             # List of all hostnames accepted at least once.
             vhv['domains'] = {dom.name: dom.status for dom in
                               vh.domain_names.exclude(status__in=['denied', 'requested'])}
-            # Dict of lists of hostnames that certain providers can support, keyed by provider
+            # Dict of lists of hostnames that certain certificate providers can support, keyed by provider
             vhv['cert_domains'] = {
+                # ACME (Let's Encrypt) can only certify hostnames it can resolve
                 'acme': [dom.name for dom in
                          vh.domain_names.filter(status__in=['global', 'external', 'special']).exclude(
                          name=vh.service.network_configuration.name)],
+                # QuoVadis will certify tentative and private hostnames as well
                 'qv': [dom.name for dom in
                        vh.domain_names.filter(status__in=['accepted', 'private', 'global', 'external', 'special'])],
             }
