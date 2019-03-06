@@ -624,15 +624,15 @@ class Vhost(models.Model):
 
 
 class DomainName(models.Model):
-    STATUS_CHOICES = (
-        ('requested', 'Requested'),
-        ('accepted', 'Accepted'),
-        ('private', 'Private'),
-        ('global', 'Global'),
-        ('external', 'External'),
-        ('special', 'Special'),
-        ('denied', 'Denied'),
-        ('deleted', 'Deleted'),
+    STATUS_CHOICES = (              # The hostname:
+        ('requested', 'Requested'), #   has been requested through the panel
+        ('accepted', 'Accepted'),   #   has been accepted by the domain owner
+        ('private', 'Private'),     #   has validated as visible within the CUDN
+        ('global', 'Global'),       #   has validated as world-visible
+        ('external', 'External'),   #   is in a zone we don't control
+        ('special', 'Special'),     #   is under cam.ac.uk, but the MWS can't add/rescind it
+        ('denied', 'Denied'),       #   has not been accepted by the domain owner
+        ('deleted', 'Deleted'),     #   has failed validation and is scheduled to be deleted
     )
 
     name = models.CharField(max_length=250, unique=True, validators=[full_domain_validator])
