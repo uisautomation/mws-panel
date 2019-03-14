@@ -2,7 +2,7 @@ import logging
 from celery import shared_task, Task
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
-from ucamlookup import user_in_groups, get_or_create_user_by_crsid, GroupMethods, conn
+from ucamlookup import user_in_groups, get_or_create_user_by_crsid, GroupMethods, get_connection
 from ucamlookup.models import LookupGroup
 
 
@@ -46,7 +46,7 @@ def get_users_of_a_group(group):
     """
 
     return map(lambda user: get_or_create_user_by_crsid(user.identifier.value),
-               GroupMethods(conn).getMembers(groupid=group.lookup_id))
+               GroupMethods(get_connection()).getMembers(groupid=group.lookup_id))
 
 
 class ScheduledTaskWithFailure(Task):
