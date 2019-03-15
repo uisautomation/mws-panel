@@ -106,4 +106,6 @@ EMAIL_TIMEOUT = 60
 
 IP_REG_API_END_POINT = IP_REG_API_END_POINT + ['live']
 
+METRICS_URL = 'https://sliderule.mws3.csx.cam.ac.uk/dashboard/script/mws3.js'
+
 from mws.logging_configuration import *

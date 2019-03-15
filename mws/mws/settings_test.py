@@ -81,4 +81,6 @@ EMAIL_TIMEOUT = 60
 
 IP_REG_API_END_POINT = IP_REG_API_END_POINT + ['live']
 
+METRICS_URL = 'https://test.dev.mws3.csx.cam.ac.uk:3000/dashboard/script/mws3.js'
+
 from mws.logging_configuration import *
