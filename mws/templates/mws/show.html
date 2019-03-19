@@ -203,7 +203,7 @@
                 </div>
             </div>
         {% endif %}
-
+        {% if metrics_url %}
             <div class="campl-column4">
                 <div class="campl-content-container campl-side-padding">
                     <a href="{{ metrics_url }}?name={{ stats_name }}">
@@ -229,7 +229,7 @@
                     </a>
                 </div>
             </div>
-
+        {% endif %}
             <div class="campl-column4">
                 <div class="campl-content-container campl-side-padding">
                     <a href="{% url 'billing_management' site_id=site.id %}">
