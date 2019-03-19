@@ -203,10 +203,10 @@
                 </div>
             </div>
         {% endif %}
-
+        {% if metrics_url %}
             <div class="campl-column4">
                 <div class="campl-content-container campl-side-padding">
-                    <a href="https://sliderule.mws3.csx.cam.ac.uk/dashboard/script/mws3.js?name={{ stats_name }}">
+                    <a href="{{ metrics_url }}?name={{ stats_name }}">
                         <article class="node node-external-link view-mode-focus_on clearfix campl-horizontal-teaser campl-teaser campl-focus-teaser">
                             <div class="campl-focus-teaser-img">
                                 <div class="campl-content-container campl-horizontal-teaser-img">
@@ -229,7 +229,7 @@
                     </a>
                 </div>
             </div>
-
+        {% endif %}
             <div class="campl-column4">
                 <div class="campl-content-container campl-side-padding">
                     <a href="{% url 'billing_management' site_id=site.id %}">

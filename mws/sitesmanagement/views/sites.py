@@ -184,6 +184,7 @@ class SiteShow(SitePriviledgeCheck, DetailView):
             0: dict(name='Managed Web Service server: ' + str(self.object.name), url=self.object.get_absolute_url())
         }
         context['MAIN_DOMAIN'] = getattr(django_settings, 'MAIN_DOMAIN', False)
+        context['metrics_url'] = getattr(django_settings, 'METRICS_URL', False)
         context['stats_name'] = self.object.production_service.network_configuration.name.replace(".","_")
         try:
             context['main_website'] = Vhost.objects.get(name="default", service=self.object.production_service)

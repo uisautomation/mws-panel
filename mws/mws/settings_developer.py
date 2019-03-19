@@ -55,3 +55,5 @@ VM_END_POINT_COMMAND = ["vmmanager"]
 CELERY_EAGER_PROPAGATES_EXCEPTIONS=True
 CELERY_ALWAYS_EAGER=True
 BROKER_BACKEND='memory'
+
+METRICS_URL = 'http://localhost:3000/dashboard/script/mws3.js'
