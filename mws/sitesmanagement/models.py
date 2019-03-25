@@ -623,6 +623,23 @@ class Vhost(models.Model):
         return self.name
 
 
+    def domains(self, global_only=None):
+        '''
+        Return the list of hostnames for the vhost, optionally filtering it.
+        '''
+        if global_only is None:
+            # all eligible names
+            names = [dom.name for dom in vh.domain_names.exclude(status__in=['denied', 'requested'])]
+        elif global_only:
+            # only names that are globally available
+            names = [dom.name for dom in vh.domain_names.filter(status__in=['global', 'external', 'special']).exclude(
+                     name=vh.service.network_configuration.name)]
+        else:
+            # both private and global names
+            names = [dom.name for dom in vh.domain_names.filter(status__in=['accepted', 'private', 'global', 'external', 'special'])]
+        return names
+
+
 class DomainName(models.Model):
     STATUS_CHOICES = (              # The hostname:
         ('requested', 'Requested'), #   has been requested through the panel
