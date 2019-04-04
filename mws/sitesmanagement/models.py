@@ -590,6 +590,11 @@ class Vhost(models.Model):
     WEBAPP_CHOICES = (
         ('wordpress', 'Wordpress'),
     )
+
+    ALL_NAMES = ['denied', 'requested']
+    GLOBAL_NAMES = ['global', 'external', 'special']
+    PRIVATE_AND_GLOBAL_NAMES = GLOBAL_NAMES.extend(['accepted', 'private'])
+
     name = models.CharField(max_length=60, validators=[validate_slug])
     # main domain name for this vhost
     main_domain = models.ForeignKey('DomainName', related_name='+', null=True, blank=True, on_delete=models.SET_NULL)
@@ -623,20 +628,22 @@ class Vhost(models.Model):
         return self.name
 
 
-    def domains(self, global_only=None):
+    def domains(self, subset=ALL_NAMES):
         '''
         Return the list of hostnames for the vhost, optionally filtering it.
         '''
-        if global_only is None:
+        if subset is ALL_NAMES:
             # all eligible names
-            names = [dom.name for dom in vh.domain_names.exclude(status__in=['denied', 'requested'])]
-        elif global_only:
+            names = [dom.name for dom in vh.domain_names.exclude(status__in=ALL_NAMES)]
+        elif subset is GLOBAL_NAMES:
             # only names that are globally available
-            names = [dom.name for dom in vh.domain_names.filter(status__in=['global', 'external', 'special']).exclude(
+            names = [dom.name for dom in vh.domain_names.filter(status__in=GLOBAL_NAMES).exclude(
                      name=vh.service.network_configuration.name)]
-        else:
+        elif subset is PRIVATE_AND_GLOBAL_NAMES:
             # both private and global names
-            names = [dom.name for dom in vh.domain_names.filter(status__in=['accepted', 'private', 'global', 'external', 'special'])]
+            names = [dom.name for dom in vh.domain_names.filter(status__in=PRIVATE_AND_GLOBAL_NAMES)]
+        else:
+            raise ValueError('Unknown subset type: %r' % (subset,))
         return names
 
 

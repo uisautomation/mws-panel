@@ -126,9 +126,9 @@ class Command(BaseCommand):
             # Dict of lists of hostnames that certain certificate providers can support, keyed by provider
             vhv['cert_domains'] = {
                 # ACME (Let's Encrypt) can only certify hostnames it can resolve
-                'acme': vh.domains(global_only=True)
+                'acme': vh.domains(subset=vh.GLOBAL_NAMES)
                 # QuoVadis will certify tentative and private hostnames as well
-                'qv': vh.domains(global_only=False)
+                'qv': vh.domains(subset=vh.PRIVATE_AND_GLOBAL_NAMES)
             }
             # The main domain where all the domain names associated will redirect to
             if vh.main_domain:
