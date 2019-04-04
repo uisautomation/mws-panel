@@ -593,7 +593,7 @@ class Vhost(models.Model):
 
     ALL_NAMES = ['denied', 'requested']
     GLOBAL_NAMES = ['global', 'external', 'special']
-    PRIVATE_AND_GLOBAL_NAMES = GLOBAL_NAMES.extend(['accepted', 'private'])
+    PRIVATE_AND_GLOBAL_NAMES = GLOBAL_NAMES + ['accepted', 'private']
 
     name = models.CharField(max_length=60, validators=[validate_slug])
     # main domain name for this vhost
