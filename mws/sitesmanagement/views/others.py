@@ -9,7 +9,7 @@ from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpRespons
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.encoding import smart_str
 from apimws.ansible import launch_ansible, ansible_change_mysql_root_pwd
-from apimws.models import AnsibleConfiguration, PHPLib
+from apimws.models import AnsibleConfiguration, PHPLib, QueueEntry
 from apimws.vm import clone_vm_api_call
 from apimws.views import post_installOS
 from mwsauth.utils import privileges_check
@@ -65,10 +65,18 @@ def clone_vm_view(request, site_id):
         return HttpResponseForbidden()
 
     can_upgrade = False
+    is_queued = False
     if settings.MAX_PENDING_UPGRADES:
         pending_upgrades = len([x for x in Service.objects.filter(type='test').prefetch_related('virtual_machines') if x.active])
         if pending_upgrades < settings.MAX_PENDING_UPGRADES:
             can_upgrade = True
+        else:
+            if not site.in_queue:
+                queue_entry = QueueEntry(site=site)
+                queue_entry.save()
+            else:
+                is_queued = True
+                
 
     breadcrumbs = {
         0: dict(name='Managed Web Service server: ' + str(site.name), url=site.get_absolute_url()),
@@ -89,6 +97,7 @@ def clone_vm_view(request, site_id):
         'breadcrumbs': breadcrumbs,
         'site': site,
         'can_upgrade': can_upgrade,
+        'is_queued': is_queued,
     })
 
 
@@ -153,6 +162,11 @@ def delete_vm(request, service_id):
     if request.method == 'POST':
         for vm in service.virtual_machines.all():
             vm.delete()
+        if not service.primary:
+            queued_site = QueueEntry.objects.first()
+            if queued_site is not None:
+                clone_vm_api_call(queued_site)
+                queued_site.delete()
         return redirect(site)
 
     return HttpResponseForbidden()
