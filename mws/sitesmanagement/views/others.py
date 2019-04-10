@@ -71,7 +71,7 @@ def clone_vm_view(request, site_id):
         if pending_upgrades < settings.MAX_PENDING_UPGRADES:
             can_upgrade = True
         else:
-            if not site.in_queue:
+            if not hasattr(site,'queueentry'):
                 queue_entry = QueueEntry(site=site)
                 queue_entry.save()
             else:
@@ -163,10 +163,10 @@ def delete_vm(request, service_id):
         for vm in service.virtual_machines.all():
             vm.delete()
         if not service.primary:
-            queued_site = QueueEntry.objects.first()
-            if queued_site is not None:
-                clone_vm_api_call(queued_site)
-                queued_site.delete()
+            queue_entry = QueueEntry.objects.first()
+            if queue_entry is not None:
+                clone_vm_api_call(queue_entry.site)
+                queue_entry.delete()
         return redirect(site)
 
     return HttpResponseForbidden()
