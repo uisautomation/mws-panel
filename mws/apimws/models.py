@@ -58,7 +58,7 @@ class PHPPackage(models.Model):
         return self.name
 
 class QueueEntry(models.Model):
-    site = models.OneToOneField(Site, on_delete=models.CASCARE, primary_key=True)
+    site = models.OneToOneField(Site, on_delete=models.CASCADE, primary_key=True)
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
