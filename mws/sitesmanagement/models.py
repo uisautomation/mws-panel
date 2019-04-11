@@ -632,17 +632,17 @@ class Vhost(models.Model):
         '''
         Return the list of hostnames for the vhost, optionally filtering it.
         '''
-        if subset is ALL_NAMES:
+        if subset is self.ALL_NAMES:
             # all eligible names
-            names = [dom.name for dom in vh.domain_names.exclude(status__in=ALL_NAMES)]
-        elif subset is GLOBAL_NAMES:
+            names = [dom.name for dom in self.domain_names.exclude(status__in=self.ALL_NAMES)]
+        elif subset is self.GLOBAL_NAMES:
             # only names that are globally available, except the service hostname
-            names = [dom.name for dom in vh.domain_names.filter(status__in=GLOBAL_NAMES).exclude(
-                     name=vh.service.network_configuration.name)]
-        elif subset is PRIVATE_AND_GLOBAL_NAMES:
+            names = [dom.name for dom in self.domain_names.filter(status__in=self.GLOBAL_NAMES).exclude(
+                     name=self.service.network_configuration.name)]
+        elif subset is self.PRIVATE_AND_GLOBAL_NAMES:
             # both private and global names
             # TODO: remove service hostname from here as well
-            names = [dom.name for dom in vh.domain_names.filter(status__in=PRIVATE_AND_GLOBAL_NAMES)]
+            names = [dom.name for dom in self.domain_names.filter(status__in=self.PRIVATE_AND_GLOBAL_NAMES)]
         else:
             raise ValueError('Unknown subset type: %r' % (subset,))
         return names
