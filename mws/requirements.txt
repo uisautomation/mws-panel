@@ -4,7 +4,7 @@ django-celery
 django-debug-toolbar
 django-reversion
 django-stronghold>=0.2.6
-django-ucamlookup==1.9.*
+django-ucamlookup~=1.9.5
 django-ucamprojectlight>=1.1
 django-ucamwebauth>=1.2
 django>=1.11,<1.12
