@@ -8,6 +8,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponse, HttpResponseNotFound
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.encoding import smart_str
+from django.core.mail import EmailMessage
 from apimws.ansible import launch_ansible, ansible_change_mysql_root_pwd
 from apimws.models import AnsibleConfiguration, PHPLib, QueueEntry
 from apimws.vm import clone_vm_api_call
