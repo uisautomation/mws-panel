@@ -76,7 +76,6 @@ def clone_vm_view(request, site_id):
                 queue_entry.save()
             else:
                 is_queued = True
-                
 
     breadcrumbs = {
         0: dict(name='Managed Web Service server: ' + str(site.name), url=site.get_absolute_url()),

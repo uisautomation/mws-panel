@@ -21,9 +21,9 @@
                 {% if is_queued %}
                     <h3>We are still waiting to create your server.</h3>
                 {% else %}
-                    <h3>We cannot create the test server right now. Your request has been placed in a queue. </h3>
+                    <h3>We cannot create the test server right now. Your request has been placed in a queue.</h3>
                 {% endif %}
-                <p>We'll send an email to the site administrators at {{ site.admin_email }} when the test server is ready.</p>
+                <p>We'll send an email to the site administrators at <b>{{ site.email }}</b> when the test server is ready.</p>
             {% endif %}
             {% endif %}
             {% if site.test_service and site.test_service.virtual_machines.count != 0 %}

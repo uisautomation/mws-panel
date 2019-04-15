@@ -58,6 +58,10 @@ class PHPPackage(models.Model):
         return self.name
 
 class QueueEntry(models.Model):
+    """
+    Instances of this model form a simple FIFO queue of sites ordered by instance
+    creation date, currently used to queue operating system upgrades.
+    """
     site = models.OneToOneField(Site, on_delete=models.CASCADE, primary_key=True)
     created = models.DateTimeField(auto_now_add=True)
 
