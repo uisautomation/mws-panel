@@ -4,13 +4,13 @@ django-celery
 django-debug-toolbar
 django-reversion
 django-stronghold>=0.2.6
-django-ucamlookup>=1.9.5
+django-ucamlookup~=2.0.0
 django-ucamprojectlight>=1.1
 django-ucamwebauth>=1.2
 django>=1.11,<1.12
 ecdsa
 mock>=1.0.1
-psycopg2-binary
+psycopg2
 pycrypto>=2.6.1
 pyyaml
 redis~=2.10
