@@ -2,10 +2,11 @@ FROM debian:stretch
 
 # Install additional Debian packages
 RUN apt-get -y update && apt-get upgrade -y && apt-get install -y \
-        vim python python-pip \
+        vim python python-pip python-dev\
         openssl userv openssh-client \
         apache2 apache2-utils libapache2-mod-wsgi \
-        libssl-dev libjpeg-dev netcat zlib1g-dev
+        libssl-dev libjpeg-dev netcat zlib1g-dev \
+        libpq-dev build-essential
 
 # Update pip and install Python dependencies. Note that vmmanager is installed
 # from a local copy of the source. We use pip install -e to install vmmanager so
