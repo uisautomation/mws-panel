@@ -179,7 +179,7 @@ def delete_vm(request, service_id):
                             MWS Support""" % (queue_entry.site.name, ),
                     from_email="Managed Web Service Support <%s>"
                                % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
-                    to=queue_entry.site.email,
+                    to=[queue_entry.site.email],
                     headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')}
                 ).send()
                 queue_entry.delete()
