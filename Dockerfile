@@ -11,11 +11,15 @@ RUN apt-get -y update && apt-get upgrade -y && apt-get install -y \
 # Update pip and install Python dependencies. Note that vmmanager is installed
 # from a local copy of the source. We use pip install -e to install vmmanager so
 # that, if a local developer mounts the vmmanager sources as a volume, changes
-# in the sources are reflected within the container.
+# in the sources are reflected within the container. We clean up the apt cache
+# and build dependencies afterwards
 COPY mws/requirements.txt ./
 COPY vmmanager /usr/src/vmmanager
 RUN pip install /usr/src/vmmanager && \
-        pip install --upgrade -r requirements.txt
+        pip install --upgrade -r requirements.txt && \
+        apt-get -y purge python-dev libssl-dev libjpeg-dev \
+            zlib1g-dev libpq-dev build-essential  && \
+        apt-get -y autoremove && apt-get -y clean
 
 # Provide wait-for-it within the container
 COPY docker/wait-for-it.sh ./
