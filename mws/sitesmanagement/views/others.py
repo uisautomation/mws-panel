@@ -167,16 +167,13 @@ def delete_vm(request, service_id):
             if queue_entry is not None:
                 clone_vm_api_call(queue_entry.site)
                 EmailMessage(
-                    subject="Test service for %s" % (queue_entry.site.name, ),
-                    body="""Dear MWS Administrator,
-
-                            This is to let you know that the test service you requested for your site
-                            %s
-                            is currently being created and should soon be available.
-                            Please allow a few minutes for this to complete.
-
-                            Kind regards,
-                            MWS Support""" % (queue_entry.site.name, ),
+                    subject="Test server for %s creating" % (queue_entry.site.name, ),
+                    body="Dear MWS Administrator,\n\n"
+                         "This is to let you know that the test server requested for your site\n\n"
+                         "'%s'\n\nis currently being created. Please allow a few minutes for this to complete. "
+                         "You will be able to access and verify your websites on the test server by visiting\n\n"
+                         "%s/settings/%d\n\n"
+                         "Kind regards,\nMWS Support" % (queue_entry.site.name, settings.MAIN_DOMAIN, service.pk ),
                     from_email="Managed Web Service Support <%s>"
                                % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
                     to=[queue_entry.site.email],
