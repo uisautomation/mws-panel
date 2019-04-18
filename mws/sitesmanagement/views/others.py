@@ -163,6 +163,10 @@ def delete_vm(request, service_id):
         for vm in service.virtual_machines.all():
             vm.delete()
         if not service.primary:
+            # delete this site's queue entry if exists to avoid stale entries
+            if hasattr(site, 'queueentry'):
+                site.queueentry.delete()
+            # get, process and delete next queue entry
             queue_entry = QueueEntry.objects.first()
             if queue_entry is not None:
                 clone_vm_api_call(queue_entry.site)
