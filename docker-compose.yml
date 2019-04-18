@@ -30,7 +30,15 @@ services:
       - POSTGRES_DB=mws
       - POSTGRES_USER=panel
       - POSTGRES_PASSWORD=databasePass
+    volumes:
+      - postgres-data-local:/var/lib/postgresql/data
+      - postgres-backup-local:/backups
   debugsmtp:
     image: mailhog/mailhog
     ports:
       - "8025:8025"
+
+volumes:
+  # Persistent volumes for postgres database data
+  postgres-data-local:
+  postgres-backup-local:
