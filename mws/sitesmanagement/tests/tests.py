@@ -458,7 +458,7 @@ class SiteManagement2Tests(TestCase):
             mock_subprocess.check_output.return_value.returncode = 0
             response = self.client.post(reverse('createunixgroup',
                                                 kwargs={'service_id': site.production_service.id}),
-                                        {'unix_users': 'amc203,jw35', 'name': 'TESTUNIXGROUP'})
+                                        {'unix_users': ['amc203', 'jw35'], 'name': 'TESTUNIXGROUP'})
             self.assertIn(response.status_code, [200, 302])
             mock_subprocess.check_output.assert_called_with([
                 "userv", "mws-admin", "mws_ansible_host",
@@ -474,8 +474,8 @@ class SiteManagement2Tests(TestCase):
         response = self.client.get(reverse('updateunixgroup', kwargs={'ug_id': unix_group.id}))
         self.assertInHTML('<input required id="id_name" maxlength="16" name="name" type="text" value="TESTUNIXGROUP" />',
                           response.content)
-        self.assertContains(response, 'crsid: "amc203"')
-        self.assertContains(response, 'crsid: "jw35"')
+        self.assertContains(response, '<option selected=selected value="amc203">')
+        self.assertContains(response, '<option selected=selected value="jw35">')
 
         with mock.patch("apimws.ansible_impl.subprocess") as mock_subprocess:
             mock_subprocess.check_output.return_value.returncode = 0

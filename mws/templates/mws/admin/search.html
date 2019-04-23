@@ -1,5 +1,12 @@
 {% extends 'project-light/campl-mws.html' %}
-{% block page_content %}
+{% block app_head %}
+    {{ block.super }}
+    <style>
+        .ucamlookup-user-container {
+            min-width: 200px;
+        }
+    </style>
+{% endblock %}{% block page_content %}
     {{ block.super }}
     <div class="campl-column12 campl-main-content">
         <div class="campl-content-container">
@@ -96,7 +103,7 @@
                         </p>
                         <p>
                             <label for="id_crsid">MWS User</label>
-                            <input id="id_crsid" maxlength="100" name="crsid" type="text">
+                            <select id="id_crsid" name="crsid"></select>
                         </p>
                     </div>
                     <p><input type="submit" value="Search" class="campl-btn campl-primary-cta"></p>

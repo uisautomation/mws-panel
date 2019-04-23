@@ -9,13 +9,15 @@ from django.test import TestCase
 import mock
 from ucamwebauth.tests import create_wls_response
 
-from apimws.models import Cluster, Host, AnsibleConfiguration
+from apimws.models import Cluster, Host
 from apimws.xen import which_cluster
 from mwsauth import views
 from mwsauth.models import MWSUser
-from mwsauth.utils import get_or_create_group_by_groupid
-from ucamlookup import user_in_groups, get_or_create_user_by_crsid, validate_crsids
-from mwsauth.validators import validate_groupids
+from ucamlookup import (
+    user_in_groups,
+    get_or_create_user_by_crsid, validate_crsid_list,
+    get_or_create_group_by_groupid, validate_groupid_list
+)
 from sitesmanagement.models import Site, Suspension, VirtualMachine, NetworkConfig, Service, Vhost, ServerType
 from ucamlookup.models import LookupGroup
 
@@ -74,11 +76,11 @@ wOq24EIbX5LquL9w+uvnfXw=
 
 class AuthTestCases(TestCase):
 
-    def test_validate_crisd(self):
+    def test_validate_crsid_list(self):
         with self.assertRaises(ValidationError):
-            validate_crsids("wrongwrongwrong")
+            validate_crsid_list(["wrongwrongwrong"])
 
-        users = validate_crsids("amc203")
+        users = validate_crsid_list(["amc203"])
         self.assertEqual(len(users), 1)
         self.assertEqual(users[0].username, "amc203")
         self.assertIsNotNone(users[0].id)
@@ -86,7 +88,7 @@ class AuthTestCases(TestCase):
         self.assertIsNot(users[0].last_name, "")
         self.assertIsNot(users[0].last_name, None)
 
-        users = validate_crsids("amc203,jw35")
+        users = validate_crsid_list(["amc203", "jw35"])
         self.assertEqual(len(users), 2)
         self.assertEqual(users[0].username, "amc203")
         self.assertIsNotNone(users[0].id)
@@ -102,23 +104,23 @@ class AuthTestCases(TestCase):
         with self.assertRaises(User.DoesNotExist):
             User.objects.get(username="wrongwrongwrong")
 
-        users = validate_crsids("")
+        users = validate_crsid_list([""])
         self.assertEqual(len(users), 0)
 
-    def test_validate_groups(self):
+    def test_validate_groupid_list(self):
         with self.assertRaises(ValidationError):
-            validate_groupids("wrongwrongwrong")
+            validate_groupid_list(["wrongwrongwrong"])
 
         with self.assertRaises(ValidationError):
-            validate_groupids("123456")
+            validate_groupid_list(["123456"])
 
-        groups = validate_groupids("101888")
+        groups = validate_groupid_list(["101888"])
         self.assertEqual(len(groups), 1)
         self.assertEqual(groups[0].lookup_id, "101888")
         self.assertIsNot(groups[0].name, "")
         self.assertIsNot(groups[0].name, None)
 
-        groups = validate_groupids("101888,101923")
+        groups = validate_groupid_list(["101888", "101923"])
         self.assertEqual(len(groups), 2)
         self.assertEqual(groups[0].lookup_id, "101888")
         self.assertIsNot(groups[0].name, "")
@@ -127,7 +129,7 @@ class AuthTestCases(TestCase):
         self.assertIsNot(groups[1].name, "")
         self.assertIsNot(groups[1].name, None)
 
-        groups = validate_groupids("")
+        groups = validate_groupid_list([""])
         self.assertEqual(len(groups), 0)
 
     def test_get_or_create_user_or_group(self):
@@ -189,7 +191,9 @@ class AuthTestCases(TestCase):
         site_with_auth_users = site_without_auth_users
 
         response = self.client.get(reverse(views.auth_change, kwargs={'site_id': site_with_auth_users.id}))
-        self.assertContains(response, 'crsid: "amc203"', status_code=200)  # User is authorised
+        self.assertContains(
+            response, '<option selected=selected value="amc203">', status_code=200
+        )  # User is authorised
 
 
         with mock.patch("apimws.vm.change_vm_power_state") as mock_change_vm_power_state:

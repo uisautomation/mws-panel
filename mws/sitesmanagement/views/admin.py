@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from django.shortcuts import render
-from ucamlookup import validate_crsids
+from ucamlookup import validate_crsid_list
 
 from sitesmanagement.models import Site
 
@@ -26,7 +26,7 @@ def admin_search(request):
                                         preallocated=False)
             parameters['results'] = sites
         elif 'crsid' in request.POST and request.POST['crsid']:
-            user = validate_crsids(request.POST['crsid'])[0]
+            user = validate_crsid_list(request.POST.getlist('crsid'))[0]
             sites = filter(lambda site: user in site.list_of_all_type_of_users(),
                            Site.objects.filter(preallocated=False))
             parameters['results'] = sites
