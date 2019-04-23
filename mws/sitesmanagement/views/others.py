@@ -73,8 +73,7 @@ def clone_vm_view(request, site_id):
             can_upgrade = True
         else:
             if not hasattr(site,'queueentry'):
-                queue_entry = QueueEntry(site=site)
-                queue_entry.save()
+                QueueEntry.objects.create(site=site)
             else:
                 is_queued = True
 
