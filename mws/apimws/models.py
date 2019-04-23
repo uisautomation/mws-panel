@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.db import models
-from sitesmanagement.models import Service
+from sitesmanagement.models import Service, Site
 
 
 class Cluster(models.Model):
@@ -56,3 +56,17 @@ class PHPPackage(models.Model):
 
     def __unicode__(self):
         return self.name
+
+class QueueEntry(models.Model):
+    """
+    Instances of this model form a simple FIFO queue of sites ordered by instance
+    creation date, currently used to queue operating system upgrades.
+    """
+    site = models.OneToOneField(Site, on_delete=models.CASCADE, primary_key=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created']
+
+    def __unicode__(self):
+        return self.site.name

@@ -8,8 +8,9 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponse, HttpResponseNotFound
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.encoding import smart_str
+from django.core.mail import EmailMessage
 from apimws.ansible import launch_ansible, ansible_change_mysql_root_pwd
-from apimws.models import AnsibleConfiguration, PHPLib
+from apimws.models import AnsibleConfiguration, PHPLib, QueueEntry
 from apimws.vm import clone_vm_api_call
 from apimws.views import post_installOS
 from mwsauth.utils import privileges_check
@@ -65,10 +66,16 @@ def clone_vm_view(request, site_id):
         return HttpResponseForbidden()
 
     can_upgrade = False
+    is_queued = False
     if settings.MAX_PENDING_UPGRADES:
         pending_upgrades = len([x for x in Service.objects.filter(type='test').prefetch_related('virtual_machines') if x.active])
         if pending_upgrades < settings.MAX_PENDING_UPGRADES:
             can_upgrade = True
+        else:
+            if not hasattr(site,'queueentry'):
+                QueueEntry.objects.create(site=site)
+            else:
+                is_queued = True
 
     breadcrumbs = {
         0: dict(name='Managed Web Service server: ' + str(site.name), url=site.get_absolute_url()),
@@ -89,6 +96,7 @@ def clone_vm_view(request, site_id):
         'breadcrumbs': breadcrumbs,
         'site': site,
         'can_upgrade': can_upgrade,
+        'is_queued': is_queued,
     })
 
 
@@ -153,6 +161,28 @@ def delete_vm(request, service_id):
     if request.method == 'POST':
         for vm in service.virtual_machines.all():
             vm.delete()
+        if not service.primary:
+            # delete this site's queue entry if exists to avoid stale entries
+            if hasattr(site, 'queueentry'):
+                site.queueentry.delete()
+            # get, process and delete next queue entry
+            queue_entry = QueueEntry.objects.first()
+            if queue_entry is not None:
+                clone_vm_api_call(queue_entry.site)
+                EmailMessage(
+                    subject="Test server for %s creating" % (queue_entry.site.name, ),
+                    body="Dear MWS Administrator,\n\n"
+                         "This is to let you know that the test server requested for your site\n\n"
+                         "'%s'\n\nis currently being created. Please allow a few minutes for this to complete. "
+                         "You will be able to access and verify your websites on the test server by visiting\n\n"
+                         "%s/settings/%d\n\n"
+                         "Kind regards,\nMWS Support" % (queue_entry.site.name, settings.MAIN_DOMAIN, service.pk ),
+                    from_email="Managed Web Service Support <%s>"
+                               % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
+                    to=[queue_entry.site.email],
+                    headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')}
+                ).send()
+                queue_entry.delete()
         return redirect(site)
 
     return HttpResponseForbidden()
