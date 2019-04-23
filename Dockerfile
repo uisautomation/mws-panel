@@ -4,7 +4,7 @@ FROM debian:stretch
 RUN apt-get -y update && apt-get upgrade -y && apt-get install -y \
         vim python python-pip python-dev\
         openssl userv openssh-client \
-        apache2 apache2-utils libapache2-mod-wsgi \
+        apache2 apache2-utils libapache2-mod-wsgi libpq5 \
         libssl-dev libjpeg-dev netcat zlib1g-dev \
         libpq-dev build-essential
 
