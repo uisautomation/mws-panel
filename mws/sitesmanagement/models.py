@@ -284,7 +284,7 @@ class Site(models.Model):
 
             from apimws.models import AnsibleConfiguration
             AnsibleConfiguration.objects.update_or_create(service=test_service, key="backup_first_date",
-                                                          value=date.today().isoformat())
+                                                          defaults={'value': date.today().isoformat(), })
 
         from apimws.ansible import launch_ansible
         launch_ansible(prod_service)
