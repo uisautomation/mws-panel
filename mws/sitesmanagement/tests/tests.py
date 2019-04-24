@@ -18,6 +18,8 @@ from sitesmanagement.utils import is_camacuk, get_object_or_None
 
 
 def pre_create_site():
+    cluster = Cluster.objects.create(name='cluster')
+    Host.objects.create(hostname='host', cluster=cluster)
     NetworkConfig.objects.create(IPv4='131.111.58.253', IPv6='2001:630:212:8::8c:253', type='ipvxpub',
                                                name="mws-66424.mws3.csx.cam.ac.uk")
     NetworkConfig.objects.create(IPv4='172.28.18.253', type='ipv4priv',
