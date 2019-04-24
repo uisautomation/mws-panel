@@ -42,6 +42,13 @@ At this point all xen/ansible calls will fail. You can mock these calls by using
 * VM_API = "apimws.xen_mock"
 * ANSIBLE_IMPL = "apimws.ansible_mock"
 
+Alternatively, if you wish to go straight to having a registered site, after running
+`initialise-developer-site.sh`, run:
+
+```
+sudo docker-compose exec devel bash -xe ./scripts/enable-developer-site.sh
+```
+
 ## Running tests
 
 Test suites require some extra packages. Install them via:
