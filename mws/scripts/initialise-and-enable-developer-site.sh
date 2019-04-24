@@ -1,4 +1,5 @@
 cd /usr/src/app
+./scripts/initialise-developer-site.sh
 ./manage.py shell <<EOL
 from django.contrib.auth.models import User
 import uuid
