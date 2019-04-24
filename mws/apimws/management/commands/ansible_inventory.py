@@ -218,4 +218,7 @@ class Command(BaseCommand):
         # URL to the panel to inform about the deletion of LVs
         v['mws_update_lv_list_url'] = "%s%s" % (settings.MAIN_DOMAIN, reverse(update_lv_list))
 
+        # has this site been migrated to Openstack
+        v['mws_migrated'] = vm.site.migrated
+
         return v

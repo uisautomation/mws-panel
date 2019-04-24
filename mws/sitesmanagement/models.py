@@ -110,6 +110,8 @@ class Site(models.Model):
         Number of days since the site lost its last admin
     exmws2
         Flag to mark Grandfathered MWS2 sites (Real date of start)
+    migrated
+        Whether site data has been copied over to Openstack
 
     """
     preallocated = models.BooleanField(default=False)
@@ -135,6 +137,8 @@ class Site(models.Model):
     days_without_admin = models.IntegerField(default=0)
 
     exmws2 = models.DateField(null=True, blank=True)
+
+    migrated = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["-id"]
