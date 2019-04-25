@@ -4,8 +4,7 @@ django-celery
 django-debug-toolbar
 django-reversion
 django-stronghold>=0.2.6
-# TODO replace with django-ucamlookup>=3.0.0 when released to PyPI
-git+https://gitlab.developers.cam.ac.uk/uis/devops/django/ucamlookup.git@issue-11-upgrade-select2-4#egg=django-ucamlookup
+django-ucamlookup>=3.0.0
 django-ucamprojectlight>=1.1
 django-ucamwebauth>=1.2
 django>=1.11,<1.12
