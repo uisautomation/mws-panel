@@ -7,9 +7,8 @@ a:hover {
     height: 110px;
 }
 
-.select2-container {
-    width: 75%;
-    max-width: 500px;
+.ucamlookup-user-container, .ucamlookup-group-container {
+    min-width: 300px;
 }
 
 input,textarea { width: auto !important; }
