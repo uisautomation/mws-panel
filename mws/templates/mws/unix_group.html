@@ -13,7 +13,13 @@
                         {{ form.as_p }}
                         <p>
                             Users:<br/>
-                            <input id="input-lookup-users-ajax" name="unix_users">
+                            <select id="input-lookup-users-ajax" name="unix_users" multiple="multiple">
+                                {% for user in unix_users %}
+                                    <option selected=selected value="{{ user.username }}">
+                                        {{user.last_name}} ({{ user.username }})
+                                    </option>
+                                {% endfor %}
+                            </select>
                         </p>
                     </div>
                     <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
@@ -24,5 +30,5 @@
 {% endblock %}
 
 {% block campl_foot_js %}
-    {% include 'ucamlookup_users.html' with input_tag_id="input-lookup-users-ajax" multiple="true" user_list="unix_users" %}
+    {% include 'ucamlookup_users.html' with input_tag_id="input-lookup-users-ajax" multiple="true" %}
 {% endblock %}

@@ -20,19 +20,39 @@
                     {% csrf_token %}
                     <p>
                         Administrators:<br/>
-                        <input id="input-lookup-users-ajax" name="users_crsids">
+                        <select id="input-lookup-users-ajax" name="users_crsids" multiple="multiple">
+                            {% for user in authorised_users %}
+                                <option selected=selected value="{{ user.username }}">
+                                    {{user.last_name}} ({{ user.username }})
+                                </option>
+                            {% endfor %}
+                        </select>
                     </p>
                     <p>
                         SSH-only users:<br/>
-                        <input id="input-lookup-sshusers-ajax" name="sshusers_crsids">
+                        <select id="input-lookup-sshusers-ajax" name="sshusers_crsids" multiple="multiple">
+                            {% for user in sshuserlist %}
+                                <option selected=selected value="{{ user.username }}">
+                                    {{user.last_name}} ({{ user.username }})
+                                </option>
+                            {% endfor %}
+                        </select>
                     </p>
                     <p>
                         Administrators lookup groups:<br/>
-                        <input id="input-lookup-groups-ajax" name="groupids">
+                        <select id="input-lookup-groups-ajax" name="groupids" multiple="multiple">
+                            {% for group in authorised_groups %}
+                                <option selected=selected value="{{ group.lookup_id }}">{{group.name}}</option>
+                            {% endfor %}
+                        </select>
                     </p>
                     <p>
                         SSH-only lookup groups:<br/>
-                        <input id="input-lookup-sshgroups-ajax" name="sshgroupids">
+                        <select id="input-lookup-sshgroups-ajax" name="sshgroupids" multiple="multiple">
+                            {% for group in sshusers_groups %}
+                                <option selected=selected value="{{ group.lookup_id }}">{{group.name}}</option>
+                            {% endfor %}
+                        </select>
                     </p>
                     <p><input type="submit" value="Submit" class="campl-btn campl-primary-cta"/></p>
                 </fieldset>
@@ -65,8 +85,8 @@
 {% endblock %}
 
 {% block campl_foot_js %}
-    {% include 'ucamlookup_users.html' with input_tag_id="input-lookup-users-ajax" multiple="true" user_list="authorised_users" %}
-    {% include 'ucamlookup_users.html' with input_tag_id="input-lookup-sshusers-ajax" multiple="true" user_list="sshuserlist" %}
-    {% include 'ucamlookup_groups.html' with input_tag_id="input-lookup-groups-ajax" multiple="true" group_list="authorised_groups" %}
-    {% include 'ucamlookup_groups.html' with input_tag_id="input-lookup-sshgroups-ajax" multiple="true" group_list="sshusers_groups" %}
+    {% include 'ucamlookup_users.html' with input_tag_id="input-lookup-users-ajax" multiple="true" %}
+    {% include 'ucamlookup_users.html' with input_tag_id="input-lookup-sshusers-ajax" multiple="true" %}
+    {% include 'ucamlookup_groups.html' with input_tag_id="input-lookup-groups-ajax" multiple="true" %}
+    {% include 'ucamlookup_groups.html' with input_tag_id="input-lookup-sshgroups-ajax" multiple="true" %}
 {% endblock %}

@@ -6,7 +6,7 @@ RUN apt-get -y update && apt-get upgrade -y && apt-get install -y \
         openssl userv openssh-client \
         apache2 apache2-utils libapache2-mod-wsgi libpq5 \
         libssl-dev libjpeg-dev netcat zlib1g-dev \
-        libpq-dev build-essential
+        libpq-dev build-essential git
 
 # Update pip and install Python dependencies. Note that vmmanager is installed
 # from a local copy of the source. We use pip install -e to install vmmanager so

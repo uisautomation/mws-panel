@@ -1,9 +1,11 @@
 """Views(Controllers) for managing Unix Groups"""
+
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.views.generic import ListView, CreateView, DeleteView, UpdateView
-from ucamlookup import validate_crsids
+from ucamlookup import validate_crsid_list
+
 from apimws.ansible import launch_ansible
 from sitesmanagement.forms import UnixGroupForm
 from sitesmanagement.models import UnixGroup
@@ -66,9 +68,6 @@ class UnixGroupCreate(ServicePriviledgeCheck, CreateView):
             'breadcrumbs': breadcrumbs,
             'site': self.site,
             'service': self.service,
-            'lookup_lists': {
-                'unix_users': []
-            },  # TODO to be removed once django-ucam-lookup is modified
         })
         return context
 
@@ -81,7 +80,7 @@ class UnixGroupCreate(ServicePriviledgeCheck, CreateView):
             form.add_error(None, "A Unix Group already exists with that name")
             return self.form_invalid(form)
 
-        unix_users = list(set(validate_crsids(self.request.POST.get('unix_users'))))
+        unix_users = list(set(validate_crsid_list(self.request.POST.getlist('unix_users'))))
 
         if not all(user in self.object.service.site.list_of_all_type_of_users() for user in unix_users):
             form.add_error(None, "You have added users to this group that are not in the authorisation user list.")
@@ -119,16 +118,14 @@ class UnixGroupUpdate(UnixGroupPriviledgeCheck, UpdateView):
             'breadcrumbs': breadcrumbs,
             'site': self.site,
             'service': self.service,
-            'lookup_lists': {
-                'unix_users': self.object.users.all()
-            },  # TODO to be removed once django-ucam-lookup is modified
+            'unix_users': self.object.users.all()
         })
         return context
 
     def form_valid(self, form):
         self.object = form.save()
 
-        unix_users = list(set(validate_crsids(self.request.POST.get('unix_users'))))
+        unix_users = list(set(validate_crsid_list(self.request.POST.getlist('unix_users'))))
 
         if not all(user in self.object.service.site.list_of_all_type_of_users() for user in unix_users):
             form.add_error(None, "You have added users to this group that are not in the authorisation user list.")

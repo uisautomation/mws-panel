@@ -14,10 +14,9 @@ from django.views.decorators.csrf import csrf_exempt
 from stronghold.decorators import public
 from apimws.ansible import launch_ansible_async, AnsibleTaskWithFailure, ansible_change_mysql_root_pwd
 from apimws.ipreg import get_nameinfo
-from mwsauth.utils import get_or_create_group_by_groupid, privileges_check
+from mwsauth.utils import privileges_check
 from sitesmanagement.models import DomainName, EmailConfirmation, VirtualMachine, Billing, Site, Vhost
-from ucamlookup import user_in_groups
-
+from ucamlookup import user_in_groups, get_or_create_group_by_groupid
 
 logger = logging.getLogger('mws')
 
