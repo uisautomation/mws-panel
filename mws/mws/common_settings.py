@@ -156,7 +156,7 @@ STRONGHOLD_PUBLIC_NAMED_URLS = ('raven_login', 'raven_return')
 
 OS_VERSION = "stretch"
 OS_DUE_UPGRADE = ["jessie"]
-MAX_PENDING_UPGRADES = 20
+MAX_PENDING_UPGRADES = 60
 NEXT_OS = 'stretch'
 
 FINANCE_EMAIL = 'finance@uis.cam.ac.uk'
