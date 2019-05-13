@@ -393,8 +393,8 @@ def send_reminder_delete_upgraded():
                      "old server has not been deleted yet. As the number of test servers the "
                      "MWS can support is limited, this may be blocking others from upgrading.\n"
                      "If you're happy with the new server, please delete the old one by "
-                     "visiting\n\nhttps://panel.mws3.csx.cam.ac.uk%s\n\nand clicking the "
-                     "'Delete the test server' button.\n\nThanks,\nMWS Support\n" % (conf_url),
+                     "visiting\n\n%s%s\n\nand clicking the "
+                     "'Delete the test server' button.\n\nThanks,\nMWS Support\n" % (settings.MAIN_DOMAIN, conf_url),
                 from_email="Managed Web Service Support <%s>"
                            % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
                 to=[site.email],
@@ -412,6 +412,7 @@ def dequeue_upgrades():
     if pending_upgrades < settings.MAX_PENDING_UPGRADES:
         queue_entry = QueueEntry.objects.first()
         if queue_entry is not None:
+            conf_url = reverse('sitesmanagement.views.service_settings', kwargs={'service_id': queue_entry.site.test_service.pk})
             clone_vm_api_call(queue_entry.site)
             EmailMessage(
                 subject="Test server for %s creating" % (queue_entry.site.name, ),
@@ -419,8 +420,8 @@ def dequeue_upgrades():
                      "This is to let you know that the test server requested for your site\n\n"
                      "'%s'\n\nis currently being created. Please allow a few minutes for this to complete. "
                      "You will be able to access and verify your websites on the test server by visiting\n\n"
-                     "%s/settings/%d\n\n"
-                     "Kind regards,\nMWS Support" % (queue_entry.site.name, settings.MAIN_DOMAIN, service.pk ),
+                     "%s%s\n\n"
+                     "Kind regards,\nMWS Support" % (queue_entry.site.name, settings.MAIN_DOMAIN, conf_url ),
                 from_email="Managed Web Service Support <%s>"
                            % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
                 to=[queue_entry.site.email],
