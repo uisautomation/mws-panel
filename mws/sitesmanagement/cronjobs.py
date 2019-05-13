@@ -391,7 +391,7 @@ def send_reminder_delete_upgraded():
                      "old server has not been deleted yet. As the number of test servers the "
                      "MWS can support is limited, this may be blocking others from upgrading.\n"
                      "If you're happy with the new server, please delete the old one by "
-                     "visiting\n\nhttps://panel.mws3.csx.cam.ac.uk%s\n\n and clicking the "
+                     "visiting\n\nhttps://panel.mws3.csx.cam.ac.uk%s\n\nand clicking the "
                      "'Delete the test server' button.\n\nThanks,\nMWS Support\n" % (conf_url),
                 from_email="Managed Web Service Support <%s>"
                            % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
