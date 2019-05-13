@@ -20,6 +20,7 @@ from django.core.urlresolvers import reverse
 from apimws.utils import preallocate_new_site
 from apimws.ansible import launch_ansible
 from apimws.models import QueueEntry
+from apimws.vm import clone_vm_api_call
 from sitesmanagement.models import Billing, Site, Service, VirtualMachine, DomainName, ServerType
 
 
