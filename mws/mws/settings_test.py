@@ -70,7 +70,7 @@ CELERYBEAT_SCHEDULE = {
     },
     'send_reminder_delete_upgraded': {
         'task': 'sitesmanagement.cronjobs.send_reminder_delete_upgraded',
-        'schedule': crontab(day_of_week='1,3,5'),
+        'schedule': crontab(hour=11, minute=0, day_of_week='1,3,5'),
         'args': ()
     },
 }
