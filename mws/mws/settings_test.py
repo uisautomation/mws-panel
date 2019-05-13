@@ -68,6 +68,11 @@ CELERYBEAT_SCHEDULE = {
         'schedule': crontab(hour=1, minute=5),
         'args': ()
     },
+    'dequeue_upgrades': {
+        'task': 'sitesmanagement.cronjobs.dequeue_upgrades',
+        'schedule': timedelta(minutes=30),
+        'args': ()
+    },
 }
 
 MIDDLEWARE_CLASSES += (
