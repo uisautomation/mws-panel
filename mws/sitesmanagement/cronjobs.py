@@ -384,7 +384,7 @@ def send_reminder_delete_upgraded():
     '''
     for site in Site.objects.all():
         if site.secondary_vm and site.secondary_vm.operating_system == 'jessie':
-            conf_url = reverse('sitesmanagement.views.service_settings', kwargs={'service_id': site.test_service.pk}))
+            conf_url = reverse('sitesmanagement.views.service_settings', kwargs={'service_id': site.test_service.pk})
             EmailMessage(
                 subject="MWS test server for %s" % (site.name),
                 body="We noticed that your site is now running on an upgraded server, but the "
