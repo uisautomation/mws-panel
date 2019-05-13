@@ -15,6 +15,7 @@ from django.conf import settings
 from django.core.mail import EmailMessage
 from django.db.models import F, Q
 from django.utils.timezone import now
+from django.core.urlresolvers import reverse
 
 from apimws.utils import preallocate_new_site
 from apimws.ansible import launch_ansible
@@ -367,6 +368,31 @@ def expire_domains():
                      "and is any one of\n - a CNAME pointing to the host %s;\n - an A record with address %s;\n"
                      " - an AAAA record with address %s.\n" %
                      (domainname.name, vhost.name, site.name, on.date().isoformat(), service.hostname, service.ipv4, service.ipv6),
+                from_email="Managed Web Service Support <%s>"
+                           % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
+                to=[site.email],
+                headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')}
+            ).send()
+
+
+@shared_task(base=ScheduledTaskWithFailure)
+def send_reminder_delete_upgraded():
+    '''
+    Send an email to owners of sites that have been switched to stretch
+    but have not yet had the old jessie server deleted yet to make them
+    delete the test server.
+    '''
+    for site in Site.objects.all():
+        if site.secondary_vm and site.secondary_vm.operating_system == 'jessie':
+            conf_url = reverse('sitesmanagement.views.service_settings', kwargs={'service_id': site.test_service.pk}))
+            EmailMessage(
+                subject="MWS test server for %s" % (site.name),
+                body="We noticed that your site is now running on an upgraded server, but the "
+                     "old server has not been deleted yet. As the number of test servers the "
+                     "MWS can support is limited, this may be blocking others from upgrading.\n"
+                     "If you're happy with the new server, please delete the old one by "
+                     "visiting\n\nhttps://panel.mws3.csx.cam.ac.uk%s\n\n and clicking the "
+                     "'Delete the test server' button.\n\nThanks,\nMWS Support\n" % (conf_url),
                 from_email="Managed Web Service Support <%s>"
                            % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
                 to=[site.email],

@@ -68,6 +68,11 @@ CELERYBEAT_SCHEDULE = {
         'schedule': crontab(hour=1, minute=5),
         'args': ()
     },
+    'send_reminder_delete_upgraded': {
+        'task': 'sitesmanagement.cronjobs.send_reminder_delete_upgraded',
+        'schedule': crontab(day_of_week='1,3,5'),
+        'args': ()
+    },
 }
 
 MIDDLEWARE_CLASSES += (
