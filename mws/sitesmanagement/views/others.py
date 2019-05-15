@@ -161,28 +161,6 @@ def delete_vm(request, service_id):
     if request.method == 'POST':
         for vm in service.virtual_machines.all():
             vm.delete()
-        if not service.primary:
-            # delete this site's queue entry if exists to avoid stale entries
-            if hasattr(site, 'queueentry'):
-                site.queueentry.delete()
-            # get, process and delete next queue entry
-            queue_entry = QueueEntry.objects.first()
-            if queue_entry is not None:
-                clone_vm_api_call(queue_entry.site)
-                EmailMessage(
-                    subject="Test server for %s creating" % (queue_entry.site.name, ),
-                    body="Dear MWS Administrator,\n\n"
-                         "This is to let you know that the test server requested for your site\n\n"
-                         "'%s'\n\nis currently being created. Please allow a few minutes for this to complete. "
-                         "You will be able to access and verify your websites on the test server by visiting\n\n"
-                         "%s/settings/%d\n\n"
-                         "Kind regards,\nMWS Support" % (queue_entry.site.name, settings.MAIN_DOMAIN, service.pk ),
-                    from_email="Managed Web Service Support <%s>"
-                               % getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk'),
-                    to=[queue_entry.site.email],
-                    headers={'Return-Path': getattr(settings, 'EMAIL_MWS3_SUPPORT', 'mws-support@uis.cam.ac.uk')}
-                ).send()
-                queue_entry.delete()
         return redirect(site)
 
     return HttpResponseForbidden()
