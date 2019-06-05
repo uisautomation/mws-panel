@@ -411,7 +411,7 @@ def dequeue_upgrades():
     pending_upgrades = len([x for x in Service.objects.filter(type='test').prefetch_related('virtual_machines') if x.active])
     if pending_upgrades < settings.MAX_PENDING_UPGRADES:
         queue_entry = QueueEntry.objects.first()
-        if queue_entry is not None:
+        if queue_entry is not None and queue_entry.site.production_service.operating_system in settings.OS_DUE_UPGRADE:
             conf_url = reverse('sitesmanagement.views.service_settings', kwargs={'service_id': queue_entry.site.test_service.pk})
             clone_vm_api_call(queue_entry.site)
             EmailMessage(
