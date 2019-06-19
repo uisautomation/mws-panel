@@ -101,13 +101,11 @@ def confirm_email(request, ec_id, token):
 
 
 @shared_task(base=AnsibleTaskWithFailure, default_retry_delay=120, max_retries=2)
-def post_installOS(service, initial=True):
+def post_installOS(service):
     if service.type == 'test':
         command = ["userv", "mws-admin", "mws_clone",
                    service.site.production_service.virtual_machines.first().name,
                    service.site.test_service.virtual_machines.first().name]
-        if initial:
-            command.append('--initial')
         subprocess.check_output(command)
     try:
         launch_ansible_async(service, ignore_host_key=True)
@@ -139,7 +137,7 @@ def post_installation(request):
                 raise Exception("The service wasn't in the OS installation process")  # TODO raise custom exception
             service.status = 'postinstall'
             service.save()
-            post_installOS.apply_async((service,), countdown=180)
+            post_installOS.apply_async((service), countdown=180)
             # Wait 180 seconds before launching ansible, this will allow the machine have time to complete the reboot
             return HttpResponse()
 
