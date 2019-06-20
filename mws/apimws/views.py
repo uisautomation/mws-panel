@@ -107,7 +107,7 @@ def post_installOS(service):
                    service.site.production_service.virtual_machines.first().name,
                    service.site.test_service.virtual_machines.first().name]
         subprocess.check_output(command)
-        launch_ansible(service, ignore_host_key=True)
+        launch_ansible(service)
     else:
         try:
             launch_ansible_async(service, ignore_host_key=True)
