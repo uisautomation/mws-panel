@@ -107,13 +107,11 @@ def post_installOS(service):
                    service.site.production_service.virtual_machines.first().name,
                    service.site.test_service.virtual_machines.first().name]
         subprocess.check_output(command)
-        launch_ansible(service)
-    else:
-        try:
-            launch_ansible_async(service, ignore_host_key=True)
-        except:
-            # In case the previous task fail because we didn't leave enough time for the machine to reboot
-            launch_ansible_async(service, ignore_host_key=True)
+    try:
+        launch_ansible_async(service, ignore_host_key=True)
+    except:
+        # In case the previous task fail because we didn't leave enough time for the machine to reboot
+        launch_ansible_async(service, ignore_host_key=True)
     if service.site.preallocated:
         service.site.disable()
 
