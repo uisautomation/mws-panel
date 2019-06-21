@@ -496,7 +496,7 @@ class Service(models.Model):
         self.status = 'ansible'
         self.save()
         from apimws.ansible import launch_ansible_async
-        launch_ansible_async.apply_async((self, ), countdown=120)
+        launch_ansible_async.apply_async(args=(self, ), countdown=120)
 
     def power_off(self):
         for vm in self.virtual_machines.all():
@@ -700,7 +700,7 @@ class DomainName(models.Model):
             # the refresh happens
             eta = now.replace(minute=54)
         from apimws.utils import domain_confirmation_user
-        domain_confirmation_user.apply_async(args=[self, ], eta=eta)
+        domain_confirmation_user.apply_async(args=(self, ), eta=eta)
 
     def reject_it(self, reason=""):
         self.status = 'denied'
