@@ -116,11 +116,11 @@ def service_status(request, service_id):
     if site is None:
         return HttpResponseForbidden()
 
-    if site.production_service.is_busy and site.test_service.is_busy:
+    if not (site.production_service.is_ready or site.test_service.is_ready):
         status = 'busy'
-    elif site.production_service.is_busy:
+    elif not site.production_service.is_ready:
         status = 'prod'
-    elif site.test_service.is_busy:
+    elif not site.test_service.is_ready:
         status = 'test'
     else:
         status = 'ready'
