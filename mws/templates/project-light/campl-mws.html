@@ -71,8 +71,12 @@
                                     success: function(data, textStatus, jqXHR){
                                         if (data['status'] == 'ready') {
                                             $("#site_status").text("Your server is ready").css("background-color", "#0F8E00");
+                                        } else if (data['status'] == 'test') {
+                                            $("#site_status").text("Your test server is being configured").css("background-color", "#A09B00");
+                                        } else if (data['status'] == 'prod') {
+                                            $("#site_status").text("Your production server is being configured").css("background-color", "#A09B00");
                                         } else if (data['status'] == 'busy') {
-                                            $("#site_status").text("Your server is being configured").css("background-color", "#A09B00");
+                                            $("#site_status").text("Both your servers are being configured").css("background-color", "#A09B00");
                                         } else {
                                             $("#site_status").text("Error while checking status of your server").css("background-color", "#920101");
                                         }

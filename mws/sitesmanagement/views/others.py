@@ -116,10 +116,15 @@ def service_status(request, service_id):
     if site is None:
         return HttpResponseForbidden()
 
-    if service.is_ready:
-        return HttpResponse(json.dumps({'status': 'ready'}), content_type='application/json')
+    if not (site.production_service.is_ready or site.test_service.is_ready):
+        status = 'busy'
+    elif not site.production_service.is_ready:
+        status = 'prod'
+    elif not site.test_service.is_ready:
+        status = 'test'
     else:
-        return HttpResponse(json.dumps({'status': 'busy'}), content_type='application/json')
+        status = 'ready'
+    return HttpResponse(json.dumps({'status': status}), content_type='application/json')
 
 
 @login_required
