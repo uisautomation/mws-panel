@@ -103,6 +103,8 @@ def confirm_email(request, ec_id, token):
 @shared_task(base=AnsibleTaskWithFailure, default_retry_delay=120, max_retries=2)
 def post_installOS(service):
     if service.type == 'test':
+        service.status = 'ansible'
+        service.save()
         command = ["userv", "mws-admin", "mws_clone",
                    service.site.production_service.virtual_machines.first().name,
                    service.site.test_service.virtual_machines.first().name]
