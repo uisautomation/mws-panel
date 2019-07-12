@@ -4,7 +4,7 @@ from reversion.admin import VersionAdmin
 
 
 class UserAdmin(VersionAdmin):
-    list_display = ('username', 'last_name', 'uid', ,'pubkey', 'is_staff', 'is_superuser')
+    list_display = ('username', 'last_name', 'uid', 'pubkey', 'is_staff', 'is_superuser')
     list_filter = ('is_staff', 'is_superuser')
     search_fields = ('username', )
 
