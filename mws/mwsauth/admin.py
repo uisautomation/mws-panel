@@ -17,7 +17,8 @@ class UserAdmin(VersionAdmin):
 
 @admin.register(MWSUser)
 class MWSUserAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('user', )
+    search_fields = ('user__username', )
 
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
